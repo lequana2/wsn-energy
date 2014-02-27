@@ -13,33 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __WSN_ENERGY_SINK_H
-#define __WSN_ENERGY_SINK_H
+#ifndef CORE_H_
+#define CORE_H_
 
 #include <omnetpp.h>
-#include "Core.h"
+
+
+#define INIT_MESSAGE 0
+#define ICMP_MESSAGE 1
 
 namespace wsn_energy {
 
-/**
- * Message sink; see NED file for more info.
- */
-class Server: public Core
+class Core : public cSimpleModule
 {
-  private:
-    // state
-    simtime_t lastArrival;
-
-    // statistics
-    cDoubleHistogram iaTimeHistogram;
-    cOutVector arrivalsVector;
+  public:
+      int numOfSensors;
+      int trRange;
+      int ssRange;
+      int redundancy;
+      int axisX;
+      int axisY;
+      int energy;
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
 };
 
 }; // namespace
 
-#endif
+#endif /* CORE_H_ */

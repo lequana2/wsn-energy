@@ -15,7 +15,7 @@
 
 #include "Client.h"
 #include "ICMP_m.h"
-#include "core.h"
+#include "Core.h"
 
 namespace wsn_energy {
 

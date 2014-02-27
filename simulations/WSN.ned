@@ -51,8 +51,8 @@ network WSN
                 redundancy = redundancy;
 //                axisX = intuniform(0, width);
 //                axisY = intuniform(0, height);
-				axisX = 0;
-				axisY = 0;
+				axisX = width/4;
+				axisY = height/4;
                 energy = energy;
                 @display("p=$axisX,$axisY");
         }

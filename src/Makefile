@@ -28,7 +28,7 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/client/Client.o $O/core/core.o $O/server/Server.o $O/icmpv6/ICMP_m.o
+OBJS = $O/client/Client.o $O/core/Core.o $O/server/Server.o $O/icmpv6/ICMP_m.o
 
 # Message files
 MSGFILES = \
@@ -121,14 +121,14 @@ depend:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/client/Client.o: client/Client.cc \
 	client/Client.h \
-	core/core.h \
+	core/Core.h \
 	icmpv6/ICMP_m.h
-$O/core/core.o: core/core.cc \
-	core/core.h
+$O/core/Core.o: core/Core.cc \
+	core/Core.h
 $O/icmpv6/ICMP_m.o: icmpv6/ICMP_m.cc \
 	icmpv6/ICMP_m.h
 $O/server/Server.o: server/Server.cc \
-	core/core.h \
+	core/Core.h \
 	icmpv6/ICMP_m.h \
 	server/Server.h
 

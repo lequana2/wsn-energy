@@ -13,33 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __WSN_ENERGY_SINK_H
-#define __WSN_ENERGY_SINK_H
-
-#include <omnetpp.h>
 #include "Core.h"
 
 namespace wsn_energy {
 
-/**
- * Message sink; see NED file for more info.
- */
-class Server: public Core
-{
-  private:
-    // state
-    simtime_t lastArrival;
-
-    // statistics
-    cDoubleHistogram iaTimeHistogram;
-    cOutVector arrivalsVector;
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-};
-
-}; // namespace
-
-#endif
+} /* namespace wsn_energy */

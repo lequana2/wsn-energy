@@ -17,23 +17,15 @@
 #define __WSN_ENERGY_SOURCE_H
 
 #include <omnetpp.h>
+#include "Core.h"
 
 namespace wsn_energy {
 
 /**
  * Generates messages; see NED file for more info.
  */
-class Client : public cSimpleModule
+class Client : public Core
 {
-  public:
-    int numOfSensors;
-    int trRange;
-    int ssRange;
-    int redundancy;
-    int axisX;
-    int axisY;
-    int energy;
-
   private:
     cMessage *timerMessage;
     bool flag;
@@ -41,10 +33,6 @@ class Client : public cSimpleModule
   public:
      Client();
      virtual ~Client();
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
 };
 
 }; // namespace
