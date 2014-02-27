@@ -15,19 +15,15 @@
 
 package wsn_energy.client;
 
+import wsn_energy.core.Core;
+
 //
 // Consumes received messages and collects statistics
 //
-simple Client
+simple Client extends Core
 {
     parameters:
-        int numOfSensors;
-   	 	int trRange;
-    	int ssRange;
-    	int redundancy;
-    	int axisX;
-    	int axisY;
-    	int energy;
+        @class("Client");
         volatile double sendInterval @unit(s) = default(exponential(1s));
         @display("i=misc/node;is=vs");
     gates:

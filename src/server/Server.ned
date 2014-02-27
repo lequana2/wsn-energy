@@ -15,18 +15,15 @@
 
 package wsn_energy.server;
 
+import wsn_energy.core.Core;
+
 //
 // Generates messages with a configurable interarrival time.
 //
-simple Server
+simple Server extends  Core
 {
     parameters:
-    	int numOfSensors;
-    	int trRange;
-    	int ssRange;
-    	int redundancy;
-    	int axisX;
-    	int axisY;
+        @class("Server");
         @display("i=abstract/db;is=s");
     gates:
         inout port;

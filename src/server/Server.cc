@@ -23,12 +23,7 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-  this->numOfSensors = par("numOfSensors");
-  this->trRange = par("trRange");
-  this->ssRange = par("ssRange");
-  this->redundancy = par("redundancy");
-  this->axisX = par("axisX");
-  this->axisY = par("axisY");
+  Core::initialize();
 
   cMessage *initMessage = new cMessage();
   initMessage->setKind(INIT_MESSAGE);

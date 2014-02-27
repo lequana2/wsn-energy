@@ -17,6 +17,7 @@ package wsn_energy.simulations;
 
 import wsn_energy.server.Server;
 import wsn_energy.client.Client;
+import wsn_energy.core.Core;
 
 //
 // Sample network, consisting of a source and a sink.
@@ -24,7 +25,7 @@ import wsn_energy.client.Client;
 network WSN
 {
     parameters:
-        int numOfSensors;
+        int numberClient;
         int trRange;
         int ssRange;
         int width;
@@ -35,25 +36,26 @@ network WSN
     submodules:
         server: Server {
             parameters:
-                numOfSensors = numOfSensors;
+                numberClient = numberClient;
                 trRange = trRange;
                 ssRange = ssRange;
+                energy = energy;
                 redundancy = redundancy;
-                axisX = (width / 2);
-                axisY = (height / 2);
+                axisX = width / 2;
+                axisY = height / 2;
                 @display("p=$axisX,$axisY");
         }
-        client[numOfSensors]: Client {
+        client[numberClient]: Client {
             parameters:
-                numOfSensors = numOfSensors;
+                numberClient = numberClient;
                 trRange = trRange;
                 ssRange = ssRange;
+                energy = energy;
                 redundancy = redundancy;
 //                axisX = intuniform(0, width);
 //                axisY = intuniform(0, height);
-				axisX = width/4;
-				axisY = height/4;
-                energy = energy;
+				axisX = width / 4;
+				axisY = height / 4;
                 @display("p=$axisX,$axisY");
         }
     connections allowunconnected:

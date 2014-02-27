@@ -31,8 +31,11 @@ class Client : public Core
     bool flag;
 
   public:
-     Client();
-     virtual ~Client();
+    Client();
+    virtual ~Client();
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+//    virtual void finish();
 };
 
 }; // namespace

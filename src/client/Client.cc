@@ -33,13 +33,7 @@ Client::~Client()
 
 void Client::initialize()
 {
-  this->numOfSensors = par("numOfSensors");
-  this->trRange = par("trRange");
-  this->ssRange = par("ssRange");
-  this->redundancy = par("redundancy");
-  this->axisX = par("axisX");
-  this->axisY = par("axisY");
-  this->energy = par("energy");
+  Core::initialize();
 
   flag = true;
 

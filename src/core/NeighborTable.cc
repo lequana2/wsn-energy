@@ -13,34 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef CORE_H_
-#define CORE_H_
-
-#include <omnetpp.h>
-
-
-#define INIT_MESSAGE 0
-#define ICMP_MESSAGE 1
+#include <NeighborTable.h>
 
 namespace wsn_energy {
 
-class Core : public cSimpleModule
+NeighborTable::NeighborTable()
 {
-  public:
-      int numberClient;
-      int trRange;
-      int ssRange;
-      int redundancy;
-      int axisX;
-      int axisY;
-      int energy;
-      bool *hasConnection;
+  // TODO Auto-generated constructor stub
 
-  protected:
-      virtual void initialize();
-      virtual void createConnection();
-};
+}
 
-}; // namespace
+NeighborTable::~NeighborTable()
+{
+  // TODO Auto-generated destructor stub
+}
 
-#endif /* CORE_H_ */
+} /* namespace wsn_energy */
