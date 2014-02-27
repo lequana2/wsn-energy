@@ -15,6 +15,7 @@
 
 #include "Client.h"
 #include "ICMP_m.h"
+#include "core.h"
 
 namespace wsn_energy {
 
@@ -40,9 +41,10 @@ void Client::initialize()
   this->axisY = par("axisY");
   this->energy = par("energy");
 
-    timerMessage = new cMessage("timer");
-    scheduleAt(simTime(), timerMessage);
-    flag = true;
+  flag = true;
+
+  timerMessage = new cMessage("timer");
+  scheduleAt(simTime(), timerMessage);
 }
 
 void Client::handleMessage(cMessage *msg)
@@ -50,20 +52,22 @@ void Client::handleMessage(cMessage *msg)
     ASSERT(msg==timerMessage);
 
     //WSN sending ICMP 6
-    cMessage *icmp = NULL;
+    cMessage *icmp;
 
     if(flag){
       icmp = new DIO();
+      ((cMessage*)icmp)->setKind(ICMP_MESSAGE);
       ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
     } else {
       icmp = new DIS();
-      ((ICMP*)icmp)->setIcmp_code(ICMP_DIS_CODE);
+      ((cMessage*)icmp)->setKind(ICMP_MESSAGE);
+      ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
     }
     flag = !flag;
 
-    send(icmp,"port$o");
+//    send(icmp,"port$o");
 
-    scheduleAt(simTime()+par("sendInterval").doubleValue(), timerMessage);
+//    scheduleAt(simTime()+par("sendInterval").doubleValue(), timerMessage);
 }
 
 }; // namespace

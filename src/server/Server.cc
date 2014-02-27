@@ -15,6 +15,7 @@
 
 #include "Server.h"
 #include "ICMP_m.h"
+#include "core.h"
 
 namespace wsn_energy {
 
@@ -29,32 +30,53 @@ void Server::initialize()
   this->axisX = par("axisX");
   this->axisY = par("axisY");
 
-    lastArrival = simTime();
-    iaTimeHistogram.setName("interarrival times");
-    arrivalsVector.setName("arrivals");
-    arrivalsVector.setInterpolationMode(cOutVector::NONE);
+  cMessage *initMessage = new cMessage();
+  initMessage->setKind(INIT_MESSAGE);
+  scheduleAt(simTime(), initMessage);
+
+//  lastArrival = simTime();
+//  iaTimeHistogram.setName("interarrival times");
+//  arrivalsVector.setName("arrivals");
+//  arrivalsVector.setInterpolationMode(cOutVector::NONE);
 }
 
 void Server::handleMessage(cMessage *msg)
 {
-    simtime_t d = simTime() - lastArrival;
+//  simtime_t d = simTime() - lastArrival;
 
-    if(((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
-      EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
-    else if(((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
-      EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
+  switch (msg->getKind())
+  {
+    case INIT_MESSAGE:
+      EV << "Set root " << endl;
+      break;
 
-    delete msg;
+    case ICMP_MESSAGE:
+      if (((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
+      {
+        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
+      }
+      else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
+      {
+        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
+      }
+      break;
 
-    iaTimeHistogram.collect(d);
-    arrivalsVector.record(1);
+    default:
+      break;
+  }
 
-    lastArrival = simTime();
+  delete msg;
+
+//  iaTimeHistogram.collect(d);
+//  arrivalsVector.record(1);
+//  lastArrival = simTime();
 }
 
 void Server::finish()
 {
-    recordStatistic(&iaTimeHistogram);
+  recordStatistic(&iaTimeHistogram);
 }
 
-}; // namespace
+}
+;
+// namespace
