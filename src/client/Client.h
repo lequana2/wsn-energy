@@ -25,6 +25,15 @@ namespace wsn_energy {
  */
 class Client : public cSimpleModule
 {
+  public:
+    int numOfSensors;
+    int trRange;
+    int ssRange;
+    int redundancy;
+    int axisX;
+    int axisY;
+    int energy;
+
   private:
     cMessage *timerMessage;
     bool flag;

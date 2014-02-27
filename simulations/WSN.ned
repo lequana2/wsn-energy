@@ -23,9 +23,38 @@ import wsn_energy.client.Client;
 //
 network WSN
 {
+    parameters:
+        int numOfSensors;
+        int trRange;
+        int ssRange;
+        int width;
+        int height;
+        double redundancy;
+        double energy;
+        @display("bgb=1000,500,#C6C6FF,#0000FF,2");
     submodules:
-        server: Server;
-        client: Client;
-    connections:
-        server.port <--> client.port;
+        server: Server {
+            parameters:
+                numOfSensors = numOfSensors;
+                trRange = trRange;
+                ssRange = ssRange;
+                redundancy = redundancy;
+                axisX = (width / 2);
+                axisY = (height / 2);
+                @display("p=$axisX,$axisY");
+        }
+        client[numOfSensors]: Client {
+            parameters:
+                numOfSensors = numOfSensors;
+                trRange = trRange;
+                ssRange = ssRange;
+                redundancy = redundancy;
+//                axisX = intuniform(0, width);
+//                axisY = intuniform(0, height);
+				axisX = 0;
+				axisY = 0;
+                energy = energy;
+                @display("p=$axisX,$axisY");
+        }
+    connections allowunconnected:
 }

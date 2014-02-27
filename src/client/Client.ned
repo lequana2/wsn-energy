@@ -21,8 +21,15 @@ package wsn_energy.client;
 simple Client
 {
     parameters:
+        int numOfSensors;
+   	 	int trRange;
+    	int ssRange;
+    	int redundancy;
+    	int axisX;
+    	int axisY;
+    	int energy;
         volatile double sendInterval @unit(s) = default(exponential(1s));
-        @display("i=block/source");
+        @display("i=misc/node;is=vs");
     gates:
         inout port;
 }

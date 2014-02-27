@@ -25,6 +25,14 @@ namespace wsn_energy {
  */
 class Server: public cSimpleModule
 {
+  public:
+    int numOfSensors;
+    int trRange;
+    int ssRange;
+    int redundancy;
+    int axisX;
+    int axisY;
+
   private:
     // state
     simtime_t lastArrival;

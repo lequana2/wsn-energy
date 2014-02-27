@@ -21,7 +21,13 @@ package wsn_energy.server;
 simple Server
 {
     parameters:
-        @display("i=block/sink");
+    	int numOfSensors;
+    	int trRange;
+    	int ssRange;
+    	int redundancy;
+    	int axisX;
+    	int axisY;
+        @display("i=abstract/db;is=s");
     gates:
         inout port;
 }
