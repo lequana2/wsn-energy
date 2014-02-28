@@ -13,6 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include <stdio.h>
+
 #include "Client.h"
 #include "ICMP_m.h"
 #include "Core.h"
@@ -23,12 +25,12 @@ Define_Module(Client);
 
 Client::Client()
 {
-    timerMessage = NULL;
+  timerMessage = NULL;
 }
 
 Client::~Client()
 {
-    cancelAndDelete(timerMessage);
+  cancelAndDelete(timerMessage);
 }
 
 void Client::initialize()
@@ -37,32 +39,37 @@ void Client::initialize()
 
   flag = true;
 
-  timerMessage = new cMessage("timer");
-  scheduleAt(simTime(), timerMessage);
+//  timerMessage = new cMessage("timer");
+//  scheduleAt(simTime(), timerMessage);
 }
 
 void Client::handleMessage(cMessage *msg)
 {
-    ASSERT(msg==timerMessage);
+  ASSERT(msg == timerMessage);
 
-    //WSN sending ICMP 6
-    cMessage *icmp;
+  //WSN sending ICMP 6
+  cMessage *icmp;
 
-    if(flag){
-      icmp = new DIO();
-      ((cMessage*)icmp)->setKind(ICMP_MESSAGE);
-      ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
-    } else {
-      icmp = new DIS();
-      ((cMessage*)icmp)->setKind(ICMP_MESSAGE);
-      ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
-    }
-    flag = !flag;
+  if (flag)
+  {
+    icmp = new DIO();
+    ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
+    ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
+  }
+  else
+  {
+    icmp = new DIS();
+    ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
+    ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
+  }
+  flag = !flag;
 
 //    send(icmp,"port$o");
 
 //    scheduleAt(simTime()+par("sendInterval").doubleValue(), timerMessage);
 }
 
-}; // namespace
+}
+;
+// namespace
 

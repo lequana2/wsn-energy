@@ -38,7 +38,11 @@ class Core : public cSimpleModule
 
   protected:
       virtual void initialize();
-      virtual void createConnection();
+
+  private:
+      void createConnection();
+      int checkConnection(Core*, Core*);
+      double calculateDistance(int,int,int,int);
 };
 
 }; // namespace

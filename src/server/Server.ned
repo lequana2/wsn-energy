@@ -25,6 +25,4 @@ simple Server extends  Core
     parameters:
         @class("Server");
         @display("i=abstract/db;is=s");
-    gates:
-        inout port;
 }

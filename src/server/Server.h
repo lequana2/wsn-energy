@@ -26,18 +26,19 @@ namespace wsn_energy {
  */
 class Server: public Core
 {
-  private:
-    // state
-    simtime_t lastArrival;
-
-    // statistics
-    cDoubleHistogram iaTimeHistogram;
-    cOutVector arrivalsVector;
-
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+  private:
+    // state
+//    simtime_t lastArrival;
+
+    // statistics
+//    cDoubleHistogram iaTimeHistogram;
+//    cOutVector arrivalsVector;
+
 };
 
 }; // namespace

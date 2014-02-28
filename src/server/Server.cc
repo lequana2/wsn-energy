@@ -69,7 +69,7 @@ void Server::handleMessage(cMessage *msg)
 
 void Server::finish()
 {
-  recordStatistic(&iaTimeHistogram);
+//  recordStatistic(&iaTimeHistogram);
 }
 
 }

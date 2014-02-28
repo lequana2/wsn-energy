@@ -13,12 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+#include <math.h>
+
 #include "Core.h"
 
 namespace wsn_energy {
 
 Define_Module(Core);
 
+//---------------------------------------------------------------------------//
 void Core::initialize()
 {
   this->numberClient = par("numberClient");
@@ -28,44 +31,66 @@ void Core::initialize()
   this->axisX = par("axisX");
   this->axisY = par("axisY");
 
-  this->hasConnection = new bool[this->numberClient];
-  for(int i = 0; i < this->numberClient; i++)
-    this->hasConnection = false;
+  this->hasConnection = new bool[this->numberClient + 1];
+  for (int i = 0; i < this->numberClient + 1; i++)
+    this->hasConnection[i] = false;
 
   this->createConnection();
 }
 
+//---------------------------------------------------------------------------//
 void Core::createConnection()
 {
-//  for(int i = 0; i < this->numberClient; i++){
-//    Core *c = (Core*) simulation.getModuleByPath("client");
-//    EV << "Neighbour " << c->size() << endl;
-//  }
-//  for(int i = 3; i <= this->numOfSensors + 2; i++)
-//      {
-//          Sensor *s = (Sensor *)simulation.getModule(i);
-//          double distance = CalculateDistance(this->xPos, this->yPos, s->xPos, s->yPos);
-//          if(distance <= trRange)
-//          {
-//              idNeighbor[numOfNeighbors] = i;
-//              numOfNeighbors ++;
-//
-//              //ket noi
-//              char outName[50];
-//              char inName[50];
-//              cGate *outGate;
-//              cGate *inGate;
-//              sprintf(outName, "out %d to %d", this->getId(), i);
-//              sprintf(inName, "in %d to %d", this->getId(), i);
-//              outGate = this->addGate(outName, cGate::OUTPUT);
-//              inGate = s->addGate(inName, cGate::INPUT);
-//              outGate->connectTo(inGate);
-//
-//              //hidden connection
-//              outGate->setDisplayString("ls=,0");;
-//          }
-//      }
-//      ev << "num neighbor = " << numOfNeighbors << endl;
+  // Check with server
+  Core *module = (Core*) simulation.getModuleByPath("server");
+  if(checkConnection(this, module))
+    this->hasConnection[0] = true;
+
+  // Check with client(s)
+  for (int i = 0; i < this->numberClient; i++)
+  {
+    char modulePath[20];
+    sprintf(modulePath, "client[%d]", i);
+    Core *module = (Core*) simulation.getModuleByPath(modulePath);
+
+    if (checkConnection(this, module))
+      this->hasConnection[i + 1] = true;
+  }
+}
+
+//---------------------------------------------------------------------------//
+int Core::checkConnection(Core *x, Core *y)
+{
+  if (calculateDistance(x->axisX, x->axisY, y->axisX, y->axisY) > x->trRange)
+    return 0;
+  if (x->getId() == y->getId())
+    return 0;
+
+  char setOutConnectionCommand[20];
+  char setInConnectionCommand[20];
+
+  sprintf(setOutConnectionCommand, "out %d to %d", x->getId(), y->getId());
+  sprintf(setInConnectionCommand, "in %d to %d", x->getId(), y->getId());
+
+  cGate *outGate;
+  cGate *inGate;
+
+  outGate = this->addGate(setOutConnectionCommand, cGate::OUTPUT);
+  inGate = y->addGate(setInConnectionCommand, cGate::INPUT);
+  outGate->connectTo(inGate);
+
+  //hidden connection
+//  outGate->setDisplayString("ls=,0");
+
+  return 1;
+}
+
+//---------------------------------------------------------------------------//
+double Core::calculateDistance(int x1, int y1, int x2, int y2)
+{
+    int x = (x1 - x2) * (x1 - x2);
+    int y = (y1 - y2) * (y1 - y2);
+    return sqrt(x + y);
 }
 
 } /* namespace wsn_energy */

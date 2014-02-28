@@ -17,7 +17,6 @@ package wsn_energy.simulations;
 
 import wsn_energy.server.Server;
 import wsn_energy.client.Client;
-import wsn_energy.core.Core;
 
 //
 // Sample network, consisting of a source and a sink.
@@ -52,10 +51,8 @@ network WSN
                 ssRange = ssRange;
                 energy = energy;
                 redundancy = redundancy;
-//                axisX = intuniform(0, width);
-//                axisY = intuniform(0, height);
-				axisX = width / 4;
-				axisY = height / 4;
+                axisX = intuniform(0, width);
+                axisY = intuniform(0, height);
                 @display("p=$axisX,$axisY");
         }
     connections allowunconnected:

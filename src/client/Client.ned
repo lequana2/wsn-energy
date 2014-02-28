@@ -26,6 +26,4 @@ simple Client extends Core
         @class("Client");
         volatile double sendInterval @unit(s) = default(exponential(1s));
         @display("i=misc/node;is=vs");
-    gates:
-        inout port;
 }

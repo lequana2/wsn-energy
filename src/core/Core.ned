@@ -28,4 +28,7 @@ simple Core
     	int axisX;
     	int axisY;
     	int energy;
+    
+    gates:
+        inout port;
 }
