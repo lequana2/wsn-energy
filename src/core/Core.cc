@@ -78,7 +78,6 @@ void Core::sendDIS(int convergence)
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
 
   icmp->setConvergence(convergence);
-  EV << "CONVERGE: " << icmp->getConvergence() << endl;
 
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
