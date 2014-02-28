@@ -24,11 +24,6 @@ Define_Module(Server);
 void Server::initialize()
 {
   Core::initialize();
-
-  cMessage *initMessage = new cMessage();
-  initMessage->setKind(INIT_MESSAGE);
-  scheduleAt(simTime(), initMessage);
-
 //  lastArrival = simTime();
 //  iaTimeHistogram.setName("interarrival times");
 //  arrivalsVector.setName("arrivals");
@@ -38,11 +33,12 @@ void Server::initialize()
 void Server::handleMessage(cMessage *msg)
 {
 //  simtime_t d = simTime() - lastArrival;
+  Core::handleMessage(msg);
 
   switch (msg->getKind())
   {
-    case INIT_MESSAGE:
-      EV << "Set root " << endl;
+    case START_MESSAGE:
+      sendDIO();
       break;
 
     case ICMP_MESSAGE:

@@ -16,6 +16,7 @@
 #include <math.h>
 
 #include "Core.h"
+#include "ICMP_m.h"
 
 namespace wsn_energy {
 
@@ -31,20 +32,48 @@ void Core::initialize()
   this->axisX = par("axisX");
   this->axisY = par("axisY");
 
-  this->hasConnection = new bool[this->numberClient + 1];
-  for (int i = 0; i < this->numberClient + 1; i++)
-    this->hasConnection[i] = false;
-
-  this->createConnection();
+  cMessage *initMessage = new cMessage();
+  initMessage->setKind(INIT_MESSAGE);
+  scheduleAt(simTime(), initMessage);
 }
 
+void Core::handleMessage(cMessage *msg)
+{
+  if (msg->getKind() == INIT_MESSAGE)
+  {
+    createConnection();
+    cMessage *startMessage = new cMessage();
+    startMessage->setKind(START_MESSAGE);
+    scheduleAt(simTime() + 1, startMessage);
+  }
+}
+
+//---------------------------------------------------------------------------//
+void Core::sendDIO()
+{
+  ev << "broadcast DIO" << endl;
+
+  DIO *icmp = new DIO();
+  ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
+  ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
+
+  // Rank
+  icmp->setRank(0);
+
+  for (unsigned int i = 0; i < this->neighbor.size(); i++)
+  {
+    char outName[20];
+    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
+    send(icmp->dup(), outName);
+  }
+}
 //---------------------------------------------------------------------------//
 void Core::createConnection()
 {
   // Check with server
   Core *module = (Core*) simulation.getModuleByPath("server");
-  if(checkConnection(this, module))
-    this->hasConnection[0] = true;
+  if (checkConnection(this, module))
+    this->neighbor.push_back(module->getId());
 
   // Check with client(s)
   for (int i = 0; i < this->numberClient; i++)
@@ -54,8 +83,10 @@ void Core::createConnection()
     Core *module = (Core*) simulation.getModuleByPath(modulePath);
 
     if (checkConnection(this, module))
-      this->hasConnection[i + 1] = true;
+      this->neighbor.push_back(module->getId());
   }
+
+  EV << "Number of neighbor " << this->neighbor.size() << endl;
 }
 
 //---------------------------------------------------------------------------//
@@ -68,19 +99,18 @@ int Core::checkConnection(Core *x, Core *y)
 
   char setOutConnectionCommand[20];
   char setInConnectionCommand[20];
+  cGate *outGate;
+  cGate *inGate;
 
   sprintf(setOutConnectionCommand, "out %d to %d", x->getId(), y->getId());
   sprintf(setInConnectionCommand, "in %d to %d", x->getId(), y->getId());
-
-  cGate *outGate;
-  cGate *inGate;
 
   outGate = this->addGate(setOutConnectionCommand, cGate::OUTPUT);
   inGate = y->addGate(setInConnectionCommand, cGate::INPUT);
   outGate->connectTo(inGate);
 
   //hidden connection
-//  outGate->setDisplayString("ls=,0");
+  outGate->setDisplayString("ls=,0");
 
   return 1;
 }
@@ -88,9 +118,9 @@ int Core::checkConnection(Core *x, Core *y)
 //---------------------------------------------------------------------------//
 double Core::calculateDistance(int x1, int y1, int x2, int y2)
 {
-    int x = (x1 - x2) * (x1 - x2);
-    int y = (y1 - y2) * (y1 - y2);
-    return sqrt(x + y);
+  int x = (x1 - x2) * (x1 - x2);
+  int y = (y1 - y2) * (y1 - y2);
+  return sqrt(x + y);
 }
 
 } /* namespace wsn_energy */

@@ -45,27 +45,9 @@ void Client::initialize()
 
 void Client::handleMessage(cMessage *msg)
 {
-  ASSERT(msg == timerMessage);
-
-  //WSN sending ICMP 6
-  cMessage *icmp;
-
-  if (flag)
-  {
-    icmp = new DIO();
-    ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
-    ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
-  }
-  else
-  {
-    icmp = new DIS();
-    ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
-    ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
-  }
-  flag = !flag;
+  Core::handleMessage(msg);
 
 //    send(icmp,"port$o");
-
 //    scheduleAt(simTime()+par("sendInterval").doubleValue(), timerMessage);
 }
 

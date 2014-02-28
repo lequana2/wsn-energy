@@ -124,7 +124,8 @@ $O/client/Client.o: client/Client.cc \
 	core/Core.h \
 	icmpv6/ICMP_m.h
 $O/core/Core.o: core/Core.cc \
-	core/Core.h
+	core/Core.h \
+	icmpv6/ICMP_m.h
 $O/core/NeighborTable.o: core/NeighborTable.cc \
 	core/CoreConf.h \
 	core/NeighborTable.h

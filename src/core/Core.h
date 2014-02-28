@@ -17,10 +17,11 @@
 #define CORE_H_
 
 #include <omnetpp.h>
-
+#include <vector>
 
 #define INIT_MESSAGE 0
-#define ICMP_MESSAGE 1
+#define START_MESSAGE 1
+#define ICMP_MESSAGE 2
 
 namespace wsn_energy {
 
@@ -34,10 +35,12 @@ class Core : public cSimpleModule
       int axisX;
       int axisY;
       int energy;
-      bool *hasConnection;
+      std::vector<int> neighbor;
 
   protected:
       virtual void initialize();
+      virtual void handleMessage(cMessage *msg);
+      void sendDIO();
 
   private:
       void createConnection();
