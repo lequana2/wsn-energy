@@ -51,7 +51,7 @@ void Client::handleMessage(cMessage *msg)
   {
     case START_MESSAGE:
       if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
-        sendDIS();
+        sendDIS(10); //WSN only forward 10 hop
       break;
 
     case ICMP_MESSAGE:
@@ -59,14 +59,21 @@ void Client::handleMessage(cMessage *msg)
       {
 //        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
         //WSN forward DIO
-        sendDIO();
+        //omit obsolete DIO
+        if (this->dodagid >= ((DIO*) msg)->getDodagID())
+          ;
+        else
+//          sendDIO()
+          ;
       }
       else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
       {
 //        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
         //WSN check route to root
-        //WSN broadcast DIS
-        sendDIS();
+        //WSN broadcast DIS toward root
+        int convergence = ((DIS*) msg)->getConvergence();
+        if (convergence > 0)
+          sendDIS(convergence - 1);
       }
       break;
 

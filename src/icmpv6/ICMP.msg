@@ -34,4 +34,5 @@ packet DIS extends ICMP{
 	int flags;
 	int reserved;
 	int options; 
+	int convergence;
 }

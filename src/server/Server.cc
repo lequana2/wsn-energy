@@ -24,6 +24,9 @@ Define_Module(Server);
 void Server::initialize()
 {
   Core::initialize();
+
+  this->dodagid++;
+
 //  lastArrival = simTime();
 //  iaTimeHistogram.setName("interarrival times");
 //  arrivalsVector.setName("arrivals");
@@ -45,7 +48,8 @@ void Server::handleMessage(cMessage *msg)
     case ICMP_MESSAGE:
       if (((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
       {
-        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
+//        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
+        //WSN Omit obsolete DIO, send up-to-date one
       }
       else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
       {

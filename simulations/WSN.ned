@@ -51,10 +51,8 @@ network WSN
                 ssRange = ssRange;
                 energy = energy;
                 redundancy = redundancy;
-//                axisX = intuniform(0, width);
-//                axisY = intuniform(0, height);
-	axisX = width/2-100;
-	axisY = height/2;
+                axisX = intuniform(0, width);
+                axisY = intuniform(0, height);
                 @display("p=$axisX,$axisY");
         }
     connections allowunconnected:

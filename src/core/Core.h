@@ -19,9 +19,11 @@
 #include <omnetpp.h>
 #include <vector>
 
-#define INIT_MESSAGE 0
-#define START_MESSAGE 1
-#define ICMP_MESSAGE 2
+#define INIT_MESSAGE 1
+#define START_MESSAGE 2
+#define ICMP_MESSAGE 3
+
+#define RANK_INFINITY 0xffff
 
 namespace wsn_energy {
 
@@ -35,7 +37,13 @@ class Core : public cSimpleModule
       int axisX;
       int axisY;
       int energy;
+
       std::vector<int> neighbor;
+
+      //WSN info
+      int dodagid;
+      int rank;
+
       //WSN default route to server
       std::vector<int> route;
 
@@ -43,7 +51,7 @@ class Core : public cSimpleModule
       virtual void initialize();
       virtual void handleMessage(cMessage *msg);
       void sendDIO();
-      void sendDIS();
+      void sendDIS(int);
 
   private:
       void createConnection();

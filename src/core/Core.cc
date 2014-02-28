@@ -31,6 +31,8 @@ void Core::initialize()
   this->redundancy = par("redundancy");
   this->axisX = par("axisX");
   this->axisY = par("axisY");
+  this->dodagid = 0;
+  this->rank    = RANK_INFINITY;
 
   cMessage *initMessage = new cMessage();
   initMessage->setKind(INIT_MESSAGE);
@@ -67,16 +69,16 @@ void Core::sendDIO()
 }
 
 //---------------------------------------------------------------------------//
-void Core::sendDIS()
+void Core::sendDIS(int convergence)
 {
   ev << "broadcast DIS" << endl;
 
-  DIO *icmp = new DIO();
+  DIS *icmp = new DIS();
   ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
 
-  // Rank
-  icmp->setRank(0);
+  icmp->setConvergence(convergence);
+  EV << "CONVERGE: " << icmp->getConvergence() << endl;
 
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
@@ -105,7 +107,7 @@ void Core::createConnection()
       this->neighbor.push_back(module->getId());
   }
 
-  EV << "Number of neighbor " << this->neighbor.size() << endl;
+//  EV << "Number of neighbor " << this->neighbor.size() << endl;
 }
 
 //---------------------------------------------------------------------------//
@@ -129,7 +131,7 @@ int Core::checkConnection(Core *x, Core *y)
   outGate->connectTo(inGate);
 
   //hidden connection
-  outGate->setDisplayString("ls=,0");
+//  outGate->setDisplayString("ls=,0");
 
   return 1;
 }

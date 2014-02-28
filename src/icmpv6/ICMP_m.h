@@ -119,6 +119,7 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
  * 	int flags;
  * 	int reserved;
  * 	int options; 
+ * 	int convergence;
  * }
  * </pre>
  */
@@ -128,6 +129,7 @@ class DIS : public ::wsn_energy::ICMP
     int flags_var;
     int reserved_var;
     int options_var;
+    int convergence_var;
 
   private:
     void copy(const DIS& other);
@@ -152,6 +154,8 @@ class DIS : public ::wsn_energy::ICMP
     virtual void setReserved(int reserved);
     virtual int getOptions() const;
     virtual void setOptions(int options);
+    virtual int getConvergence() const;
+    virtual void setConvergence(int convergence);
 };
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}

@@ -561,6 +561,7 @@ DIS::DIS(const char *name, int kind) : wsn_energy::ICMP(name,kind)
     this->flags_var = 0;
     this->reserved_var = 0;
     this->options_var = 0;
+    this->convergence_var = 0;
 }
 
 DIS::DIS(const DIS& other) : wsn_energy::ICMP(other)
@@ -585,6 +586,7 @@ void DIS::copy(const DIS& other)
     this->flags_var = other.flags_var;
     this->reserved_var = other.reserved_var;
     this->options_var = other.options_var;
+    this->convergence_var = other.convergence_var;
 }
 
 void DIS::parsimPack(cCommBuffer *b)
@@ -593,6 +595,7 @@ void DIS::parsimPack(cCommBuffer *b)
     doPacking(b,this->flags_var);
     doPacking(b,this->reserved_var);
     doPacking(b,this->options_var);
+    doPacking(b,this->convergence_var);
 }
 
 void DIS::parsimUnpack(cCommBuffer *b)
@@ -601,6 +604,7 @@ void DIS::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->flags_var);
     doUnpacking(b,this->reserved_var);
     doUnpacking(b,this->options_var);
+    doUnpacking(b,this->convergence_var);
 }
 
 int DIS::getFlags() const
@@ -631,6 +635,16 @@ int DIS::getOptions() const
 void DIS::setOptions(int options)
 {
     this->options_var = options;
+}
+
+int DIS::getConvergence() const
+{
+    return convergence_var;
+}
+
+void DIS::setConvergence(int convergence)
+{
+    this->convergence_var = convergence;
 }
 
 class DISDescriptor : public cClassDescriptor
@@ -680,7 +694,7 @@ const char *DISDescriptor::getProperty(const char *propertyname) const
 int DISDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -695,8 +709,9 @@ unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DISDescriptor::getFieldName(void *object, int field) const
@@ -711,8 +726,9 @@ const char *DISDescriptor::getFieldName(void *object, int field) const
         "flags",
         "reserved",
         "options",
+        "convergence",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int DISDescriptor::findField(void *object, const char *fieldName) const
@@ -722,6 +738,7 @@ int DISDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='f' && strcmp(fieldName, "flags")==0) return base+0;
     if (fieldName[0]=='r' && strcmp(fieldName, "reserved")==0) return base+1;
     if (fieldName[0]=='o' && strcmp(fieldName, "options")==0) return base+2;
+    if (fieldName[0]=='c' && strcmp(fieldName, "convergence")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -737,8 +754,9 @@ const char *DISDescriptor::getFieldTypeString(void *object, int field) const
         "int",
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DISDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -781,6 +799,7 @@ std::string DISDescriptor::getFieldAsString(void *object, int field, int i) cons
         case 0: return long2string(pp->getFlags());
         case 1: return long2string(pp->getReserved());
         case 2: return long2string(pp->getOptions());
+        case 3: return long2string(pp->getConvergence());
         default: return "";
     }
 }
@@ -798,6 +817,7 @@ bool DISDescriptor::setFieldAsString(void *object, int field, int i, const char 
         case 0: pp->setFlags(string2long(value)); return true;
         case 1: pp->setReserved(string2long(value)); return true;
         case 2: pp->setOptions(string2long(value)); return true;
+        case 3: pp->setConvergence(string2long(value)); return true;
         default: return false;
     }
 }
@@ -814,8 +834,9 @@ const char *DISDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const
