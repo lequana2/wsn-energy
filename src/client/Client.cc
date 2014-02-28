@@ -47,6 +47,35 @@ void Client::handleMessage(cMessage *msg)
 {
   Core::handleMessage(msg);
 
+  switch (msg->getKind())
+  {
+    case START_MESSAGE:
+      if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
+        sendDIS();
+      break;
+
+    case ICMP_MESSAGE:
+      if (((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
+      {
+//        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
+        //WSN forward DIO
+        sendDIO();
+      }
+      else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
+      {
+//        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
+        //WSN check route to root
+        //WSN broadcast DIS
+        sendDIS();
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  delete msg;
+
 //    send(icmp,"port$o");
 //    scheduleAt(simTime()+par("sendInterval").doubleValue(), timerMessage);
 }

@@ -36,11 +36,14 @@ class Core : public cSimpleModule
       int axisY;
       int energy;
       std::vector<int> neighbor;
+      //WSN default route to server
+      std::vector<int> route;
 
   protected:
       virtual void initialize();
       virtual void handleMessage(cMessage *msg);
       void sendDIO();
+      void sendDIS();
 
   private:
       void createConnection();

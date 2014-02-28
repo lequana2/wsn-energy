@@ -38,7 +38,8 @@ void Server::handleMessage(cMessage *msg)
   switch (msg->getKind())
   {
     case START_MESSAGE:
-      sendDIO();
+      //WSN disable proactive
+//      sendDIO();
       break;
 
     case ICMP_MESSAGE:
@@ -48,7 +49,9 @@ void Server::handleMessage(cMessage *msg)
       }
       else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
       {
-        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
+//        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
+        //WSN create global repair
+        sendDIO();
       }
       break;
 

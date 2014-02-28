@@ -57,6 +57,24 @@ void Core::sendDIO()
   ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
 
+  for (unsigned int i = 0; i < this->neighbor.size(); i++)
+  {
+    char outName[20];
+    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
+//    send(icmp->dup(), outName);
+    sendDelayed(icmp->dup(), 1, outName);
+  }
+}
+
+//---------------------------------------------------------------------------//
+void Core::sendDIS()
+{
+  ev << "broadcast DIS" << endl;
+
+  DIO *icmp = new DIO();
+  ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
+  ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
+
   // Rank
   icmp->setRank(0);
 
@@ -64,7 +82,8 @@ void Core::sendDIO()
   {
     char outName[20];
     sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
-    send(icmp->dup(), outName);
+//    send(icmp->dup(), outName);
+    sendDelayed(icmp->dup(), 1, outName);
   }
 }
 //---------------------------------------------------------------------------//

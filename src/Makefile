@@ -28,7 +28,7 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/client/Client.o $O/core/Core.o $O/core/NeighborTable.o $O/server/Server.o $O/icmpv6/ICMP_m.o
+OBJS = $O/client/Client.o $O/core/Core.o $O/server/Server.o $O/icmpv6/ICMP_m.o
 
 # Message files
 MSGFILES = \
@@ -126,9 +126,6 @@ $O/client/Client.o: client/Client.cc \
 $O/core/Core.o: core/Core.cc \
 	core/Core.h \
 	icmpv6/ICMP_m.h
-$O/core/NeighborTable.o: core/NeighborTable.cc \
-	core/CoreConf.h \
-	core/NeighborTable.h
 $O/icmpv6/ICMP_m.o: icmpv6/ICMP_m.cc \
 	icmpv6/ICMP_m.h
 $O/server/Server.o: server/Server.cc \
