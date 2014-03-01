@@ -50,20 +50,34 @@ void Client::handleMessage(cMessage *msg)
   switch (msg->getKind())
   {
     case START_MESSAGE:
-      if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
-        sendDIS(5); //WSN limit forward hop
+//      if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
+//        sendDIS(5);
       break;
 
     case ICMP_MESSAGE:
       if (((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
       {
 //        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
-        //WSN forward DIO
         //omit obsolete DIO
         if (this->dodagid >= ((DIO*) msg)->getDodagID())
-          ;
+        {
+//          sendDIO();
+        }
+        //forward update DIO, create connection
         else
+        {
+          //Consider new parent
+          //WSN Choose new preferred parent
+          //Draw new connection
+          char setOutConnectionName[20];
+          sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getId(),
+              msg->getSenderModule()->getId());
+          (this->gate(setOutConnectionName))->setDisplayString("ls=red,1");
+//          EV << setOutConnectionName << endl;
+
+          this->dodagid = ((DIO*) msg)->getDodagID();
           sendDIO();
+        }
       }
       else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
       {

@@ -42,7 +42,8 @@ void Server::handleMessage(cMessage *msg)
   {
     case START_MESSAGE:
       //WSN disable proactive
-//      sendDIO();
+      this->dodagid++;
+      sendDIO();
       break;
 
     case ICMP_MESSAGE:

@@ -32,7 +32,7 @@ void Core::initialize()
   this->axisX = par("axisX");
   this->axisY = par("axisY");
   this->dodagid = 0;
-  this->rank    = RANK_INFINITY;
+  this->rank = RANK_INFINITY;
 
   cMessage *initMessage = new cMessage();
   initMessage->setKind(INIT_MESSAGE);
@@ -58,6 +58,8 @@ void Core::sendDIO()
   DIO *icmp = new DIO();
   ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
+
+  icmp->setDodagID(this->dodagid);
 
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
@@ -117,20 +119,20 @@ int Core::checkConnection(Core *x, Core *y)
   if (x->getId() == y->getId())
     return 0;
 
-  char setOutConnectionCommand[20];
-  char setInConnectionCommand[20];
+  char setOutConnectionName[20];
+  char setInConnectionName[20];
   cGate *outGate;
   cGate *inGate;
 
-  sprintf(setOutConnectionCommand, "out %d to %d", x->getId(), y->getId());
-  sprintf(setInConnectionCommand, "in %d to %d", x->getId(), y->getId());
+  sprintf(setOutConnectionName, "out %d to %d", x->getId(), y->getId());
+  sprintf(setInConnectionName, "in %d to %d", x->getId(), y->getId());
 
-  outGate = this->addGate(setOutConnectionCommand, cGate::OUTPUT);
-  inGate = y->addGate(setInConnectionCommand, cGate::INPUT);
+  outGate = this->addGate(setOutConnectionName, cGate::OUTPUT);
+  inGate = y->addGate(setInConnectionName, cGate::INPUT);
   outGate->connectTo(inGate);
 
   //hidden connection
-//  outGate->setDisplayString("ls=,0");
+  outGate->setDisplayString("ls=,0");
 
   return 1;
 }
