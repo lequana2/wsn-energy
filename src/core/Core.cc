@@ -43,7 +43,6 @@ void Core::handleMessage(cMessage *msg)
 {
   if (msg->getKind() == INIT_MESSAGE)
   {
-    createConnection();
     cMessage *startMessage = new cMessage();
     startMessage->setKind(START_MESSAGE);
     scheduleAt(simTime() + 1, startMessage);
@@ -88,61 +87,6 @@ void Core::sendDIS(int convergence)
 //    send(icmp->dup(), outName);
     sendDelayed(icmp->dup(), 1, outName);
   }
-}
-//---------------------------------------------------------------------------//
-void Core::createConnection()
-{
-  // Check with server
-  Core *module = (Core*) simulation.getModuleByPath("server");
-  if (checkConnection(this, module))
-    this->neighbor.push_back(module->getId());
-
-  // Check with client(s)
-  for (int i = 0; i < this->numberClient; i++)
-  {
-    char modulePath[20];
-    sprintf(modulePath, "client[%d]", i);
-    Core *module = (Core*) simulation.getModuleByPath(modulePath);
-
-    if (checkConnection(this, module))
-      this->neighbor.push_back(module->getId());
-  }
-
-//  EV << "Number of neighbor " << this->neighbor.size() << endl;
-}
-
-//---------------------------------------------------------------------------//
-int Core::checkConnection(Core *x, Core *y)
-{
-  if (calculateDistance(x->axisX, x->axisY, y->axisX, y->axisY) > x->trRange)
-    return 0;
-  if (x->getId() == y->getId())
-    return 0;
-
-  char setOutConnectionName[20];
-  char setInConnectionName[20];
-  cGate *outGate;
-  cGate *inGate;
-
-  sprintf(setOutConnectionName, "out %d to %d", x->getId(), y->getId());
-  sprintf(setInConnectionName, "in %d to %d", x->getId(), y->getId());
-
-  outGate = this->addGate(setOutConnectionName, cGate::OUTPUT);
-  inGate = y->addGate(setInConnectionName, cGate::INPUT);
-  outGate->connectTo(inGate);
-
-  //hidden connection
-  outGate->setDisplayString("ls=,0");
-
-  return 1;
-}
-
-//---------------------------------------------------------------------------//
-double Core::calculateDistance(int x1, int y1, int x2, int y2)
-{
-  int x = (x1 - x2) * (x1 - x2);
-  int y = (y1 - y2) * (y1 - y2);
-  return sqrt(x + y);
 }
 
 } /* namespace wsn_energy */

@@ -17,6 +17,7 @@ package wsn_energy.simulations;
 
 import wsn_energy.server.Server;
 import wsn_energy.client.Client;
+import wsn_energy.enviroment.Enviroment;
 
 //
 // Sample network, consisting of a source and a sink.
@@ -54,6 +55,10 @@ network WSN
                 axisX = intuniform(0, width);
                 axisY = intuniform(0, height);
                 @display("p=$axisX,$axisY");
+        }
+        enviroment: Enviroment{
+        	parameters:
+        	    @display("p=-10,-10");
         }
     connections allowunconnected:
 }

@@ -14,7 +14,13 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 #USERIF_LIBS = $(TKENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -I. -Iclient -Icore -Iicmpv6 -Iserver
+INCLUDE_PATH = \
+    -I. \
+    -Iclient \
+    -Icore \
+    -Ienviroment \
+    -Iicmpv6 \
+    -Iserver
 
 # Additional object and library files to link with
 EXTRA_OBJS =
@@ -28,7 +34,7 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/client/Client.o $O/core/Core.o $O/server/Server.o $O/icmpv6/ICMP_m.o
+OBJS = $O/client/Client.o $O/core/Core.o $O/enviroment/Enviroment.o $O/server/Server.o $O/icmpv6/ICMP_m.o
 
 # Message files
 MSGFILES = \
@@ -108,6 +114,7 @@ clean:
 	$(Q)-rm -f ./*_m.cc ./*_m.h
 	$(Q)-rm -f client/*_m.cc client/*_m.h
 	$(Q)-rm -f core/*_m.cc core/*_m.h
+	$(Q)-rm -f enviroment/*_m.cc enviroment/*_m.h
 	$(Q)-rm -f icmpv6/*_m.cc icmpv6/*_m.h
 	$(Q)-rm -f server/*_m.cc server/*_m.h
 
@@ -116,7 +123,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc client/*.cc core/*.cc icmpv6/*.cc server/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc client/*.cc core/*.cc enviroment/*.cc icmpv6/*.cc server/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/client/Client.o: client/Client.cc \
@@ -126,6 +133,9 @@ $O/client/Client.o: client/Client.cc \
 $O/core/Core.o: core/Core.cc \
 	core/Core.h \
 	icmpv6/ICMP_m.h
+$O/enviroment/Enviroment.o: enviroment/Enviroment.cc \
+	core/Core.h \
+	enviroment/Enviroment.h
 $O/icmpv6/ICMP_m.o: icmpv6/ICMP_m.cc \
 	icmpv6/ICMP_m.h
 $O/server/Server.o: server/Server.cc \

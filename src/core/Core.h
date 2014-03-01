@@ -52,11 +52,6 @@ class Core : public cSimpleModule
       virtual void handleMessage(cMessage *msg);
       void sendDIO();
       void sendDIS(int);
-
-  private:
-      void createConnection();
-      int checkConnection(Core*, Core*);
-      double calculateDistance(int,int,int,int);
 };
 
 }; // namespace
