@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from icmpv6/ICMP.msg.
+// Generated file, do not edit! Created by opp_msgc 4.4 from icmp/ICMP.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -45,6 +45,8 @@ Register_Class(ICMP);
 ICMP::ICMP(const char *name, int kind) : cPacket(name,kind)
 {
     this->icmp_code_var = 0;
+    this->sendID_var = 0;
+    this->recvID_var = 0;
 }
 
 ICMP::ICMP(const ICMP& other) : cPacket(other)
@@ -67,18 +69,24 @@ ICMP& ICMP::operator=(const ICMP& other)
 void ICMP::copy(const ICMP& other)
 {
     this->icmp_code_var = other.icmp_code_var;
+    this->sendID_var = other.sendID_var;
+    this->recvID_var = other.recvID_var;
 }
 
 void ICMP::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->icmp_code_var);
+    doPacking(b,this->sendID_var);
+    doPacking(b,this->recvID_var);
 }
 
 void ICMP::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->icmp_code_var);
+    doUnpacking(b,this->sendID_var);
+    doUnpacking(b,this->recvID_var);
 }
 
 int ICMP::getIcmp_code() const
@@ -89,6 +97,26 @@ int ICMP::getIcmp_code() const
 void ICMP::setIcmp_code(int icmp_code)
 {
     this->icmp_code_var = icmp_code;
+}
+
+int ICMP::getSendID() const
+{
+    return sendID_var;
+}
+
+void ICMP::setSendID(int sendID)
+{
+    this->sendID_var = sendID;
+}
+
+int ICMP::getRecvID() const
+{
+    return recvID_var;
+}
+
+void ICMP::setRecvID(int recvID)
+{
+    this->recvID_var = recvID;
 }
 
 class ICMPDescriptor : public cClassDescriptor
@@ -138,7 +166,7 @@ const char *ICMPDescriptor::getProperty(const char *propertyname) const
 int ICMPDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
 unsigned int ICMPDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -151,8 +179,10 @@ unsigned int ICMPDescriptor::getFieldTypeFlags(void *object, int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *ICMPDescriptor::getFieldName(void *object, int field) const
@@ -165,8 +195,10 @@ const char *ICMPDescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "icmp_code",
+        "sendID",
+        "recvID",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
 int ICMPDescriptor::findField(void *object, const char *fieldName) const
@@ -174,6 +206,8 @@ int ICMPDescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='i' && strcmp(fieldName, "icmp_code")==0) return base+0;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sendID")==0) return base+1;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recvID")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -187,8 +221,10 @@ const char *ICMPDescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *ICMPDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -229,6 +265,8 @@ std::string ICMPDescriptor::getFieldAsString(void *object, int field, int i) con
     ICMP *pp = (ICMP *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getIcmp_code());
+        case 1: return long2string(pp->getSendID());
+        case 2: return long2string(pp->getRecvID());
         default: return "";
     }
 }
@@ -244,6 +282,8 @@ bool ICMPDescriptor::setFieldAsString(void *object, int field, int i, const char
     ICMP *pp = (ICMP *)object; (void)pp;
     switch (field) {
         case 0: pp->setIcmp_code(string2long(value)); return true;
+        case 1: pp->setSendID(string2long(value)); return true;
+        case 2: pp->setRecvID(string2long(value)); return true;
         default: return false;
     }
 }
@@ -258,8 +298,10 @@ const char *ICMPDescriptor::getFieldStructName(void *object, int field) const
     }
     static const char *fieldStructNames[] = {
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *ICMPDescriptor::getFieldStructPointer(void *object, int field, int i) const

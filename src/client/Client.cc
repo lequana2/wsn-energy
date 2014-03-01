@@ -49,7 +49,7 @@ void Client::handleMessage(cMessage *msg)
 
   switch (msg->getKind())
   {
-    case START_MESSAGE:
+    case INIT_MESSAGE:
 //      if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
 //        sendDIS(5);
       break;

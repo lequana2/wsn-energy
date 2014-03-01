@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from icmpv6/ICMP.msg.
+// Generated file, do not edit! Created by opp_msgc 4.4 from icmp/ICMP.msg.
 //
 
 #ifndef _ICMP_M_H_
@@ -17,7 +17,7 @@
 namespace wsn_energy {
 
 /**
- * Enum generated from <tt>icmpv6/ICMP.msg</tt> by opp_msgc.
+ * Enum generated from <tt>icmp/ICMP.msg</tt> by opp_msgc.
  * <pre>
  * enum ICMP_CODE{
  * 	ICMP_DIO_CODE = 0;
@@ -31,10 +31,12 @@ enum ICMP_CODE {
 };
 
 /**
- * Class generated from <tt>icmpv6/ICMP.msg</tt> by opp_msgc.
+ * Class generated from <tt>icmp/ICMP.msg</tt> by opp_msgc.
  * <pre>
  * packet ICMP{
  *     int icmp_code;
+ *     int sendID;
+ *     int recvID;
  * }
  * </pre>
  */
@@ -42,6 +44,8 @@ class ICMP : public ::cPacket
 {
   protected:
     int icmp_code_var;
+    int sendID_var;
+    int recvID_var;
 
   private:
     void copy(const ICMP& other);
@@ -62,13 +66,17 @@ class ICMP : public ::cPacket
     // field getter/setter methods
     virtual int getIcmp_code() const;
     virtual void setIcmp_code(int icmp_code);
+    virtual int getSendID() const;
+    virtual void setSendID(int sendID);
+    virtual int getRecvID() const;
+    virtual void setRecvID(int recvID);
 };
 
 inline void doPacking(cCommBuffer *b, ICMP& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, ICMP& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>icmpv6/ICMP.msg</tt> by opp_msgc.
+ * Class generated from <tt>icmp/ICMP.msg</tt> by opp_msgc.
  * <pre>
  * packet DIO extends ICMP{
  * 	int dodagID;
@@ -113,7 +121,7 @@ inline void doPacking(cCommBuffer *b, DIO& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>icmpv6/ICMP.msg</tt> by opp_msgc.
+ * Class generated from <tt>icmp/ICMP.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS extends ICMP{
  * 	int flags;

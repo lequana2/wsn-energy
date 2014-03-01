@@ -17,6 +17,7 @@
 
 #include "Core.h"
 #include "ICMP_m.h"
+#include "Enviroment.h"
 
 namespace wsn_energy {
 
@@ -38,17 +39,41 @@ void Core::initialize()
   initMessage->setKind(INIT_MESSAGE);
   scheduleAt(simTime(), initMessage);
 }
-
+//---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)
 {
-  if (msg->getKind() == INIT_MESSAGE)
+  if (msg->getKind() == MESSAGE)
   {
-    cMessage *startMessage = new cMessage();
-    startMessage->setKind(START_MESSAGE);
-    scheduleAt(simTime() + 1, startMessage);
+    //WSN check feasible
+    if (((Enviroment*) simulation.getModuleByPath("enviroment"))->checkFeasibleTranmission(this))
+    {
+      //WSN send
+      ICMP* icmp = (ICMP*) messageBuffer.front();
+      messageBuffer.erase(messageBuffer.begin());
+
+      EV << "OUT " << icmp->getSendID() << " " << icmp->getRecvID()  << endl;
+    }
+    else
+    {
+      EV << "Conflict" << endl;
+    }
   }
 }
 
+//---------------------------------------------------------------------------//
+void Core::sendMessage(ICMP *msg)
+{
+  //WSN buffer
+  messageBuffer.push_back(msg);
+  ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(this);
+
+  int size = 1;
+
+  //WSN schedule
+  cMessage *message = new cMessage();
+  message->setKind(MESSAGE);
+  scheduleAt(simTime() + size, message);
+}
 //---------------------------------------------------------------------------//
 void Core::sendDIO()
 {
@@ -58,14 +83,19 @@ void Core::sendDIO()
   ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
 
+  icmp->setSendID(this->getId());
+
   icmp->setDodagID(this->dodagid);
+
 
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
     char outName[20];
     sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
 //    send(icmp->dup(), outName);
-    sendDelayed(icmp->dup(), 1, outName);
+    DIO *icmp_dup = icmp->dup();
+    icmp_dup->setRecvID(this->neighbor.at(i));
+    this->sendMessage(icmp_dup);
   }
 }
 
@@ -85,7 +115,7 @@ void Core::sendDIS(int convergence)
     char outName[20];
     sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
 //    send(icmp->dup(), outName);
-    sendDelayed(icmp->dup(), 1, outName);
+    this->sendMessage(icmp->dup());
   }
 }
 

@@ -35,12 +35,12 @@ void Server::initialize()
 
 void Server::handleMessage(cMessage *msg)
 {
-//  simtime_t d = simTime() - lastArrival;
   Core::handleMessage(msg);
 
+//  simtime_t d = simTime() - lastArrival;
   switch (msg->getKind())
   {
-    case START_MESSAGE:
+    case INIT_MESSAGE:
       //WSN disable proactive
       this->dodagid++;
       sendDIO();
@@ -65,7 +65,6 @@ void Server::handleMessage(cMessage *msg)
   }
 
   delete msg;
-
 //  iaTimeHistogram.collect(d);
 //  arrivalsVector.record(1);
 //  lastArrival = simTime();

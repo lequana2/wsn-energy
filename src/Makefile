@@ -19,7 +19,7 @@ INCLUDE_PATH = \
     -Iclient \
     -Icore \
     -Ienviroment \
-    -Iicmpv6 \
+    -Iicmp \
     -Iserver
 
 # Additional object and library files to link with
@@ -34,11 +34,11 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/client/Client.o $O/core/Core.o $O/enviroment/Enviroment.o $O/server/Server.o $O/icmpv6/ICMP_m.o
+OBJS = $O/client/Client.o $O/core/Core.o $O/enviroment/Enviroment.o $O/server/Server.o $O/icmp/ICMP_m.o
 
 # Message files
 MSGFILES = \
-    icmpv6/ICMP.msg
+    icmp/ICMP.msg
 
 #------------------------------------------------------------------------------
 
@@ -115,7 +115,7 @@ clean:
 	$(Q)-rm -f client/*_m.cc client/*_m.h
 	$(Q)-rm -f core/*_m.cc core/*_m.h
 	$(Q)-rm -f enviroment/*_m.cc enviroment/*_m.h
-	$(Q)-rm -f icmpv6/*_m.cc icmpv6/*_m.h
+	$(Q)-rm -f icmp/*_m.cc icmp/*_m.h
 	$(Q)-rm -f server/*_m.cc server/*_m.h
 
 cleanall: clean
@@ -123,23 +123,25 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc client/*.cc core/*.cc enviroment/*.cc icmpv6/*.cc server/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc client/*.cc core/*.cc enviroment/*.cc icmp/*.cc server/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/client/Client.o: client/Client.cc \
 	client/Client.h \
 	core/Core.h \
-	icmpv6/ICMP_m.h
+	icmp/ICMP_m.h
 $O/core/Core.o: core/Core.cc \
 	core/Core.h \
-	icmpv6/ICMP_m.h
+	enviroment/Enviroment.h \
+	icmp/ICMP_m.h
 $O/enviroment/Enviroment.o: enviroment/Enviroment.cc \
 	core/Core.h \
-	enviroment/Enviroment.h
-$O/icmpv6/ICMP_m.o: icmpv6/ICMP_m.cc \
-	icmpv6/ICMP_m.h
+	enviroment/Enviroment.h \
+	icmp/ICMP_m.h
+$O/icmp/ICMP_m.o: icmp/ICMP_m.cc \
+	icmp/ICMP_m.h
 $O/server/Server.o: server/Server.cc \
 	core/Core.h \
-	icmpv6/ICMP_m.h \
+	icmp/ICMP_m.h \
 	server/Server.h
 

@@ -22,6 +22,8 @@ enum ICMP_CODE{
 
 packet ICMP{
     int icmp_code;
+    int sendID;
+    int recvID;
 }
 
 packet DIO extends ICMP{
