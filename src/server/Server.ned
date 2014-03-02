@@ -20,7 +20,7 @@ import wsn_energy.core.Core;
 //
 // Generates messages with a configurable interarrival time.
 //
-simple Server extends  Core
+simple Server extends Core
 {
     parameters:
         @class("Server");

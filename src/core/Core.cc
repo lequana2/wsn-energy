@@ -61,12 +61,22 @@ void Core::handleMessage(cMessage *msg)
     else
     {
       EV << "Conflict" << endl;
-      send(icmp, outName);
+//      send(icmp, outName);
     }
 
     ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
 
     messageBuffer.pop_front();
+
+    if (messageBuffer.size() == 0)
+    {
+      char newDisplay[20];
+      if (this->getId() == simulation.getModuleByPath("server")->getId())
+        sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
+      else
+        sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
+      this->setDisplayString(newDisplay);
+    }
 
     return;
   }
@@ -81,6 +91,13 @@ void Core::sendMessage(Core*recv, ICMP *msg)
 
 // Length of broadcast message
   int size = 1;
+
+  char newDisplay[20];
+  if (this->getId() == simulation.getModuleByPath("server")->getId())
+    sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s;r=120", this->axisX, this->axisY);
+  else
+    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=120", this->axisX, this->axisY);
+  this->setDisplayString(newDisplay);
 
 //schedule
   cMessage *message = new cMessage();

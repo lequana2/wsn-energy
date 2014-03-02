@@ -25,5 +25,4 @@ simple Client extends Core
     parameters:
         @class("Client");
         volatile double sendInterval @unit(s) = default(exponential(1s));
-        @display("i=misc/node;is=vs");
 }

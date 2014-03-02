@@ -36,11 +36,6 @@ Client::~Client()
 void Client::initialize()
 {
   Core::initialize();
-
-  flag = true;
-
-//  timerMessage = new cMessage("timer");
-//  scheduleAt(simTime(), timerMessage);
 }
 
 void Client::handleMessage(cMessage *msg)
@@ -102,9 +97,6 @@ void Client::handleMessage(cMessage *msg)
   }
 
   delete msg;
-
-//    send(icmp,"port$o");
-//    scheduleAt(simTime()+par("sendInterval").doubleValue(), timerMessage);
 }
 
 }

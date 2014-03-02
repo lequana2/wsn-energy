@@ -22,13 +22,10 @@ simple Core
 {
     parameters:
         int numberClient;
-   	 	int trRange;
-    	int coRange;
-    	int redundancy;
-    	int axisX;
-    	int axisY;
-    	int energy;
-    
-    gates:
-        inout port;
+        int trRange;
+        int coRange;
+        int redundancy;
+        int axisX;
+        int axisY;
+        int energy;
 }
