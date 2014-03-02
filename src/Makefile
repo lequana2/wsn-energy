@@ -142,6 +142,7 @@ $O/core/Core.o: core/Core.cc \
 	enviroment/Tranmission.h \
 	icmp/ICMP_m.h
 $O/enviroment/Enviroment.o: enviroment/Enviroment.cc \
+	client/Client.h \
 	core/Core.h \
 	enviroment/Enviroment.h \
 	enviroment/Tranmission.h \

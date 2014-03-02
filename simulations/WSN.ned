@@ -32,7 +32,7 @@ network WSN
         int height;
         double redundancy;
         double energy;
-        @display("bgb=700,700,#C6C6FF,#0000FF,2");
+        @display("bgb=1000,1000,#C6C6FF,#0000FF,2");
     submodules:
         server: Server {
             parameters:
@@ -52,13 +52,12 @@ network WSN
                 coRange = coRange;
                 energy = energy;
                 redundancy = redundancy;
-                axisX = intuniform(0, width);
-                axisY = intuniform(0, height);
-                @display("p=$axisX,$axisY");
+                axisX = 0;
+                axisY = 0;
         }
-        enviroment: Enviroment{
-        	parameters:
-        	    @display("p=-10,-10");
+        enviroment: Enviroment {
+            parameters:
+                @display("p=-10,-10");
         }
     connections allowunconnected:
 }
