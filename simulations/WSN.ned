@@ -32,7 +32,7 @@ network WSN
         int height;
         double redundancy;
         double energy;
-        @display("bgb=500,500,#C6C6FF,#0000FF,2");
+        @display("bgb=700,700,#C6C6FF,#0000FF,2");
     submodules:
         server: Server {
             parameters:
@@ -42,7 +42,7 @@ network WSN
                 energy = energy;
                 redundancy = redundancy;
                 axisX = width / 2;
-                axisY = height / 2;
+                axisY = 0;
                 @display("p=$axisX,$axisY");
         }
         client[numberClient]: Client {

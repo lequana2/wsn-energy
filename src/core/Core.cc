@@ -52,19 +52,21 @@ void Core::handleMessage(cMessage *msg)
 
     Tranmission *completeTranmission = new Tranmission(this, (Core*) simulation.getModule(icmp->getRecvID()));
 
-    //WSN check feasible
+    //check feasible
     if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
     {
+      EV << outName << " sent" << endl;
       send(icmp, outName);
-
-      ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
     }
     else
     {
       EV << "Conflict" << endl;
+//      send(icmp, outName);
     }
 
-    messageBuffer.erase(messageBuffer.begin());
+    ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
+
+    messageBuffer.pop_front();
 
     return;
   }
@@ -101,7 +103,6 @@ void Core::sendDIO()
   {
     DIO *icmp_dup = icmp->dup();
     icmp_dup->setRecvID(this->neighbor.at(i));
-
     this->sendMessage((Core*) simulation.getModule(this->neighbor.at(i)), icmp_dup);
   }
 }
