@@ -27,18 +27,18 @@ network WSN
     parameters:
         int numberClient;
         int trRange;
-        int ssRange;
+        int coRange;
         int width;
         int height;
         double redundancy;
         double energy;
-        @display("bgb=1000,500,#C6C6FF,#0000FF,2");
+        @display("bgb=500,500,#C6C6FF,#0000FF,2");
     submodules:
         server: Server {
             parameters:
                 numberClient = numberClient;
                 trRange = trRange;
-                ssRange = ssRange;
+                coRange = coRange;
                 energy = energy;
                 redundancy = redundancy;
                 axisX = width / 2;
@@ -49,7 +49,7 @@ network WSN
             parameters:
                 numberClient = numberClient;
                 trRange = trRange;
-                ssRange = ssRange;
+                coRange = coRange;
                 energy = energy;
                 redundancy = redundancy;
                 axisX = intuniform(0, width);

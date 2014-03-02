@@ -34,7 +34,13 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/client/Client.o $O/core/Core.o $O/enviroment/Enviroment.o $O/server/Server.o $O/icmp/ICMP_m.o
+OBJS = \
+    $O/client/Client.o \
+    $O/core/Core.o \
+    $O/enviroment/Enviroment.o \
+    $O/enviroment/Tranmission.o \
+    $O/server/Server.o \
+    $O/icmp/ICMP_m.o
 
 # Message files
 MSGFILES = \
@@ -133,10 +139,16 @@ $O/client/Client.o: client/Client.cc \
 $O/core/Core.o: core/Core.cc \
 	core/Core.h \
 	enviroment/Enviroment.h \
+	enviroment/Tranmission.h \
 	icmp/ICMP_m.h
 $O/enviroment/Enviroment.o: enviroment/Enviroment.cc \
 	core/Core.h \
 	enviroment/Enviroment.h \
+	enviroment/Tranmission.h \
+	icmp/ICMP_m.h
+$O/enviroment/Tranmission.o: enviroment/Tranmission.cc \
+	core/Core.h \
+	enviroment/Tranmission.h \
 	icmp/ICMP_m.h
 $O/icmp/ICMP_m.o: icmp/ICMP_m.cc \
 	icmp/ICMP_m.h

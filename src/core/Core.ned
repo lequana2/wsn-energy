@@ -23,7 +23,7 @@ simple Core
     parameters:
         int numberClient;
    	 	int trRange;
-    	int ssRange;
+    	int coRange;
     	int redundancy;
     	int axisX;
     	int axisY;

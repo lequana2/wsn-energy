@@ -17,7 +17,7 @@
 #define CORE_H_
 
 #include <omnetpp.h>
-#include <vector>
+#include <list>
 
 #include "ICMP_m.h"
 
@@ -35,7 +35,7 @@ class Core : public cSimpleModule
   public:
     int numberClient;
     int trRange;
-    int ssRange;
+    int coRange;
     int redundancy;
     int axisX;
     int axisY;
@@ -44,19 +44,19 @@ class Core : public cSimpleModule
     std::vector<int> neighbor;
 
     //WSN messageBuffer
-    std::vector<ICMP*> messageBuffer;
+    std::list<ICMP*> messageBuffer;
 
     //WSN info
     int dodagid;
     int rank;
 
     //WSN default route to server
-    std::vector<int> route;
+    std::list<int> route;
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);
-    void sendMessage(ICMP*);
+    void sendMessage(Core*, ICMP*);
     void sendDIO();
     void sendDIS(int);
 };

@@ -28,7 +28,7 @@ void Core::initialize()
 {
   this->numberClient = par("numberClient");
   this->trRange = par("trRange");
-  this->ssRange = par("ssRange");
+  this->coRange = par("coRange");
   this->redundancy = par("redundancy");
   this->axisX = par("axisX");
   this->axisY = par("axisY");
@@ -44,32 +44,43 @@ void Core::handleMessage(cMessage *msg)
 {
   if (msg->getKind() == MESSAGE)
   {
-    //WSN check feasible
-    if (((Enviroment*) simulation.getModuleByPath("enviroment"))->checkFeasibleTranmission(this))
-    {
-      //WSN send
-      ICMP* icmp = (ICMP*) messageBuffer.front();
-      messageBuffer.erase(messageBuffer.begin());
+    //WSN send
+    ICMP* icmp = (ICMP*) messageBuffer.front();
 
-      EV << "OUT " << icmp->getSendID() << " " << icmp->getRecvID()  << endl;
+    char outName[20];
+    sprintf(outName, "out %d to %d", this->getId(), icmp->getRecvID());
+
+    Tranmission *completeTranmission = new Tranmission(this, (Core*) simulation.getModule(icmp->getRecvID()));
+
+    //WSN check feasible
+    if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
+    {
+      send(icmp, outName);
+
+      ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
     }
     else
     {
       EV << "Conflict" << endl;
     }
+
+    messageBuffer.erase(messageBuffer.begin());
+
+    return;
   }
 }
 
 //---------------------------------------------------------------------------//
-void Core::sendMessage(ICMP *msg)
+void Core::sendMessage(Core*recv, ICMP *msg)
 {
-  //WSN buffer
+//buffer
   messageBuffer.push_back(msg);
-  ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(this);
+  ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(new Tranmission(this, recv));
 
+// Length of broadcast message
   int size = 1;
 
-  //WSN schedule
+//schedule
   cMessage *message = new cMessage();
   message->setKind(MESSAGE);
   scheduleAt(simTime() + size, message);
@@ -84,18 +95,14 @@ void Core::sendDIO()
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
 
   icmp->setSendID(this->getId());
-
   icmp->setDodagID(this->dodagid);
-
 
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
-    char outName[20];
-    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
-//    send(icmp->dup(), outName);
     DIO *icmp_dup = icmp->dup();
     icmp_dup->setRecvID(this->neighbor.at(i));
-    this->sendMessage(icmp_dup);
+
+    this->sendMessage((Core*) simulation.getModule(this->neighbor.at(i)), icmp_dup);
   }
 }
 
@@ -112,10 +119,10 @@ void Core::sendDIS(int convergence)
 
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
-    char outName[20];
-    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
-//    send(icmp->dup(), outName);
-    this->sendMessage(icmp->dup());
+    DIS *icmp_dup = icmp->dup();
+    icmp_dup->setRecvID(this->neighbor.at(i));
+
+    this->sendMessage((Core*) simulation.getModule(this->neighbor.at(i)), icmp_dup);
   }
 }
 
