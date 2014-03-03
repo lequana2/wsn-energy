@@ -14,7 +14,7 @@
 //
 
 #include "server.h"
-#include "IpPacket_m.h"
+#include "ipPacket_m.h"
 #include "core.h"
 
 namespace wsn_energy {
@@ -25,9 +25,8 @@ void Server::initialize()
 {
   Core::initialize();
 
-  this->dodagid++;
-
   //WSN set Root
+  this->rpl->rpl_set_root();
 }
 
 void Server::handleMessage(cMessage *msg)
@@ -38,8 +37,7 @@ void Server::handleMessage(cMessage *msg)
   {
     case INIT_MESSAGE:
       //disable proactive
-      this->dodagid++;
-      sendDIO();
+      this->rpl->sendDIO();
       break;
 
     case ICMP_MESSAGE:
@@ -52,7 +50,7 @@ void Server::handleMessage(cMessage *msg)
       {
 //        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
         //WSN create global repair
-        sendDIO();
+        this->rpl->sendDIO();
       }
       break;
 

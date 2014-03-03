@@ -19,14 +19,13 @@
 #include <omnetpp.h>
 #include <list>
 
-#include "IpPacket_m.h"
+#include "ipPacket_m.h"
+#include "rpl.h"
 
 #define INIT_MESSAGE 1
 #define ICMP_MESSAGE 2
 
 #define MESSAGE 3
-
-#define RANK_INFINITY 0xffff
 
 namespace wsn_energy {
 
@@ -41,24 +40,22 @@ class Core : public cSimpleModule
     int axisY;
     int energy;
 
+    //WSN RPL
+    RPL *rpl;
+
     std::vector<int> neighbor;
 
     //WSN messageBuffer
     std::list<ICMP*> messageBuffer;
 
-    //WSN info
-    int dodagid;
-    int rank;
-
     //WSN default route to server
     std::list<int> route;
+
+    void sendMessage(Core*, ICMP*);
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);
-    void sendMessage(Core*, ICMP*);
-    void sendDIO();
-    void sendDIS(int);
 };
 
 }

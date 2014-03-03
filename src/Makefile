@@ -41,6 +41,7 @@ OBJS = \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
     $O/core/core.o \
+    $O/core/rpl/rpl.o \
     $O/world/tranmission.o \
     $O/world/enviroment.o \
     $O/core/net/ip/ipPacket_m.o
@@ -140,21 +141,35 @@ depend:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/client/client.h \
-	core/core.h
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/rpl/rpl.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
-	core/core.h
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/rpl/rpl.h
 $O/core/core.o: core/core.cc \
 	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/rpl/rpl.h \
 	world/enviroment.h \
 	world/tranmission.h
 $O/core/net/ip/ipPacket_m.o: core/net/ip/ipPacket_m.cc \
 	core/net/ip/ipPacket_m.h
+$O/core/rpl/rpl.o: core/rpl/rpl.cc \
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/rpl/rpl.h
 $O/world/enviroment.o: world/enviroment.cc \
 	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/rpl/rpl.h \
 	world/enviroment.h \
 	world/tranmission.h
 $O/world/tranmission.o: world/tranmission.cc \
 	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/rpl/rpl.h \
 	world/tranmission.h
 

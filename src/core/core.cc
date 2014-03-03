@@ -16,8 +16,9 @@
 #include <math.h>
 
 #include "core.h"
-#include "IpPacket_m.h"
+#include "ipPacket_m.h"
 #include "enviroment.h"
+#include "rpl.h"
 
 namespace wsn_energy {
 
@@ -32,8 +33,7 @@ void Core::initialize()
   this->redundancy = par("redundancy");
   this->axisX = par("axisX");
   this->axisY = par("axisY");
-  this->dodagid = 0;
-  this->rank = RANK_INFINITY;
+  this->rpl = new RPL(this);
 
   cMessage *initMessage = new cMessage();
   initMessage->setKind(INIT_MESSAGE);
@@ -104,44 +104,4 @@ void Core::sendMessage(Core*recv, ICMP *msg)
   message->setKind(MESSAGE);
   scheduleAt(simTime() + size, message);
 }
-//---------------------------------------------------------------------------//
-void Core::sendDIO()
-{
-  ev << "broadcast DIO" << endl;
-
-  DIO *icmp = new DIO();
-  ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
-  ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
-
-  icmp->setSendID(this->getId());
-  icmp->setDodagID(this->dodagid);
-
-  for (unsigned int i = 0; i < this->neighbor.size(); i++)
-  {
-    DIO *icmp_dup = icmp->dup();
-    icmp_dup->setRecvID(this->neighbor.at(i));
-    this->sendMessage((Core*) simulation.getModule(this->neighbor.at(i)), icmp_dup);
-  }
-}
-
-//---------------------------------------------------------------------------//
-void Core::sendDIS(int convergence)
-{
-  ev << "broadcast DIS" << endl;
-
-  DIS *icmp = new DIS();
-  ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
-  ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
-
-  icmp->setConvergence(convergence);
-
-  for (unsigned int i = 0; i < this->neighbor.size(); i++)
-  {
-    DIS *icmp_dup = icmp->dup();
-    icmp_dup->setRecvID(this->neighbor.at(i));
-
-    this->sendMessage((Core*) simulation.getModule(this->neighbor.at(i)), icmp_dup);
-  }
-}
-
 } /* namespace wsn_energy */

@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 #include "client.h"
-#include "IpPacket_m.h"
+#include "ipPacket_m.h"
 #include "core.h"
 
 namespace wsn_energy {
@@ -54,7 +54,7 @@ void Client::handleMessage(cMessage *msg)
       {
 //        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
         //omit obsolete DIO
-        if (this->dodagid >= ((DIO*) msg)->getDodagID())
+        if (this->rpl->rplDag.dodagid >= ((DIO*) msg)->getDodagID())
         {
 //          sendDIO();
         }
@@ -63,6 +63,7 @@ void Client::handleMessage(cMessage *msg)
         {
           //Consider new parent
           //WSN Choose new preferred parent
+
           //Draw new connection
           char setOutConnectionName[20];
           sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getId(),
@@ -70,8 +71,8 @@ void Client::handleMessage(cMessage *msg)
           (this->gate(setOutConnectionName))->setDisplayString("ls=red,1");
 //          EV << setOutConnectionName << endl;
 
-          this->dodagid = ((DIO*) msg)->getDodagID();
-          sendDIO();
+          this->rpl->rplDag.dodagid = ((DIO*) msg)->getDodagID();
+          this->rpl->sendDIO();
         }
       }
       else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
@@ -87,7 +88,7 @@ void Client::handleMessage(cMessage *msg)
           //WSN broadcast DIS toward root
           int convergence = ((DIS*) msg)->getConvergence();
           if (convergence > 0)
-            sendDIS(convergence - 1);
+            this->rpl->sendDIS(convergence - 1);
         }
       }
       break;
