@@ -89,8 +89,8 @@ void Core::sendMessage(Core*recv, ICMP *msg)
   messageBuffer.push_back(msg);
   ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(new Tranmission(this, recv));
 
-// Length of broadcast message
-  int size = 1;
+// WSN Length of broadcast message
+  double size = 0.4;
 
   char newDisplay[20];
   if (this->getId() == simulation.getModuleByPath("server")->getId())
