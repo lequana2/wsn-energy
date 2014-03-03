@@ -49,12 +49,17 @@ void Enviroment::arrangeNodes()
 
     int coreId = core->getId() - firstClient->getId();
 
+    // Partition
     core->axisX = (coreId % 10) * 100 + 15;
     core->axisY = (coreId / 10) * 100 + 50;
     if ((coreId / 10) % 2 != 0)
       core->axisX += 50;
 
-//    EV << clientId << " " << core->axisX << " " << core->axisY << " " << endl;
+    // Randomize
+    core->axisX = uniform(core->axisX - 20, core->axisX + 20);
+    core->axisY = uniform(core->axisY - 20, core->axisY + 20);
+
+    //    EV << clientId << " " << core->axisX << " " << core->axisY << " " << endl;
 
     char newDisplay[20];
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", core->axisX, core->axisY);

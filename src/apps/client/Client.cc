@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 #include "Client.h"
-#include "ICMP_m.h"
+#include "IpPacket_m.h"
 #include "Core.h"
 
 namespace wsn_energy {

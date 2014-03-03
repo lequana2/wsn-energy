@@ -15,9 +15,9 @@
 
 package wsn_energy.simulations;
 
-import wsn_energy.server.Server;
-import wsn_energy.client.Client;
-import wsn_energy.enviroment.Enviroment;
+import wsn_energy.apps.server.Server;
+import wsn_energy.apps.client.Client;
+import wsn_energy.world.Enviroment;
 
 //
 // Sample network, consisting of a source and a sink.

@@ -13,16 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.server;
-
-import wsn_energy.core.Core;
+package wsn_energy.world;
 
 //
-// Generates messages with a configurable interarrival time.
+// Utilities about simulation world
 //
-simple Server extends Core
+simple Enviroment
 {
-    parameters:
-        @class("Server");
-        @display("i=abstract/db;is=s");
+    @display("i=misc/globe");
 }

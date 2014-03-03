@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include <list>
 
-#include "ICMP_m.h"
+#include "IpPacket_m.h"
 
 #define INIT_MESSAGE 1
 #define ICMP_MESSAGE 2

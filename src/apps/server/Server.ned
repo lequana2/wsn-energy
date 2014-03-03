@@ -13,28 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-namespace wsn_energy;
+package wsn_energy.apps.server;
 
-enum ICMP_CODE{
-	ICMP_DIO_CODE = 0;
-	ICMP_DIS_CODE = 1;
-};
+import wsn_energy.core.Core;
 
-packet ICMP{
-    int icmp_code;
-    int sendID;
-    int recvID;
-}
-
-packet DIO extends ICMP{
-	int dodagID;
-	int rank;
-	int version;
-}
-
-packet DIS extends ICMP{
-	int flags;
-	int reserved;
-	int options; 
-	int convergence;
+//
+// Generates messages with a configurable interarrival time.
+//
+simple Server extends Core
+{
+    parameters:
+        @class("Server");
+        @display("i=abstract/db;is=s");
 }

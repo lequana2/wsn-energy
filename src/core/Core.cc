@@ -16,7 +16,7 @@
 #include <math.h>
 
 #include "Core.h"
-#include "ICMP_m.h"
+#include "IpPacket_m.h"
 #include "Enviroment.h"
 
 namespace wsn_energy {
@@ -61,7 +61,7 @@ void Core::handleMessage(cMessage *msg)
     else
     {
       EV << "Conflict" << endl;
-//      send(icmp, outName);
+      send(icmp, outName);
     }
 
     ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);

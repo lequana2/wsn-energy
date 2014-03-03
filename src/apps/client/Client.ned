@@ -13,12 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.enviroment;
+package wsn_energy.apps.client;
+
+import wsn_energy.core.Core;
 
 //
-// Utilities about simulation world
+// Consumes received messages and collects statistics
 //
-simple Enviroment
+simple Client extends Core
 {
-    @display("i=misc/globe");
+    parameters:
+        @class("Client");
+        volatile double sendInterval @unit(s) = default(exponential(1s));
 }

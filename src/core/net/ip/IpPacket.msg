@@ -13,16 +13,35 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.client;
+namespace wsn_energy;
 
-import wsn_energy.core.Core;
+enum ICMP_CODE{
+	ICMP_DIO_CODE = 0;
+	ICMP_DIS_CODE = 1;
+};
 
-//
-// Consumes received messages and collects statistics
-//
-simple Client extends Core
-{
-    parameters:
-        @class("Client");
-        volatile double sendInterval @unit(s) = default(exponential(1s));
+packet IpPacket{
+    int sendID;
+    int recvID;
+}
+
+packet Data extends IpPacket {
+	int value;
+}
+
+packet ICMP extends IpPacket{
+    int icmp_code;
+}
+
+packet DIO extends ICMP{
+	int dodagID;
+	int rank;
+	int version;
+}
+
+packet DIS extends ICMP{
+	int flags;
+	int reserved;
+	int options; 
+	int convergence;
 }

@@ -16,11 +16,14 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 # C++ include paths (with -I)
 INCLUDE_PATH = \
     -I. \
-    -Iclient \
+    -Iapps \
+    -Iapps/client \
+    -Iapps/server \
     -Icore \
-    -Ienviroment \
-    -Iicmp \
-    -Iserver
+    -Icore/net \
+    -Icore/net/ip \
+    -Icore/rpl \
+    -Iworld
 
 # Additional object and library files to link with
 EXTRA_OBJS =
@@ -35,16 +38,16 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/client/Client.o \
+    $O/apps/client/Client.o \
+    $O/apps/server/Server.o \
     $O/core/Core.o \
-    $O/enviroment/Enviroment.o \
-    $O/enviroment/Tranmission.o \
-    $O/server/Server.o \
-    $O/icmp/ICMP_m.o
+    $O/world/Enviroment.o \
+    $O/world/Tranmission.o \
+    $O/core/net/ip/IpPacket_m.o
 
 # Message files
 MSGFILES = \
-    icmp/ICMP.msg
+    core/net/ip/IpPacket.msg
 
 #------------------------------------------------------------------------------
 
@@ -118,43 +121,46 @@ clean:
 	$(Q)-rm -rf $O
 	$(Q)-rm -f wsn-energy wsn-energy.exe libwsn-energy.so libwsn-energy.a libwsn-energy.dll libwsn-energy.dylib
 	$(Q)-rm -f ./*_m.cc ./*_m.h
-	$(Q)-rm -f client/*_m.cc client/*_m.h
+	$(Q)-rm -f apps/*_m.cc apps/*_m.h
+	$(Q)-rm -f apps/client/*_m.cc apps/client/*_m.h
+	$(Q)-rm -f apps/server/*_m.cc apps/server/*_m.h
 	$(Q)-rm -f core/*_m.cc core/*_m.h
-	$(Q)-rm -f enviroment/*_m.cc enviroment/*_m.h
-	$(Q)-rm -f icmp/*_m.cc icmp/*_m.h
-	$(Q)-rm -f server/*_m.cc server/*_m.h
+	$(Q)-rm -f core/net/*_m.cc core/net/*_m.h
+	$(Q)-rm -f core/net/ip/*_m.cc core/net/ip/*_m.h
+	$(Q)-rm -f core/rpl/*_m.cc core/rpl/*_m.h
+	$(Q)-rm -f world/*_m.cc world/*_m.h
 
 cleanall: clean
 	$(Q)-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc client/*.cc core/*.cc enviroment/*.cc icmp/*.cc server/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/net/*.cc core/net/ip/*.cc core/rpl/*.cc world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-$O/client/Client.o: client/Client.cc \
-	client/Client.h \
+$O/apps/client/Client.o: apps/client/Client.cc \
+	apps/client/Client.h \
 	core/Core.h \
-	icmp/ICMP_m.h
+	core/net/ip/IpPacket_m.h
+$O/apps/server/Server.o: apps/server/Server.cc \
+	apps/server/Server.h \
+	core/Core.h \
+	core/net/ip/IpPacket_m.h
 $O/core/Core.o: core/Core.cc \
 	core/Core.h \
-	enviroment/Enviroment.h \
-	enviroment/Tranmission.h \
-	icmp/ICMP_m.h
-$O/enviroment/Enviroment.o: enviroment/Enviroment.cc \
-	client/Client.h \
+	core/net/ip/IpPacket_m.h \
+	world/Enviroment.h \
+	world/Tranmission.h
+$O/core/net/ip/IpPacket_m.o: core/net/ip/IpPacket_m.cc \
+	core/net/ip/IpPacket_m.h
+$O/world/Enviroment.o: world/Enviroment.cc \
+	apps/client/Client.h \
 	core/Core.h \
-	enviroment/Enviroment.h \
-	enviroment/Tranmission.h \
-	icmp/ICMP_m.h
-$O/enviroment/Tranmission.o: enviroment/Tranmission.cc \
+	core/net/ip/IpPacket_m.h \
+	world/Enviroment.h \
+	world/Tranmission.h
+$O/world/Tranmission.o: world/Tranmission.cc \
 	core/Core.h \
-	enviroment/Tranmission.h \
-	icmp/ICMP_m.h
-$O/icmp/ICMP_m.o: icmp/ICMP_m.cc \
-	icmp/ICMP_m.h
-$O/server/Server.o: server/Server.cc \
-	core/Core.h \
-	icmp/ICMP_m.h \
-	server/Server.h
+	core/net/ip/IpPacket_m.h \
+	world/Tranmission.h
 

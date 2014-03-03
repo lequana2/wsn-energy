@@ -14,7 +14,7 @@
 //
 
 #include "Server.h"
-#include "ICMP_m.h"
+#include "IpPacket_m.h"
 #include "Core.h"
 
 namespace wsn_energy {
@@ -27,21 +27,17 @@ void Server::initialize()
 
   this->dodagid++;
 
-//  lastArrival = simTime();
-//  iaTimeHistogram.setName("interarrival times");
-//  arrivalsVector.setName("arrivals");
-//  arrivalsVector.setInterpolationMode(cOutVector::NONE);
+  //WSN set Root
 }
 
 void Server::handleMessage(cMessage *msg)
 {
   Core::handleMessage(msg);
 
-//  simtime_t d = simTime() - lastArrival;
   switch (msg->getKind())
   {
     case INIT_MESSAGE:
-      //WSN disable proactive
+      //disable proactive
       this->dodagid++;
       sendDIO();
       break;
@@ -65,14 +61,10 @@ void Server::handleMessage(cMessage *msg)
   }
 
   delete msg;
-//  iaTimeHistogram.collect(d);
-//  arrivalsVector.record(1);
-//  lastArrival = simTime();
 }
 
 void Server::finish()
 {
-//  recordStatistic(&iaTimeHistogram);
 }
 
 }
