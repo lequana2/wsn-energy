@@ -18,6 +18,7 @@ package wsn_energy.simulations;
 import wsn_energy.apps.server.Server;
 import wsn_energy.apps.client.Client;
 import wsn_energy.world.Enviroment;
+import wsn_energy.world.Statistic;
 
 //
 // Sample network, consisting of a source and a sink.
@@ -32,6 +33,7 @@ network WSN
         int height;
         double redundancy;
         double energy;
+        double polling;
         @display("bgb=1000,1000,#C6C6FF,#0000FF,2");
     submodules:
         server: Server {
@@ -58,6 +60,9 @@ network WSN
         enviroment: Enviroment {
             parameters:
                 @display("p=-10,-10");
+        }
+        statistic: Statistic{
+                @display("p=40,-10;i=block/table2");
         }
     connections allowunconnected:
 }

@@ -36,6 +36,10 @@ void RPL::rpl_set_root()
 {
   this->rplDag.dodagid++;
   this->rplDag.rank = 0;
+
+  cMessage *constructMessage = new cMessage();
+  constructMessage->setKind(RPL_CONSTRUCT);
+  core->scheduleAt(simTime(), constructMessage);
 }
 
 void RPL::sendDIO()
@@ -49,13 +53,7 @@ void RPL::sendDIO()
   icmp->setSendID(core->getId());
   icmp->setDodagID(this->rplDag.dodagid);
 
-  for (unsigned int i = 0; i < core->neighbor.size(); i++)
-  {
-    DIO *icmp_dup = icmp->dup();
-    icmp_dup->setRecvID(this->core->neighbor.at(i));
-
-    core->sendMessage((Core*) simulation.getModule(core->neighbor.at(i)), icmp_dup);
-  }
+  core->broadcast(icmp);
 }
 
 void RPL::sendDIS(int convergence)
@@ -73,7 +71,50 @@ void RPL::sendDIS(int convergence)
     DIS *icmp_dup = icmp->dup();
     icmp_dup->setRecvID(this->core->neighbor.at(i));
 
-    core->sendMessage((Core*) simulation.getModule(core->neighbor.at(i)), icmp_dup);
+    core->broadcast(icmp);
   }
 }
+
+void RPL::receiveDIO(DIO* msg)
+{
+  ev << "Received DIO " << msg->getDodagID() << endl;
+  //omit obsolete DIO
+  if (this->rplDag.dodagid >= msg->getDodagID())
+  {
+    // sendDIO();
+  }
+  //forward update DIO, create connection
+  else
+  {
+    //Consider new parent
+    //WSN Choose new preferred parent
+
+    //Draw new connection
+    char setOutConnectionName[20];
+    sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getId(), msg->getSenderModule()->getId());
+    (core->gate(setOutConnectionName))->setDisplayString("ls=red,1");
+    // EV << setOutConnectionName << endl;
+
+    this->rplDag.dodagid = ((DIO*) msg)->getDodagID();
+    this->sendDIO();
+  }
+}
+
+void RPL::receiveDIS(DIS* msg)
+{
+  EV << "Received DIS " << msg->getConvergence() << endl;
+  //WSN check route to root
+  if (core->route.size() == 0)
+    ;
+  else if (((Core*) core->route.back())->getId() != simulation.getModuleByPath("server")->getId())
+    ;
+  else
+  {
+    //WSN broadcast DIS toward root
+    int convergence = ((DIS*) msg)->getConvergence();
+    if (convergence > 0)
+      this->sendDIS(convergence - 1);
+  }
+}
+
 } /* namespace wsn_energy */

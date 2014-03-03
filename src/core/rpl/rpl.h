@@ -17,6 +17,7 @@
 #define RPL_H_
 
 #include <list>
+#include <ipPacket_m.h>
 
 #define RANK_INFINITY 0xffff
 

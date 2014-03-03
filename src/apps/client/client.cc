@@ -44,53 +44,9 @@ void Client::handleMessage(cMessage *msg)
 
   switch (msg->getKind())
   {
-    case INIT_MESSAGE:
+    case ICMP_SOLICIT:
 //      if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
 //        sendDIS(5);
-      break;
-
-    case ICMP_MESSAGE:
-      if (((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
-      {
-//        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
-        //omit obsolete DIO
-        if (this->rpl->rplDag.dodagid >= ((DIO*) msg)->getDodagID())
-        {
-//          sendDIO();
-        }
-        //forward update DIO, create connection
-        else
-        {
-          //Consider new parent
-          //WSN Choose new preferred parent
-
-          //Draw new connection
-          char setOutConnectionName[20];
-          sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getId(),
-              msg->getSenderModule()->getId());
-          (this->gate(setOutConnectionName))->setDisplayString("ls=red,1");
-//          EV << setOutConnectionName << endl;
-
-          this->rpl->rplDag.dodagid = ((DIO*) msg)->getDodagID();
-          this->rpl->sendDIO();
-        }
-      }
-      else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
-      {
-//        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
-        //WSN check route to root
-        if (route.size() == 0)
-          ;
-        else if (((Core*) route.back())->getId() != simulation.getModuleByPath("server")->getId())
-          ;
-        else
-        {
-          //WSN broadcast DIS toward root
-          int convergence = ((DIS*) msg)->getConvergence();
-          if (convergence > 0)
-            this->rpl->sendDIS(convergence - 1);
-        }
-      }
       break;
 
     default:

@@ -20,6 +20,8 @@
 #include "enviroment.h"
 #include "rpl.h"
 
+#include "statistic.h"
+
 namespace wsn_energy {
 
 Define_Module(Core);
@@ -34,48 +36,66 @@ void Core::initialize()
   this->axisX = par("axisX");
   this->axisY = par("axisY");
   this->rpl = new RPL(this);
-
-  cMessage *initMessage = new cMessage();
-  initMessage->setKind(INIT_MESSAGE);
-  scheduleAt(simTime(), initMessage);
 }
 //---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)
 {
-  if (msg->getKind() == MESSAGE)
+  //WSN Dispatch event
+  // End of broadcast transmitting
+  if (msg->getKind() == END_BROADCAST)
   {
-    //WSN send
-    ICMP* icmp = (ICMP*) messageBuffer.front();
-
-    char outName[20];
-    sprintf(outName, "out %d to %d", this->getId(), icmp->getRecvID());
-
-    Tranmission *completeTranmission = new Tranmission(this, (Core*) simulation.getModule(icmp->getRecvID()));
-
-    //check feasible
-    if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
+    // send
+    for (unsigned int i = 0; i < this->neighbor.size(); i++)
     {
-      EV << outName << " sent" << endl;
-      send(icmp, outName);
-    }
-    else
-    {
-      EV << "Conflict" << endl;
-//      send(icmp, outName);
-    }
+      char outName[20];
+      sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
 
-    ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
-
-    messageBuffer.pop_front();
-
-    if (messageBuffer.size() == 0)
-    {
-      char newDisplay[20];
-      if (this->getId() == simulation.getModuleByPath("server")->getId())
-        sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
+      Tranmission *completeTranmission = new Tranmission(this, (Core*) simulation.getModule(this->neighbor.at(i)));
+      //check feasible
+      if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
+      {
+        EV << outName << " sent" << endl;
+        send(broadcastMessage->dup(), outName);
+        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
+      }
       else
-        sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
-      this->setDisplayString(newDisplay);
+      {
+        EV << outName << " disposed" << endl;
+//        send(broadcastMessage->dup(), outName);
+        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
+      }
+
+      ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
+
+    }
+
+    char newDisplay[20];
+    if (this->getId() == simulation.getModuleByPath("server")->getId())
+      sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
+    else
+      sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
+    this->setDisplayString(newDisplay);
+
+    return;
+  }
+  // dispatch constructing
+  else if (msg->getKind() == RPL_CONSTRUCT)
+  {
+    this->rpl->sendDIO();
+
+    return;
+  }
+  //WSN dispatch message
+  else if (msg->getKind() == ICMP_MESSAGE)
+  {
+    switch (((ICMP*) msg)->getIcmp_code())
+    {
+      case ICMP_DIO_CODE:
+        this->rpl->receiveDIO((DIO*) msg);
+        break;
+      case ICMP_DIS_CODE:
+        this->rpl->receiveDIS((DIS*) msg);
+        break;
     }
 
     return;
@@ -83,11 +103,16 @@ void Core::handleMessage(cMessage *msg)
 }
 
 //---------------------------------------------------------------------------//
-void Core::sendMessage(Core*recv, ICMP *msg)
+void Core::broadcast(IpPacket *msg)
 {
 //buffer
-  messageBuffer.push_back(msg);
-  ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(new Tranmission(this, recv));
+  broadcastMessage = msg;
+
+  for (unsigned int i = 0; i < this->neighbor.size(); i++)
+  {
+    ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(
+        new Tranmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
+  }
 
 // WSN Length of broadcast message
   double size = 0.4;
@@ -99,9 +124,9 @@ void Core::sendMessage(Core*recv, ICMP *msg)
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=120", this->axisX, this->axisY);
   this->setDisplayString(newDisplay);
 
-//schedule
+// start broadcasting, check succeed in future
   cMessage *message = new cMessage();
-  message->setKind(MESSAGE);
+  message->setKind(END_BROADCAST);
   scheduleAt(simTime() + size, message);
 }
 } /* namespace wsn_energy */

@@ -35,25 +35,6 @@ void Server::handleMessage(cMessage *msg)
 
   switch (msg->getKind())
   {
-    case INIT_MESSAGE:
-      //disable proactive
-      this->rpl->sendDIO();
-      break;
-
-    case ICMP_MESSAGE:
-      if (((ICMP*) msg)->getIcmp_code() == ICMP_DIO_CODE)
-      {
-//        EV << "Received DIO " << ((DIO*) msg)->getDodagID() << endl;
-        //WSN Omit obsolete DIO, send up-to-date one
-      }
-      else if (((ICMP*) msg)->getIcmp_code() == ICMP_DIS_CODE)
-      {
-//        EV << "Received DIS " << ((DIS*) msg)->getOptions() << endl;
-        //WSN create global repair
-        this->rpl->sendDIO();
-      }
-      break;
-
     default:
       break;
   }

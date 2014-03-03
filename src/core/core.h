@@ -22,10 +22,14 @@
 #include "ipPacket_m.h"
 #include "rpl.h"
 
-#define INIT_MESSAGE 1
-#define ICMP_MESSAGE 2
+// PACKET
+#define ICMP_MESSAGE 1
+#define ICMP_SOLICIT 2
 
-#define MESSAGE 3
+// EVENT
+#define END_BROADCAST 5
+#define RPL_CONSTRUCT 4
+#define DATA_FORWARD 3
 
 namespace wsn_energy {
 
@@ -45,13 +49,13 @@ class Core : public cSimpleModule
 
     std::vector<int> neighbor;
 
-    //WSN messageBuffer
-    std::list<ICMP*> messageBuffer;
+    //on the ải broadcast
+    IpPacket *broadcastMessage;
 
     //WSN default route to server
     std::list<int> route;
 
-    void sendMessage(Core*, ICMP*);
+    void broadcast(IpPacket*);
 
   protected:
     virtual void initialize();
