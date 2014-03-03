@@ -17,7 +17,7 @@
 #define __WSN_ENERGY_SINK_H
 
 #include <omnetpp.h>
-#include "Core.h"
+#include "core.h"
 
 namespace wsn_energy {
 

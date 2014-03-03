@@ -38,16 +38,16 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/apps/client/Client.o \
-    $O/apps/server/Server.o \
-    $O/core/Core.o \
-    $O/world/Enviroment.o \
-    $O/world/Tranmission.o \
-    $O/core/net/ip/IpPacket_m.o
+    $O/apps/client/client.o \
+    $O/apps/server/server.o \
+    $O/core/core.o \
+    $O/world/tranmission.o \
+    $O/world/enviroment.o \
+    $O/core/net/ip/ipPacket_m.o
 
 # Message files
 MSGFILES = \
-    core/net/ip/IpPacket.msg
+    core/net/ip/ipPacket.msg
 
 #------------------------------------------------------------------------------
 
@@ -138,29 +138,23 @@ depend:
 	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/net/*.cc core/net/ip/*.cc core/rpl/*.cc world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-$O/apps/client/Client.o: apps/client/Client.cc \
-	apps/client/Client.h \
-	core/Core.h \
-	core/net/ip/IpPacket_m.h
-$O/apps/server/Server.o: apps/server/Server.cc \
-	apps/server/Server.h \
-	core/Core.h \
-	core/net/ip/IpPacket_m.h
-$O/core/Core.o: core/Core.cc \
-	core/Core.h \
-	core/net/ip/IpPacket_m.h \
-	world/Enviroment.h \
-	world/Tranmission.h
-$O/core/net/ip/IpPacket_m.o: core/net/ip/IpPacket_m.cc \
-	core/net/ip/IpPacket_m.h
-$O/world/Enviroment.o: world/Enviroment.cc \
-	apps/client/Client.h \
-	core/Core.h \
-	core/net/ip/IpPacket_m.h \
-	world/Enviroment.h \
-	world/Tranmission.h
-$O/world/Tranmission.o: world/Tranmission.cc \
-	core/Core.h \
-	core/net/ip/IpPacket_m.h \
-	world/Tranmission.h
+$O/apps/client/client.o: apps/client/client.cc \
+	apps/client/client.h \
+	core/core.h
+$O/apps/server/server.o: apps/server/server.cc \
+	apps/server/server.h \
+	core/core.h
+$O/core/core.o: core/core.cc \
+	core/core.h \
+	world/enviroment.h \
+	world/tranmission.h
+$O/core/net/ip/ipPacket_m.o: core/net/ip/ipPacket_m.cc \
+	core/net/ip/ipPacket_m.h
+$O/world/enviroment.o: world/enviroment.cc \
+	core/core.h \
+	world/enviroment.h \
+	world/tranmission.h
+$O/world/tranmission.o: world/tranmission.cc \
+	core/core.h \
+	world/tranmission.h
 

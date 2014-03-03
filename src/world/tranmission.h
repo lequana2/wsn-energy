@@ -16,7 +16,7 @@
 #ifndef TRANMISSION_H_
 #define TRANMISSION_H_
 
-#include "Core.h"
+#include "core.h"
 
 namespace wsn_energy {
 

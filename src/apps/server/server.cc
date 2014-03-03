@@ -13,9 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "Server.h"
+#include "server.h"
 #include "IpPacket_m.h"
-#include "Core.h"
+#include "core.h"
 
 namespace wsn_energy {
 

@@ -15,9 +15,9 @@
 
 #include <stdio.h>
 
-#include "Client.h"
+#include "client.h"
 #include "IpPacket_m.h"
-#include "Core.h"
+#include "core.h"
 
 namespace wsn_energy {
 
