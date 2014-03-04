@@ -46,7 +46,7 @@ OBJS = \
     $O/apps/server/server.o \
     $O/core/core.o \
     $O/core/rpl/rpl.o \
-    $O/platform/radio/tranmission.o \
+    $O/platform/radio/transmission.o \
     $O/world/statistic.o \
     $O/world/enviroment.o \
     $O/core/net/ip/ipPacket_m.o
@@ -162,7 +162,7 @@ $O/core/core.o: core/core.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/rpl/rpl.h \
-	platform/radio/tranmission.h \
+	platform/radio/transmission.h \
 	world/enviroment.h \
 	world/statistic.h
 $O/core/net/ip/ipPacket_m.o: core/net/ip/ipPacket_m.cc \
@@ -171,16 +171,16 @@ $O/core/rpl/rpl.o: core/rpl/rpl.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/rpl/rpl.h
-$O/platform/radio/tranmission.o: platform/radio/tranmission.cc \
+$O/platform/radio/transmission.o: platform/radio/transmission.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/rpl/rpl.h \
-	platform/radio/tranmission.h
+	platform/radio/transmission.h
 $O/world/enviroment.o: world/enviroment.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/rpl/rpl.h \
-	platform/radio/tranmission.h \
+	platform/radio/transmission.h \
 	world/enviroment.h
 $O/world/statistic.o: world/statistic.cc \
 	world/statistic.h

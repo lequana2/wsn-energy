@@ -18,22 +18,22 @@
 
 #include <omnetpp.h>
 
-#include "tranmission.h"
+#include "transmission.h"
 
 namespace wsn_energy {
 
 class Enviroment : public cSimpleModule
 {
   public:
-    void registerTranmission(Tranmission*);
-    bool isFeasibleTranmission(Tranmission*);
-    void stopTranmission(Tranmission*);
+    void registerTranmission(Transmission*);
+    bool isFeasibleTranmission(Transmission*);
+    void stopTranmission(Transmission*);
 
     double calculateDistance(Core*, Core*);
     double calculateDistance(int, int, int, int);
 
   private:
-    std::list<Tranmission*> onTheAir;
+    std::list<Transmission*> onTheAir;
     void arrangeNodes(); // Arrange nodes in positions
     void connectNodes(); // Connect adjacent nodes
 
@@ -41,8 +41,8 @@ class Enviroment : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-    void createConnection(Core*);
-    int checkConnection(Core*, Core*);
+    void checkConnection(Core*);
+    int deployConnection(Core*, Core*);
 };
 
 } /* namespace wsn_energy */

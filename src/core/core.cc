@@ -42,20 +42,20 @@ void Core::handleMessage(cMessage *msg)
 {
   //WSN Dispatch event
   // End of broadcast transmitting
-  if (msg->getKind() == END_BROADCAST)
+  if (msg->getKind() == RECV_MESSAGE)
   {
-    // send
+    // check receive message
     for (unsigned int i = 0; i < this->neighbor.size(); i++)
     {
       char outName[20];
       sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
 
-      Tranmission *completeTranmission = new Tranmission(this, (Core*) simulation.getModule(this->neighbor.at(i)));
+      Transmission *completeTranmission = new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i)));
       //check feasible
       if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
       {
         EV << outName << " sent" << endl;
-        send(broadcastMessage->dup(), outName);
+
         ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
       }
       else
@@ -111,11 +111,8 @@ void Core::broadcast(IpPacket *msg)
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
     ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(
-        new Tranmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
+        new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
   }
-
-// WSN Length of broadcast message
-  double size = 0.4;
 
   char newDisplay[20];
   if (this->getId() == simulation.getModuleByPath("server")->getId())
@@ -124,9 +121,16 @@ void Core::broadcast(IpPacket *msg)
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=120", this->axisX, this->axisY);
   this->setDisplayString(newDisplay);
 
-// start broadcasting, check succeed in future
+  // start broadcasting, check succeed in future
+  for (unsigned int i = 0; i < this->neighbor.size(); i++)
+  {
+    char outName[20];
+    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
+    send(broadcastMessage->dup(), outName);
+  }
+
   cMessage *message = new cMessage();
-  message->setKind(END_BROADCAST);
-  scheduleAt(simTime() + size, message);
+  message->setKind(RECV_MESSAGE);
+  scheduleAt(simTime(), message);
 }
 } /* namespace wsn_energy */

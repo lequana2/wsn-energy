@@ -13,11 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <tranmission.h>
+#include <transmission.h>
 
 namespace wsn_energy {
 
-Tranmission::Tranmission(Core *send, Core *recv)
+Transmission::Transmission(Core *send, Core *recv)
 {
   this->sendMote = send;
   this->recvMote = recv;

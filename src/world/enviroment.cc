@@ -71,24 +71,24 @@ void Enviroment::arrangeNodes()
 void Enviroment::connectNodes()
 {
   Core *server = (Core*) simulation.getModuleByPath("server");
-  this->createConnection(server);
+  this->checkConnection(server);
 
   for (int i = 0; i < server->numberClient; i++)
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d]", i);
-    this->createConnection((Core*) simulation.getModuleByPath(modulePath));
+    this->checkConnection((Core*) simulation.getModuleByPath(modulePath));
   }
 }
 
 /*
  * Create connection from node to others
  */
-void Enviroment::createConnection(Core *core)
+void Enviroment::checkConnection(Core *core)
 {
 // Check with server
   Core *module = (Core*) simulation.getModuleByPath("server");
-  if (checkConnection(core, module))
+  if (deployConnection(core, module))
     core->neighbor.push_back(module->getId());
 
 // Check with client(s)
@@ -98,12 +98,12 @@ void Enviroment::createConnection(Core *core)
     sprintf(modulePath, "client[%d]", i);
     Core *module = (Core*) simulation.getModuleByPath(modulePath);
 
-    if (checkConnection(core, module))
+    if (deployConnection(core, module))
       core->neighbor.push_back(module->getId());
   }
 }
 
-int Enviroment::checkConnection(Core *x, Core *y)
+int Enviroment::deployConnection(Core *x, Core *y)
 {
   if (calculateDistance(x->axisX, x->axisY, y->axisX, y->axisY) > x->trRange)
     return 0;
@@ -120,9 +120,14 @@ int Enviroment::checkConnection(Core *x, Core *y)
 
   outGate = x->addGate(setOutConnectionName, cGate::OUTPUT);
   inGate = y->addGate(setInConnectionName, cGate::INPUT);
-  outGate->connectTo(inGate);
 
-//hidden connection
+  cDatarateChannel *channel = cDatarateChannel::create(NULL);
+  channel->setDatarate(250000);
+
+  outGate->connectTo(inGate, channel);
+  channel->callInitialize();
+
+  //hidden connection
   outGate->setDisplayString("ls=,0");
 
   return 1;
@@ -140,7 +145,7 @@ double Enviroment::calculateDistance(int x1, int y1, int x2, int y2)
   return sqrt(x + y);
 }
 
-void Enviroment::registerTranmission(Tranmission *tranmission)
+void Enviroment::registerTranmission(Transmission *tranmission)
 {
   if (this->onTheAir.size() == 0)
   {
@@ -154,7 +159,7 @@ void Enviroment::registerTranmission(Tranmission *tranmission)
   bool isFeasible = true;
 
 //check collision with activated tranmission
-  for (std::list<Tranmission*>::iterator otherTranmission = this->onTheAir.begin();
+  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
     Core *otherSender = (*otherTranmission)->getSendMote();
@@ -178,7 +183,7 @@ void Enviroment::registerTranmission(Tranmission *tranmission)
     this->onTheAir.push_back(tranmission);
 }
 
-bool Enviroment::isFeasibleTranmission(Tranmission* tranmission)
+bool Enviroment::isFeasibleTranmission(Transmission* tranmission)
 {
   if (this->onTheAir.size() == 1)
     return true;
@@ -186,7 +191,7 @@ bool Enviroment::isFeasibleTranmission(Tranmission* tranmission)
   Core* sender = tranmission->getSendMote();
   Core* recver = tranmission->getRecvMote();
 
-  for (std::list<Tranmission*>::iterator otherTranmission = this->onTheAir.begin();
+  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
     if (sender == (*otherTranmission)->getSendMote() && recver == (*otherTranmission)->getRecvMote())
@@ -196,7 +201,7 @@ bool Enviroment::isFeasibleTranmission(Tranmission* tranmission)
   return false;
 }
 
-void Enviroment::stopTranmission(Tranmission* trans)
+void Enviroment::stopTranmission(Transmission* trans)
 {
   this->onTheAir.remove(trans);
 }

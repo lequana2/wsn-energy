@@ -46,3 +46,71 @@ in expression "-_@_"
 "createGraphicalModWindow .ptr0x8428fd8-2 """
 
 
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: (cDatarateChannel)WSN.server.out 2 to 7.: Object has no associated cComponentType (maybe cDatarateChannel should not subclass cModule/cChannel?)
+    while executing
+"opp_inspectorcommand $w redraw"
+    (procedure "graphicalModuleWindow:zoomBy" line 18)
+    invoked from within
+"graphicalModuleWindow:zoomBy $w $zoom"
+    (procedure "graphicalModuleWindow:adjustWindowSizeAndZoom" line 35)
+    invoked from within
+"graphicalModuleWindow:adjustWindowSizeAndZoom $w"
+    (procedure "createGraphicalModWindow" line 104)
+    invoked from within
+"createGraphicalModWindow .ptr0x83e8a40-2 "969x809+0+55:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: (cDatarateChannel)WSN.server.out 2 to 7.: Object has no associated cComponentType (maybe cDatarateChannel should not subclass cModule/cChannel?)
+    while executing
+"opp_inspectorcommand $w redraw"
+    (procedure "graphicalModuleWindow:zoomBy" line 18)
+    invoked from within
+"graphicalModuleWindow:zoomBy $w $zoom"
+    (procedure "graphicalModuleWindow:adjustWindowSizeAndZoom" line 35)
+    invoked from within
+"graphicalModuleWindow:adjustWindowSizeAndZoom $w"
+    (procedure "createGraphicalModWindow" line 104)
+    invoked from within
+"createGraphicalModWindow .ptr0x83e88d8-2 "969x809+0+55:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: (cDatarateChannel)WSN.server.out 2 to 7.: Object has no associated cComponentType (maybe cDatarateChannel should not subclass cModule/cChannel?)
+    while executing
+"opp_inspectorcommand $w redraw"
+    (procedure "graphicalModuleWindow:zoomBy" line 18)
+    invoked from within
+"graphicalModuleWindow:zoomBy $w $zoom"
+    (procedure "graphicalModuleWindow:adjustWindowSizeAndZoom" line 35)
+    invoked from within
+"graphicalModuleWindow:adjustWindowSizeAndZoom $w"
+    (procedure "createGraphicalModWindow" line 104)
+    invoked from within
+"createGraphicalModWindow .ptr0x83d4b78-2 "969x809+0+55:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: (cDatarateChannel)WSN.server.out 2 to 7.out 2 to 7: Object has no associated cComponentType (maybe cDatarateChannel should not subclass cModule/cChannel?)
+    while executing
+"opp_inspectorcommand $w redraw"
+    (procedure "graphicalModuleWindow:zoomBy" line 18)
+    invoked from within
+"graphicalModuleWindow:zoomBy $w $zoom"
+    (procedure "graphicalModuleWindow:adjustWindowSizeAndZoom" line 35)
+    invoked from within
+"graphicalModuleWindow:adjustWindowSizeAndZoom $w"
+    (procedure "createGraphicalModWindow" line 104)
+    invoked from within
+"createGraphicalModWindow .ptr0x83eea30-2 "607x337+495+282:normal""
+
+

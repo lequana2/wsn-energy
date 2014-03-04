@@ -20,10 +20,10 @@
 
 namespace wsn_energy {
 
-class Tranmission
+class Transmission
 {
   public:
-    Tranmission(Core *, Core *);
+    Transmission(Core *, Core *);
 
     Core* getRecvMote()
     {
