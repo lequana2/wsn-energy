@@ -23,7 +23,7 @@ INCLUDE_PATH = \
     -Icore/mac \
     -Icore/net \
     -Icore/net/ip \
-    -Icore/rpl \
+    -Icore/net/rpl \
     -Iplatform \
     -Iplatform/battery \
     -Iplatform/radio \
@@ -45,7 +45,9 @@ OBJS = \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
     $O/core/core.o \
-    $O/core/rpl/rpl.o \
+    $O/core/net/rpl/rpl.o \
+    $O/platform/battery/battery.o \
+    $O/platform/radio/cc2420.o \
     $O/platform/radio/transmission.o \
     $O/world/statistic.o \
     $O/world/enviroment.o \
@@ -134,7 +136,7 @@ clean:
 	$(Q)-rm -f core/mac/*_m.cc core/mac/*_m.h
 	$(Q)-rm -f core/net/*_m.cc core/net/*_m.h
 	$(Q)-rm -f core/net/ip/*_m.cc core/net/ip/*_m.h
-	$(Q)-rm -f core/rpl/*_m.cc core/rpl/*_m.h
+	$(Q)-rm -f core/net/rpl/*_m.cc core/net/rpl/*_m.h
 	$(Q)-rm -f platform/*_m.cc platform/*_m.h
 	$(Q)-rm -f platform/battery/*_m.cc platform/battery/*_m.h
 	$(Q)-rm -f platform/radio/*_m.cc platform/radio/*_m.h
@@ -145,41 +147,45 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/net/*.cc core/net/ip/*.cc core/rpl/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/net/*.cc core/net/ip/*.cc core/net/rpl/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/client/client.h \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/rpl/rpl.h
+	core/net/rpl/rpl.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/rpl/rpl.h
+	core/net/rpl/rpl.h
 $O/core/core.o: core/core.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/rpl/rpl.h \
+	core/net/rpl/rpl.h \
 	platform/radio/transmission.h \
 	world/enviroment.h \
 	world/statistic.h
 $O/core/net/ip/ipPacket_m.o: core/net/ip/ipPacket_m.cc \
 	core/net/ip/ipPacket_m.h
-$O/core/rpl/rpl.o: core/rpl/rpl.cc \
+$O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/rpl/rpl.h
+	core/net/rpl/rpl.h
+$O/platform/battery/battery.o: platform/battery/battery.cc \
+	platform/battery/battery.h
+$O/platform/radio/cc2420.o: platform/radio/cc2420.cc \
+	platform/radio/cc2420.h
 $O/platform/radio/transmission.o: platform/radio/transmission.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/rpl/rpl.h \
+	core/net/rpl/rpl.h \
 	platform/radio/transmission.h
 $O/world/enviroment.o: world/enviroment.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/rpl/rpl.h \
+	core/net/rpl/rpl.h \
 	platform/radio/transmission.h \
 	world/enviroment.h
 $O/world/statistic.o: world/statistic.cc \

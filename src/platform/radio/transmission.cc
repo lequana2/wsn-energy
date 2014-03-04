@@ -16,11 +16,26 @@
 #include <transmission.h>
 
 namespace wsn_energy {
-
-Transmission::Transmission(Core *send, Core *recv)
+Transmission::Transmission(Core *sender, Core *recver)
 {
-  this->sendMote = send;
-  this->recvMote = recv;
+  this->sender = sender;
+  this->recver = recver;
+  this->collision = false;
 }
-
+Core* Transmission::getSender()
+{
+  return this->sender;
+}
+Core* Transmission::getRecver()
+{
+  return this->recver;
+}
+void Transmission::collide()
+{
+  this->collision = true;
+}
+bool Transmission::isCollided()
+{
+  return this->collision;
+}
 } /* namespace wsn_energy */

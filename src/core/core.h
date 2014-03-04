@@ -23,13 +23,13 @@
 #include "rpl.h"
 
 // PACKET
-#define ICMP_MESSAGE 1
-#define ICMP_SOLICIT 2
+#define IP_PACKET 1
 
 // EVENT
-#define END_BROADCAST 5
+#define ICMP_SOLICIT  2
 #define RPL_CONSTRUCT 4
-#define DATA_FORWARD 3
+#define DATA_FORWARD  3
+#define FIN_TRANSMISS 5
 
 namespace wsn_energy {
 

@@ -121,8 +121,10 @@ int Enviroment::deployConnection(Core *x, Core *y)
   outGate = x->addGate(setOutConnectionName, cGate::OUTPUT);
   inGate = y->addGate(setInConnectionName, cGate::INPUT);
 
+  //WSN create channel
   cDatarateChannel *channel = cDatarateChannel::create(NULL);
-  channel->setDatarate(250000);
+//  channel->setDatarate(250000);
+//  channel->setDelay(1);
 
   outGate->connectTo(inGate, channel);
   channel->callInitialize();
@@ -147,40 +149,41 @@ double Enviroment::calculateDistance(int x1, int y1, int x2, int y2)
 
 void Enviroment::registerTranmission(Transmission *tranmission)
 {
-  if (this->onTheAir.size() == 0)
-  {
-    this->onTheAir.push_back(tranmission);
+  this->onTheAir.push_back(tranmission);
+
+  if (this->onTheAir.size() == 1)
     return;
-  }
 
-  Core* sender = tranmission->getSendMote();
-  Core* recver = tranmission->getRecvMote();
+  Core* sender = tranmission->getSender();
+  Core* recver = tranmission->getRecver();
 
-  bool isFeasible = true;
-
-//check collision with activated tranmission
+//  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    Core *otherSender = (*otherTranmission)->getSendMote();
-    Core *otherRecver = (*otherTranmission)->getRecvMote();
+    Core *otherSender = (*otherTranmission)->getSender();
 
+    // check is same source
     if (otherSender == sender)
-    {
-      EV << "Broadcast " << endl;
-    }
+      ;
     // check interference
-    else if (calculateDistance(recver, otherSender) < otherSender->coRange)
+    else
     {
-      EV << "Collision " << endl;
-      isFeasible = false;
-      if (calculateDistance(sender, otherRecver) < sender->coRange)
-        this->onTheAir.erase(otherTranmission--);
+      Core *otherRecver = (*otherTranmission)->getRecver();
+
+      // at this transmission
+      if (tranmission->isCollided())
+        ;
+      else if (calculateDistance(otherSender, recver) < otherSender->coRange)
+        tranmission->collide();
+
+      // at other transmission
+      if ((*otherTranmission)->isCollided())
+        ;
+      else if (calculateDistance(sender, otherRecver) < sender->coRange)
+        (*otherTranmission)->collide();
     }
   }
-
-  if (isFeasible)
-    this->onTheAir.push_back(tranmission);
 }
 
 bool Enviroment::isFeasibleTranmission(Transmission* tranmission)
@@ -188,13 +191,14 @@ bool Enviroment::isFeasibleTranmission(Transmission* tranmission)
   if (this->onTheAir.size() == 1)
     return true;
 
-  Core* sender = tranmission->getSendMote();
-  Core* recver = tranmission->getRecvMote();
+  Core* sender = tranmission->getSender();
+  Core* recver = tranmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    if (sender == (*otherTranmission)->getSendMote() && recver == (*otherTranmission)->getRecvMote())
+    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
+        && !(*otherTranmission)->isCollided())
       return true;
   }
 

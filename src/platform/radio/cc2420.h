@@ -13,35 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-/*
- * This is simulation of the on the air tranmission
- * The sender and receiver is recorded
- * If the tranmission is spoiled, isCollided should return true;
- */
-#ifndef TRANMISSION_H_
-#define TRANMISSION_H_
-
-#include "core.h"
+#ifndef CC2420_H_
+#define CC2420_H_
 
 namespace wsn_energy {
 
-class Transmission
+class cc2420
 {
   public:
-    Transmission(Core *sender, Core *recver);
-
-    virtual Core* getSender();
-    virtual Core* getRecver();
-
-    virtual bool isCollided();
-    virtual void collide();
-
-  private:
-    Core *sender;
-    Core *recver;
-    bool collision;
+    cc2420();
+    virtual ~cc2420();
 };
 
 } /* namespace wsn_energy */
 
-#endif /* TRANMISSION_H_ */
+#endif /* CC2420_H_ */

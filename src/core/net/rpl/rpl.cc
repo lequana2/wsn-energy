@@ -37,6 +37,7 @@ void RPL::rpl_set_root()
   this->rplDag.dodagid++;
   this->rplDag.rank = 0;
 
+  // WSN Should send continously
   cMessage *constructMessage = new cMessage();
   constructMessage->setKind(RPL_CONSTRUCT);
   core->scheduleAt(simTime(), constructMessage);
@@ -47,10 +48,10 @@ void RPL::sendDIO()
   ev << "broadcast DIO" << endl;
 
   DIO *icmp = new DIO();
-  ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
+  ((cMessage*) icmp)->setKind(IP_PACKET);
+  ((IpPacket*) icmp)->setType(IP_ICMP);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
 
-  icmp->setSendID(core->getId());
   icmp->setDodagID(this->rplDag.dodagid);
 
   core->broadcast(icmp);
@@ -61,7 +62,8 @@ void RPL::sendDIS(int convergence)
   ev << "broadcast DIS" << endl;
 
   DIS *icmp = new DIS();
-  ((cMessage*) icmp)->setKind(ICMP_MESSAGE);
+  ((cMessage*) icmp)->setKind(IP_PACKET);
+  ((IpPacket*) icmp)->setType(IP_ICMP);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
 
   icmp->setConvergence(convergence);

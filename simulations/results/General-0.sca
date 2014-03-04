@@ -1,23 +1,43 @@
 version 2
-run General-0-20140304-16:20:27-12354
+<<<<<<< HEAD
+run General-0-20140305-15:15:03-5824
+=======
+run General-0-20140304-22:39:44-22850
+>>>>>>> refs/remotes/origin/master
 attr configname General
-attr datetime 20140304-16:20:27
+<<<<<<< HEAD
+attr datetime 20140305-15:15:03
+=======
+attr datetime 20140304-22:39:44
+>>>>>>> refs/remotes/origin/master
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvars2 $repetition=0
 attr measurement ""
 attr network WSN
-attr processid 12354
+<<<<<<< HEAD
+attr processid 5824
+=======
+attr processid 22850
+>>>>>>> refs/remotes/origin/master
 attr repetition 0
 attr replication #0
 attr resultdir results
 attr runnumber 0
 attr seedset 0
 
-scalar WSN.statistic 	numLostPacket:last 	352
+<<<<<<< HEAD
+scalar WSN.statistic 	numLostPacket:last 	206
+=======
+scalar WSN.statistic 	numLostPacket:last 	236
+>>>>>>> refs/remotes/origin/master
 attr source  lost_packet
 attr title  "Number of lost packets, last"
-scalar WSN.statistic 	numRecvPacket:last 	-nan
+<<<<<<< HEAD
+scalar WSN.statistic 	numRecvPacket:last 	76
+=======
+scalar WSN.statistic 	numRecvPacket:last 	116
+>>>>>>> refs/remotes/origin/master
 attr source  recv_packet
 attr title  "Number of received packets, last"

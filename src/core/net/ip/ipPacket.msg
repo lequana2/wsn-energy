@@ -15,6 +15,11 @@
 
 namespace wsn_energy;
 
+enum IP_CODE{
+    IP_ICMP = 0;
+	IP_DATA = 1;
+}
+
 enum ICMP_CODE{
 	ICMP_DIO_CODE = 0;
 	ICMP_DIS_CODE = 1;
@@ -23,6 +28,7 @@ enum ICMP_CODE{
 packet IpPacket{
     int sendID;
     int recvID;
+    int type;
 }
 
 packet Data extends IpPacket {
