@@ -19,6 +19,20 @@ namespace wsn_energy {
 /**
  * Enum generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
  * <pre>
+ * enum IP_CODE{
+ *     IP_ICMP = 0;
+ * 	IP_DATA = 1;
+ * }
+ * </pre>
+ */
+enum IP_CODE {
+    IP_ICMP = 0,
+    IP_DATA = 1
+};
+
+/**
+ * Enum generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * <pre>
  * enum ICMP_CODE{
  * 	ICMP_DIO_CODE = 0;
  * 	ICMP_DIS_CODE = 1;
@@ -36,6 +50,7 @@ enum ICMP_CODE {
  * packet IpPacket{
  *     int sendID;
  *     int recvID;
+ *     int type;
  * }
  * </pre>
  */
@@ -44,6 +59,7 @@ class IpPacket : public ::cPacket
   protected:
     int sendID_var;
     int recvID_var;
+    int type_var;
 
   private:
     void copy(const IpPacket& other);
@@ -66,6 +82,8 @@ class IpPacket : public ::cPacket
     virtual void setSendID(int sendID);
     virtual int getRecvID() const;
     virtual void setRecvID(int recvID);
+    virtual int getType() const;
+    virtual void setType(int type);
 };
 
 inline void doPacking(cCommBuffer *b, IpPacket& obj) {obj.parsimPack(b);}

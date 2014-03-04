@@ -34,6 +34,13 @@ void doUnpacking(cCommBuffer *, T& t) {
 namespace wsn_energy {
 
 EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::IP_CODE");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::IP_CODE"));
+    e->insert(IP_ICMP, "IP_ICMP");
+    e->insert(IP_DATA, "IP_DATA");
+);
+
+EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::ICMP_CODE");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::ICMP_CODE"));
     e->insert(ICMP_DIO_CODE, "ICMP_DIO_CODE");
@@ -46,6 +53,7 @@ IpPacket::IpPacket(const char *name, int kind) : cPacket(name,kind)
 {
     this->sendID_var = 0;
     this->recvID_var = 0;
+    this->type_var = 0;
 }
 
 IpPacket::IpPacket(const IpPacket& other) : cPacket(other)
@@ -69,6 +77,7 @@ void IpPacket::copy(const IpPacket& other)
 {
     this->sendID_var = other.sendID_var;
     this->recvID_var = other.recvID_var;
+    this->type_var = other.type_var;
 }
 
 void IpPacket::parsimPack(cCommBuffer *b)
@@ -76,6 +85,7 @@ void IpPacket::parsimPack(cCommBuffer *b)
     cPacket::parsimPack(b);
     doPacking(b,this->sendID_var);
     doPacking(b,this->recvID_var);
+    doPacking(b,this->type_var);
 }
 
 void IpPacket::parsimUnpack(cCommBuffer *b)
@@ -83,6 +93,7 @@ void IpPacket::parsimUnpack(cCommBuffer *b)
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->sendID_var);
     doUnpacking(b,this->recvID_var);
+    doUnpacking(b,this->type_var);
 }
 
 int IpPacket::getSendID() const
@@ -103,6 +114,16 @@ int IpPacket::getRecvID() const
 void IpPacket::setRecvID(int recvID)
 {
     this->recvID_var = recvID;
+}
+
+int IpPacket::getType() const
+{
+    return type_var;
+}
+
+void IpPacket::setType(int type)
+{
+    this->type_var = type;
 }
 
 class IpPacketDescriptor : public cClassDescriptor
@@ -152,7 +173,7 @@ const char *IpPacketDescriptor::getProperty(const char *propertyname) const
 int IpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
 unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -166,8 +187,9 @@ unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) cons
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketDescriptor::getFieldName(void *object, int field) const
@@ -181,8 +203,9 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
     static const char *fieldNames[] = {
         "sendID",
         "recvID",
+        "type",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
 int IpPacketDescriptor::findField(void *object, const char *fieldName) const
@@ -191,6 +214,7 @@ int IpPacketDescriptor::findField(void *object, const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='s' && strcmp(fieldName, "sendID")==0) return base+0;
     if (fieldName[0]=='r' && strcmp(fieldName, "recvID")==0) return base+1;
+    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -205,8 +229,9 @@ const char *IpPacketDescriptor::getFieldTypeString(void *object, int field) cons
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -248,6 +273,7 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
     switch (field) {
         case 0: return long2string(pp->getSendID());
         case 1: return long2string(pp->getRecvID());
+        case 2: return long2string(pp->getType());
         default: return "";
     }
 }
@@ -264,6 +290,7 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
     switch (field) {
         case 0: pp->setSendID(string2long(value)); return true;
         case 1: pp->setRecvID(string2long(value)); return true;
+        case 2: pp->setType(string2long(value)); return true;
         default: return false;
     }
 }
@@ -279,8 +306,9 @@ const char *IpPacketDescriptor::getFieldStructName(void *object, int field) cons
     static const char *fieldStructNames[] = {
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const

@@ -40,80 +40,85 @@ void Core::initialize()
 //---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)
 {
-  //WSN Dispatch event
-  // End of broadcast transmitting
-  if (msg->getKind() == RECV_MESSAGE)
-  {
-    // check receive message
-    for (unsigned int i = 0; i < this->neighbor.size(); i++)
-    {
-      char outName[20];
-      sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
-
-      Transmission *completeTranmission = new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i)));
-      //check feasible
-      if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
-      {
-        EV << outName << " sent" << endl;
-
-        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
-      }
-      else
-      {
-        EV << outName << " disposed" << endl;
-//        send(broadcastMessage->dup(), outName);
-        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
-      }
-
-      ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
-
-    }
-
-    char newDisplay[20];
-    if (this->getId() == simulation.getModuleByPath("server")->getId())
-      sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
-    else
-      sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
-    this->setDisplayString(newDisplay);
-
-    return;
-  }
-  // dispatch constructing
-  else if (msg->getKind() == RPL_CONSTRUCT)
+  // dispatch event
+  if (msg->getKind() == RPL_CONSTRUCT)
   {
     this->rpl->sendDIO();
 
     return;
   }
-  //WSN dispatch message
-  else if (msg->getKind() == ICMP_MESSAGE)
+
+  if (msg->getKind() == FIN_TRANSMISS)
   {
-    switch (((ICMP*) msg)->getIcmp_code())
+    for (unsigned int i = 0; i < this->neighbor.size(); i++)
     {
-      case ICMP_DIO_CODE:
-        this->rpl->receiveDIO((DIO*) msg);
-        break;
-      case ICMP_DIS_CODE:
-        this->rpl->receiveDIS((DIS*) msg);
-        break;
+      Core* recver = (Core*) simulation.getModule(this->neighbor.at(i));
+
+      char outName[20];
+      sprintf(outName, "out %d to %d", this->getId(), recver->getId());
+
+      Transmission *completeTranmission = new Transmission(this, recver);
+
+      // check feasible
+      if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
+      {
+        //      EV << "Recv" << endl;
+        send(this->broadcastMessage->dup(), outName);
+
+        ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
+        ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
+      }
+      else
+      {
+        //      EV << "Disposed" << endl;
+        recver->bubble("dispose");
+
+        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
+      }
     }
 
+    // Turn off broadcast
+    char newDisplay[20];
+    if (this->getId() == simulation.getModuleByPath("server")->getId())
+      sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
+    else
+      sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
+
+    this->setDisplayString(newDisplay);
     return;
+  }
+
+  // Check arrival message
+  if (msg->getKind() == IP_PACKET)
+  {
+    // receive RPL construct
+    if (((IpPacket*) msg)->getType() == IP_ICMP)
+    {
+      switch (((ICMP*) msg)->getIcmp_code())
+      {
+        case ICMP_DIO_CODE:
+          this->rpl->receiveDIO((DIO*) msg);
+          break;
+        case ICMP_DIS_CODE:
+          this->rpl->receiveDIS((DIS*) msg);
+          break;
+      }
+    }
+    //WSN forward data
+    else if (((IpPacket*) msg)->getType() == IP_DATA)
+    {
+    }
   }
 }
 
 //---------------------------------------------------------------------------//
 void Core::broadcast(IpPacket *msg)
 {
-//buffer
+  //buffer
   broadcastMessage = msg;
+  broadcastMessage->setSendID(this->getId());
 
-  for (unsigned int i = 0; i < this->neighbor.size(); i++)
-  {
-    ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(
-        new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
-  }
-
+  // start broadcasting
   char newDisplay[20];
   if (this->getId() == simulation.getModuleByPath("server")->getId())
     sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s;r=120", this->axisX, this->axisY);
@@ -121,16 +126,20 @@ void Core::broadcast(IpPacket *msg)
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=120", this->axisX, this->axisY);
   this->setDisplayString(newDisplay);
 
-  // start broadcasting, check succeed in future
   for (unsigned int i = 0; i < this->neighbor.size(); i++)
   {
     char outName[20];
     sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
-    send(broadcastMessage->dup(), outName);
+
+    // register transmission
+    ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(
+        new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
+
+//    send(broadcastMessage->dup(), outName);
   }
 
-  cMessage *message = new cMessage();
-  message->setKind(RECV_MESSAGE);
-  scheduleAt(simTime(), message);
+  int finishTime = 1;
+  scheduleAt(simTime() + finishTime, new cMessage(NULL, FIN_TRANSMISS));
 }
+
 } /* namespace wsn_energy */

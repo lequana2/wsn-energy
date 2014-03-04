@@ -121,8 +121,10 @@ int Enviroment::deployConnection(Core *x, Core *y)
   outGate = x->addGate(setOutConnectionName, cGate::OUTPUT);
   inGate = y->addGate(setInConnectionName, cGate::INPUT);
 
+  //WSN create channel
   cDatarateChannel *channel = cDatarateChannel::create(NULL);
-  channel->setDatarate(250000);
+//  channel->setDatarate(250000);
+//  channel->setDelay(1);
 
   outGate->connectTo(inGate, channel);
   channel->callInitialize();
@@ -158,7 +160,7 @@ void Enviroment::registerTranmission(Transmission *tranmission)
 
   bool isFeasible = true;
 
-//check collision with activated tranmission
+//  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
@@ -167,12 +169,12 @@ void Enviroment::registerTranmission(Transmission *tranmission)
 
     if (otherSender == sender)
     {
-      EV << "Broadcast " << endl;
+//      EV << "Broadcast " << endl;
     }
     // check interference
     else if (calculateDistance(recver, otherSender) < otherSender->coRange)
     {
-      EV << "Collision " << endl;
+//      EV << "Collision " << endl;
       isFeasible = false;
       if (calculateDistance(sender, otherRecver) < sender->coRange)
         this->onTheAir.erase(otherTranmission--);
