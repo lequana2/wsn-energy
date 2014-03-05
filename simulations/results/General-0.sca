@@ -1,12 +1,20 @@
 version 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 run General-0-20140305-15:15:03-5824
+=======
+run General-0-20140304-22:39:44-22850
+>>>>>>> refs/remotes/origin/master
 =======
 run General-0-20140304-22:39:44-22850
 >>>>>>> refs/remotes/origin/master
 attr configname General
 <<<<<<< HEAD
+<<<<<<< HEAD
 attr datetime 20140305-15:15:03
+=======
+attr datetime 20140304-22:39:44
+>>>>>>> refs/remotes/origin/master
 =======
 attr datetime 20140304-22:39:44
 >>>>>>> refs/remotes/origin/master
@@ -17,7 +25,11 @@ attr iterationvars2 $repetition=0
 attr measurement ""
 attr network WSN
 <<<<<<< HEAD
+<<<<<<< HEAD
 attr processid 5824
+=======
+attr processid 22850
+>>>>>>> refs/remotes/origin/master
 =======
 attr processid 22850
 >>>>>>> refs/remotes/origin/master
@@ -28,14 +40,22 @@ attr runnumber 0
 attr seedset 0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 scalar WSN.statistic 	numLostPacket:last 	206
+=======
+scalar WSN.statistic 	numLostPacket:last 	236
+>>>>>>> refs/remotes/origin/master
 =======
 scalar WSN.statistic 	numLostPacket:last 	236
 >>>>>>> refs/remotes/origin/master
 attr source  lost_packet
 attr title  "Number of lost packets, last"
 <<<<<<< HEAD
+<<<<<<< HEAD
 scalar WSN.statistic 	numRecvPacket:last 	76
+=======
+scalar WSN.statistic 	numRecvPacket:last 	116
+>>>>>>> refs/remotes/origin/master
 =======
 scalar WSN.statistic 	numRecvPacket:last 	116
 >>>>>>> refs/remotes/origin/master
