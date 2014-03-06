@@ -20,12 +20,12 @@ package wsn_energy.core;
 //
 simple Core
 {
-    parameters:
-        int numberClient;
-        int trRange;
-        int coRange;
-        int redundancy;
-        int axisX;
-        int axisY;
-        int energy;
+//    parameters:
+//        int numberClient;
+//        int trRange;
+//        int coRange;
+//        int redundancy;
+//        int axisX;
+//        int axisY;
+//        int energy;
 }

@@ -20,5 +20,8 @@ package wsn_energy.world;
 //
 simple Enviroment
 {
-    @display("i=misc/globe");
+    parameters:
+        int numberClient;
+
+        @display("p=-50,-10;i=misc/globe");
 }

@@ -15,12 +15,10 @@
 
 package wsn_energy.apps.server;
 
-import wsn_energy.core.Core;
-
 //
 // Generates messages with a configurable interarrival time.
 //
-simple Server extends Core
+simple Server
 {
     parameters:
         @class("Server");

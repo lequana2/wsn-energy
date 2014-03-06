@@ -17,22 +17,15 @@
 #define __WSN_ENERGY_SOURCE_H
 
 #include <omnetpp.h>
-#include "core.h"
 
 namespace wsn_energy {
 
 /**
  * Generates messages; see NED file for more info.
  */
-class Client : public Core
+class Client : public cSimpleModule
 {
-  private:
-    cMessage *timerMessage;
-    bool flag;
-
   public:
-    Client();
-    virtual ~Client();
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 //    virtual void finish();

@@ -25,6 +25,8 @@ namespace wsn_energy {
 class Enviroment : public cSimpleModule
 {
   public:
+    int numberClient;
+
     void registerTranmission(Transmission*);
     bool isFeasibleTranmission(Transmission*);
     void stopTranmission(Transmission*);

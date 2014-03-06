@@ -17,28 +17,18 @@
 #define __WSN_ENERGY_SINK_H
 
 #include <omnetpp.h>
-#include "core.h"
 
 namespace wsn_energy {
 
 /**
  * Message sink; see NED file for more info.
  */
-class Server: public Core
+class Server: public cSimpleModule
 {
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
-
-  private:
-    // state
-//    simtime_t lastArrival;
-
-    // statistics
-//    cDoubleHistogram iaTimeHistogram;
-//    cOutVector arrivalsVector;
-
 };
 
 }; // namespace

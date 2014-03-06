@@ -23,24 +23,14 @@ namespace wsn_energy {
 
 Define_Module(Client);
 
-Client::Client()
-{
-  timerMessage = NULL;
-}
-
-Client::~Client()
-{
-  cancelAndDelete(timerMessage);
-}
-
 void Client::initialize()
 {
-  Core::initialize();
+//  Core::initialize();
 }
 
 void Client::handleMessage(cMessage *msg)
 {
-  Core::handleMessage(msg);
+//  Core::handleMessage(msg);
 
   switch (msg->getKind())
   {

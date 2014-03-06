@@ -15,8 +15,8 @@
 
 package wsn_energy.simulations;
 
-import wsn_energy.apps.server.Server;
-import wsn_energy.apps.client.Client;
+import wsn_energy.mote.server.MoteServer;
+import wsn_energy.mote.client.MoteClient;
 import wsn_energy.world.Enviroment;
 import wsn_energy.world.Statistic;
 
@@ -27,42 +27,45 @@ network WSN
 {
     parameters:
         int numberClient;
+
         int trRange;
         int coRange;
+
         int width;
         int height;
+
         double redundancy;
         double energy;
+
         double polling;
-        @display("bgb=1000,1000,#C6C6FF,#0000FF,2");
+
+        @display("bgb=$width,$height,#C6C6FF,#0000FF,2");
+
     submodules:
-        server: Server {
+        server: MoteServer {
             parameters:
-                numberClient = numberClient;
                 trRange = trRange;
                 coRange = coRange;
-                energy = energy;
-                redundancy = redundancy;
+
                 axisX = width / 2;
                 axisY = 0;
+
                 @display("p=$axisX,$axisY");
         }
-        client[numberClient]: Client {
+        client[numberClient]: MoteClient {
             parameters:
-                numberClient = numberClient;
                 trRange = trRange;
                 coRange = coRange;
-                energy = energy;
-                redundancy = redundancy;
+
                 axisX = 0;
                 axisY = 0;
+                
+                  @display("p=$axisX,$axisY;i=misc/node;is=vs");
         }
         enviroment: Enviroment {
             parameters:
-                @display("p=-10,-10");
+                numberClient = numberClient;
         }
-        statistic: Statistic{
-                @display("p=40,-10;i=block/table2");
-        }
+        statistic: Statistic;
     connections allowunconnected:
 }

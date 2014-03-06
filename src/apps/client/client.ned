@@ -15,12 +15,10 @@
 
 package wsn_energy.apps.client;
 
-import wsn_energy.core.Core;
-
 //
 // Consumes received messages and collects statistics
 //
-simple Client extends Core
+simple Client
 {
     parameters:
         @class("Client");

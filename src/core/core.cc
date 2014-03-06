@@ -29,13 +29,13 @@ Define_Module(Core);
 //---------------------------------------------------------------------------//
 void Core::initialize()
 {
-  this->numberClient = par("numberClient");
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
-  this->redundancy = par("redundancy");
-  this->axisX = par("axisX");
-  this->axisY = par("axisY");
-  this->rpl = new RPL(this);
+//  this->numberClient = par("numberClient");
+//  this->trRange = par("trRange");
+//  this->coRange = par("coRange");
+//  this->redundancy = par("redundancy");
+//  this->axisX = par("axisX");
+//  this->axisY = par("axisY");
+//  this->rpl = new RPL(this);
 }
 //---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)

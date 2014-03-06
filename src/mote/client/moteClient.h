@@ -13,24 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.world;
+#ifndef __WSN_ENERGY_CLIENT_MOTE_H
+#define __WSN_ENERGY_CLIENT_MOTE_H
 
-//
-// Statistics Collector
-//
-simple Statistic
+#include <omnetpp.h>
+#include <mote.h>
+
+namespace wsn_energy {
+
+/**
+ * Message sink; see NED file for more info.
+ */
+class MoteClient : public cCompoundModule
 {
-    parameters:
-        double pollTSEInterval = default(0.5);
+  public:
+    int axisX;
+    int axisY;
+    int trRange;
+    int coRange;
 
-        @signal[total_sensor_energy](type="double");
-        @statistic[totalEnergy](title="Total energy"; source="total_sensor_energy"; record=vector);
+    virtual void initialize();
+};
 
-        @signal[recv_packet](type="int");
-        @statistic[numRecvPacket](title="Number of received packets"; source="recv_packet"; record=last);
-
-        @signal[lost_packet](type="int");
-        @statistic[numLostPacket](title="Number of lost packets"; source="lost_packet"; record=last);
-
-        @display("p=-50,80;i=block/table2");
 }
+;
+// namespace
+
+#endif

@@ -15,17 +15,22 @@
 
 #include <enviroment.h>
 
+#include "moteClient.h"
+#include "moteServer.h"
+
 namespace wsn_energy {
 
 Define_Module(Enviroment);
 
 void Enviroment::initialize()
 {
+  this->numberClient = par("numberClient");
+
   // Arrange nodes into positions
   arrangeNodes();
 
 // Create connections
-  connectNodes();
+//  connectNodes();
 }
 
 void Enviroment::handleMessage(cMessage *msg)
@@ -37,31 +42,27 @@ void Enviroment::handleMessage(cMessage *msg)
  */
 void Enviroment::arrangeNodes()
 {
-  Core *firstClient = (Core*) simulation.getModuleByPath("client[0]");
-
-  for (int i = 0; i < firstClient->numberClient; i++)
+  for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d]", i);
-    Core *core = (Core*) simulation.getModuleByPath(modulePath);
-
-    int coreId = core->getId() - firstClient->getId();
+    MoteClient *mote = (MoteClient*) simulation.getModuleByPath(modulePath);
 
     // Partition
-    core->axisX = (coreId % 10) * 100 + 15;
-    core->axisY = (coreId / 10) * 100 + 50;
-    if ((coreId / 10) % 2 != 0)
-      core->axisX += 50;
+    mote->axisX = (i % 10) * 100 + 15;
+    mote->axisY = (i / 10) * 100 + 50;
+    if ((i / 10) % 2 != 0)
+      mote->axisX += 50;
 
     // Randomize
-    core->axisX = uniform(core->axisX - 20, core->axisX + 20);
-    core->axisY = uniform(core->axisY - 20, core->axisY + 20);
+    mote->axisX = uniform(mote->axisX - 20, mote->axisX + 20);
+    mote->axisY = uniform(mote->axisY - 20, mote->axisY + 20);
 
-    //    EV << clientId << " " << core->axisX << " " << core->axisY << " " << endl;
+    EV << i << " " << mote->axisX << " " << mote->axisY << " " << endl;
 
     char newDisplay[20];
-    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", core->axisX, core->axisY);
-    core->setDisplayString(newDisplay);
+    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", mote->axisX, mote->axisY);
+    mote->setDisplayString(newDisplay);
   }
 }
 
@@ -157,11 +158,6 @@ void Enviroment::registerTranmission(Transmission *tranmission)
   Core* sender = tranmission->getSender();
   Core* recver = tranmission->getRecver();
 
-<<<<<<< HEAD
-=======
-  bool isFeasible = true;
-
->>>>>>> refs/remotes/origin/master
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
@@ -170,17 +166,10 @@ void Enviroment::registerTranmission(Transmission *tranmission)
 
     // check is same source
     if (otherSender == sender)
-<<<<<<< HEAD
       ;
-=======
-    {
-//      EV << "Broadcast " << endl;
-    }
->>>>>>> refs/remotes/origin/master
     // check interference
     else
     {
-<<<<<<< HEAD
       Core *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
@@ -194,12 +183,6 @@ void Enviroment::registerTranmission(Transmission *tranmission)
         ;
       else if (calculateDistance(sender, otherRecver) < sender->coRange)
         (*otherTranmission)->collide();
-=======
-//      EV << "Collision " << endl;
-      isFeasible = false;
-      if (calculateDistance(sender, otherRecver) < sender->coRange)
-        this->onTheAir.erase(otherTranmission--);
->>>>>>> refs/remotes/origin/master
     }
   }
 }

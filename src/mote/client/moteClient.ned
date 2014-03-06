@@ -13,24 +13,24 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.world;
+package wsn_energy.mote.client;
+
+import wsn_energy.core.Core;
+import wsn_energy.apps.client.Client;
 
 //
-// Statistics Collector
+// TODO auto-generated type
 //
-simple Statistic
+module MoteClient
 {
     parameters:
-        double pollTSEInterval = default(0.5);
+        int axisX;
+        int axisY;
 
-        @signal[total_sensor_energy](type="double");
-        @statistic[totalEnergy](title="Total energy"; source="total_sensor_energy"; record=vector);
-
-        @signal[recv_packet](type="int");
-        @statistic[numRecvPacket](title="Number of received packets"; source="recv_packet"; record=last);
-
-        @signal[lost_packet](type="int");
-        @statistic[numLostPacket](title="Number of lost packets"; source="lost_packet"; record=last);
-
-        @display("p=-50,80;i=block/table2");
+        int trRange;
+        int coRange;
+        
+    submodules:
+        app: Client;
+        core: Core;
 }
