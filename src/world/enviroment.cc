@@ -157,11 +157,6 @@ void Enviroment::registerTranmission(Transmission *tranmission)
   Core* sender = tranmission->getSender();
   Core* recver = tranmission->getRecver();
 
-<<<<<<< HEAD
-=======
-  bool isFeasible = true;
-
->>>>>>> refs/remotes/origin/master
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
@@ -170,17 +165,10 @@ void Enviroment::registerTranmission(Transmission *tranmission)
 
     // check is same source
     if (otherSender == sender)
-<<<<<<< HEAD
       ;
-=======
-    {
-//      EV << "Broadcast " << endl;
-    }
->>>>>>> refs/remotes/origin/master
     // check interference
     else
     {
-<<<<<<< HEAD
       Core *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
@@ -194,12 +182,6 @@ void Enviroment::registerTranmission(Transmission *tranmission)
         ;
       else if (calculateDistance(sender, otherRecver) < sender->coRange)
         (*otherTranmission)->collide();
-=======
-//      EV << "Collision " << endl;
-      isFeasible = false;
-      if (calculateDistance(sender, otherRecver) < sender->coRange)
-        this->onTheAir.erase(otherTranmission--);
->>>>>>> refs/remotes/origin/master
     }
   }
 }
