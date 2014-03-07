@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 
 #include "transmission.h"
+#include "app.h"
 
 namespace wsn_energy {
 
@@ -34,8 +35,9 @@ class World : public cSimpleModule
     double calculateDistance(App*, App*);
     double calculateDistance(int, int, int, int);
 
-  private:
     std::list<Transmission*> onTheAir;
+
+  private:
     void arrangeNodes(); // Arrange nodes in positions
     void connectNodes(); // Connect adjacent nodes
 

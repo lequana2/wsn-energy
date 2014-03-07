@@ -16,7 +16,6 @@
 #include "world.h"
 
 #include <math.h>
-#include "app.h"
 
 namespace wsn_energy {
 
@@ -92,7 +91,7 @@ void World::checkConnection(App *app)
 // Check with server
   App *server = (App*) simulation.getModuleByPath("server.app");
   if (deployConnection(app, server))
-    app->neighbor.push_back(server->getId());
+    app->neighbor.push_back(server->getParentModule()->getModuleByPath(".core")->getId());
 
 // Check with client(s)
   for (int i = 0; i < numberClient; i++)
@@ -102,7 +101,7 @@ void World::checkConnection(App *app)
     App *module = (App*) simulation.getModuleByPath(modulePath);
 
     if (deployConnection(app, module))
-      app->neighbor.push_back(module->getId());
+      app->neighbor.push_back(module->getParentModule()->getModuleByPath(".core")->getId());
   }
 }
 
@@ -128,17 +127,10 @@ int World::deployConnection(App *x, App *y)
   outGate = x->getParentModule()->addGate(setOutConnectionName, cGate::OUTPUT);
   inGate = y->getParentModule()->addGate(setInConnectionName, cGate::INPUT);
 
-  // create channel
-//  cDatarateChannel *channel = cDatarateChannel::create(NULL);
-  //  channel->setDatarate(250000);
-  //  channel->setDelay(1);
-
-//  outGate->connectTo(inGate, channel);
   outGate->connectTo(inGate);
-//  channel->callInitialize();
 
   //hidden connection
-//  outGate->setDisplayString("ls=,0");
+  outGate->setDisplayString("ls=,0");
 
   return 1;
 }
@@ -165,14 +157,14 @@ void World::registerTranmission(Transmission *tranmission)
   if (this->onTheAir.size() == 1)
     return;
 
-  App* sender = tranmission->getSender();
-  App* recver = tranmission->getRecver();
+  Core* sender = tranmission->getSender();
+  Core* recver = tranmission->getRecver();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    App *otherSender = (*otherTranmission)->getSender();
+    Core *otherSender = (*otherTranmission)->getSender();
 
     // check is same source
     if (otherSender == sender)
@@ -180,18 +172,22 @@ void World::registerTranmission(Transmission *tranmission)
     // check interference
     else
     {
-      App *otherRecver = (*otherTranmission)->getRecver();
+      Core *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
       if (tranmission->isCollided())
         ;
-      else if (calculateDistance(otherSender, recver) < otherSender->coRange)
+      else if (calculateDistance((App*) otherSender->getParentModule()->getModuleByPath(".app"),
+          (App*) recver->getParentModule()->getModuleByPath(".app"))
+          < ((App*) otherSender->getParentModule()->getModuleByPath(".app"))->coRange)
         tranmission->collide();
 
       // at other transmission
       if ((*otherTranmission)->isCollided())
         ;
-      else if (calculateDistance(sender, otherRecver) < sender->coRange)
+      else if (calculateDistance((App*) sender->getParentModule()->getModuleByPath(".app"),
+          (App*) otherRecver->getParentModule()->getModuleByPath(".app"))
+          < ((App*) sender->getParentModule()->getModuleByPath(".app"))->coRange)
         (*otherTranmission)->collide();
     }
   }
@@ -202,8 +198,8 @@ bool World::isFeasibleTranmission(Transmission* tranmission)
   if (this->onTheAir.size() == 1)
     return true;
 
-  App* sender = tranmission->getSender();
-  App* recver = tranmission->getRecver();
+  Core* sender = tranmission->getSender();
+  Core* recver = tranmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)

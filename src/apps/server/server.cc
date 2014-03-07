@@ -27,11 +27,11 @@ void Server::initialize()
 
 void Server::handleMessage(cMessage *msg)
 {
-  switch (msg->getKind())
-  {
-    default:
-      break;
-  }
+//  switch (msg->getKind())
+//  {
+//    default:
+//      break;
+//  }
 
   delete msg;
 }

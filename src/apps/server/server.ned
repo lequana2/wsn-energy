@@ -27,4 +27,8 @@ simple Server
         int axisY;
         int trRange;
         int coRange;
+
+    gates:
+        input in;
+        output out;
 }

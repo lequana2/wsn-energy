@@ -13,35 +13,34 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-/*
- * This is simulation of the on the air tranmission
- * The sender and receiver is recorded
- * If the tranmission is spoiled, isCollided should return true;
- */
-#ifndef TRANMISSION_H_
-#define TRANMISSION_H_
+package wsn_energy.mote;
 
-#include "core.h"
+import wsn_energy.apps.client.Client;
+import wsn_energy.core.Core;
 
-namespace wsn_energy {
-
-class Transmission
+//
+// TODO auto-generated type
+//
+module ClientMote
 {
-  public:
-    Transmission(Core *sender, Core *recver);
+    parameters:
+        int axisX;
+        int axisY;
+        int trRange;
+        int coRange;
+        @display("p=$axisX,$axisY");
 
-    virtual Core* getSender();
-    virtual Core* getRecver();
+    submodules:
+        core: Core;
+        app: Client {
+            parameters:
+                trRange = trRange;
+                coRange = coRange;
+                axisX = axisX;
+                axisY = axisY;
+        }
 
-    virtual bool isCollided();
-    virtual void collide();
-
-  private:
-    Core *sender;
-    Core *recver;
-    bool collision;
-};
-
-} /* namespace wsn_energy */
-
-#endif /* TRANMISSION_H_ */
+    connections allowunconnected:
+        core.out --> app.in;
+        app.out --> core.in;
+}

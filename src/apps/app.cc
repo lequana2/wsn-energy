@@ -24,8 +24,6 @@ App::App()
 App::~App()
 {
   this->neighbor.clear();
-
-  this->core = (Core*) this->getParentModule()->getModuleByPath("core");
 }
 
 void App::initialize()

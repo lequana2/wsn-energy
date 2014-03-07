@@ -20,4 +20,9 @@ package wsn_energy.core;
 //
 simple Core
 {
+    gates:
+        input in;
+        output out;
+
+        input stream @directin;
 }

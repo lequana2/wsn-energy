@@ -28,12 +28,6 @@ void Client::initialize()
 
 void Client::handleMessage(cMessage *msg)
 {
-  switch (msg->getKind())
-  {
-    default:
-      break;
-  }
-
   delete msg;
 }
 

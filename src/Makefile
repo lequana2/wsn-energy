@@ -154,16 +154,10 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/app.o: apps/app.cc \
-	apps/app.h \
-	core/core.h \
-	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h
+	apps/app.h
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/app.h \
-	apps/client/client.h \
-	core/core.h \
-	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h
+	apps/client/client.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/app.h \
 	apps/server/server.h \
@@ -171,9 +165,13 @@ $O/apps/server/server.o: apps/server/server.cc \
 	core/net/ip/ipPacket_m.h \
 	core/net/rpl/rpl.h
 $O/core/core.o: core/core.cc \
+	apps/app.h \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h
+	core/net/rpl/rpl.h \
+	platform/radio/transmission.h \
+	world/statistic.h \
+	world/world.h
 $O/core/net/ip/ipPacket_m.o: core/net/ip/ipPacket_m.cc \
 	core/net/ip/ipPacket_m.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
@@ -188,7 +186,6 @@ $O/platform/radio/radio.o: platform/radio/radio.cc \
 	core/net/rpl/rpl.h \
 	platform/radio/radio.h
 $O/platform/radio/transmission.o: platform/radio/transmission.cc \
-	apps/app.h \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/net/rpl/rpl.h \

@@ -52,7 +52,6 @@ class Core : public cSimpleModule
     //WSN default route to server
     std::list<int> route;
 
-    void setUp();
     void broadcast(IpPacket*);
 
   protected:

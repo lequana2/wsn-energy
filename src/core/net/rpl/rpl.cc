@@ -93,8 +93,8 @@ void RPL::receiveDIO(DIO* msg)
 
     //Draw new connection
     char setOutConnectionName[20];
-    sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getId(), msg->getSenderModule()->getId());
-    (core->gate(setOutConnectionName))->setDisplayString("ls=red,1");
+    sprintf(setOutConnectionName, "out %d to %d", msg->getRecvID(), msg->getSendID());
+    core->getParentModule()->gate(setOutConnectionName)->setDisplayString("ls=red,1");
     // EV << setOutConnectionName << endl;
 
     this->rplDag.dodagid = ((DIO*) msg)->getDodagID();

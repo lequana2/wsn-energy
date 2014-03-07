@@ -29,4 +29,8 @@ simple Client
         int coRange;
 
         volatile double sendInterval @unit(s) = default(exponential(1s));
+
+    gates:
+        input in;
+        output out;
 }

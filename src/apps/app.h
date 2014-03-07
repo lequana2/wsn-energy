@@ -18,22 +18,17 @@
 
 #include <omnetpp.h>
 
-#include "core.h"
-
 namespace wsn_energy {
 
 class App : public cSimpleModule
 {
-  protected:
-    Core *core;
-
   public:
     int axisX;
     int axisY;
     int trRange;
     int coRange;
 
-    std::list<int> neighbor;
+    std::vector<int> neighbor;
 
     App();
     virtual ~App();
