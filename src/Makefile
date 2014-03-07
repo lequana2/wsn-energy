@@ -53,7 +53,6 @@ OBJS = \
     $O/mote/client/moteClient.o \
     $O/mote/server/moteServer.o \
     $O/platform/battery/battery.o \
-    $O/platform/radio/cc2420.o \
     $O/platform/radio/radio.o \
     $O/platform/radio/transmission.o \
     $O/world/statistic.o \
@@ -161,10 +160,7 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
-	apps/client/client.h \
-	core/core.h \
-	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h
+	apps/client/client.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
 	core/core.h \
@@ -173,10 +169,7 @@ $O/apps/server/server.o: apps/server/server.cc \
 $O/core/core.o: core/core.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h \
-	platform/radio/transmission.h \
-	world/enviroment.h \
-	world/statistic.h
+	core/net/rpl/rpl.h
 $O/core/net/ip/ipPacket_m.o: core/net/ip/ipPacket_m.cc \
 	core/net/ip/ipPacket_m.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
@@ -193,22 +186,15 @@ $O/mote/server/moteServer.o: mote/server/moteServer.cc \
 	mote/server/moteServer.h
 $O/platform/battery/battery.o: platform/battery/battery.cc \
 	platform/battery/battery.h
-$O/platform/radio/cc2420.o: platform/radio/cc2420.cc \
-	platform/radio/cc2420.h
 $O/platform/radio/radio.o: platform/radio/radio.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/net/rpl/rpl.h \
 	platform/radio/radio.h
 $O/platform/radio/transmission.o: platform/radio/transmission.cc \
-	core/core.h \
-	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h \
+	mote/mote.h \
 	platform/radio/transmission.h
 $O/world/enviroment.o: world/enviroment.cc \
-	core/core.h \
-	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h \
 	mote/client/moteClient.h \
 	mote/mote.h \
 	mote/server/moteServer.h \

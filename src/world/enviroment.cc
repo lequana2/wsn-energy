@@ -17,6 +17,7 @@
 
 #include "moteClient.h"
 #include "moteServer.h"
+#include "mote.h"
 
 namespace wsn_energy {
 
@@ -29,7 +30,7 @@ void Enviroment::initialize()
   // Arrange nodes into positions
   arrangeNodes();
 
-// Create connections
+  // Create connections
 //  connectNodes();
 }
 
@@ -46,7 +47,7 @@ void Enviroment::arrangeNodes()
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d]", i);
-    MoteClient *mote = (MoteClient*) simulation.getModuleByPath(modulePath);
+    Mote *mote = (Mote*) simulation.getModuleByPath(modulePath);
 
     // Partition
     mote->axisX = (i % 10) * 100 + 15;
@@ -71,40 +72,40 @@ void Enviroment::arrangeNodes()
  */
 void Enviroment::connectNodes()
 {
-  Core *server = (Core*) simulation.getModuleByPath("server");
+  Mote *server = (Mote*) simulation.getModuleByPath("server");
   this->checkConnection(server);
 
-  for (int i = 0; i < server->numberClient; i++)
+  for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d]", i);
-    this->checkConnection((Core*) simulation.getModuleByPath(modulePath));
+    this->checkConnection((Mote*) simulation.getModuleByPath(modulePath));
   }
 }
 
 /*
  * Create connection from node to others
  */
-void Enviroment::checkConnection(Core *core)
+void Enviroment::checkConnection(Mote *mote)
 {
 // Check with server
-  Core *module = (Core*) simulation.getModuleByPath("server");
-  if (deployConnection(core, module))
-    core->neighbor.push_back(module->getId());
+  Mote *module = (Mote*) simulation.getModuleByPath("server");
+  if (deployConnection(mote, module))
+    mote->neighbor.push_back(module->getId());
 
 // Check with client(s)
-  for (int i = 0; i < core->numberClient; i++)
+  for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d]", i);
-    Core *module = (Core*) simulation.getModuleByPath(modulePath);
+    Mote *module = (Mote*) simulation.getModuleByPath(modulePath);
 
-    if (deployConnection(core, module))
-      core->neighbor.push_back(module->getId());
+    if (deployConnection(mote, module))
+      mote->neighbor.push_back(module->getId());
   }
 }
 
-int Enviroment::deployConnection(Core *x, Core *y)
+int Enviroment::deployConnection(Mote *x, Mote *y)
 {
   if (calculateDistance(x->axisX, x->axisY, y->axisX, y->axisY) > x->trRange)
     return 0;
@@ -113,6 +114,7 @@ int Enviroment::deployConnection(Core *x, Core *y)
 
   char setOutConnectionName[20];
   char setInConnectionName[20];
+
   cGate *outGate;
   cGate *inGate;
 
@@ -131,12 +133,12 @@ int Enviroment::deployConnection(Core *x, Core *y)
   channel->callInitialize();
 
   //hidden connection
-  outGate->setDisplayString("ls=,0");
+//  outGate->setDisplayString("ls=,0");
 
   return 1;
 }
 
-double Enviroment::calculateDistance(Core *a, Core *b)
+double Enviroment::calculateDistance(Mote *a, Mote *b)
 {
   return this->calculateDistance(a->axisX, a->axisY, b->axisX, b->axisY);
 }
@@ -155,14 +157,14 @@ void Enviroment::registerTranmission(Transmission *tranmission)
   if (this->onTheAir.size() == 1)
     return;
 
-  Core* sender = tranmission->getSender();
-  Core* recver = tranmission->getRecver();
+  Mote* sender = tranmission->getSender();
+  Mote* recver = tranmission->getRecver();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    Core *otherSender = (*otherTranmission)->getSender();
+    Mote *otherSender = (*otherTranmission)->getSender();
 
     // check is same source
     if (otherSender == sender)
@@ -170,7 +172,7 @@ void Enviroment::registerTranmission(Transmission *tranmission)
     // check interference
     else
     {
-      Core *otherRecver = (*otherTranmission)->getRecver();
+      Mote *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
       if (tranmission->isCollided())
@@ -192,8 +194,8 @@ bool Enviroment::isFeasibleTranmission(Transmission* tranmission)
   if (this->onTheAir.size() == 1)
     return true;
 
-  Core* sender = tranmission->getSender();
-  Core* recver = tranmission->getRecver();
+  Mote* sender = tranmission->getSender();
+  Mote* recver = tranmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)

@@ -14,7 +14,6 @@
 //
 
 #include "server.h"
-#include "ipPacket_m.h"
 #include "core.h"
 
 namespace wsn_energy {
@@ -23,16 +22,12 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-//  Core::initialize();
-
   //WSN set Root
 //  this->rpl->rpl_set_root();
 }
 
 void Server::handleMessage(cMessage *msg)
 {
-//  Core::handleMessage(msg);
-
   switch (msg->getKind())
   {
     default:

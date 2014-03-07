@@ -13,11 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core;
+package wsn_energy.mote;
+
+import wsn_energy.core.Core;
 
 //
 // TODO auto-generated type
 //
-simple Core
+module Mote
 {
+    parameters:
+        int axisX;
+        int axisY;
+
+        int trRange;
+        int coRange;
 }

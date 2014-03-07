@@ -13,11 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core;
+#include <radio.h>
 
-//
-// TODO auto-generated type
-//
-simple Core
+namespace wsn_energy {
+
+Define_Module(Radio)
+
+void Radio::initialize()
 {
 }
+
+void Radio::handleMessage(cMessage*)
+{
+}
+
+void Radio::send(Core *sender, Core *recver, cMessage *msg)
+{
+}
+
+void Radio::turnOn()
+{
+}
+
+void Radio::turnOff()
+{
+}
+
+}
+/* namespace wsn_energy */

@@ -16,8 +16,6 @@
 #include <stdio.h>
 
 #include "client.h"
-#include "ipPacket_m.h"
-#include "core.h"
 
 namespace wsn_energy {
 
@@ -25,20 +23,12 @@ Define_Module(Client);
 
 void Client::initialize()
 {
-//  Core::initialize();
 }
 
 void Client::handleMessage(cMessage *msg)
 {
-//  Core::handleMessage(msg);
-
   switch (msg->getKind())
   {
-    case ICMP_SOLICIT:
-//      if (this->getId() == ((cSimpleModule*) simulation.getModuleByPath("client[0]"))->getId())
-//        sendDIS(5);
-      break;
-
     default:
       break;
   }

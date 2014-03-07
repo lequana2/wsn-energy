@@ -15,22 +15,16 @@
 
 package wsn_energy.mote.server;
 
+import wsn_energy.mote.Mote;
 import wsn_energy.core.Core;
 import wsn_energy.apps.server.Server;
 
 //
 // TODO auto-generated type
 //
-module MoteServer
+module MoteServer extends Mote
 {
-    parameters:
-        int axisX;
-        int axisY;
-
-        int trRange;
-        int coRange;
-
-        @display("i=abstract/db;is=s");
+    @display("i=abstract/db;is=s");
 
     submodules:
         app: Server;

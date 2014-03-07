@@ -13,19 +13,29 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <cc2420.h>
+#ifndef MOTE_H_
+#define MOTE_H_
+
+#include <omnetpp.h>
+
+#include "list"
 
 namespace wsn_energy {
 
-cc2420::cc2420()
+class Mote : public cCompoundModule
 {
-  // TODO Auto-generated constructor stub
+  public:
+    int axisX;
+    int axisY;
+    int trRange;
+    int coRange;
 
-}
+    std::list<int> neighbor;
 
-cc2420::~cc2420()
-{
-  // TODO Auto-generated destructor stub
-}
+    virtual void initialize();
+    virtual void finish();
+};
 
 } /* namespace wsn_energy */
+
+#endif /* MOTE_H_ */

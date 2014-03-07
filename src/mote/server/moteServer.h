@@ -16,7 +16,6 @@
 #ifndef __WSN_ENERGY_SERVER_MOTE_H
 #define __WSN_ENERGY_SERVER_MOTE_H
 
-#include <omnetpp.h>
 #include "mote.h"
 
 namespace wsn_energy {
@@ -24,15 +23,10 @@ namespace wsn_energy {
 /**
  * Message sink; see NED file for more info.
  */
-class MoteServer : public cCompoundModule
+class MoteServer : public Mote
 {
   public:
-    int axisX;
-    int axisY;
-    int trRange;
-    int coRange;
-
-    virtual void initialize();
+    ~MoteServer();
 };
 
 }

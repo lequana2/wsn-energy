@@ -13,18 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef CC2420_H_
-#define CC2420_H_
+#include <mote.h>
 
 namespace wsn_energy {
 
-class cc2420
+void Mote::initialize()
 {
-  public:
-    cc2420();
-    virtual ~cc2420();
-};
+  this->axisX = par("axisX");
+  this->axisY = par("axisY");
+  this->trRange = par("trRange");
+  this->coRange = par("coRange");
+}
+
+void Mote::finish()
+{
+}
 
 } /* namespace wsn_energy */
-
-#endif /* CC2420_H_ */

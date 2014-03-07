@@ -13,11 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core;
+#ifndef RADIO_H_
+#define RADIO_H_
 
-//
-// TODO auto-generated type
-//
-simple Core
+#include <omnetpp.h>
+#include "core.h"
+
+#define TX_POWER 0
+#define RX_POWER 0
+
+namespace wsn_energy {
+
+class Radio : public cSimpleModule
 {
-}
+  private:
+    virtual void turnOn();
+    virtual void turnOff();
+
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+
+  public:
+    virtual void send(Core *sender, Core *recver, cMessage *msg);
+};
+
+} /* namespace wsn_energy */
+
+#endif /* RADIO_H_ */

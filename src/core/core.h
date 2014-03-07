@@ -19,7 +19,6 @@
 #include <omnetpp.h>
 #include <list>
 
-#include "ipPacket_m.h"
 #include "rpl.h"
 
 // PACKET
@@ -47,9 +46,7 @@ class Core : public cSimpleModule
     //WSN RPL
     RPL *rpl;
 
-    std::vector<int> neighbor;
-
-    //on the ải broadcast
+    //on the air broadcast
     IpPacket *broadcastMessage;
 
     //WSN default route to server

@@ -15,21 +15,15 @@
 
 package wsn_energy.mote.client;
 
+import wsn_energy.mote.Mote;
 import wsn_energy.core.Core;
 import wsn_energy.apps.client.Client;
 
 //
 // TODO auto-generated type
 //
-module MoteClient
+module MoteClient extends Mote
 {
-    parameters:
-        int axisX;
-        int axisY;
-
-        int trRange;
-        int coRange;
-        
     submodules:
         app: Client;
         core: Core;

@@ -13,11 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core;
+package wsn_energy.platform.radio;
 
 //
 // TODO auto-generated type
 //
-simple Core
+simple Radio
 {
 }

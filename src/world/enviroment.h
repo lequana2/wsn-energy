@@ -31,7 +31,7 @@ class Enviroment : public cSimpleModule
     bool isFeasibleTranmission(Transmission*);
     void stopTranmission(Transmission*);
 
-    double calculateDistance(Core*, Core*);
+    double calculateDistance(Mote*, Mote*);
     double calculateDistance(int, int, int, int);
 
   private:
@@ -43,8 +43,8 @@ class Enviroment : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-    void checkConnection(Core*);
-    int deployConnection(Core*, Core*);
+    void checkConnection(Mote*);
+    int deployConnection(Mote*, Mote*);
 };
 
 } /* namespace wsn_energy */

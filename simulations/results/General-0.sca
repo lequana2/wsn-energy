@@ -1,0 +1,23 @@
+version 2
+run General-0-20140307-10:36:58-5064
+attr configname General
+attr datetime 20140307-10:36:58
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network WSN
+attr processid 5064
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar WSN.statistic 	numLostPacket:last 	-nan
+attr source  lost_packet
+attr title  "Number of lost packets, last"
+scalar WSN.statistic 	numRecvPacket:last 	-nan
+attr source  recv_packet
+attr title  "Number of received packets, last"

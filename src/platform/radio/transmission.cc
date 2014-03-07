@@ -16,17 +16,17 @@
 #include <transmission.h>
 
 namespace wsn_energy {
-Transmission::Transmission(Core *sender, Core *recver)
+Transmission::Transmission(Mote*sender, Mote*recver)
 {
   this->sender = sender;
   this->recver = recver;
   this->collision = false;
 }
-Core* Transmission::getSender()
+Mote* Transmission::getSender()
 {
   return this->sender;
 }
-Core* Transmission::getRecver()
+Mote* Transmission::getRecver()
 {
   return this->recver;
 }

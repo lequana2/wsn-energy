@@ -22,5 +22,4 @@ simple Server
 {
     parameters:
         @class("Server");
-        @display("i=abstract/db;is=s");
 }

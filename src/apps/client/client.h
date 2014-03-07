@@ -31,6 +31,8 @@ class Client : public cSimpleModule
 //    virtual void finish();
 };
 
-}; // namespace
+}
+;
+// namespace
 
 #endif

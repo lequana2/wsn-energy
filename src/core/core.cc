@@ -16,11 +16,7 @@
 #include <math.h>
 
 #include "core.h"
-#include "ipPacket_m.h"
-#include "enviroment.h"
 #include "rpl.h"
-
-#include "statistic.h"
 
 namespace wsn_energy {
 
@@ -29,13 +25,7 @@ Define_Module(Core);
 //---------------------------------------------------------------------------//
 void Core::initialize()
 {
-//  this->numberClient = par("numberClient");
-//  this->trRange = par("trRange");
-//  this->coRange = par("coRange");
-//  this->redundancy = par("redundancy");
-//  this->axisX = par("axisX");
-//  this->axisY = par("axisY");
-//  this->rpl = new RPL(this);
+  this->rpl = new RPL(this);
 }
 //---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)
@@ -44,51 +34,50 @@ void Core::handleMessage(cMessage *msg)
   if (msg->getKind() == RPL_CONSTRUCT)
   {
     this->rpl->sendDIO();
-
     return;
   }
 
-  if (msg->getKind() == FIN_TRANSMISS)
-  {
-    for (unsigned int i = 0; i < this->neighbor.size(); i++)
-    {
-      Core* recver = (Core*) simulation.getModule(this->neighbor.at(i));
+//  if (msg->getKind() == FIN_TRANSMISS)
+//  {
+//    for (unsigned int i = 0; i < this->neighbor.size(); i++)
+//    {
+//      Core* recver = (Core*) simulation.getModule(this->neighbor.at(i));
+//
+//      char outName[20];
+//      sprintf(outName, "out %d to %d", this->getId(), recver->getId());
+//
+////      Transmission *completeTranmission = new Transmission(this, recver);
+//
+//      // check feasible
+////      if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
+////      {
+////        //      EV << "Recv" << endl;
+////        send(this->broadcastMessage->dup(), outName);
+////
+////        ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
+////        ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
+////      }
+////      else
+////      {
+////        //      EV << "Disposed" << endl;
+////        recver->bubble("dispose");
+////
+////        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
+////      }
+//    }
+//
+//    // Turn off broadcast
+//    char newDisplay[20];
+//    if (this->getId() == simulation.getModuleByPath("server")->getId())
+//      sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
+//    else
+//      sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
+//
+//    this->setDisplayString(newDisplay);
+//    return;
+//  }
 
-      char outName[20];
-      sprintf(outName, "out %d to %d", this->getId(), recver->getId());
-
-      Transmission *completeTranmission = new Transmission(this, recver);
-
-      // check feasible
-      if (((Enviroment*) simulation.getModuleByPath("enviroment"))->isFeasibleTranmission(completeTranmission))
-      {
-        //      EV << "Recv" << endl;
-        send(this->broadcastMessage->dup(), outName);
-
-        ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
-        ((Enviroment*) simulation.getModuleByPath("enviroment"))->stopTranmission(completeTranmission);
-      }
-      else
-      {
-        //      EV << "Disposed" << endl;
-        recver->bubble("dispose");
-
-        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
-      }
-    }
-
-    // Turn off broadcast
-    char newDisplay[20];
-    if (this->getId() == simulation.getModuleByPath("server")->getId())
-      sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", this->axisX, this->axisY);
-    else
-      sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", this->axisX, this->axisY);
-
-    this->setDisplayString(newDisplay);
-    return;
-  }
-
-  // Check arrival message
+// Check arrival message
   if (msg->getKind() == IP_PACKET)
   {
     // receive RPL construct
@@ -126,17 +115,17 @@ void Core::broadcast(IpPacket *msg)
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=120", this->axisX, this->axisY);
   this->setDisplayString(newDisplay);
 
-  for (unsigned int i = 0; i < this->neighbor.size(); i++)
-  {
-    char outName[20];
-    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
-
-    // register transmission
-    ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(
-        new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
-
-//    send(broadcastMessage->dup(), outName);
-  }
+//  for (unsigned int i = 0; i < this->neighbor.size(); i++)
+//  {
+//    char outName[20];
+//    sprintf(outName, "out %d to %d", this->getId(), this->neighbor.at(i));
+//
+//    // register transmission
+////    ((Enviroment*) simulation.getModuleByPath("enviroment"))->registerTranmission(
+////        new Transmission(this, (Core*) simulation.getModule(this->neighbor.at(i))));
+//
+////    send(broadcastMessage->dup(), outName);
+//  }
 
   int finishTime = 1;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, FIN_TRANSMISS));

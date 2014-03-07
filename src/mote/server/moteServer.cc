@@ -21,12 +21,8 @@ namespace wsn_energy {
 
 Define_Module(MoteServer);
 
-void MoteServer::initialize()
-{
-  this->axisX = par("axisX");
-  this->axisY = par("axisY");
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
+MoteServer::~MoteServer(){
+  this->neighbor.clear();
 }
 
 }

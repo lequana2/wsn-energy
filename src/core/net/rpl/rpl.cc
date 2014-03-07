@@ -68,13 +68,13 @@ void RPL::sendDIS(int convergence)
 
   icmp->setConvergence(convergence);
 
-  for (unsigned int i = 0; i < core->neighbor.size(); i++)
-  {
-    DIS *icmp_dup = icmp->dup();
-    icmp_dup->setRecvID(this->core->neighbor.at(i));
-
-    core->broadcast(icmp);
-  }
+//  for (unsigned int i = 0; i < core->neighbor.size(); i++)
+//  {
+//    DIS *icmp_dup = icmp->dup();
+//    icmp_dup->setRecvID(this->core->neighbor.at(i));
+//
+//    core->broadcast(icmp);
+//  }
 }
 
 void RPL::receiveDIO(DIO* msg)
