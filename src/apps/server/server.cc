@@ -22,8 +22,7 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-  //WSN set Root
-//  this->rpl->rpl_set_root();
+  App::initialize();
 }
 
 void Server::handleMessage(cMessage *msg)

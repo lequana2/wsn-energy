@@ -21,24 +21,24 @@
 #ifndef TRANMISSION_H_
 #define TRANMISSION_H_
 
-#include "mote.h"
+#include "app.h"
 
 namespace wsn_energy {
 
 class Transmission
 {
   public:
-    Transmission(Mote *sender, Mote *recver);
+    Transmission(App *sender, App *recver);
 
-    virtual Mote* getSender();
-    virtual Mote* getRecver();
+    virtual App* getSender();
+    virtual App* getRecver();
 
     virtual bool isCollided();
     virtual void collide();
 
   private:
-    Mote *sender;
-    Mote *recver;
+    App *sender;
+    App *recver;
     bool collision;
 };
 

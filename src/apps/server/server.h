@@ -16,14 +16,14 @@
 #ifndef __WSN_ENERGY_SINK_H
 #define __WSN_ENERGY_SINK_H
 
-#include <omnetpp.h>
+#include "app.h"
 
 namespace wsn_energy {
 
 /**
  * Message sink; see NED file for more info.
  */
-class Server: public cSimpleModule
+class Server: public App
 {
   protected:
     virtual void initialize();

@@ -13,20 +13,33 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <mote.h>
+#ifndef APP_H_
+#define APP_H_
+
+#include <omnetpp.h>
+
+#include "core.h"
 
 namespace wsn_energy {
 
-void Mote::initialize()
+class App : public cSimpleModule
 {
-  this->axisX = par("axisX");
-  this->axisY = par("axisY");
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
-}
+  protected:
+    Core *core;
 
-void Mote::finish()
-{
-}
+  public:
+    int axisX;
+    int axisY;
+    int trRange;
+    int coRange;
+
+    std::list<int> neighbor;
+
+    App();
+    virtual ~App();
+    virtual void initialize();
+};
 
 } /* namespace wsn_energy */
+
+#endif /* APP_H_ */

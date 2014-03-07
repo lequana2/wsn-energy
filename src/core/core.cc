@@ -22,6 +22,13 @@ namespace wsn_energy {
 
 Define_Module(Core);
 
+/*
+ * Set up a kernel
+ */
+void Core::setUp(){
+  this->initialize();
+}
+
 //---------------------------------------------------------------------------//
 void Core::initialize()
 {
@@ -98,6 +105,10 @@ void Core::handleMessage(cMessage *msg)
     {
     }
   }
+}
+
+void Core::finish()
+{
 }
 
 //---------------------------------------------------------------------------//

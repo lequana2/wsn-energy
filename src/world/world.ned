@@ -13,18 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.mote.client;
-
-import wsn_energy.mote.Mote;
-import wsn_energy.core.Core;
-import wsn_energy.apps.client.Client;
+package wsn_energy.world;
 
 //
-// TODO auto-generated type
+// Utilities about simulation world
 //
-module MoteClient extends Mote
+simple World
 {
-    submodules:
-        app: Client;
-        core: Core;
+    parameters:
+        int numberClient;
+
+        @display("p=-50,-10;i=misc/globe");
 }

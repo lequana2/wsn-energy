@@ -13,29 +13,40 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef MOTE_H_
-#define MOTE_H_
+#ifndef ENVIROMENT_H_
+#define ENVIROMENT_H_
 
 #include <omnetpp.h>
 
-#include "list"
+#include "transmission.h"
 
 namespace wsn_energy {
 
-class Mote : public cCompoundModule
+class World : public cSimpleModule
 {
   public:
-    int axisX;
-    int axisY;
-    int trRange;
-    int coRange;
+    int numberClient;
 
-    std::list<int> neighbor;
+    void registerTranmission(Transmission*);
+    bool isFeasibleTranmission(Transmission*);
+    void stopTranmission(Transmission*);
 
+    double calculateDistance(App*, App*);
+    double calculateDistance(int, int, int, int);
+
+  private:
+    std::list<Transmission*> onTheAir;
+    void arrangeNodes(); // Arrange nodes in positions
+    void connectNodes(); // Connect adjacent nodes
+
+  protected:
     virtual void initialize();
-    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
+
+    void checkConnection(App*);
+    int deployConnection(App*, App*);
 };
 
 } /* namespace wsn_energy */
 
-#endif /* MOTE_H_ */
+#endif /* ENVIROMENT_H_ */

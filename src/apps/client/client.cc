@@ -23,6 +23,7 @@ Define_Module(Client);
 
 void Client::initialize()
 {
+  App::initialize();
 }
 
 void Client::handleMessage(cMessage *msg)
@@ -34,6 +35,10 @@ void Client::handleMessage(cMessage *msg)
   }
 
   delete msg;
+}
+
+void Client::finish()
+{
 }
 
 }

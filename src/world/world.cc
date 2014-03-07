@@ -13,17 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <enviroment.h>
+#include "world.h"
 
-#include "moteClient.h"
-#include "moteServer.h"
-#include "mote.h"
+#include <math.h>
+#include "app.h"
 
 namespace wsn_energy {
 
-Define_Module(Enviroment);
+Define_Module(World);
 
-void Enviroment::initialize()
+void World::initialize()
 {
   this->numberClient = par("numberClient");
 
@@ -31,83 +30,88 @@ void Enviroment::initialize()
   arrangeNodes();
 
   // Create connections
-//  connectNodes();
+  connectNodes();
 }
 
-void Enviroment::handleMessage(cMessage *msg)
+void World::handleMessage(cMessage *msg)
 {
 }
 
 /*
  * Arrange position of nodes in network.
  */
-void Enviroment::arrangeNodes()
+void World::arrangeNodes()
 {
   for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
-    sprintf(modulePath, "client[%d]", i);
-    Mote *mote = (Mote*) simulation.getModuleByPath(modulePath);
+    sprintf(modulePath, "client[%d].app", i);
+    App *app = (App*) simulation.getModuleByPath(modulePath);
 
     // Partition
-    mote->axisX = (i % 10) * 100 + 15;
-    mote->axisY = (i / 10) * 100 + 50;
+    app->axisX = (i % 10) * 100 + 20;
+    app->axisY = (i / 10) * 100 + 50;
     if ((i / 10) % 2 != 0)
-      mote->axisX += 50;
+      app->axisX += 50;
 
     // Randomize
-    mote->axisX = uniform(mote->axisX - 20, mote->axisX + 20);
-    mote->axisY = uniform(mote->axisY - 20, mote->axisY + 20);
+    app->axisX = uniform(app->axisX - 20, app->axisX + 20);
+    app->axisY = uniform(app->axisY - 20, app->axisY + 20);
 
-    EV << i << " " << mote->axisX << " " << mote->axisY << " " << endl;
+//    EV << i << " " << app->axisX << " " << app->axisY << " " << endl;
 
     char newDisplay[20];
-    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", mote->axisX, mote->axisY);
-    mote->setDisplayString(newDisplay);
+    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", app->axisX, app->axisY);
+    app->getParentModule()->setDisplayString(newDisplay);
   }
 }
 
 /*
  * Create connection accords to every node
  */
-void Enviroment::connectNodes()
+void World::connectNodes()
 {
-  Mote *server = (Mote*) simulation.getModuleByPath("server");
+  // Connect server to other(s)
+  App *server = (App*) simulation.getModuleByPath("server.app");
   this->checkConnection(server);
 
+  // Connect client(s) to other(s)
   for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
-    sprintf(modulePath, "client[%d]", i);
-    this->checkConnection((Mote*) simulation.getModuleByPath(modulePath));
+    sprintf(modulePath, "client[%d].app", i);
+    this->checkConnection((App*) simulation.getModuleByPath(modulePath));
   }
 }
 
 /*
  * Create connection from node to others
  */
-void Enviroment::checkConnection(Mote *mote)
+void World::checkConnection(App *app)
 {
 // Check with server
-  Mote *module = (Mote*) simulation.getModuleByPath("server");
-  if (deployConnection(mote, module))
-    mote->neighbor.push_back(module->getId());
+  App *server = (App*) simulation.getModuleByPath("server.app");
+  if (deployConnection(app, server))
+    app->neighbor.push_back(server->getId());
 
 // Check with client(s)
   for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
-    sprintf(modulePath, "client[%d]", i);
-    Mote *module = (Mote*) simulation.getModuleByPath(modulePath);
+    sprintf(modulePath, "client[%d].app", i);
+    App *module = (App*) simulation.getModuleByPath(modulePath);
 
-    if (deployConnection(mote, module))
-      mote->neighbor.push_back(module->getId());
+    if (deployConnection(app, module))
+      app->neighbor.push_back(module->getId());
   }
 }
 
-int Enviroment::deployConnection(Mote *x, Mote *y)
+/*
+ * Check and create connection
+ */
+int World::deployConnection(App *x, App *y)
 {
-  if (calculateDistance(x->axisX, x->axisY, y->axisX, y->axisY) > x->trRange)
+  if (calculateDistance(x, y) > x->trRange)
     return 0;
   if (x->getId() == y->getId())
     return 0;
@@ -118,19 +122,20 @@ int Enviroment::deployConnection(Mote *x, Mote *y)
   cGate *outGate;
   cGate *inGate;
 
-  sprintf(setOutConnectionName, "out %d to %d", x->getId(), y->getId());
-  sprintf(setInConnectionName, "in %d to %d", x->getId(), y->getId());
+  sprintf(setOutConnectionName, "out %d to %d", x->getParentModule()->getId(), y->getParentModule()->getId());
+  sprintf(setInConnectionName, "in %d to %d", x->getParentModule()->getId(), y->getParentModule()->getId());
 
-  outGate = x->addGate(setOutConnectionName, cGate::OUTPUT);
-  inGate = y->addGate(setInConnectionName, cGate::INPUT);
+  outGate = x->getParentModule()->addGate(setOutConnectionName, cGate::OUTPUT);
+  inGate = y->getParentModule()->addGate(setInConnectionName, cGate::INPUT);
 
-  //WSN create channel
-  cDatarateChannel *channel = cDatarateChannel::create(NULL);
-//  channel->setDatarate(250000);
-//  channel->setDelay(1);
+  // create channel
+//  cDatarateChannel *channel = cDatarateChannel::create(NULL);
+  //  channel->setDatarate(250000);
+  //  channel->setDelay(1);
 
-  outGate->connectTo(inGate, channel);
-  channel->callInitialize();
+//  outGate->connectTo(inGate, channel);
+  outGate->connectTo(inGate);
+//  channel->callInitialize();
 
   //hidden connection
 //  outGate->setDisplayString("ls=,0");
@@ -138,33 +143,36 @@ int Enviroment::deployConnection(Mote *x, Mote *y)
   return 1;
 }
 
-double Enviroment::calculateDistance(Mote *a, Mote *b)
+/*
+ * Calculate distance util
+ */
+double World::calculateDistance(App *a, App *b)
 {
   return this->calculateDistance(a->axisX, a->axisY, b->axisX, b->axisY);
 }
 
-double Enviroment::calculateDistance(int x1, int y1, int x2, int y2)
+double World::calculateDistance(int x1, int y1, int x2, int y2)
 {
   int x = (x1 - x2) * (x1 - x2);
   int y = (y1 - y2) * (y1 - y2);
   return sqrt(x + y);
 }
 
-void Enviroment::registerTranmission(Transmission *tranmission)
+void World::registerTranmission(Transmission *tranmission)
 {
   this->onTheAir.push_back(tranmission);
 
   if (this->onTheAir.size() == 1)
     return;
 
-  Mote* sender = tranmission->getSender();
-  Mote* recver = tranmission->getRecver();
+  App* sender = tranmission->getSender();
+  App* recver = tranmission->getRecver();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    Mote *otherSender = (*otherTranmission)->getSender();
+    App *otherSender = (*otherTranmission)->getSender();
 
     // check is same source
     if (otherSender == sender)
@@ -172,7 +180,7 @@ void Enviroment::registerTranmission(Transmission *tranmission)
     // check interference
     else
     {
-      Mote *otherRecver = (*otherTranmission)->getRecver();
+      App *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
       if (tranmission->isCollided())
@@ -189,13 +197,13 @@ void Enviroment::registerTranmission(Transmission *tranmission)
   }
 }
 
-bool Enviroment::isFeasibleTranmission(Transmission* tranmission)
+bool World::isFeasibleTranmission(Transmission* tranmission)
 {
   if (this->onTheAir.size() == 1)
     return true;
 
-  Mote* sender = tranmission->getSender();
-  Mote* recver = tranmission->getRecver();
+  App* sender = tranmission->getSender();
+  App* recver = tranmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
@@ -208,7 +216,7 @@ bool Enviroment::isFeasibleTranmission(Transmission* tranmission)
   return false;
 }
 
-void Enviroment::stopTranmission(Transmission* trans)
+void World::stopTranmission(Transmission* trans)
 {
   this->onTheAir.remove(trans);
 }

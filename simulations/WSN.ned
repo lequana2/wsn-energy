@@ -15,9 +15,11 @@
 
 package wsn_energy.simulations;
 
-import wsn_energy.mote.server.MoteServer;
-import wsn_energy.mote.client.MoteClient;
-import wsn_energy.world.Enviroment;
+//import wsn_energy.apps.server.Server;
+//import wsn_energy.apps.client.Client;
+import wsn_energy.mote.ClientMote;
+import wsn_energy.mote.ServerMote;
+import wsn_energy.world.World;
 import wsn_energy.world.Statistic;
 
 //
@@ -42,27 +44,21 @@ network WSN
         @display("bgb=$width,$height,#C6C6FF,#0000FF,2");
 
     submodules:
-        server: MoteServer {
+        server: ServerMote {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-
                 axisX = width / 2;
                 axisY = 0;
-
-                @display("p=$axisX,$axisY");
         }
-        client[numberClient]: MoteClient {
+        client[numberClient]: ClientMote {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-
                 axisX = 0;
                 axisY = 0;
-                
-                  @display("p=$axisX,$axisY;i=misc/node;is=vs");
         }
-        enviroment: Enviroment {
+        world: World {
             parameters:
                 numberClient = numberClient;
         }

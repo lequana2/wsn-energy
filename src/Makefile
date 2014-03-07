@@ -25,8 +25,6 @@ INCLUDE_PATH = \
     -Icore/net/ip \
     -Icore/net/rpl \
     -Imote \
-    -Imote/client \
-    -Imote/server \
     -Iplatform \
     -Iplatform/battery \
     -Iplatform/radio \
@@ -45,18 +43,16 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
+    $O/apps/app.o \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
     $O/core/core.o \
     $O/core/net/rpl/rpl.o \
-    $O/mote/mote.o \
-    $O/mote/client/moteClient.o \
-    $O/mote/server/moteServer.o \
     $O/platform/battery/battery.o \
     $O/platform/radio/radio.o \
     $O/platform/radio/transmission.o \
     $O/world/statistic.o \
-    $O/world/enviroment.o \
+    $O/world/world.o \
     $O/core/net/ip/ipPacket_m.o
 
 # Message files
@@ -144,8 +140,6 @@ clean:
 	$(Q)-rm -f core/net/ip/*_m.cc core/net/ip/*_m.h
 	$(Q)-rm -f core/net/rpl/*_m.cc core/net/rpl/*_m.h
 	$(Q)-rm -f mote/*_m.cc mote/*_m.h
-	$(Q)-rm -f mote/client/*_m.cc mote/client/*_m.h
-	$(Q)-rm -f mote/server/*_m.cc mote/server/*_m.h
 	$(Q)-rm -f platform/*_m.cc platform/*_m.h
 	$(Q)-rm -f platform/battery/*_m.cc platform/battery/*_m.h
 	$(Q)-rm -f platform/radio/*_m.cc platform/radio/*_m.h
@@ -156,12 +150,22 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/net/*.cc core/net/ip/*.cc core/net/rpl/*.cc mote/*.cc mote/client/*.cc mote/server/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/net/*.cc core/net/ip/*.cc core/net/rpl/*.cc mote/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+$O/apps/app.o: apps/app.cc \
+	apps/app.h \
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/net/rpl/rpl.h
 $O/apps/client/client.o: apps/client/client.cc \
-	apps/client/client.h
+	apps/app.h \
+	apps/client/client.h \
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/net/rpl/rpl.h
 $O/apps/server/server.o: apps/server/server.cc \
+	apps/app.h \
 	apps/server/server.h \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
@@ -176,14 +180,6 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/net/rpl/rpl.h
-$O/mote/mote.o: mote/mote.cc \
-	mote/mote.h
-$O/mote/client/moteClient.o: mote/client/moteClient.cc \
-	mote/client/moteClient.h \
-	mote/mote.h
-$O/mote/server/moteServer.o: mote/server/moteServer.cc \
-	mote/mote.h \
-	mote/server/moteServer.h
 $O/platform/battery/battery.o: platform/battery/battery.cc \
 	platform/battery/battery.h
 $O/platform/radio/radio.o: platform/radio/radio.cc \
@@ -192,14 +188,18 @@ $O/platform/radio/radio.o: platform/radio/radio.cc \
 	core/net/rpl/rpl.h \
 	platform/radio/radio.h
 $O/platform/radio/transmission.o: platform/radio/transmission.cc \
-	mote/mote.h \
+	apps/app.h \
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/net/rpl/rpl.h \
 	platform/radio/transmission.h
-$O/world/enviroment.o: world/enviroment.cc \
-	mote/client/moteClient.h \
-	mote/mote.h \
-	mote/server/moteServer.h \
-	platform/radio/transmission.h \
-	world/enviroment.h
 $O/world/statistic.o: world/statistic.cc \
 	world/statistic.h
+$O/world/world.o: world/world.cc \
+	apps/app.h \
+	core/core.h \
+	core/net/ip/ipPacket_m.h \
+	core/net/rpl/rpl.h \
+	platform/radio/transmission.h \
+	world/world.h
 

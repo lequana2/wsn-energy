@@ -22,4 +22,9 @@ simple Server
 {
     parameters:
         @class("Server");
+
+        int axisX;
+        int axisY;
+        int trRange;
+        int coRange;
 }
