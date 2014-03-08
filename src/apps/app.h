@@ -23,12 +23,6 @@ namespace wsn_energy {
 class App : public cSimpleModule
 {
   public:
-    int axisX;
-    int axisY;
-    int trRange;
-    int coRange;
-
-    std::vector<int> neighbor;
 
     App();
     virtual ~App();

@@ -21,24 +21,24 @@
 #ifndef TRANMISSION_H_
 #define TRANMISSION_H_
 
-#include "core.h"
+#include "radio.h"
 
 namespace wsn_energy {
 
 class Transmission
 {
   public:
-    Transmission(Core *sender, Core *recver);
+    Transmission(Radio *sender, Radio *recver);
 
-    virtual Core* getSender();
-    virtual Core* getRecver();
+    virtual Radio* getSender();
+    virtual Radio* getRecver();
 
     virtual bool isCollided();
     virtual void collide();
 
   private:
-    Core *sender;
-    Core *recver;
+    Radio *sender;
+    Radio *recver;
     bool collision;
 };
 

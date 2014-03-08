@@ -23,12 +23,7 @@ simple Server
     parameters:
         @class("Server");
 
-        int axisX;
-        int axisY;
-        int trRange;
-        int coRange;
-
     gates:
-        input in;
-        output out;
+        input appIn;
+        output appOut;
 }

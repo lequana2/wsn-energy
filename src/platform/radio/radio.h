@@ -17,25 +17,40 @@
 #define RADIO_H_
 
 #include <omnetpp.h>
-#include "core.h"
+#include "ipPacket_m.h"
 
-#define TX_POWER 0
-#define RX_POWER 0
+#define POWER_TX 1
+#define POWER_RX 2
+#define POWER_SB 3
+
+#define TRX_BROADCAST 0
+#define RCX_BROADCAST 1
+#define END_BROADCAST 2
 
 namespace wsn_energy {
 
 class Radio : public cSimpleModule
 {
   private:
-    virtual void turnOn();
-    virtual void turnOff();
+    virtual void transmit_on();
+    virtual void transmit_off();
+    virtual void receive_on();
+    virtual void receive_off();
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);
+    virtual void finish();
 
   public:
-    virtual void send(Core *sender, Core *recver, cMessage *msg);
+    int trRange;
+    int coRange;
+
+    // on the air broadcast
+    IpPacket *broadcastMessage;
+
+    // neighbor list
+    std::vector<int> neighbor;
 };
 
 } /* namespace wsn_energy */

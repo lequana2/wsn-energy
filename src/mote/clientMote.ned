@@ -17,6 +17,7 @@ package wsn_energy.mote;
 
 import wsn_energy.apps.client.Client;
 import wsn_energy.core.Core;
+import wsn_energy.platform.radio.Radio;
 
 //
 // TODO auto-generated type
@@ -28,19 +29,19 @@ module ClientMote
         int axisY;
         int trRange;
         int coRange;
-        @display("p=$axisX,$axisY");
+        @display("p=$axisX,$axisY;i=misc/node;is=vs");
 
     submodules:
         core: Core;
-        app: Client {
+        app: Client;
+        radio: Radio {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-                axisX = axisX;
-                axisY = axisY;
         }
-
     connections allowunconnected:
-        core.out --> app.in;
-        app.out --> core.in;
+        core.appOut --> app.appIn;
+        app.appOut --> core.appIn;
+        core.radioOut --> radio.radioIn;
+        radio.radioOut --> core.radioIn;
 }

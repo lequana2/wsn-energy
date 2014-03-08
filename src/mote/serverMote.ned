@@ -17,6 +17,7 @@ package wsn_energy.mote;
 
 import wsn_energy.apps.server.Server;
 import wsn_energy.core.Core;
+import wsn_energy.platform.radio.Radio;
 
 //
 // TODO auto-generated type
@@ -32,15 +33,15 @@ module ServerMote
 
     submodules:
         core: Core;
-        app: Server {
+        app: Server;
+        radio: Radio {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-                axisX = axisX;
-                axisY = axisY;
         }
-
     connections allowunconnected:
-        core.out --> app.in;
-        app.out --> core.in;
+        core.appOut --> app.appIn;
+        app.appOut --> core.appIn;
+        core.radioOut --> radio.radioIn;
+        radio.radioOut --> core.radioIn;
 }

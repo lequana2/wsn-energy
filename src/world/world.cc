@@ -43,25 +43,33 @@ void World::arrangeNodes()
 {
   for (int i = 0; i < numberClient; i++)
   {
-    char modulePath[20];
-    sprintf(modulePath, "client[%d].app", i);
-    App *app = (App*) simulation.getModuleByPath(modulePath);
+    int x, y;
 
     // Partition
-    app->axisX = (i % 10) * 100 + 20;
-    app->axisY = (i / 10) * 100 + 50;
+    x = (i % 10) * 100 + 20;
+    y = (i / 10) * 100 + 50;
+
     if ((i / 10) % 2 != 0)
-      app->axisX += 50;
+      x += 50;
 
     // Randomize
-    app->axisX = uniform(app->axisX - 20, app->axisX + 20);
-    app->axisY = uniform(app->axisY - 20, app->axisY + 20);
+    x = uniform(x - 20, x + 20);
+    y = uniform(y - 20, y + 20);
 
-//    EV << i << " " << app->axisX << " " << app->axisY << " " << endl;
+    char modulePath[20];
+    sprintf(modulePath, "client[%d]", i);
+    cModule *mote = getParentModule()->getModuleByPath(modulePath);
+
+    mote->par("axisX").setDoubleValue(x);
+    mote->par("axisY").setDoubleValue(y);
+
+//    x = mote->par("axisX");
+//    y = mote->par("axisY");
+//    ev << i << " " << x << " " << y << " " << endl;
 
     char newDisplay[20];
-    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", app->axisX, app->axisY);
-    app->getParentModule()->setDisplayString(newDisplay);
+    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", x, y);
+    mote->setDisplayString(newDisplay);
   }
 }
 
@@ -71,50 +79,51 @@ void World::arrangeNodes()
 void World::connectNodes()
 {
   // Connect server to other(s)
-  App *server = (App*) simulation.getModuleByPath("server.app");
+  Radio *server = (Radio*) simulation.getModuleByPath("server.radio");
   this->checkConnection(server);
 
   // Connect client(s) to other(s)
   for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
-    sprintf(modulePath, "client[%d].app", i);
-    this->checkConnection((App*) simulation.getModuleByPath(modulePath));
+    sprintf(modulePath, "client[%d].radio", i);
+    this->checkConnection((Radio*) simulation.getModuleByPath(modulePath));
   }
 }
 
 /*
  * Create connection from node to others
  */
-void World::checkConnection(App *app)
+void World::checkConnection(Radio *radio)
 {
-// Check with server
-  App *server = (App*) simulation.getModuleByPath("server.app");
-  if (deployConnection(app, server))
-    app->neighbor.push_back(server->getParentModule()->getModuleByPath(".core")->getId());
+  // Check with server
+  Radio *server = (Radio*) simulation.getModuleByPath("server.radio");
+  if (deployConnection(radio, server))
+    radio->neighbor.push_back(server->getParentModule()->getModuleByPath(".radio")->getId());
 
-// Check with client(s)
+  // Check with client(s)
   for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
-    sprintf(modulePath, "client[%d].app", i);
-    App *module = (App*) simulation.getModuleByPath(modulePath);
+    sprintf(modulePath, "client[%d].radio", i);
+    Radio *client = (Radio*) simulation.getModuleByPath(modulePath);
 
-    if (deployConnection(app, module))
-      app->neighbor.push_back(module->getParentModule()->getModuleByPath(".core")->getId());
+    if (deployConnection(radio, client))
+      radio->neighbor.push_back(client->getParentModule()->getModuleByPath(".radio")->getId());
   }
 }
 
 /*
  * Check and create connection
  */
-int World::deployConnection(App *x, App *y)
+int World::deployConnection(Radio *x, Radio *y)
 {
   if (calculateDistance(x, y) > x->trRange)
     return 0;
   if (x->getId() == y->getId())
     return 0;
-
+ev << "set up" << endl;
+  // set up connection
   char setOutConnectionName[20];
   char setInConnectionName[20];
 
@@ -138,11 +147,19 @@ int World::deployConnection(App *x, App *y)
 /*
  * Calculate distance util
  */
-double World::calculateDistance(App *a, App *b)
+double World::calculateDistance(Radio *a, Radio *b)
 {
-  return this->calculateDistance(a->axisX, a->axisY, b->axisX, b->axisY);
+  int x1 = a->getParentModule()->par("axisX");
+  int y1 = a->getParentModule()->par("axisY");
+  int x2 = b->getParentModule()->par("axisX");
+  int y2 = b->getParentModule()->par("axisY");
+
+  return this->calculateDistance(x1, y1, x2, y2);
 }
 
+/*
+ * Calculate distance util
+ */
 double World::calculateDistance(int x1, int y1, int x2, int y2)
 {
   int x = (x1 - x2) * (x1 - x2);
@@ -157,64 +174,64 @@ void World::registerTranmission(Transmission *tranmission)
   if (this->onTheAir.size() == 1)
     return;
 
-  Core* sender = tranmission->getSender();
-  Core* recver = tranmission->getRecver();
+//  Core* sender = tranmission->getSender();
+//  Core* recver = tranmission->getRecver();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    Core *otherSender = (*otherTranmission)->getSender();
-
-    // check is same source
-    if (otherSender == sender)
-      ;
-    // check interference
-    else
-    {
-      Core *otherRecver = (*otherTranmission)->getRecver();
-
-      // at this transmission
-      if (tranmission->isCollided())
-        ;
-      else if (calculateDistance((App*) otherSender->getParentModule()->getModuleByPath(".app"),
-          (App*) recver->getParentModule()->getModuleByPath(".app"))
-          < ((App*) otherSender->getParentModule()->getModuleByPath(".app"))->coRange)
-        tranmission->collide();
-
-      // at other transmission
-      if ((*otherTranmission)->isCollided())
-        ;
-      else if (calculateDistance((App*) sender->getParentModule()->getModuleByPath(".app"),
-          (App*) otherRecver->getParentModule()->getModuleByPath(".app"))
-          < ((App*) sender->getParentModule()->getModuleByPath(".app"))->coRange)
-        (*otherTranmission)->collide();
-    }
+//    Core *otherSender = (*otherTranmission)->getSender();
+//
+//    // check is same source
+//    if (otherSender == sender)
+//      ;
+//    // check interference
+//    else
+//    {
+//      Core *otherRecver = (*otherTranmission)->getRecver();
+//
+//      // at this transmission
+//      if (tranmission->isCollided())
+//        ;
+//      else if (calculateDistance((Radio*) otherSender->getParentModule()->getModuleByPath(".Radio"),
+//          (Radio*) recver->getParentModule()->getModuleByPath(".Radio"))
+//          < ((Radio*) otherSender->getParentModule()->getModuleByPath(".Radio"))->coRange)
+//        tranmission->collide();
+//
+//      // at other transmission
+//      if ((*otherTranmission)->isCollided())
+//        ;
+//      else if (calculateDistance((Radio*) sender->getParentModule()->getModuleByPath(".Radio"),
+//          (Radio*) otherRecver->getParentModule()->getModuleByPath(".Radio"))
+//          < ((Radio*) sender->getParentModule()->getModuleByPath(".Radio"))->coRange)
+//        (*otherTranmission)->collide();
+//    }
   }
 }
 
-bool World::isFeasibleTranmission(Transmission* tranmission)
-{
-  if (this->onTheAir.size() == 1)
-    return true;
+//bool World::isFeasibleTranmission(Transmission* tranmission)
+//{
+//  if (this->onTheAir.size() == 1)
+//    return true;
 
-  Core* sender = tranmission->getSender();
-  Core* recver = tranmission->getRecver();
+//  Core* sender = tranmission->getSender();
+//  Core* recver = tranmission->getRecver();
+//
+//  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
+//      otherTranmission != this->onTheAir.end(); otherTranmission++)
+//  {
+//    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
+//        && !(*otherTranmission)->isCollided())
+//      return true;
+//  }
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
-      otherTranmission != this->onTheAir.end(); otherTranmission++)
-  {
-    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
-        && !(*otherTranmission)->isCollided())
-      return true;
-  }
-
-  return false;
-}
-
-void World::stopTranmission(Transmission* trans)
-{
-  this->onTheAir.remove(trans);
-}
+//  return false;
+//}
+//
+//void World::stopTranmission(Transmission* trans)
+//{
+//  this->onTheAir.remove(trans);
+//}
 
 } /* namespace wsn_energy */

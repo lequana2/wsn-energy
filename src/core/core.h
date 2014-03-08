@@ -46,13 +46,13 @@ class Core : public cSimpleModule
     //WSN RPL
     RPL *rpl;
 
-    //on the air broadcast
-    IpPacket *broadcastMessage;
-
     //WSN default route to server
     std::list<int> route;
 
     void broadcast(IpPacket*);
+
+    Core();
+    ~Core();
 
   protected:
     virtual void initialize();

@@ -23,15 +23,14 @@ App::App()
 
 App::~App()
 {
-  this->neighbor.clear();
 }
 
 void App::initialize()
 {
-  this->axisX = par("axisX");
-  this->axisY = par("axisY");
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
+//  this->axisX = par("axisX");
+//  this->axisY = par("axisY");
+//  this->trRange = par("trRange");
+//  this->coRange = par("coRange");
 }
 
 } /* namespace wsn_energy */

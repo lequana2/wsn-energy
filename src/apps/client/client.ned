@@ -23,14 +23,9 @@ simple Client
     parameters:
         @class("Client");
 
-        int axisX;
-        int axisY;
-        int trRange;
-        int coRange;
-
         volatile double sendInterval @unit(s) = default(exponential(1s));
 
     gates:
-        input in;
-        output out;
+        input appIn;
+        output appOut;
 }

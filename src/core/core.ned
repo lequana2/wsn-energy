@@ -21,8 +21,9 @@ package wsn_energy.core;
 simple Core
 {
     gates:
-        input in;
-        output out;
+        input appIn;
+        output appOut;
 
-        input stream @directin;
+        input radioIn;
+        output radioOut;
 }

@@ -20,4 +20,11 @@ package wsn_energy.platform.radio;
 //
 simple Radio
 {
+    parameters:
+        int trRange;
+        int coRange;
+        
+    gates:
+        input radioIn;
+        output radioOut;
 }

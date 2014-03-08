@@ -169,6 +169,7 @@ $O/core/core.o: core/core.cc \
 	core/core.h \
 	core/net/ip/ipPacket_m.h \
 	core/net/rpl/rpl.h \
+	platform/radio/radio.h \
 	platform/radio/transmission.h \
 	world/statistic.h \
 	world/world.h
@@ -181,22 +182,17 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 $O/platform/battery/battery.o: platform/battery/battery.cc \
 	platform/battery/battery.h
 $O/platform/radio/radio.o: platform/radio/radio.cc \
-	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h \
 	platform/radio/radio.h
 $O/platform/radio/transmission.o: platform/radio/transmission.cc \
-	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h \
+	platform/radio/radio.h \
 	platform/radio/transmission.h
 $O/world/statistic.o: world/statistic.cc \
 	world/statistic.h
 $O/world/world.o: world/world.cc \
-	apps/app.h \
-	core/core.h \
 	core/net/ip/ipPacket_m.h \
-	core/net/rpl/rpl.h \
+	platform/radio/radio.h \
 	platform/radio/transmission.h \
 	world/world.h
 

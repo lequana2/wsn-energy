@@ -98,7 +98,7 @@ void RPL::receiveDIO(DIO* msg)
     // EV << setOutConnectionName << endl;
 
     this->rplDag.dodagid = ((DIO*) msg)->getDodagID();
-    this->sendDIO();
+//    this->sendDIO();
   }
 }
 

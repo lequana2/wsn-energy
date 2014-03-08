@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 
 #include "transmission.h"
-#include "app.h"
+#include "radio.h"
 
 namespace wsn_energy {
 
@@ -32,7 +32,7 @@ class World : public cSimpleModule
     bool isFeasibleTranmission(Transmission*);
     void stopTranmission(Transmission*);
 
-    double calculateDistance(App*, App*);
+    double calculateDistance(Radio*, Radio*);
     double calculateDistance(int, int, int, int);
 
     std::list<Transmission*> onTheAir;
@@ -45,8 +45,8 @@ class World : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-    void checkConnection(App*);
-    int deployConnection(App*, App*);
+    void checkConnection(Radio*);
+    int deployConnection(Radio*, Radio*);
 };
 
 } /* namespace wsn_energy */

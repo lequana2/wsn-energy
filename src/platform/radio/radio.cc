@@ -21,23 +21,43 @@ Define_Module(Radio)
 
 void Radio::initialize()
 {
+  this->trRange = par("trRange");
+  this->coRange = par("coRange");
 }
 
-void Radio::handleMessage(cMessage*)
+void Radio::handleMessage(cMessage* msg)
+{
+  if (msg->getKind() == TRX_BROADCAST)
+  {
+    ev << "Trans on" << endl;
+  }
+  else if (msg->getKind() == RCX_BROADCAST)
+  {
+    ev << "Recv on" << endl;
+  }
+  else if (msg->getKind() == END_BROADCAST)
+  {
+    ev << "Turn off" << endl;
+  }
+}
+
+void Radio::finish()
 {
 }
 
-void Radio::send(Core *sender, Core *recver, cMessage *msg)
+void Radio::transmit_on()
 {
 }
 
-void Radio::turnOn()
+void Radio::receive_on()
+{
+}
+void Radio::transmit_off()
 {
 }
 
-void Radio::turnOff()
+void Radio::receive_off()
 {
 }
-
 }
 /* namespace wsn_energy */
