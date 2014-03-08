@@ -40,8 +40,8 @@ void Core::initialize()
   this->rpl = new RPL(this);
 
 //  scheduleAt(simTime(), new cMessage("abc"));
-//  if (this->getId() == simulation.getModuleByPath("server.core")->getId())
-//    this->rpl->rpl_set_root();
+  if (this->getId() == simulation.getModuleByPath("server.core")->getId())
+    this->rpl->rpl_set_root();
 }
 //---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)
@@ -50,56 +50,6 @@ void Core::handleMessage(cMessage *msg)
   if (msg->getKind() == RPL_CONSTRUCT)
   {
     this->rpl->sendDIO();
-    return;
-  }
-
-  if (msg->getKind() == FIN_TRANSMISS)
-  {
-    //App layer
-//    App* app = ((App*) getParentModule()->getModuleByPath(".app"));
-//
-//    for (unsigned int i = 0; i < app->neighbor.size(); i++)
-//    {
-//      Core* recver = (Core*) simulation.getModule(app->neighbor.at(i));
-
-//      Transmission *completeTranmission = new Transmission(this, recver);
-
-      // check feasible
-
-//      if (((World*) simulation.getModuleByPath("world"))->isFeasibleTranmission(completeTranmission))
-//      {
-        // EV << "Recv" << endl;
-
-//        Radio::broadcastMessage->setRecvID(simulation.getModule(app->neighbor.at(i))->getParentModule()->getId());
-
-//        cGate* gate = simulation.getModule(app->neighbor.at(i))->gate("stream");
-//        sendDirect(Radio::broadcastMessage->dup(), gate);
-
-//        ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
-//
-//        ((World*) simulation.getModuleByPath("world"))->stopTranmission(completeTranmission);
-//      }
-//      else
-//      {
-//        // EV << "Disposed" << endl;
-//
-//        recver->getParentModule()->bubble("dispose");
-//
-//        ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
-//      }
-
-      // Turn on receiving broadcast
-//    }
-
-    // Turn off sending broadcast
-
-//    char newDisplay[20];
-//    if (this->getId() == simulation.getModuleByPath("server.core")->getId())
-//      sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", app->axisX, app->axisY);
-//    else
-//      sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", app->axisX, app->axisY);
-//    this->getParentModule()->setDisplayString(newDisplay);
-
     return;
   }
 
@@ -133,32 +83,10 @@ void Core::finish()
 //---------------------------------------------------------------------------//
 void Core::broadcast(IpPacket *msg)
 {
-  //buffer
-//  Radio::broadcastMessage = msg;
-//  Radio::broadcastMessage->setSendID(this->getParentModule()->getId());
+  Raw *raw = (Raw*) msg;
+  raw->setKind(TRX_BROADCAST);
 
-  //App layer
-//  App* app = ((App*) getParentModule()->getModuleByPath(".app"));
-
-  // start broadcasting
-//  char newDisplay[20];
-//  if (this->getId() == simulation.getModuleByPath("server.core")->getId())
-//    sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s;r=120", app->axisX, app->axisY);
-//  else
-//    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=120", app->axisX, app->axisY);
-//  this->getParentModule()->setDisplayString(newDisplay);
-
-//  for (unsigned int i = 0; i < app->neighbor.size(); i++)
-//  {
-    // register transmission
-//    ((World*) simulation.getModuleByPath("world"))->registerTranmission(
-//        new Transmission(this, ((Core*) simulation.getModule(app->neighbor.at(i)))));
-    // receiving
-//  }
-
-  int finishTime = 1;
-  scheduleAt(simTime() + finishTime, new cMessage(NULL, FIN_TRANSMISS));
-  send(new cMessage(NULL, TRX_BROADCAST), gate("radioOut"));
+  send(raw, gate("radioOut"));
 }
 
 } /* namespace wsn_energy */

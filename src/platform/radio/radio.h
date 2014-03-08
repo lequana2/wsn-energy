@@ -17,15 +17,13 @@
 #define RADIO_H_
 
 #include <omnetpp.h>
-#include "ipPacket_m.h"
-
-#define POWER_TX 1
-#define POWER_RX 2
-#define POWER_SB 3
+#include "packet_m.h"
 
 #define TRX_BROADCAST 0
 #define RCX_BROADCAST 1
+
 #define END_BROADCAST 2
+#define RCV_BROADCAST 3
 
 namespace wsn_energy {
 
@@ -47,10 +45,13 @@ class Radio : public cSimpleModule
     int coRange;
 
     // on the air broadcast
-    IpPacket *broadcastMessage;
+    Raw *broadcastMessage;
 
     // neighbor list
     std::vector<int> neighbor;
+
+    Radio();
+    ~Radio();
 };
 
 } /* namespace wsn_energy */

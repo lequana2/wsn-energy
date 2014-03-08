@@ -93,7 +93,8 @@ void RPL::receiveDIO(DIO* msg)
 
     //Draw new connection
     char setOutConnectionName[20];
-    sprintf(setOutConnectionName, "out %d to %d", msg->getRecvID(), msg->getSendID());
+    sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getParentModule()->getId(),
+        msg->getSenderModule()->getParentModule()->getId());
     core->getParentModule()->gate(setOutConnectionName)->setDisplayString("ls=red,1");
     // EV << setOutConnectionName << endl;
 

@@ -25,7 +25,11 @@ enum ICMP_CODE{
 	ICMP_DIS_CODE = 1;
 };
 
-packet IpPacket{
+packet Raw{
+	int type;
+}
+
+packet IpPacket extends Raw{
     int sendID;
     int recvID;
     int type;

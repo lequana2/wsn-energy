@@ -1,9 +1,9 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from core/net/ip/ipPacket.msg.
+// Generated file, do not edit! Created by opp_msgc 4.4 from packet/packet.msg.
 //
 
-#ifndef _IPPACKET_M_H_
-#define _IPPACKET_M_H_
+#ifndef _PACKET_M_H_
+#define _PACKET_M_H_
 
 #include <omnetpp.h>
 
@@ -17,7 +17,7 @@
 namespace wsn_energy {
 
 /**
- * Enum generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum IP_CODE{
  *     IP_ICMP = 0;
@@ -31,7 +31,7 @@ enum IP_CODE {
 };
 
 /**
- * Enum generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum ICMP_CODE{
  * 	ICMP_DIO_CODE = 0;
@@ -45,16 +45,53 @@ enum ICMP_CODE {
 };
 
 /**
- * Class generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet IpPacket{
+ * packet Raw{
+ * 	int type;
+ * }
+ * </pre>
+ */
+class Raw : public ::cPacket
+{
+  protected:
+    int type_var;
+
+  private:
+    void copy(const Raw& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const Raw&);
+
+  public:
+    Raw(const char *name=NULL, int kind=0);
+    Raw(const Raw& other);
+    virtual ~Raw();
+    Raw& operator=(const Raw& other);
+    virtual Raw *dup() const {return new Raw(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getType() const;
+    virtual void setType(int type);
+};
+
+inline void doPacking(cCommBuffer *b, Raw& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet IpPacket extends Raw{
  *     int sendID;
  *     int recvID;
  *     int type;
  * }
  * </pre>
  */
-class IpPacket : public ::cPacket
+class IpPacket : public ::wsn_energy::Raw
 {
   protected:
     int sendID_var;
@@ -90,7 +127,7 @@ inline void doPacking(cCommBuffer *b, IpPacket& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Data extends IpPacket {
  * 	int value;
@@ -127,7 +164,7 @@ inline void doPacking(cCommBuffer *b, Data& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet ICMP extends IpPacket{
  *     int icmp_code;
@@ -164,7 +201,7 @@ inline void doPacking(cCommBuffer *b, ICMP& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, ICMP& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIO extends ICMP{
  * 	int dodagID;
@@ -209,7 +246,7 @@ inline void doPacking(cCommBuffer *b, DIO& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>core/net/ip/ipPacket.msg</tt> by opp_msgc.
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS extends ICMP{
  * 	int flags;
@@ -259,4 +296,4 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
 
 }; // end namespace wsn_energy
 
-#endif // _IPPACKET_M_H_
+#endif // _PACKET_M_H_

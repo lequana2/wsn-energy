@@ -122,7 +122,7 @@ int World::deployConnection(Radio *x, Radio *y)
     return 0;
   if (x->getId() == y->getId())
     return 0;
-ev << "set up" << endl;
+
   // set up connection
   char setOutConnectionName[20];
   char setInConnectionName[20];
@@ -174,64 +174,64 @@ void World::registerTranmission(Transmission *tranmission)
   if (this->onTheAir.size() == 1)
     return;
 
-//  Core* sender = tranmission->getSender();
-//  Core* recver = tranmission->getRecver();
+  Radio* sender = tranmission->getSender();
+  Radio* recver = tranmission->getRecver();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-//    Core *otherSender = (*otherTranmission)->getSender();
-//
-//    // check is same source
-//    if (otherSender == sender)
-//      ;
-//    // check interference
-//    else
-//    {
-//      Core *otherRecver = (*otherTranmission)->getRecver();
-//
-//      // at this transmission
-//      if (tranmission->isCollided())
-//        ;
-//      else if (calculateDistance((Radio*) otherSender->getParentModule()->getModuleByPath(".Radio"),
-//          (Radio*) recver->getParentModule()->getModuleByPath(".Radio"))
-//          < ((Radio*) otherSender->getParentModule()->getModuleByPath(".Radio"))->coRange)
-//        tranmission->collide();
-//
-//      // at other transmission
-//      if ((*otherTranmission)->isCollided())
-//        ;
-//      else if (calculateDistance((Radio*) sender->getParentModule()->getModuleByPath(".Radio"),
-//          (Radio*) otherRecver->getParentModule()->getModuleByPath(".Radio"))
-//          < ((Radio*) sender->getParentModule()->getModuleByPath(".Radio"))->coRange)
-//        (*otherTranmission)->collide();
-//    }
+    Radio *otherSender = (*otherTranmission)->getSender();
+
+    // check is same source
+    if (otherSender == sender)
+      ;
+    // check interference
+    else
+    {
+      Radio *otherRecver = (*otherTranmission)->getRecver();
+
+      // at this transmission
+      if (tranmission->isCollided())
+        ;
+      else if (calculateDistance((Radio*) otherSender->getParentModule()->getModuleByPath(".radio"),
+          (Radio*) recver->getParentModule()->getModuleByPath(".radio"))
+          < ((Radio*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
+        tranmission->collide();
+
+      // at other transmission
+      if ((*otherTranmission)->isCollided())
+        ;
+      else if (calculateDistance((Radio*) sender->getParentModule()->getModuleByPath(".radio"),
+          (Radio*) otherRecver->getParentModule()->getModuleByPath(".radio"))
+          < ((Radio*) sender->getParentModule()->getModuleByPath(".radio"))->coRange)
+        (*otherTranmission)->collide();
+    }
   }
 }
 
-//bool World::isFeasibleTranmission(Transmission* tranmission)
-//{
-//  if (this->onTheAir.size() == 1)
-//    return true;
+bool World::isFeasibleTranmission(Transmission* tranmission)
+{
+  if (this->onTheAir.size() == 1)
+    return true;
 
-//  Core* sender = tranmission->getSender();
-//  Core* recver = tranmission->getRecver();
-//
-//  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
-//      otherTranmission != this->onTheAir.end(); otherTranmission++)
-//  {
-//    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
-//        && !(*otherTranmission)->isCollided())
-//      return true;
-//  }
+  Radio* sender = tranmission->getSender();
+  Radio* recver = tranmission->getRecver();
 
-//  return false;
-//}
-//
-//void World::stopTranmission(Transmission* trans)
-//{
-//  this->onTheAir.remove(trans);
-//}
+  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
+      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  {
+    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
+        && !(*otherTranmission)->isCollided())
+      return true;
+  }
+
+  return false;
+}
+
+void World::stopTranmission(Transmission* transmission)
+{
+  this->onTheAir.remove(transmission);
+}
 
 } /* namespace wsn_energy */

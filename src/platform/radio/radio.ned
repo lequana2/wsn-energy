@@ -27,4 +27,6 @@ simple Radio
     gates:
         input radioIn;
         output radioOut;
+        
+        input raw@directin;
 }
