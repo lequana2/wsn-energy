@@ -19,8 +19,33 @@ namespace wsn_energy {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum IP_CODE{
- *     IP_ICMP = 0;
+ * enum MESSAGE{
+ * 	
+ *  	TRX_BROADCAST = 4;
+ *  	RCX_BROADCAST = 3;
+ * 	TOF_BROADCAST = 2;
+ * 	ROF_BROADCAST = 1;
+ * 	
+ * 	CONTROL_FLAG = 4;
+ * 	ENVIRON_FLAG = 5;
+ * }
+ * </pre>
+ */
+enum MESSAGE {
+    TRX_BROADCAST = 4,
+    RCX_BROADCAST = 3,
+    TOF_BROADCAST = 2,
+    ROF_BROADCAST = 1,
+    CONTROL_FLAG = 4,
+    ENVIRON_FLAG = 5
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum IP_CODE {
+ * 	
+ * 	IP_ICMP = 0;
  * 	IP_DATA = 1;
  * }
  * </pre>
@@ -33,13 +58,14 @@ enum IP_CODE {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum ICMP_CODE{
+ * enum RPL_CODE {
+ * 	
  * 	ICMP_DIO_CODE = 0;
  * 	ICMP_DIS_CODE = 1;
- * };
+ * }
  * </pre>
  */
-enum ICMP_CODE {
+enum RPL_CODE {
     ICMP_DIO_CODE = 0,
     ICMP_DIS_CODE = 1
 };
@@ -48,14 +74,16 @@ enum ICMP_CODE {
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Raw{
- * 	int type;
+ *     int radioSendId;
+ *     int radioRecvId;
  * }
  * </pre>
  */
 class Raw : public ::cPacket
 {
   protected:
-    int type_var;
+    int radioSendId_var;
+    int radioRecvId_var;
 
   private:
     void copy(const Raw& other);
@@ -74,8 +102,10 @@ class Raw : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getType() const;
-    virtual void setType(int type);
+    virtual int getRadioSendId() const;
+    virtual void setRadioSendId(int radioSendId);
+    virtual int getRadioRecvId() const;
+    virtual void setRadioRecvId(int radioRecvId);
 };
 
 inline void doPacking(cCommBuffer *b, Raw& obj) {obj.parsimPack(b);}

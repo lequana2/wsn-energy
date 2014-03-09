@@ -86,7 +86,7 @@ void Core::broadcast(IpPacket *msg)
   Raw *raw = (Raw*) msg;
   raw->setKind(TRX_BROADCAST);
 
-  send(raw, gate("radioOut"));
+  send(msg, gate("radioOut"));
 }
 
 } /* namespace wsn_energy */

@@ -19,21 +19,13 @@
 #include <omnetpp.h>
 #include "packet_m.h"
 
-#define TRX_BROADCAST 0
-#define RCX_BROADCAST 1
-
-#define END_BROADCAST 2
-#define RCV_BROADCAST 3
-
 namespace wsn_energy {
 
 class Radio : public cSimpleModule
 {
   private:
-    virtual void transmit_on();
+    virtual void transmit_on(Raw *raw);
     virtual void transmit_off();
-    virtual void receive_on();
-    virtual void receive_off();
 
   protected:
     virtual void initialize();
@@ -52,6 +44,10 @@ class Radio : public cSimpleModule
 
     Radio();
     ~Radio();
+
+    // control other mote(s) without sending message
+    virtual void receive_off();
+    virtual void receive_on();
 };
 
 } /* namespace wsn_energy */

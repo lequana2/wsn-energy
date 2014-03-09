@@ -80,6 +80,7 @@ void RPL::sendDIS(int convergence)
 void RPL::receiveDIO(DIO* msg)
 {
   ev << "Received DIO " << msg->getDodagID() << endl;
+
   //omit obsolete DIO
   if (this->rplDag.dodagid >= msg->getDodagID())
   {
@@ -92,14 +93,13 @@ void RPL::receiveDIO(DIO* msg)
     //WSN Choose new preferred parent
 
     //Draw new connection
-    char setOutConnectionName[20];
-    sprintf(setOutConnectionName, "out %d to %d", msg->getArrivalModule()->getParentModule()->getId(),
-        msg->getSenderModule()->getParentModule()->getId());
-    core->getParentModule()->gate(setOutConnectionName)->setDisplayString("ls=red,1");
-    // EV << setOutConnectionName << endl;
+    char channelParent[20];
+    sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
+    core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+    EV << channelParent << endl;
 
     this->rplDag.dodagid = ((DIO*) msg)->getDodagID();
-//    this->sendDIO();
+    this->sendDIO();
   }
 }
 

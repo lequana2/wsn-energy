@@ -15,18 +15,32 @@
 
 namespace wsn_energy;
 
-enum IP_CODE{
-    IP_ICMP = 0;
+enum MESSAGE{
+	// radio event
+ 	TRX_BROADCAST = 4;
+ 	RCX_BROADCAST = 3;
+	TOF_BROADCAST = 2;
+	ROF_BROADCAST = 1;
+	
+	CONTROL_FLAG = 4;
+	ENVIRON_FLAG = 5;
+}
+
+enum IP_CODE {
+	// IP
+	IP_ICMP = 0;
 	IP_DATA = 1;
 }
 
-enum ICMP_CODE{
+enum RPL_CODE {
+	// RPL
 	ICMP_DIO_CODE = 0;
 	ICMP_DIS_CODE = 1;
-};
+}
 
 packet Raw{
-	int type;
+    int radioSendId;
+    int radioRecvId;
 }
 
 packet IpPacket extends Raw{
