@@ -39,7 +39,6 @@ void Core::initialize()
 {
   this->rpl = new RPL(this);
 
-//  scheduleAt(simTime(), new cMessage("abc"));
   if (this->getId() == simulation.getModuleByPath("server.core")->getId())
     this->rpl->rpl_set_root();
 }
@@ -52,9 +51,8 @@ void Core::handleMessage(cMessage *msg)
     this->rpl->sendDIO();
     return;
   }
-
-  // Check arrival message
-  if (msg->getKind() == IP_PACKET)
+  // IP messeage
+  else if (msg->getKind() == WORKING_FLAG)
   {
     // receive RPL construct
     if (((IpPacket*) msg)->getType() == IP_ICMP)
@@ -74,6 +72,7 @@ void Core::handleMessage(cMessage *msg)
     {
     }
   }
+  // WSN Enviroment message
 }
 
 void Core::finish()
@@ -83,8 +82,7 @@ void Core::finish()
 //---------------------------------------------------------------------------//
 void Core::broadcast(IpPacket *msg)
 {
-  Raw *raw = (Raw*) msg;
-  raw->setKind(TRX_BROADCAST);
+  msg->setKind(TRX_BROADCAST);
 
   send(msg, gate("radioOut"));
 }

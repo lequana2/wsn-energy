@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 #include "client.h"
+#include "packet_m.h"
 
 namespace wsn_energy {
 
@@ -24,6 +25,17 @@ Define_Module(Client);
 void Client::initialize()
 {
   App::initialize();
+
+  // WSN Client scheme
+  cMessage *event = new cMessage;
+  event->setKind(ENVIRON_FLAG);
+
+//  if(this->getParentModule()->getId() == simulation.getModuleByPath("client[33]")->getId())
+//    scheduleAt(simTime() + 20, new DIS());
+//
+//  if(this->getParentModule()->getId() == simulation.getModuleByPath("client[44]")->getId())
+//    scheduleAt(simTime() + 30, new DIS());
+
 }
 
 void Client::handleMessage(cMessage *msg)

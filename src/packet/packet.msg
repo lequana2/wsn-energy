@@ -22,8 +22,12 @@ enum MESSAGE{
 	TOF_BROADCAST = 2;
 	ROF_BROADCAST = 1;
 	
-	CONTROL_FLAG = 4;
-	ENVIRON_FLAG = 5;
+	// information event
+	WORKING_FLAG = 5;
+	ENVIRON_FLAG = 6;
+	
+	// specialize event
+	RPL_CONSTRUCT = 7;
 }
 
 enum IP_CODE {
@@ -41,6 +45,7 @@ enum RPL_CODE {
 packet Raw{
     int radioSendId;
     int radioRecvId;
+    int type;
 }
 
 packet IpPacket extends Raw{

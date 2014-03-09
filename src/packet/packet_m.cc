@@ -40,8 +40,9 @@ EXECUTE_ON_STARTUP(
     e->insert(RCX_BROADCAST, "RCX_BROADCAST");
     e->insert(TOF_BROADCAST, "TOF_BROADCAST");
     e->insert(ROF_BROADCAST, "ROF_BROADCAST");
-    e->insert(CONTROL_FLAG, "CONTROL_FLAG");
+    e->insert(WORKING_FLAG, "WORKING_FLAG");
     e->insert(ENVIRON_FLAG, "ENVIRON_FLAG");
+    e->insert(RPL_CONSTRUCT, "RPL_CONSTRUCT");
 );
 
 EXECUTE_ON_STARTUP(
@@ -64,6 +65,7 @@ Raw::Raw(const char *name, int kind) : cPacket(name,kind)
 {
     this->radioSendId_var = 0;
     this->radioRecvId_var = 0;
+    this->type_var = 0;
 }
 
 Raw::Raw(const Raw& other) : cPacket(other)
@@ -87,6 +89,7 @@ void Raw::copy(const Raw& other)
 {
     this->radioSendId_var = other.radioSendId_var;
     this->radioRecvId_var = other.radioRecvId_var;
+    this->type_var = other.type_var;
 }
 
 void Raw::parsimPack(cCommBuffer *b)
@@ -94,6 +97,7 @@ void Raw::parsimPack(cCommBuffer *b)
     cPacket::parsimPack(b);
     doPacking(b,this->radioSendId_var);
     doPacking(b,this->radioRecvId_var);
+    doPacking(b,this->type_var);
 }
 
 void Raw::parsimUnpack(cCommBuffer *b)
@@ -101,6 +105,7 @@ void Raw::parsimUnpack(cCommBuffer *b)
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->radioSendId_var);
     doUnpacking(b,this->radioRecvId_var);
+    doUnpacking(b,this->type_var);
 }
 
 int Raw::getRadioSendId() const
@@ -121,6 +126,16 @@ int Raw::getRadioRecvId() const
 void Raw::setRadioRecvId(int radioRecvId)
 {
     this->radioRecvId_var = radioRecvId;
+}
+
+int Raw::getType() const
+{
+    return type_var;
+}
+
+void Raw::setType(int type)
+{
+    this->type_var = type;
 }
 
 class RawDescriptor : public cClassDescriptor
@@ -170,7 +185,7 @@ const char *RawDescriptor::getProperty(const char *propertyname) const
 int RawDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
 unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -184,8 +199,9 @@ unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RawDescriptor::getFieldName(void *object, int field) const
@@ -199,8 +215,9 @@ const char *RawDescriptor::getFieldName(void *object, int field) const
     static const char *fieldNames[] = {
         "radioSendId",
         "radioRecvId",
+        "type",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
 int RawDescriptor::findField(void *object, const char *fieldName) const
@@ -209,6 +226,7 @@ int RawDescriptor::findField(void *object, const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='r' && strcmp(fieldName, "radioSendId")==0) return base+0;
     if (fieldName[0]=='r' && strcmp(fieldName, "radioRecvId")==0) return base+1;
+    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -223,8 +241,9 @@ const char *RawDescriptor::getFieldTypeString(void *object, int field) const
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *RawDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -266,6 +285,7 @@ std::string RawDescriptor::getFieldAsString(void *object, int field, int i) cons
     switch (field) {
         case 0: return long2string(pp->getRadioSendId());
         case 1: return long2string(pp->getRadioRecvId());
+        case 2: return long2string(pp->getType());
         default: return "";
     }
 }
@@ -282,6 +302,7 @@ bool RawDescriptor::setFieldAsString(void *object, int field, int i, const char 
     switch (field) {
         case 0: pp->setRadioSendId(string2long(value)); return true;
         case 1: pp->setRadioRecvId(string2long(value)); return true;
+        case 2: pp->setType(string2long(value)); return true;
         default: return false;
     }
 }
@@ -297,8 +318,9 @@ const char *RawDescriptor::getFieldStructName(void *object, int field) const
     static const char *fieldStructNames[] = {
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const

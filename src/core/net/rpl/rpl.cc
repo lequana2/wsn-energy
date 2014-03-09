@@ -59,9 +59,8 @@ void RPL::sendDIO()
   ev << "broadcast DIO" << endl;
 
   DIO *icmp = new DIO();
-  ((cMessage*) icmp)->setKind(IP_PACKET);
-  ((IpPacket*) icmp)->setType(IP_ICMP);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
+  ((IpPacket*) icmp)->setType(IP_ICMP);
 
   icmp->setDodagID(this->rplDag.dodagid);
 
@@ -73,9 +72,8 @@ void RPL::sendDIS(int convergence)
   ev << "broadcast DIS" << endl;
 
   DIS *icmp = new DIS();
-  ((cMessage*) icmp)->setKind(IP_PACKET);
-  ((IpPacket*) icmp)->setType(IP_ICMP);
   ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
+  ((IpPacket*) icmp)->setType(IP_ICMP);
 
   icmp->setConvergence(convergence);
 
@@ -104,7 +102,7 @@ void RPL::receiveDIO(DIO* msg)
     //Draw new connection
     char channelParent[20];
     sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
-    //    EV << channelParent << endl;
+    EV << channelParent << endl;
     core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
 
     // WSN Consider neighbor
@@ -115,10 +113,9 @@ void RPL::receiveDIO(DIO* msg)
       neighborList.push_back(neighbor);
     }
 
-// WSN Choose new preferred parent
-
+    // WSN Choose new preferred parent
     this->rplDag.dodagid = ((DIO*) msg)->getDodagID();
-    this->sendDIO();
+//    this->sendDIO();
   }
 }
 

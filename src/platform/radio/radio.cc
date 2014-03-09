@@ -50,6 +50,8 @@ void Radio::handleMessage(cMessage* msg)
   }
   else if (msg->getKind() == ROF_BROADCAST)
   {
+    // to upper layer
+    msg->setKind(WORKING_FLAG);
     send(msg, gate("radioOut"));
   }
 }

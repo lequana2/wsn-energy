@@ -26,8 +26,12 @@ namespace wsn_energy {
  * 	TOF_BROADCAST = 2;
  * 	ROF_BROADCAST = 1;
  * 	
- * 	CONTROL_FLAG = 4;
- * 	ENVIRON_FLAG = 5;
+ * 	
+ * 	WORKING_FLAG = 5;
+ * 	ENVIRON_FLAG = 6;
+ * 	
+ * 	
+ * 	RPL_CONSTRUCT = 7;
  * }
  * </pre>
  */
@@ -36,8 +40,9 @@ enum MESSAGE {
     RCX_BROADCAST = 3,
     TOF_BROADCAST = 2,
     ROF_BROADCAST = 1,
-    CONTROL_FLAG = 4,
-    ENVIRON_FLAG = 5
+    WORKING_FLAG = 5,
+    ENVIRON_FLAG = 6,
+    RPL_CONSTRUCT = 7
 };
 
 /**
@@ -76,6 +81,7 @@ enum RPL_CODE {
  * packet Raw{
  *     int radioSendId;
  *     int radioRecvId;
+ *     int type;
  * }
  * </pre>
  */
@@ -84,6 +90,7 @@ class Raw : public ::cPacket
   protected:
     int radioSendId_var;
     int radioRecvId_var;
+    int type_var;
 
   private:
     void copy(const Raw& other);
@@ -106,6 +113,8 @@ class Raw : public ::cPacket
     virtual void setRadioSendId(int radioSendId);
     virtual int getRadioRecvId() const;
     virtual void setRadioRecvId(int radioRecvId);
+    virtual int getType() const;
+    virtual void setType(int type);
 };
 
 inline void doPacking(cCommBuffer *b, Raw& obj) {obj.parsimPack(b);}

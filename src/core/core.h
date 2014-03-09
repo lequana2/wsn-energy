@@ -21,15 +21,6 @@
 
 #include "rpl.h"
 
-// PACKET
-#define IP_PACKET 1
-
-// EVENT
-#define ICMP_SOLICIT  2
-#define RPL_CONSTRUCT 4
-#define DATA_FORWARD  3
-#define FIN_TRANSMISS 5
-
 namespace wsn_energy {
 
 class Core : public cSimpleModule

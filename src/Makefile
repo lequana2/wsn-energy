@@ -157,7 +157,8 @@ $O/apps/app.o: apps/app.cc \
 	apps/app.h
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/app.h \
-	apps/client/client.h
+	apps/client/client.h \
+	packet/packet_m.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/app.h \
 	apps/server/server.h \
