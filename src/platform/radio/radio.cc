@@ -17,6 +17,7 @@
 #include "world.h"
 #include "statistic.h"
 
+#ifndef DEBUG
 #define DEBUG 0
 
 namespace wsn_energy {
@@ -124,8 +125,6 @@ void Radio::transmit_off()
       cGate* gate = simulation.getModule(neighbor.at(i))->gate("raw");
       sendDirect(broadcastMessage->dup(), gate);
 
-      ((World*) simulation.getModuleByPath("world"))->stopTranmission(completeTranmission);
-
       ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
     }
     else
@@ -138,6 +137,7 @@ void Radio::transmit_off()
     }
 
     // Turn receiving mote off
+    ((World*) simulation.getModuleByPath("world"))->stopTranmission(completeTranmission);
     recver->receive_off();
   }
 

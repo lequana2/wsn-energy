@@ -32,6 +32,7 @@ namespace wsn_energy {
  * 	
  * 	
  * 	RPL_CONSTRUCT = 7;
+ * 	RPL_SOLICIT   = 8;
  * }
  * </pre>
  */
@@ -42,7 +43,8 @@ enum MESSAGE {
     ROF_BROADCAST = 1,
     WORKING_FLAG = 5,
     ENVIRON_FLAG = 6,
-    RPL_CONSTRUCT = 7
+    RPL_CONSTRUCT = 7,
+    RPL_SOLICIT = 8
 };
 
 /**

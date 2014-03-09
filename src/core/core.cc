@@ -31,7 +31,6 @@ Core::Core()
 }
 Core::~Core()
 {
-  this->route.clear();
 }
 
 //---------------------------------------------------------------------------//
@@ -45,10 +44,15 @@ void Core::initialize()
 //---------------------------------------------------------------------------//
 void Core::handleMessage(cMessage *msg)
 {
-// dispatch event
+  // dispatch event
   if (msg->getKind() == RPL_CONSTRUCT)
   {
     this->rpl->sendDIO();
+    return;
+  }
+  else if (msg->getKind() == RPL_SOLICIT)
+  {
+    this->rpl->sendDIS(5);
     return;
   }
   // IP messeage

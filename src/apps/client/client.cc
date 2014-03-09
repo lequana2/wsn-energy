@@ -28,13 +28,15 @@ void Client::initialize()
 
   // WSN Client scheme
   cMessage *event = new cMessage;
-  event->setKind(ENVIRON_FLAG);
+  event->setKind(RPL_SOLICIT);
+
+  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
+    send(event, gate("appOut"));
 
 //  if(this->getParentModule()->getId() == simulation.getModuleByPath("client[33]")->getId())
-//    scheduleAt(simTime() + 20, new DIS());
-//
+//    ;
 //  if(this->getParentModule()->getId() == simulation.getModuleByPath("client[44]")->getId())
-//    scheduleAt(simTime() + 30, new DIS());
+//    ;
 
 }
 

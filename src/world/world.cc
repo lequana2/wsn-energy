@@ -17,6 +17,9 @@
 
 #include <math.h>
 
+#ifndef DEBUG
+#define DEBUG 0
+
 namespace wsn_energy {
 
 Define_Module(World);
@@ -169,6 +172,9 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
 
 void World::registerTranmission(Transmission *tranmission)
 {
+  if (DEBUG)
+    ev << "On the air transmisionn: " << this->onTheAir.size() << endl;
+
   this->onTheAir.push_back(tranmission);
 
   if (this->onTheAir.size() == 1)
@@ -210,13 +216,13 @@ void World::registerTranmission(Transmission *tranmission)
   }
 }
 
-bool World::isFeasibleTranmission(Transmission* tranmission)
+bool World::isFeasibleTranmission(Transmission* transmission)
 {
   if (this->onTheAir.size() == 1)
     return true;
 
-  Radio* sender = tranmission->getSender();
-  Radio* recver = tranmission->getRecver();
+  Radio* sender = transmission->getSender();
+  Radio* recver = transmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
@@ -231,7 +237,23 @@ bool World::isFeasibleTranmission(Transmission* tranmission)
 
 void World::stopTranmission(Transmission* transmission)
 {
-  this->onTheAir.remove(transmission);
-}
+  //??? do not remove
 
+  Radio* sender = transmission->getSender();
+  Radio* recver = transmission->getRecver();
+
+  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
+      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  {
+    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
+        && !(*otherTranmission)->isCollided())
+    {
+      this->onTheAir.remove(*otherTranmission);
+      return;
+    }
+
+    if (DEBUG)
+      ev << "missing transmission" << endl;
+  }
+}
 } /* namespace wsn_energy */

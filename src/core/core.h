@@ -37,9 +37,6 @@ class Core : public cSimpleModule
     //WSN RPL
     RPL *rpl;
 
-    //WSN default route to server
-    std::list<int> route;
-
     void broadcast(IpPacket*);
 
     Core();

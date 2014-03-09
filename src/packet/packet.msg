@@ -28,6 +28,7 @@ enum MESSAGE{
 	
 	// specialize event
 	RPL_CONSTRUCT = 7;
+	RPL_SOLICIT   = 8;
 }
 
 enum IP_CODE {

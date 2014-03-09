@@ -39,19 +39,20 @@ RPL::RPL(Core *core)
 void RPL::rpl_init()
 {
   this->rplDag.dodagid = 0;
-  this->rplDag.joined = 0;
+  this->rplDag.joined = false;
   this->rplDag.rank = RANK_INFINITY;
 }
 
 void RPL::rpl_set_root()
 {
   this->rplDag.dodagid++;
+  this->rplDag.joined = true;
   this->rplDag.rank = 0;
 
   // WSN Should send continously
   cMessage *constructMessage = new cMessage();
   constructMessage->setKind(RPL_CONSTRUCT);
-  core->scheduleAt(simTime(), constructMessage);
+//  core->scheduleAt(simTime(), constructMessage);
 }
 
 void RPL::sendDIO()
@@ -77,13 +78,7 @@ void RPL::sendDIS(int convergence)
 
   icmp->setConvergence(convergence);
 
-//  for (unsigned int i = 0; i < core->neighbor.size(); i++)
-//  {
-//    DIS *icmp_dup = icmp->dup();
-//    icmp_dup->setRecvID(this->core->neighbor.at(i));
-//
-//    core->broadcast(icmp);
-//  }
+  core->broadcast(icmp);
 }
 
 void RPL::receiveDIO(DIO* msg)
@@ -121,18 +116,20 @@ void RPL::receiveDIO(DIO* msg)
 
 void RPL::receiveDIS(DIS* msg)
 {
-  EV << "Received DIS " << msg->getConvergence() << endl;
-  //WSN check route to root
-  if (core->route.size() == 0)
-    ;
-  else if (((Core*) core->route.back())->getId() != simulation.getModuleByPath("server")->getId())
-    ;
+  EV << "Received DIS " << endl;
+
+  // currently in DAG, then broadcast DIS
+  if (this->rplDag.joined)
+  {
+    this->sendDIO();
+  }
+  // already
   else
   {
     //WSN broadcast DIS toward root
-    int convergence = ((DIS*) msg)->getConvergence();
-    if (convergence > 0)
-      this->sendDIS(convergence - 1);
+//    int convergence = ((DIS*) msg)->getConvergence();
+//    if (convergence > 0)
+//      this->sendDIS(convergence - 1);
   }
 }
 
