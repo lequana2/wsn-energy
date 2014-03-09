@@ -17,6 +17,8 @@
 #include "world.h"
 #include "statistic.h"
 
+#define DEBUG 0
+
 namespace wsn_energy {
 
 Define_Module(Radio)
@@ -46,7 +48,8 @@ void Radio::handleMessage(cMessage* msg)
   {
     transmit_off();
   }
-  else if (msg->getKind() == ROF_BROADCAST){
+  else if (msg->getKind() == ROF_BROADCAST)
+  {
     send(msg, gate("radioOut"));
   }
 }
@@ -60,7 +63,8 @@ void Radio::finish()
  */
 void Radio::transmit_on(Raw *msg)
 {
-  ev << "Trans on" << endl;
+  if (DEBUG)
+    ev << "Trans on" << endl;
 
   // buffer
   broadcastMessage = (Raw*) msg;
@@ -97,7 +101,8 @@ void Radio::transmit_on(Raw *msg)
  */
 void Radio::transmit_off()
 {
-  ev << "Trans off" << endl;
+  if (DEBUG)
+    ev << "Trans off" << endl;
 
   broadcastMessage->setKind(ROF_BROADCAST);
   broadcastMessage->setRadioSendId(this->getParentModule()->getId());
@@ -153,7 +158,8 @@ void Radio::transmit_off()
  */
 void Radio::receive_on()
 {
-  ev << "Recv on" << endl;
+  if (DEBUG)
+    ev << "Recv on" << endl;
   // Battery utils
 }
 
@@ -162,7 +168,8 @@ void Radio::receive_on()
  */
 void Radio::receive_off()
 {
-  ev << "Recv off" << endl;
+  if (DEBUG)
+    ev << "Recv off" << endl;
   // Battery utils
 }
 }

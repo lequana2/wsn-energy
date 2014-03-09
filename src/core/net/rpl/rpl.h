@@ -36,9 +36,15 @@ class RPL_dag
 
 class RPL
 {
+  private:
+    Core *core;
+    std::list<int> neighborList;
+
   public:
     RPL_dag rplDag;
 
+    RPL();
+    ~RPL();
     RPL(Core *core);
 
     void rpl_set_root();
@@ -49,9 +55,6 @@ class RPL
 
     void receiveDIO(DIO*);
     void receiveDIS(DIS*);
-
-  private:
-    Core *core;
 };
 
 } /* namespace wsn_energy */

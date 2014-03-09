@@ -15,9 +15,20 @@
 
 #include <rpl.h>
 
+#include <algorithm>
+
 #include "core.h"
 
 namespace wsn_energy {
+
+RPL::RPL()
+{
+}
+
+RPL::~RPL()
+{
+  this->neighborList.clear();
+}
 
 RPL::RPL(Core *core)
 {
@@ -79,7 +90,7 @@ void RPL::sendDIS(int convergence)
 
 void RPL::receiveDIO(DIO* msg)
 {
-  ev << "Received DIO " << msg->getDodagID() << endl;
+  ev << "Received DIO " << endl;
 
   //omit obsolete DIO
   if (this->rplDag.dodagid >= msg->getDodagID())
@@ -89,14 +100,22 @@ void RPL::receiveDIO(DIO* msg)
   //forward update DIO, create connection
   else
   {
-    //Consider new parent
-    //WSN Choose new preferred parent
 
     //Draw new connection
     char channelParent[20];
     sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
+    //    EV << channelParent << endl;
     core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
-    EV << channelParent << endl;
+
+    // WSN Consider neighbor
+    int neighbor = simulation.getModule(((Raw*) msg)->getRadioSendId())->getId();
+    if (std::find(neighborList.begin(), neighborList.end(), neighbor) == neighborList.end())
+    {
+      ev << "new neighbor" << endl;
+      neighborList.push_back(neighbor);
+    }
+
+// WSN Choose new preferred parent
 
     this->rplDag.dodagid = ((DIO*) msg)->getDodagID();
     this->sendDIO();
