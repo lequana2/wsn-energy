@@ -18,7 +18,8 @@
 #include <math.h>
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
+#endif
 
 namespace wsn_energy {
 
@@ -173,7 +174,7 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
 void World::registerTranmission(Transmission *tranmission)
 {
   if (DEBUG)
-    ev << "On the air transmisionn: " << this->onTheAir.size() << endl;
+    ev << "On the air transmision: " << this->onTheAir.size() << endl;
 
   this->onTheAir.push_back(tranmission);
 
@@ -245,8 +246,7 @@ void World::stopTranmission(Transmission* transmission)
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
-        && !(*otherTranmission)->isCollided())
+    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver())
     {
       this->onTheAir.remove(*otherTranmission);
       return;

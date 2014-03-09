@@ -17,8 +17,9 @@
 #include "world.h"
 #include "statistic.h"
 
-#ifndef DEBUG
-#define DEBUG 0
+#ifndef  DEBUG
+#define  DEBUG 0
+#endif
 
 namespace wsn_energy {
 

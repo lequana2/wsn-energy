@@ -52,7 +52,7 @@ void RPL::rpl_set_root()
   // WSN Should send continously
   cMessage *constructMessage = new cMessage();
   constructMessage->setKind(RPL_CONSTRUCT);
-//  core->scheduleAt(simTime(), constructMessage);
+  core->scheduleAt(simTime(), constructMessage);
 }
 
 void RPL::sendDIO()
@@ -93,24 +93,26 @@ void RPL::receiveDIO(DIO* msg)
   //forward update DIO, create connection
   else
   {
-
-    //Draw new connection
-    char channelParent[20];
-    sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
-    EV << channelParent << endl;
-    core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
-
     // WSN Consider neighbor
     int neighbor = simulation.getModule(((Raw*) msg)->getRadioSendId())->getId();
     if (std::find(neighborList.begin(), neighborList.end(), neighbor) == neighborList.end())
     {
       ev << "new neighbor" << endl;
       neighborList.push_back(neighbor);
+
+      // considering rank
+      // assure children, siblings or parents
+
+      // draw new connection
+      char channelParent[20];
+      sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
+      EV << channelParent << endl;
+      core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
     }
 
     // WSN Choose new preferred parent
     this->rplDag.dodagid = ((DIO*) msg)->getDodagID();
-//    this->sendDIO();
+    this->sendDIO();
   }
 }
 

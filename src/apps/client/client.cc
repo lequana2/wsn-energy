@@ -30,19 +30,22 @@ void Client::initialize()
   cMessage *event = new cMessage;
   event->setKind(RPL_SOLICIT);
 
-  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
-    send(event, gate("appOut"));
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
+//    send(event, gate("appOut"));
 
-//  if(this->getParentModule()->getId() == simulation.getModuleByPath("client[33]")->getId())
-//    ;
-//  if(this->getParentModule()->getId() == simulation.getModuleByPath("client[44]")->getId())
-//    ;
+  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[35]")->getId())
+    scheduleAt(simTime() + 20, event);
 
+  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[45]")->getId())
+    scheduleAt(simTime() + 30, event);
 }
 
 void Client::handleMessage(cMessage *msg)
 {
-  delete msg;
+  if (msg->getKind() == RPL_SOLICIT)
+  {
+    send(msg, gate("appOut"));
+  }
 }
 
 void Client::finish()
