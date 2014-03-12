@@ -50,8 +50,8 @@ packet Raw{
 }
 
 packet IpPacket extends Raw{
-    int sendID;
-    int recvID;
+    int senderIpAddress;
+    int recverIpAddress;
     int type;
 }
 
@@ -65,7 +65,7 @@ packet ICMP extends IpPacket{
 
 packet DIO extends ICMP{
 	int dodagID;
-	int rank;
+	unsigned long rank;
 	int version;
 }
 
@@ -74,4 +74,8 @@ packet DIS extends ICMP{
 	int reserved;
 	int options; 
 	int convergence;
+}
+
+packet DATA extends ICMP {
+	int value;
 }

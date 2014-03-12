@@ -126,8 +126,8 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet IpPacket extends Raw{
- *     int sendID;
- *     int recvID;
+ *     int senderIpAddress;
+ *     int recverIpAddress;
  *     int type;
  * }
  * </pre>
@@ -135,8 +135,8 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
 class IpPacket : public ::wsn_energy::Raw
 {
   protected:
-    int sendID_var;
-    int recvID_var;
+    int senderIpAddress_var;
+    int recverIpAddress_var;
     int type_var;
 
   private:
@@ -156,10 +156,10 @@ class IpPacket : public ::wsn_energy::Raw
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getSendID() const;
-    virtual void setSendID(int sendID);
-    virtual int getRecvID() const;
-    virtual void setRecvID(int recvID);
+    virtual int getSenderIpAddress() const;
+    virtual void setSenderIpAddress(int senderIpAddress);
+    virtual int getRecverIpAddress() const;
+    virtual void setRecverIpAddress(int recverIpAddress);
     virtual int getType() const;
     virtual void setType(int type);
 };
@@ -246,7 +246,7 @@ inline void doUnpacking(cCommBuffer *b, ICMP& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet DIO extends ICMP{
  * 	int dodagID;
- * 	int rank;
+ * 	unsigned long rank;
  * 	int version;
  * }
  * </pre>
@@ -255,7 +255,7 @@ class DIO : public ::wsn_energy::ICMP
 {
   protected:
     int dodagID_var;
-    int rank_var;
+    unsigned long rank_var;
     int version_var;
 
   private:
@@ -277,8 +277,8 @@ class DIO : public ::wsn_energy::ICMP
     // field getter/setter methods
     virtual int getDodagID() const;
     virtual void setDodagID(int dodagID);
-    virtual int getRank() const;
-    virtual void setRank(int rank);
+    virtual unsigned long getRank() const;
+    virtual void setRank(unsigned long rank);
     virtual int getVersion() const;
     virtual void setVersion(int version);
 };
@@ -334,6 +334,43 @@ class DIS : public ::wsn_energy::ICMP
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet DATA extends ICMP {
+ * 	int value;
+ * }
+ * </pre>
+ */
+class DATA : public ::wsn_energy::ICMP
+{
+  protected:
+    int value_var;
+
+  private:
+    void copy(const DATA& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const DATA&);
+
+  public:
+    DATA(const char *name=NULL, int kind=0);
+    DATA(const DATA& other);
+    virtual ~DATA();
+    DATA& operator=(const DATA& other);
+    virtual DATA *dup() const {return new DATA(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getValue() const;
+    virtual void setValue(int value);
+};
+
+inline void doPacking(cCommBuffer *b, DATA& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, DATA& obj) {obj.parsimUnpack(b);}
 
 }; // end namespace wsn_energy
 

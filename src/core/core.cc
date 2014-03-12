@@ -55,9 +55,36 @@ void Core::handleMessage(cMessage *msg)
     this->rpl->sendDIS(5);
     return;
   }
+  // Enviroment flag
+  else if (msg->getKind() == ENVIRON_FLAG)
+  {
+    RPL_neighbor *des = this->rpl->getPrefferedParent();
+    if (des != NULL)
+    {
+      // choosing preferfed parent
+      char channelParent[20];
+      sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+      getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
+
+      IpPacket* broadcastMessage = (IpPacket*) msg;
+      broadcastMessage->setRecverIpAddress(des->neighborID);
+      broadcastMessage->setType(IP_DATA);
+
+      broadcast(broadcastMessage);
+    }
+    else
+    {
+      // WSN dismiss message ?
+    }
+  }
   // IP messeage
   else if (msg->getKind() == WORKING_FLAG)
   {
+    // dismiss if recvID is not the same
+    if (((IpPacket*) msg)->getRecverIpAddress() != 0
+        && ((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
+      return;
+
     // receive RPL construct
     if (((IpPacket*) msg)->getType() == IP_ICMP)
     {
@@ -74,6 +101,39 @@ void Core::handleMessage(cMessage *msg)
     //WSN forward data
     else if (((IpPacket*) msg)->getType() == IP_DATA)
     {
+      if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
+        return;
+
+      // Root
+      int value = ((Data*) msg)->getValue();
+      char m[20];
+      sprintf(m, "%d", value);
+
+      if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+      {
+        this->getParentModule()->bubble(m);
+      }
+      else
+      {
+        RPL_neighbor *des = this->rpl->getPrefferedParent();
+        if (des != NULL)
+        {
+          // choosing preferfed parent
+          char channelParent[20];
+          sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+          getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
+
+          IpPacket* broadcastMessage = (IpPacket*) msg;
+          broadcastMessage->setRecverIpAddress(des->neighborID);
+          broadcastMessage->setType(IP_DATA);
+
+          broadcast(broadcastMessage);
+        }
+        else
+        {
+          // WSN dismiss message ?
+        }
+      }
     }
   }
   // WSN Enviroment message

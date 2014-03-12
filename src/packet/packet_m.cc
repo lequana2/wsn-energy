@@ -342,8 +342,8 @@ Register_Class(IpPacket);
 
 IpPacket::IpPacket(const char *name, int kind) : wsn_energy::Raw(name,kind)
 {
-    this->sendID_var = 0;
-    this->recvID_var = 0;
+    this->senderIpAddress_var = 0;
+    this->recverIpAddress_var = 0;
     this->type_var = 0;
 }
 
@@ -366,45 +366,45 @@ IpPacket& IpPacket::operator=(const IpPacket& other)
 
 void IpPacket::copy(const IpPacket& other)
 {
-    this->sendID_var = other.sendID_var;
-    this->recvID_var = other.recvID_var;
+    this->senderIpAddress_var = other.senderIpAddress_var;
+    this->recverIpAddress_var = other.recverIpAddress_var;
     this->type_var = other.type_var;
 }
 
 void IpPacket::parsimPack(cCommBuffer *b)
 {
     wsn_energy::Raw::parsimPack(b);
-    doPacking(b,this->sendID_var);
-    doPacking(b,this->recvID_var);
+    doPacking(b,this->senderIpAddress_var);
+    doPacking(b,this->recverIpAddress_var);
     doPacking(b,this->type_var);
 }
 
 void IpPacket::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::Raw::parsimUnpack(b);
-    doUnpacking(b,this->sendID_var);
-    doUnpacking(b,this->recvID_var);
+    doUnpacking(b,this->senderIpAddress_var);
+    doUnpacking(b,this->recverIpAddress_var);
     doUnpacking(b,this->type_var);
 }
 
-int IpPacket::getSendID() const
+int IpPacket::getSenderIpAddress() const
 {
-    return sendID_var;
+    return senderIpAddress_var;
 }
 
-void IpPacket::setSendID(int sendID)
+void IpPacket::setSenderIpAddress(int senderIpAddress)
 {
-    this->sendID_var = sendID;
+    this->senderIpAddress_var = senderIpAddress;
 }
 
-int IpPacket::getRecvID() const
+int IpPacket::getRecverIpAddress() const
 {
-    return recvID_var;
+    return recverIpAddress_var;
 }
 
-void IpPacket::setRecvID(int recvID)
+void IpPacket::setRecverIpAddress(int recverIpAddress)
 {
-    this->recvID_var = recvID;
+    this->recverIpAddress_var = recverIpAddress;
 }
 
 int IpPacket::getType() const
@@ -492,8 +492,8 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "sendID",
-        "recvID",
+        "senderIpAddress",
+        "recverIpAddress",
         "type",
     };
     return (field>=0 && field<3) ? fieldNames[field] : NULL;
@@ -503,8 +503,8 @@ int IpPacketDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sendID")==0) return base+0;
-    if (fieldName[0]=='r' && strcmp(fieldName, "recvID")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+0;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+1;
     if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
@@ -562,8 +562,8 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getSendID());
-        case 1: return long2string(pp->getRecvID());
+        case 0: return long2string(pp->getSenderIpAddress());
+        case 1: return long2string(pp->getRecverIpAddress());
         case 2: return long2string(pp->getType());
         default: return "";
     }
@@ -579,8 +579,8 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
     switch (field) {
-        case 0: pp->setSendID(string2long(value)); return true;
-        case 1: pp->setRecvID(string2long(value)); return true;
+        case 0: pp->setSenderIpAddress(string2long(value)); return true;
+        case 1: pp->setRecverIpAddress(string2long(value)); return true;
         case 2: pp->setType(string2long(value)); return true;
         default: return false;
     }
@@ -1147,12 +1147,12 @@ void DIO::setDodagID(int dodagID)
     this->dodagID_var = dodagID;
 }
 
-int DIO::getRank() const
+unsigned long DIO::getRank() const
 {
     return rank_var;
 }
 
-void DIO::setRank(int rank)
+void DIO::setRank(unsigned long rank)
 {
     this->rank_var = rank;
 }
@@ -1269,7 +1269,7 @@ const char *DIODescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "int",
+        "unsigned long",
         "int",
     };
     return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
@@ -1313,7 +1313,7 @@ std::string DIODescriptor::getFieldAsString(void *object, int field, int i) cons
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getDodagID());
-        case 1: return long2string(pp->getRank());
+        case 1: return ulong2string(pp->getRank());
         case 2: return long2string(pp->getVersion());
         default: return "";
     }
@@ -1330,7 +1330,7 @@ bool DIODescriptor::setFieldAsString(void *object, int field, int i, const char 
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
         case 0: pp->setDodagID(string2long(value)); return true;
-        case 1: pp->setRank(string2long(value)); return true;
+        case 1: pp->setRank(string2ulong(value)); return true;
         case 2: pp->setVersion(string2long(value)); return true;
         default: return false;
     }
@@ -1660,6 +1660,242 @@ void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const
         field -= basedesc->getFieldCount(object);
     }
     DIS *pp = (DIS *)object; (void)pp;
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+Register_Class(DATA);
+
+DATA::DATA(const char *name, int kind) : wsn_energy::ICMP(name,kind)
+{
+    this->value_var = 0;
+}
+
+DATA::DATA(const DATA& other) : wsn_energy::ICMP(other)
+{
+    copy(other);
+}
+
+DATA::~DATA()
+{
+}
+
+DATA& DATA::operator=(const DATA& other)
+{
+    if (this==&other) return *this;
+    wsn_energy::ICMP::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void DATA::copy(const DATA& other)
+{
+    this->value_var = other.value_var;
+}
+
+void DATA::parsimPack(cCommBuffer *b)
+{
+    wsn_energy::ICMP::parsimPack(b);
+    doPacking(b,this->value_var);
+}
+
+void DATA::parsimUnpack(cCommBuffer *b)
+{
+    wsn_energy::ICMP::parsimUnpack(b);
+    doUnpacking(b,this->value_var);
+}
+
+int DATA::getValue() const
+{
+    return value_var;
+}
+
+void DATA::setValue(int value)
+{
+    this->value_var = value;
+}
+
+class DATADescriptor : public cClassDescriptor
+{
+  public:
+    DATADescriptor();
+    virtual ~DATADescriptor();
+
+    virtual bool doesSupport(cObject *obj) const;
+    virtual const char *getProperty(const char *propertyname) const;
+    virtual int getFieldCount(void *object) const;
+    virtual const char *getFieldName(void *object, int field) const;
+    virtual int findField(void *object, const char *fieldName) const;
+    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
+    virtual const char *getFieldTypeString(void *object, int field) const;
+    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
+    virtual int getArraySize(void *object, int field) const;
+
+    virtual std::string getFieldAsString(void *object, int field, int i) const;
+    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
+
+    virtual const char *getFieldStructName(void *object, int field) const;
+    virtual void *getFieldStructPointer(void *object, int field, int i) const;
+};
+
+Register_ClassDescriptor(DATADescriptor);
+
+DATADescriptor::DATADescriptor() : cClassDescriptor("wsn_energy::DATA", "wsn_energy::ICMP")
+{
+}
+
+DATADescriptor::~DATADescriptor()
+{
+}
+
+bool DATADescriptor::doesSupport(cObject *obj) const
+{
+    return dynamic_cast<DATA *>(obj)!=NULL;
+}
+
+const char *DATADescriptor::getProperty(const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : NULL;
+}
+
+int DATADescriptor::getFieldCount(void *object) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+}
+
+unsigned int DATADescriptor::getFieldTypeFlags(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeFlags(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+}
+
+const char *DATADescriptor::getFieldName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldNames[] = {
+        "value",
+    };
+    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+}
+
+int DATADescriptor::findField(void *object, const char *fieldName) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+0;
+    return basedesc ? basedesc->findField(object, fieldName) : -1;
+}
+
+const char *DATADescriptor::getFieldTypeString(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeString(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldTypeStrings[] = {
+        "int",
+    };
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+}
+
+const char *DATADescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldProperty(object, field, propertyname);
+        field -= basedesc->getFieldCount(object);
+    }
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+int DATADescriptor::getArraySize(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getArraySize(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    DATA *pp = (DATA *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+std::string DATADescriptor::getFieldAsString(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldAsString(object,field,i);
+        field -= basedesc->getFieldCount(object);
+    }
+    DATA *pp = (DATA *)object; (void)pp;
+    switch (field) {
+        case 0: return long2string(pp->getValue());
+        default: return "";
+    }
+}
+
+bool DATADescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->setFieldAsString(object,field,i,value);
+        field -= basedesc->getFieldCount(object);
+    }
+    DATA *pp = (DATA *)object; (void)pp;
+    switch (field) {
+        case 0: pp->setValue(string2long(value)); return true;
+        default: return false;
+    }
+}
+
+const char *DATADescriptor::getFieldStructName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldStructNames[] = {
+        NULL,
+    };
+    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+}
+
+void *DATADescriptor::getFieldStructPointer(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructPointer(object, field, i);
+        field -= basedesc->getFieldCount(object);
+    }
+    DATA *pp = (DATA *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }

@@ -23,22 +23,30 @@
 
 namespace wsn_energy {
 
-class Core; // forward declaration
+class Core;
+// forward declaration
+
+class RPL_neighbor
+{
+  public:
+    int neighborID;
+    unsigned long neighborRank;
+};
 
 class RPL_dag
 {
   public:
-    int dodagid;
+    int version;
     unsigned long rank;
     bool joined;
-    std::list<int> parentList;
+    std::list<RPL_neighbor*> parentList;
 };
 
 class RPL
 {
   private:
     Core *core;
-    std::list<int> neighborList;
+//    std::list<RPL_neighbor*> neighborList;
 
   public:
     RPL_dag rplDag;
@@ -55,6 +63,8 @@ class RPL
 
     void receiveDIO(DIO*);
     void receiveDIS(DIS*);
+
+    RPL_neighbor* getPrefferedParent();
 };
 
 } /* namespace wsn_energy */
