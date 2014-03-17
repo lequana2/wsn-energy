@@ -25,8 +25,8 @@ simple Radio
         int coRange;
         
     gates:
-        input radioIn;
-        output radioOut;
+        input upperIn;
+        output upperOut;
         
-        input raw@directin;
+        input radioIn@directin;
 }

@@ -13,19 +13,44 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.client;
+#include <rdc.h>
+#include "packet_m.h"
 
-//
-// Consumes received messages and collects statistics
-//
-simple Client
+namespace wsn_energy {
+
+Define_Module(Rdc);
+
+Rdc::Rdc()
 {
-    parameters:
-        @class("Client");
+  // TODO Auto-generated constructor stub
 
-        volatile double sendInterval @unit(s) = default(exponential(1s));
-
-    gates:
-        input lowerIn;
-        output lowerOut;
 }
+
+Rdc::~Rdc()
+{
+  // TODO Auto-generated destructor stub
+}
+
+void Rdc::initialize()
+{
+}
+
+void Rdc::handleMessage(cMessage *msg)
+{
+  Frame *frame = (Frame*) msg;
+  if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
+  {
+    msg->setKind(TRX_BROADCAST);
+    send(msg, gate("lowerOut"));
+  }
+  else
+  {
+    send(frame, gate("upperOut"));
+  }
+}
+
+void Rdc::finish()
+{
+}
+
+} /* namespace wsn_energy */

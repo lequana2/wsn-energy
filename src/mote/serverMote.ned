@@ -16,7 +16,9 @@
 package wsn_energy.mote;
 
 import wsn_energy.apps.server.Server;
-import wsn_energy.core.Core;
+import wsn_energy.core.net.Net;
+import wsn_energy.core.mac.Mac;
+import wsn_energy.core.rdc.Rdc;
 import wsn_energy.platform.radio.Radio;
 
 //
@@ -32,16 +34,25 @@ module ServerMote
         @display("i=abstract/db;is=s;p=$axisX,$axisY");
 
     submodules:
-        core: Core;
         app: Server;
+        net: Net;
+        mac: Mac;
+        rdc: Rdc;
         radio: Radio {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
         }
     connections allowunconnected:
-        core.appOut --> app.appIn;
-        app.appOut --> core.appIn;
-        core.radioOut --> radio.radioIn;
-        radio.radioOut --> core.radioIn;
+        app.lowerOut --> net.upperIn;
+        app.lowerIn <-- net.upperOut;
+
+        net.lowerOut --> mac.upperIn;
+        net.lowerIn <-- mac.upperOut;
+
+        mac.lowerOut --> rdc.upperIn;
+        mac.lowerIn <-- rdc.upperOut;
+
+        rdc.lowerOut --> radio.upperIn;
+        rdc.lowerIn <-- radio.upperOut;
 }

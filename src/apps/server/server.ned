@@ -24,6 +24,6 @@ simple Server
         @class("Server");
 
     gates:
-        input appIn;
-        output appOut;
+        input lowerIn;
+        output lowerOut;
 }

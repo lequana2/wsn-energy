@@ -22,13 +22,13 @@ enum MESSAGE{
 	TOF_BROADCAST = 2;
 	ROF_BROADCAST = 1;
 	
-	// information event
-	WORKING_FLAG = 5;
-	ENVIRON_FLAG = 6;
-	
 	// specialize event
 	RPL_CONSTRUCT = 7;
 	RPL_SOLICIT   = 8;
+
+	// information event
+	WORKING_FLAG = 5;
+	ENVIRON_FLAG = 6;
 }
 
 enum IP_CODE {
@@ -44,15 +44,21 @@ enum RPL_CODE {
 }
 
 packet Raw{
+    int type;
     int radioSendId;
     int radioRecvId;
-    int type;
 }
 
-packet IpPacket extends Raw{
+packet Frame extends Raw{
+	int type;
+	int senderMacAddress;
+	int recverMacAddress;
+}
+
+packet IpPacket extends Frame{
+    int type;
     int senderIpAddress;
     int recverIpAddress;
-    int type;
 }
 
 packet Data extends IpPacket {
@@ -74,8 +80,4 @@ packet DIS extends ICMP{
 	int reserved;
 	int options; 
 	int convergence;
-}
-
-packet DATA extends ICMP {
-	int value;
 }

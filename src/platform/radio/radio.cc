@@ -54,7 +54,7 @@ void Radio::handleMessage(cMessage* msg)
   {
     // to upper layer
     msg->setKind(WORKING_FLAG);
-    send(msg, gate("radioOut"));
+    send(msg, gate("upperOut"));
   }
 }
 
@@ -92,7 +92,7 @@ void Radio::transmit_on(Raw *msg)
     // register transmission
     ((World*) simulation.getModuleByPath("world"))->registerTranmission(new Transmission(this, recver));
 
-    // turn receiving mote on
+    // WSN turn receiving mote on self-synchronize
     recver->receive_on();
   }
 
@@ -123,7 +123,7 @@ void Radio::transmit_off()
       // EV << "Received" << endl;
       broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
 
-      cGate* gate = simulation.getModule(neighbor.at(i))->gate("raw");
+      cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
       sendDirect(broadcastMessage->dup(), gate);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
@@ -132,13 +132,18 @@ void Radio::transmit_off()
     {
       // EV << "Disposed" << endl;
 
-      recver->getParentModule()->bubble("dispose");
+//      recver->getParentModule()->bubble("dispose");
+
+      broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
+      cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
+      sendDirect(broadcastMessage->dup(), gate);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
 
     // Turn receiving mote off
     ((World*) simulation.getModuleByPath("world"))->stopTranmission(completeTranmission);
+
     recver->receive_off();
   }
 

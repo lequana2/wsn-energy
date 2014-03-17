@@ -13,17 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core;
+package wsn_energy.core.rdc;
 
 //
 // TODO auto-generated type
 //
-simple Core
+simple Rdc
 {
     gates:
-        input appIn;
-        output appOut;
+        input upperIn;
+        output upperOut;
 
-        input radioIn;
-        output radioOut;
+        input lowerIn;
+        output lowerOut;
 }

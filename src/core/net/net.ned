@@ -13,19 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.client;
+package wsn_energy.core.net;
 
 //
-// Consumes received messages and collects statistics
+// TODO auto-generated type
 //
-simple Client
+simple Net
 {
-    parameters:
-        @class("Client");
-
-        volatile double sendInterval @unit(s) = default(exponential(1s));
-
     gates:
+        input upperIn;
+        output upperOut;
+
         input lowerIn;
         output lowerOut;
 }

@@ -27,10 +27,10 @@ void Client::initialize()
   App::initialize();
 
   // WSN Client scheme
-  cMessage *event = new cMessage;
+//  cMessage *event = new cMessage;
 //  event->setKind(RPL_SOLICIT);
 //  event->setKind(RPL_CONSTRUCT);
-  event->setKind(ENVIRON_FLAG);
+//  event->setKind(ENVIRON_FLAG);
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
 //    send(event, gate("appOut"));
@@ -41,8 +41,14 @@ void Client::initialize()
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[45]")->getId())
 //    scheduleAt(simTime() + 30, event);
 
-  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[35]")->getId())
-    scheduleAt(simTime() + 30, event);
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[35]")->getId())
+//    scheduleAt(simTime() + 30, event);
+
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
+//      scheduleAt(simTime() + 30, event->dup());
+//
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
+//      scheduleAt(simTime() + 35, event->dup());
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[26]")->getId())
 //    scheduleAt(simTime() + 30, event);
@@ -50,16 +56,16 @@ void Client::initialize()
 
 void Client::handleMessage(cMessage *msg)
 {
-  if (msg->getKind() == RPL_SOLICIT || msg->getKind() == RPL_CONSTRUCT)
-  {
-    send(msg, gate("appOut"));
-  }
-  if (msg->getKind() == ENVIRON_FLAG){
-    Data *emsg = new Data;
-    emsg->setKind(ENVIRON_FLAG);
-    emsg->setValue(69);
-    send(emsg, gate("appOut"));
-  }
+//  if (msg->getKind() == RPL_SOLICIT || msg->getKind() == RPL_CONSTRUCT)
+//  {
+//    send(msg, gate("lowerOut"));
+//  }
+//  if (msg->getKind() == ENVIRON_FLAG){
+//    Data *emsg = new Data;
+//    emsg->setKind(ENVIRON_FLAG);
+//    emsg->setValue(69);
+//    send(emsg, gate("lowerOut"));
+//  }
 }
 
 void Client::finish()

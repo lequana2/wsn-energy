@@ -31,11 +31,13 @@ Statistic::Statistic()
   polling = new cMessage();
   numRecvPacket = 0;
   numLostPacket = 0;
+  numSensData = 0;
+  numRecvData = 0;
 }
 
 Statistic::~Statistic()
 {
-  cancelAndDelete (polling);
+  cancelAndDelete(polling);
 }
 
 void Statistic::initialize()
@@ -43,6 +45,8 @@ void Statistic::initialize()
   totalSensorEnergySignal = registerSignal("total_sensor_energy");
   sigRecvPacket = registerSignal("recv_packet");
   sigLostPacket = registerSignal("lost_packet");
+  sigSensData = registerSignal("sens_data");
+  sigRecvData = registerSignal("recv_data");
 
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
@@ -92,6 +96,22 @@ void Statistic::incLostPacket()
   ("incLostPacket");
   numLostPacket++;
   emit(sigLostPacket, numLostPacket);
+}
+
+void Statistic::incSensData()
+{
+  Enter_Method_Silent
+  ("incSensData");
+  numSensData++;
+  emit(sigSensData, numSensData);
+}
+
+void Statistic::incRecvData()
+{
+  Enter_Method_Silent
+  ("incRecvData");
+  numRecvData++;
+  emit(sigRecvData, numRecvData);
 }
 
 void Statistic::finish()

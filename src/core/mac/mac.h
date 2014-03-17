@@ -13,19 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.client;
+#ifndef MAC_H_
+#define MAC_H_
 
-//
-// Consumes received messages and collects statistics
-//
-simple Client
+#include <omnetpp.h>
+
+namespace wsn_energy {
+
+class Mac : public cSimpleModule
 {
-    parameters:
-        @class("Client");
+  public:
+    Mac();
+    virtual ~Mac();
 
-        volatile double sendInterval @unit(s) = default(exponential(1s));
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
+};
 
-    gates:
-        input lowerIn;
-        output lowerOut;
-}
+} /* namespace wsn_energy */
+
+#endif /* MAC_H_ */

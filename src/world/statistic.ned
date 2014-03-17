@@ -32,5 +32,11 @@ simple Statistic
         @signal[lost_packet](type="int");
         @statistic[numLostPacket](title="Number of lost packets"; source="lost_packet"; record=last);
 
+        @signal[sens_data](type="int");
+        @statistic[sensData](title="Number of sens data"; source="sens_data"; record=last);
+
+        @signal[recv_data](type="int");
+        @statistic[recvData](title="Number of received data"; source="recv_data"; record=last);
+
         @display("p=-50,80;i=block/table2");
 }

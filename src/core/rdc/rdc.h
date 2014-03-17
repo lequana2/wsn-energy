@@ -13,19 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.client;
+#ifndef RDC_H_
+#define RDC_H_
 
-//
-// Consumes received messages and collects statistics
-//
-simple Client
+#include <omnetpp.h>
+
+namespace wsn_energy {
+
+class Rdc : public cSimpleModule
 {
-    parameters:
-        @class("Client");
+  public:
+    Rdc();
+    virtual ~Rdc();
 
-        volatile double sendInterval @unit(s) = default(exponential(1s));
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
+};
 
-    gates:
-        input lowerIn;
-        output lowerOut;
-}
+} /* namespace wsn_energy */
+
+#endif /* RDC_H_ */

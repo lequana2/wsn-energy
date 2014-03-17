@@ -22,7 +22,9 @@ INCLUDE_PATH = \
     -Icore \
     -Icore/mac \
     -Icore/net \
+    -Icore/net/ip \
     -Icore/net/rpl \
+    -Icore/rdc \
     -Imote \
     -Ipacket \
     -Iplatform \
@@ -46,8 +48,10 @@ OBJS = \
     $O/apps/app.o \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
-    $O/core/core.o \
+    $O/core/mac/mac.o \
+    $O/core/net/net.o \
     $O/core/net/rpl/rpl.o \
+    $O/core/rdc/rdc.o \
     $O/platform/battery/battery.o \
     $O/platform/radio/radio.o \
     $O/platform/radio/transmission.o \
@@ -137,7 +141,9 @@ clean:
 	$(Q)-rm -f core/*_m.cc core/*_m.h
 	$(Q)-rm -f core/mac/*_m.cc core/mac/*_m.h
 	$(Q)-rm -f core/net/*_m.cc core/net/*_m.h
+	$(Q)-rm -f core/net/ip/*_m.cc core/net/ip/*_m.h
 	$(Q)-rm -f core/net/rpl/*_m.cc core/net/rpl/*_m.h
+	$(Q)-rm -f core/rdc/*_m.cc core/rdc/*_m.h
 	$(Q)-rm -f mote/*_m.cc mote/*_m.h
 	$(Q)-rm -f packet/*_m.cc packet/*_m.h
 	$(Q)-rm -f platform/*_m.cc platform/*_m.h
@@ -150,7 +156,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/net/*.cc core/net/rpl/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/net/*.cc core/net/ip/*.cc core/net/rpl/*.cc core/rdc/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/app.o: apps/app.cc \
@@ -162,12 +168,15 @@ $O/apps/client/client.o: apps/client/client.cc \
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/app.h \
 	apps/server/server.h \
-	core/core.h \
+	core/net/net.h \
 	core/net/rpl/rpl.h \
 	packet/packet_m.h
-$O/core/core.o: core/core.cc \
+$O/core/mac/mac.o: core/mac/mac.cc \
+	core/mac/mac.h \
+	packet/packet_m.h
+$O/core/net/net.o: core/net/net.cc \
 	apps/app.h \
-	core/core.h \
+	core/net/net.h \
 	core/net/rpl/rpl.h \
 	packet/packet_m.h \
 	platform/radio/radio.h \
@@ -175,8 +184,11 @@ $O/core/core.o: core/core.cc \
 	world/statistic.h \
 	world/world.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
-	core/core.h \
+	core/net/net.h \
 	core/net/rpl/rpl.h \
+	packet/packet_m.h
+$O/core/rdc/rdc.o: core/rdc/rdc.cc \
+	core/rdc/rdc.h \
 	packet/packet_m.h
 $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_m.h

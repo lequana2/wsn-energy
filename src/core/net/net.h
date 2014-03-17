@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef CORE_H_
-#define CORE_H_
+#ifndef NET_H_
+#define NET_H_
 
 #include <omnetpp.h>
 #include <list>
@@ -23,7 +23,7 @@
 
 namespace wsn_energy {
 
-class Core : public cSimpleModule
+class Net : public cSimpleModule
 {
   public:
     int numberClient;
@@ -39,8 +39,8 @@ class Core : public cSimpleModule
 
     void broadcast(IpPacket*);
 
-    Core();
-    ~Core();
+    Net();
+    ~Net();
 
   protected:
     virtual void initialize();
@@ -52,4 +52,4 @@ class Core : public cSimpleModule
 ;
 // namespace
 
-#endif /* CORE_H_ */
+#endif /* NET_H_ */

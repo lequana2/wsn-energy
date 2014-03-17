@@ -14,7 +14,7 @@
 //
 
 #include "server.h"
-#include "core.h"
+#include "net.h"
 
 namespace wsn_energy {
 

@@ -27,12 +27,12 @@ namespace wsn_energy {
  * 	ROF_BROADCAST = 1;
  * 	
  * 	
- * 	WORKING_FLAG = 5;
- * 	ENVIRON_FLAG = 6;
- * 	
- * 	
  * 	RPL_CONSTRUCT = 7;
  * 	RPL_SOLICIT   = 8;
+ * 
+ * 	
+ * 	WORKING_FLAG = 5;
+ * 	ENVIRON_FLAG = 6;
  * }
  * </pre>
  */
@@ -41,10 +41,10 @@ enum MESSAGE {
     RCX_BROADCAST = 3,
     TOF_BROADCAST = 2,
     ROF_BROADCAST = 1,
-    WORKING_FLAG = 5,
-    ENVIRON_FLAG = 6,
     RPL_CONSTRUCT = 7,
-    RPL_SOLICIT = 8
+    RPL_SOLICIT = 8,
+    WORKING_FLAG = 5,
+    ENVIRON_FLAG = 6
 };
 
 /**
@@ -81,18 +81,18 @@ enum RPL_CODE {
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Raw{
+ *     int type;
  *     int radioSendId;
  *     int radioRecvId;
- *     int type;
  * }
  * </pre>
  */
 class Raw : public ::cPacket
 {
   protected:
+    int type_var;
     int radioSendId_var;
     int radioRecvId_var;
-    int type_var;
 
   private:
     void copy(const Raw& other);
@@ -111,12 +111,12 @@ class Raw : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
+    virtual int getType() const;
+    virtual void setType(int type);
     virtual int getRadioSendId() const;
     virtual void setRadioSendId(int radioSendId);
     virtual int getRadioRecvId() const;
     virtual void setRadioRecvId(int radioRecvId);
-    virtual int getType() const;
-    virtual void setType(int type);
 };
 
 inline void doPacking(cCommBuffer *b, Raw& obj) {obj.parsimPack(b);}
@@ -125,19 +125,64 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet IpPacket extends Raw{
- *     int senderIpAddress;
- *     int recverIpAddress;
- *     int type;
+ * packet Frame extends Raw{
+ * 	int type;
+ * 	int senderMacAddress;
+ * 	int recverMacAddress;
  * }
  * </pre>
  */
-class IpPacket : public ::wsn_energy::Raw
+class Frame : public ::wsn_energy::Raw
 {
   protected:
+    int type_var;
+    int senderMacAddress_var;
+    int recverMacAddress_var;
+
+  private:
+    void copy(const Frame& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const Frame&);
+
+  public:
+    Frame(const char *name=NULL, int kind=0);
+    Frame(const Frame& other);
+    virtual ~Frame();
+    Frame& operator=(const Frame& other);
+    virtual Frame *dup() const {return new Frame(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getType() const;
+    virtual void setType(int type);
+    virtual int getSenderMacAddress() const;
+    virtual void setSenderMacAddress(int senderMacAddress);
+    virtual int getRecverMacAddress() const;
+    virtual void setRecverMacAddress(int recverMacAddress);
+};
+
+inline void doPacking(cCommBuffer *b, Frame& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet IpPacket extends Frame{
+ *     int type;
+ *     int senderIpAddress;
+ *     int recverIpAddress;
+ * }
+ * </pre>
+ */
+class IpPacket : public ::wsn_energy::Frame
+{
+  protected:
+    int type_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
-    int type_var;
 
   private:
     void copy(const IpPacket& other);
@@ -156,12 +201,12 @@ class IpPacket : public ::wsn_energy::Raw
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
+    virtual int getType() const;
+    virtual void setType(int type);
     virtual int getSenderIpAddress() const;
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;
     virtual void setRecverIpAddress(int recverIpAddress);
-    virtual int getType() const;
-    virtual void setType(int type);
 };
 
 inline void doPacking(cCommBuffer *b, IpPacket& obj) {obj.parsimPack(b);}
@@ -334,43 +379,6 @@ class DIS : public ::wsn_energy::ICMP
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
-
-/**
- * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
- * packet DATA extends ICMP {
- * 	int value;
- * }
- * </pre>
- */
-class DATA : public ::wsn_energy::ICMP
-{
-  protected:
-    int value_var;
-
-  private:
-    void copy(const DATA& other);
-
-  protected:
-    // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const DATA&);
-
-  public:
-    DATA(const char *name=NULL, int kind=0);
-    DATA(const DATA& other);
-    virtual ~DATA();
-    DATA& operator=(const DATA& other);
-    virtual DATA *dup() const {return new DATA(*this);}
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
-
-    // field getter/setter methods
-    virtual int getValue() const;
-    virtual void setValue(int value);
-};
-
-inline void doPacking(cCommBuffer *b, DATA& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, DATA& obj) {obj.parsimUnpack(b);}
 
 }; // end namespace wsn_energy
 

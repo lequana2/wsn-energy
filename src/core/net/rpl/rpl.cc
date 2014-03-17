@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "core.h"
+#include <net.h>
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -34,10 +34,10 @@ RPL::~RPL()
 //  this->neighborList.clear();
 }
 
-RPL::RPL(Core *core)
+RPL::RPL(Net *net)
 {
   this->rpl_init();
-  this->core = core;
+  this->net = net;
 }
 
 void RPL::rpl_init()
@@ -56,7 +56,7 @@ void RPL::rpl_set_root()
   // WSN Should send continously, trickle timer ???
   cMessage *constructMessage = new cMessage();
   constructMessage->setKind(RPL_CONSTRUCT);
-  core->scheduleAt(simTime(), constructMessage);
+  net->scheduleAt(simTime(), constructMessage);
 }
 
 void RPL::sendDIO()
@@ -70,7 +70,7 @@ void RPL::sendDIO()
   icmp->setDodagID(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
 
-  core->broadcast(icmp);
+  net->broadcast(icmp);
 }
 
 void RPL::sendDIS(int convergence)
@@ -83,7 +83,7 @@ void RPL::sendDIS(int convergence)
 
   icmp->setConvergence(convergence);
 
-  core->broadcast(icmp);
+  net->broadcast(icmp);
 }
 
 void RPL::receiveDIO(DIO* msg)
@@ -125,7 +125,7 @@ void RPL::receiveDIO(DIO* msg)
       char channelParent[20];
       sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
       EV << channelParent << endl;
-      core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+      net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
 
       // Different
       this->sendDIO();
@@ -147,7 +147,7 @@ void RPL::receiveDIO(DIO* msg)
         char channelParent[20];
         sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
         EV << channelParent << endl;
-        core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+        net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
       }
       // Update parent
       this->sendDIO();
@@ -165,7 +165,7 @@ void RPL::receiveDIO(DIO* msg)
         char channelParent[20];
         sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
         EV << channelParent << endl;
-        core->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+        net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
       }
       // Update sibling
     }
@@ -177,7 +177,7 @@ void RPL::receiveDIO(DIO* msg)
   // Bubble current rank
   char rank[10];
   sprintf(rank, "Rank %d", (int) this->rplDag.rank);
-  core->getParentModule()->bubble(rank);
+  net->getParentModule()->bubble(rank);
 }
 
 void RPL::receiveDIS(DIS* msg)
@@ -201,11 +201,14 @@ void RPL::receiveDIS(DIS* msg)
 
 RPL_neighbor* RPL::getPrefferedParent()
 {
+  if (this->rplDag.parentList.size() == 0)
+    return NULL;
+
   std::list<RPL_neighbor*> goodParent;
   for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
       iterator != this->rplDag.parentList.end(); iterator++)
   {
-    if ((*iterator)->neighborRank < this->rplDag.rank)
+    if ((*iterator)->neighborRank <= this->rplDag.rank)
       goodParent.push_back(*iterator);
   }
 

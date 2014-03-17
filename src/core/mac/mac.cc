@@ -13,19 +13,46 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.client;
+#include <mac.h>
+#include "packet_m.h"
 
-//
-// Consumes received messages and collects statistics
-//
-simple Client
+namespace wsn_energy {
+
+Define_Module(Mac);
+
+Mac::Mac()
 {
-    parameters:
-        @class("Client");
+  // TODO Auto-generated constructor stub
 
-        volatile double sendInterval @unit(s) = default(exponential(1s));
-
-    gates:
-        input lowerIn;
-        output lowerOut;
 }
+
+Mac::~Mac()
+{
+  // TODO Auto-generated destructor stub
+}
+
+void Mac::initialize()
+{
+}
+
+void Mac::handleMessage(cMessage *msg)
+{
+  Frame *frame = (Frame*) msg;
+  if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".net")->getId())
+  {
+    frame->setSenderMacAddress(this->getId());
+    frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+
+    send(msg, gate("lowerOut"));
+  }
+  else
+  {
+    send(frame, gate("upperOut"));
+  }
+}
+
+void Mac::finish()
+{
+}
+
+} /* namespace wsn_energy */

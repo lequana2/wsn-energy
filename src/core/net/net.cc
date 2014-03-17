@@ -18,32 +18,34 @@
 #include "world.h"
 #include "statistic.h"
 #include "app.h"
-#include "core.h"
+#include "net.h"
 #include "rpl.h"
 #include "radio.h"
 
 namespace wsn_energy {
 
-Define_Module(Core);
+Define_Module(Net);
 
-Core::Core()
+Net::Net()
 {
 }
-Core::~Core()
+Net::~Net()
 {
 }
 
 //---------------------------------------------------------------------------//
-void Core::initialize()
+void Net::initialize()
 {
   this->rpl = new RPL(this);
 
-  if (this->getId() == simulation.getModuleByPath("server.core")->getId())
+  if (this->getId() == simulation.getModuleByPath("server.net")->getId())
     this->rpl->rpl_set_root();
 }
 //---------------------------------------------------------------------------//
-void Core::handleMessage(cMessage *msg)
+void Net::handleMessage(cMessage *msg)
 {
+  ev << msg->getKind() << endl;
+
   // dispatch event
   if (msg->getKind() == RPL_CONSTRUCT)
   {
@@ -58,6 +60,8 @@ void Core::handleMessage(cMessage *msg)
   // Enviroment flag
   else if (msg->getKind() == ENVIRON_FLAG)
   {
+    ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
+
     RPL_neighbor *des = this->rpl->getPrefferedParent();
     if (des != NULL)
     {
@@ -71,6 +75,9 @@ void Core::handleMessage(cMessage *msg)
       broadcastMessage->setType(IP_DATA);
 
       broadcast(broadcastMessage);
+
+      // WSN remove
+      this->rpl->rplDag.parentList.remove(des);
     }
     else
     {
@@ -80,10 +87,10 @@ void Core::handleMessage(cMessage *msg)
   // IP messeage
   else if (msg->getKind() == WORKING_FLAG)
   {
-    // dismiss if recvID is not the same
-    if (((IpPacket*) msg)->getRecverIpAddress() != 0
-        && ((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
-      return;
+    // WSN dismiss if recvID is not the same
+//    if (((IpPacket*) msg)->getRecverIpAddress() != 0
+//        && ((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
+//      return;
 
     // receive RPL construct
     if (((IpPacket*) msg)->getType() == IP_ICMP)
@@ -112,6 +119,8 @@ void Core::handleMessage(cMessage *msg)
       if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
       {
         this->getParentModule()->bubble(m);
+        ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
+        // WSN send to application layer
       }
       else
       {
@@ -139,16 +148,17 @@ void Core::handleMessage(cMessage *msg)
   // WSN Enviroment message
 }
 
-void Core::finish()
+void Net::finish()
 {
 }
 
 //---------------------------------------------------------------------------//
-void Core::broadcast(IpPacket *msg)
+void Net::broadcast(IpPacket *msg)
 {
-  msg->setKind(TRX_BROADCAST);
+  msg->setSenderIpAddress(this->getId());
+  msg->setRecverIpAddress(getModuleByPath("server.net")->getId());
 
-  send(msg, gate("radioOut"));
+  send(msg, gate("lowerOut"));
 }
 
 } /* namespace wsn_energy */

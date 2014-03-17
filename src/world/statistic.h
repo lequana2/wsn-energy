@@ -27,12 +27,18 @@ class Statistic : public cSimpleModule
 {
   private:
     cMessage *polling; // Timer for polling total sensor energy
+
     int numRecvPacket; // Number of successfully received packets
     int numLostPacket; // Number of lost packets
+    int numSensData; // Number of data sending by client
+    int numRecvData; // Number of data recving by server
 
     simsignal_t totalSensorEnergySignal;
+
     simsignal_t sigRecvPacket;
     simsignal_t sigLostPacket;
+    simsignal_t sigSensData;
+    simsignal_t sigRecvData;
 
     /**
      * Record remaining energy of sensor nodes
@@ -46,12 +52,20 @@ class Statistic : public cSimpleModule
   public:
     Statistic();
     ~Statistic();
+
     /* Calculate total energy and emit it */
     void pollTotalSensorEnergy();
+
     /* Increase number of successfully received packets (payload frames) */
     void incRecvPacket();
     /* Increase number of lost packets (payload frames) */
     void incLostPacket();
+
+    /* Increase number of data send by mote (payload frames) */
+    void incSensData();
+    /* Increase number of data recv by server (payload frames) */
+    void incRecvData();
+
     void finish();
 };
 }

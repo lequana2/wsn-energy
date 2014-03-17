@@ -23,7 +23,7 @@
 
 namespace wsn_energy {
 
-class Core;
+class Net;
 // forward declaration
 
 class RPL_neighbor
@@ -45,7 +45,7 @@ class RPL_dag
 class RPL
 {
   private:
-    Core *core;
+    Net *net;
 //    std::list<RPL_neighbor*> neighborList;
 
   public:
@@ -53,7 +53,7 @@ class RPL
 
     RPL();
     ~RPL();
-    RPL(Core *core);
+    RPL(Net *net);
 
     void rpl_set_root();
     void rpl_init();
