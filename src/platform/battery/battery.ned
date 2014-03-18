@@ -13,19 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.server;
-
-import wsn_energy.apps.iApp;
+package wsn_energy.platform.battery;
 
 //
-// Generates messages with a configurable interarrival time.
+// TODO auto-generated type
 //
-simple Server like iApp
+simple Battery
 {
-    parameters:
-        @class("Server");
-
-    gates:
-        input lowerIn;
-        output lowerOut;
 }

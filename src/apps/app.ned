@@ -13,18 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.server;
-
-import wsn_energy.apps.iApp;
+package wsn_energy.apps;
 
 //
-// Generates messages with a configurable interarrival time.
+// TODO auto-generated type
 //
-simple Server like iApp
+moduleinterface iApp
 {
-    parameters:
-        @class("Server");
-
     gates:
         input lowerIn;
         output lowerOut;

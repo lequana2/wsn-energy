@@ -14,8 +14,11 @@
 // 
 
 #include <radio.h>
+
 #include "world.h"
 #include "statistic.h"
+
+#include "battery.h"
 
 #ifndef  DEBUG
 #define  DEBUG 0
@@ -27,6 +30,7 @@ Define_Module(Radio)
 
 Radio::Radio()
 {
+  this->broadcastMessage = NULL;
 }
 
 Radio::~Radio()
@@ -98,6 +102,8 @@ void Radio::transmit_on(Raw *msg)
 
   int finishTime = 1;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, TOF_BROADCAST));
+
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
 }
 
 /*
@@ -159,6 +165,8 @@ void Radio::transmit_off()
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", x, y);
 
   getParentModule()->setDisplayString(newDisplay);
+
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
 }
 
 /*
@@ -168,7 +176,8 @@ void Radio::receive_on()
 {
   if (DEBUG)
     ev << "Recv on" << endl;
-  // Battery utils
+
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN);
 }
 
 /*
@@ -178,7 +187,8 @@ void Radio::receive_off()
 {
   if (DEBUG)
     ev << "Recv off" << endl;
-  // Battery utils
+
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
 }
 }
 /* namespace wsn_energy */

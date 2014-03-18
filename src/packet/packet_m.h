@@ -80,6 +80,47 @@ enum RPL_CODE {
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
+ * packet Energest{
+ * 	int capsule;
+ * 	int command;
+ * }
+ * </pre>
+ */
+class Energest : public ::cPacket
+{
+  protected:
+    int capsule_var;
+    int command_var;
+
+  private:
+    void copy(const Energest& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const Energest&);
+
+  public:
+    Energest(const char *name=NULL, int kind=0);
+    Energest(const Energest& other);
+    virtual ~Energest();
+    Energest& operator=(const Energest& other);
+    virtual Energest *dup() const {return new Energest(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getCapsule() const;
+    virtual void setCapsule(int capsule);
+    virtual int getCommand() const;
+    virtual void setCommand(int command);
+};
+
+inline void doPacking(cCommBuffer *b, Energest& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Energest& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
  * packet Raw{
  *     int type;
  *     int radioSendId;
@@ -335,9 +376,6 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS extends ICMP{
- * 	int flags;
- * 	int reserved;
- * 	int options; 
  * 	int convergence;
  * }
  * </pre>
@@ -345,9 +383,6 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
 class DIS : public ::wsn_energy::ICMP
 {
   protected:
-    int flags_var;
-    int reserved_var;
-    int options_var;
     int convergence_var;
 
   private:
@@ -367,12 +402,6 @@ class DIS : public ::wsn_energy::ICMP
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getFlags() const;
-    virtual void setFlags(int flags);
-    virtual int getReserved() const;
-    virtual void setReserved(int reserved);
-    virtual int getOptions() const;
-    virtual void setOptions(int options);
     virtual int getConvergence() const;
     virtual void setConvergence(int convergence);
 };

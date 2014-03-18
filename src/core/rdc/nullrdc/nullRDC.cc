@@ -13,36 +13,34 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <mac.h>
+#include "nullRDC.h"
 #include "packet_m.h"
 
 namespace wsn_energy {
 
-Define_Module(Mac);
+Define_Module(nullRDC);
 
-Mac::Mac()
+nullRDC::nullRDC()
 {
   // TODO Auto-generated constructor stub
 
 }
 
-Mac::~Mac()
+nullRDC::~nullRDC()
 {
   // TODO Auto-generated destructor stub
 }
 
-void Mac::initialize()
+void nullRDC::initialize()
 {
 }
 
-void Mac::handleMessage(cMessage *msg)
+void nullRDC::handleMessage(cMessage *msg)
 {
   Frame *frame = (Frame*) msg;
-  if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".net")->getId())
+  if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
   {
-    frame->setSenderMacAddress(this->getId());
-    frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
-
+    msg->setKind(TRX_BROADCAST);
     send(msg, gate("lowerOut"));
   }
   else
@@ -51,7 +49,7 @@ void Mac::handleMessage(cMessage *msg)
   }
 }
 
-void Mac::finish()
+void nullRDC::finish()
 {
 }
 

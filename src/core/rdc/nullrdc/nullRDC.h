@@ -13,19 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.server;
+#ifndef RDC_H_
+#define RDC_H_
 
-import wsn_energy.apps.iApp;
+#include <omnetpp.h>
 
-//
-// Generates messages with a configurable interarrival time.
-//
-simple Server like iApp
+namespace wsn_energy {
+
+class nullRDC : public cSimpleModule
 {
-    parameters:
-        @class("Server");
+  public:
+    nullRDC();
+    virtual ~nullRDC();
 
-    gates:
-        input lowerIn;
-        output lowerOut;
-}
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
+};
+
+} /* namespace wsn_energy */
+
+#endif /* RDC_H_ */

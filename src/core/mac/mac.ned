@@ -18,7 +18,7 @@ package wsn_energy.core.mac;
 //
 // TODO auto-generated type
 //
-simple Mac
+moduleinterface iMAC
 {
     gates:
         input upperIn;

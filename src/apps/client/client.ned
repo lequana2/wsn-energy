@@ -15,10 +15,12 @@
 
 package wsn_energy.apps.client;
 
+import wsn_energy.apps.iApp;
+
 //
 // Consumes received messages and collects statistics
 //
-simple Client
+simple Client like iApp
 {
     parameters:
         @class("Client");

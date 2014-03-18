@@ -13,25 +13,22 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef RDC_H_
-#define RDC_H_
+package wsn_energy.core.mac.nullmac;
 
-#include <omnetpp.h>
+import wsn_energy.core.mac.iMAC;
 
-namespace wsn_energy {
-
-class Rdc : public cSimpleModule
+//
+// TODO auto-generated type
+//
+simple nullMAC like iMAC
 {
-  public:
-    Rdc();
-    virtual ~Rdc();
+    parameters:
+        @class("nullMAC");
+        
+    gates:
+        input upperIn;
+        output upperOut;
 
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
-};
-
-} /* namespace wsn_energy */
-
-#endif /* RDC_H_ */
+        input lowerIn;
+        output lowerOut;
+}

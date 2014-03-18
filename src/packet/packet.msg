@@ -43,6 +43,11 @@ enum RPL_CODE {
 	ICMP_DIS_CODE = 1;
 }
 
+packet Energest{
+	int capsule;
+	int command;
+}
+
 packet Raw{
     int type;
     int radioSendId;
@@ -76,8 +81,5 @@ packet DIO extends ICMP{
 }
 
 packet DIS extends ICMP{
-	int flags;
-	int reserved;
-	int options; 
 	int convergence;
 }

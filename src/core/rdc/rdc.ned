@@ -18,7 +18,7 @@ package wsn_energy.core.rdc;
 //
 // TODO auto-generated type
 //
-simple Rdc
+moduleinterface iRDC
 {
     gates:
         input upperIn;

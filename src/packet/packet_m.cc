@@ -60,6 +60,263 @@ EXECUTE_ON_STARTUP(
     e->insert(ICMP_DIS_CODE, "ICMP_DIS_CODE");
 );
 
+Register_Class(Energest);
+
+Energest::Energest(const char *name, int kind) : cPacket(name,kind)
+{
+    this->capsule_var = 0;
+    this->command_var = 0;
+}
+
+Energest::Energest(const Energest& other) : cPacket(other)
+{
+    copy(other);
+}
+
+Energest::~Energest()
+{
+}
+
+Energest& Energest::operator=(const Energest& other)
+{
+    if (this==&other) return *this;
+    cPacket::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Energest::copy(const Energest& other)
+{
+    this->capsule_var = other.capsule_var;
+    this->command_var = other.command_var;
+}
+
+void Energest::parsimPack(cCommBuffer *b)
+{
+    cPacket::parsimPack(b);
+    doPacking(b,this->capsule_var);
+    doPacking(b,this->command_var);
+}
+
+void Energest::parsimUnpack(cCommBuffer *b)
+{
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->capsule_var);
+    doUnpacking(b,this->command_var);
+}
+
+int Energest::getCapsule() const
+{
+    return capsule_var;
+}
+
+void Energest::setCapsule(int capsule)
+{
+    this->capsule_var = capsule;
+}
+
+int Energest::getCommand() const
+{
+    return command_var;
+}
+
+void Energest::setCommand(int command)
+{
+    this->command_var = command;
+}
+
+class EnergestDescriptor : public cClassDescriptor
+{
+  public:
+    EnergestDescriptor();
+    virtual ~EnergestDescriptor();
+
+    virtual bool doesSupport(cObject *obj) const;
+    virtual const char *getProperty(const char *propertyname) const;
+    virtual int getFieldCount(void *object) const;
+    virtual const char *getFieldName(void *object, int field) const;
+    virtual int findField(void *object, const char *fieldName) const;
+    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
+    virtual const char *getFieldTypeString(void *object, int field) const;
+    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
+    virtual int getArraySize(void *object, int field) const;
+
+    virtual std::string getFieldAsString(void *object, int field, int i) const;
+    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
+
+    virtual const char *getFieldStructName(void *object, int field) const;
+    virtual void *getFieldStructPointer(void *object, int field, int i) const;
+};
+
+Register_ClassDescriptor(EnergestDescriptor);
+
+EnergestDescriptor::EnergestDescriptor() : cClassDescriptor("wsn_energy::Energest", "cPacket")
+{
+}
+
+EnergestDescriptor::~EnergestDescriptor()
+{
+}
+
+bool EnergestDescriptor::doesSupport(cObject *obj) const
+{
+    return dynamic_cast<Energest *>(obj)!=NULL;
+}
+
+const char *EnergestDescriptor::getProperty(const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : NULL;
+}
+
+int EnergestDescriptor::getFieldCount(void *object) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
+}
+
+unsigned int EnergestDescriptor::getFieldTypeFlags(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeFlags(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+}
+
+const char *EnergestDescriptor::getFieldName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldNames[] = {
+        "capsule",
+        "command",
+    };
+    return (field>=0 && field<2) ? fieldNames[field] : NULL;
+}
+
+int EnergestDescriptor::findField(void *object, const char *fieldName) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='c' && strcmp(fieldName, "capsule")==0) return base+0;
+    if (fieldName[0]=='c' && strcmp(fieldName, "command")==0) return base+1;
+    return basedesc ? basedesc->findField(object, fieldName) : -1;
+}
+
+const char *EnergestDescriptor::getFieldTypeString(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeString(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldTypeStrings[] = {
+        "int",
+        "int",
+    };
+    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
+}
+
+const char *EnergestDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldProperty(object, field, propertyname);
+        field -= basedesc->getFieldCount(object);
+    }
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+int EnergestDescriptor::getArraySize(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getArraySize(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    Energest *pp = (Energest *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+std::string EnergestDescriptor::getFieldAsString(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldAsString(object,field,i);
+        field -= basedesc->getFieldCount(object);
+    }
+    Energest *pp = (Energest *)object; (void)pp;
+    switch (field) {
+        case 0: return long2string(pp->getCapsule());
+        case 1: return long2string(pp->getCommand());
+        default: return "";
+    }
+}
+
+bool EnergestDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->setFieldAsString(object,field,i,value);
+        field -= basedesc->getFieldCount(object);
+    }
+    Energest *pp = (Energest *)object; (void)pp;
+    switch (field) {
+        case 0: pp->setCapsule(string2long(value)); return true;
+        case 1: pp->setCommand(string2long(value)); return true;
+        default: return false;
+    }
+}
+
+const char *EnergestDescriptor::getFieldStructName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldStructNames[] = {
+        NULL,
+        NULL,
+    };
+    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
+}
+
+void *EnergestDescriptor::getFieldStructPointer(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructPointer(object, field, i);
+        field -= basedesc->getFieldCount(object);
+    }
+    Energest *pp = (Energest *)object; (void)pp;
+    switch (field) {
+        default: return NULL;
+    }
+}
+
 Register_Class(Raw);
 
 Raw::Raw(const char *name, int kind) : cPacket(name,kind)
@@ -1648,9 +1905,6 @@ Register_Class(DIS);
 
 DIS::DIS(const char *name, int kind) : wsn_energy::ICMP(name,kind)
 {
-    this->flags_var = 0;
-    this->reserved_var = 0;
-    this->options_var = 0;
     this->convergence_var = 0;
 }
 
@@ -1673,58 +1927,19 @@ DIS& DIS::operator=(const DIS& other)
 
 void DIS::copy(const DIS& other)
 {
-    this->flags_var = other.flags_var;
-    this->reserved_var = other.reserved_var;
-    this->options_var = other.options_var;
     this->convergence_var = other.convergence_var;
 }
 
 void DIS::parsimPack(cCommBuffer *b)
 {
     wsn_energy::ICMP::parsimPack(b);
-    doPacking(b,this->flags_var);
-    doPacking(b,this->reserved_var);
-    doPacking(b,this->options_var);
     doPacking(b,this->convergence_var);
 }
 
 void DIS::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::ICMP::parsimUnpack(b);
-    doUnpacking(b,this->flags_var);
-    doUnpacking(b,this->reserved_var);
-    doUnpacking(b,this->options_var);
     doUnpacking(b,this->convergence_var);
-}
-
-int DIS::getFlags() const
-{
-    return flags_var;
-}
-
-void DIS::setFlags(int flags)
-{
-    this->flags_var = flags;
-}
-
-int DIS::getReserved() const
-{
-    return reserved_var;
-}
-
-void DIS::setReserved(int reserved)
-{
-    this->reserved_var = reserved;
-}
-
-int DIS::getOptions() const
-{
-    return options_var;
-}
-
-void DIS::setOptions(int options)
-{
-    this->options_var = options;
 }
 
 int DIS::getConvergence() const
@@ -1784,7 +1999,7 @@ const char *DISDescriptor::getProperty(const char *propertyname) const
 int DISDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
+    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
 }
 
 unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -1797,11 +2012,8 @@ unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
-        FD_ISEDITABLE,
-        FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DISDescriptor::getFieldName(void *object, int field) const
@@ -1813,22 +2025,16 @@ const char *DISDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "flags",
-        "reserved",
-        "options",
         "convergence",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : NULL;
+    return (field>=0 && field<1) ? fieldNames[field] : NULL;
 }
 
 int DISDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='f' && strcmp(fieldName, "flags")==0) return base+0;
-    if (fieldName[0]=='r' && strcmp(fieldName, "reserved")==0) return base+1;
-    if (fieldName[0]=='o' && strcmp(fieldName, "options")==0) return base+2;
-    if (fieldName[0]=='c' && strcmp(fieldName, "convergence")==0) return base+3;
+    if (fieldName[0]=='c' && strcmp(fieldName, "convergence")==0) return base+0;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1842,11 +2048,8 @@ const char *DISDescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "int",
-        "int",
-        "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DISDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1886,10 +2089,7 @@ std::string DISDescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     DIS *pp = (DIS *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getFlags());
-        case 1: return long2string(pp->getReserved());
-        case 2: return long2string(pp->getOptions());
-        case 3: return long2string(pp->getConvergence());
+        case 0: return long2string(pp->getConvergence());
         default: return "";
     }
 }
@@ -1904,10 +2104,7 @@ bool DISDescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     DIS *pp = (DIS *)object; (void)pp;
     switch (field) {
-        case 0: pp->setFlags(string2long(value)); return true;
-        case 1: pp->setReserved(string2long(value)); return true;
-        case 2: pp->setOptions(string2long(value)); return true;
-        case 3: pp->setConvergence(string2long(value)); return true;
+        case 0: pp->setConvergence(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1922,11 +2119,8 @@ const char *DISDescriptor::getFieldStructName(void *object, int field) const
     }
     static const char *fieldStructNames[] = {
         NULL,
-        NULL,
-        NULL,
-        NULL,
     };
-    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
 }
 
 void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const

@@ -14,8 +14,7 @@
 // 
 
 #include "statistic.h"
-//#include "energy.h"
-//#include "mobility.h"
+#include "battery.h"
 
 #include <iostream>
 #include <fstream>
@@ -29,10 +28,18 @@ Define_Module(Statistic);
 Statistic::Statistic()
 {
   polling = new cMessage();
+
   numRecvPacket = 0;
   numLostPacket = 0;
   numSensData = 0;
   numRecvData = 0;
+
+  totalSensorEnergySignal = registerSignal("total_sensor_energy");
+
+  sigRecvPacket = registerSignal("recv_packet");
+  sigLostPacket = registerSignal("lost_packet");
+  sigSensData = registerSignal("sens_data");
+  sigRecvData = registerSignal("recv_data");
 }
 
 Statistic::~Statistic()
@@ -42,15 +49,9 @@ Statistic::~Statistic()
 
 void Statistic::initialize()
 {
-  totalSensorEnergySignal = registerSignal("total_sensor_energy");
-  sigRecvPacket = registerSignal("recv_packet");
-  sigLostPacket = registerSignal("lost_packet");
-  sigSensData = registerSignal("sens_data");
-  sigRecvData = registerSignal("recv_data");
-
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
-//  scheduleAt(simTime() + par("pollTSEInterval").doubleValue(), pollTSE);
+  scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
 }
 
 void Statistic::handleMessage(cMessage *msg)
@@ -60,7 +61,7 @@ void Statistic::handleMessage(cMessage *msg)
     if (msg == polling)
     {
       pollTotalSensorEnergy();
-      scheduleAt(simTime() + par("WSN.polling").doubleValue(), polling);
+      scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
     }
   }
 }
@@ -68,18 +69,20 @@ void Statistic::handleMessage(cMessage *msg)
 void Statistic::pollTotalSensorEnergy()
 {
   /* Calculate total sensor energy */
-//    cModule *wsn = getModuleByPath("Wsn");
-//    Energy *ener;
-//    int nss = wsn->par("numSensors").longValue();
-//    int i;
-//    double totalEnergy = 0;
-//
-//    for (i = 0; i < nss; i++) {
-//        ener = check_and_cast<Energy*>(wsn->getSubmodule("sensor", i)->getSubmodule("energy"));
-//        totalEnergy += ener->getCapacity();
-//    }
-//
-//    emit(totalSensorEnergySignal, totalEnergy);
+  cModule *wsn = getModuleByPath("WSN");
+  int numberClient = wsn->par("numberClient").longValue();
+
+  double totalEnergy = 0;
+
+  Battery *battery;
+
+  for (int i = 0; i < numberClient; i++)
+  {
+    battery = check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery"));
+    totalEnergy += battery->capsuleCumulativeEnergest;
+  }
+
+  emit(totalSensorEnergySignal, totalEnergy);
 }
 
 void Statistic::incRecvPacket()

@@ -15,8 +15,6 @@
 
 package wsn_energy.simulations;
 
-//import wsn_energy.apps.server.Server;
-//import wsn_energy.apps.client.Client;
 import wsn_energy.mote.ClientMote;
 import wsn_energy.mote.ServerMote;
 import wsn_energy.world.World;

@@ -15,11 +15,12 @@
 
 package wsn_energy.mote;
 
-import wsn_energy.apps.client.Client;
+import wsn_energy.apps.iApp;
 import wsn_energy.core.net.Net;
-import wsn_energy.core.mac.Mac;
-import wsn_energy.core.rdc.Rdc;
+import wsn_energy.core.mac.iMAC;
+import wsn_energy.core.rdc.iRDC;
 import wsn_energy.platform.radio.Radio;
+import wsn_energy.platform.battery.Battery;
 
 //
 // TODO auto-generated type
@@ -27,6 +28,10 @@ import wsn_energy.platform.radio.Radio;
 module ClientMote
 {
     parameters:
+        string appClientType;
+        string macType;
+        string rdcType;
+        
         int axisX;
         int axisY;
         int trRange;
@@ -34,15 +39,18 @@ module ClientMote
         @display("p=$axisX,$axisY;i=misc/node;is=vs");
 
     submodules:
-        app: Client;
+        app: <appClientType> like iApp;
         net: Net;
-        mac: Mac;
-        rdc: Rdc;
+        mac: <macType> like iMAC;
+        rdc: <rdcType> like iRDC;
         radio: Radio {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
         }
+        
+        battery: Battery;
+        
     connections allowunconnected:
         app.lowerOut --> net.upperIn;
         app.lowerIn <-- net.upperOut;

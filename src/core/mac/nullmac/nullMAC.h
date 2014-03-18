@@ -13,19 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.apps.server;
+#ifndef NULLMAC_H_
+#define NULLMAC_H_
 
-import wsn_energy.apps.iApp;
+#include <omnetpp.h>
 
-//
-// Generates messages with a configurable interarrival time.
-//
-simple Server like iApp
+namespace wsn_energy {
+
+class nullMAC : public cSimpleModule
 {
-    parameters:
-        @class("Server");
+  public:
+    nullMAC();
+    virtual ~nullMAC();
 
-    gates:
-        input lowerIn;
-        output lowerOut;
-}
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
+};
+
+} /* namespace wsn_energy */
+
+#endif /* NULLMAC_H_ */
