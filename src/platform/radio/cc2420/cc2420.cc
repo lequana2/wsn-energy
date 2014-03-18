@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <radio.h>
+#include "cc2420.h"
 
 #include "world.h"
 #include "statistic.h"
@@ -26,25 +26,25 @@
 
 namespace wsn_energy {
 
-Define_Module(Radio)
+Define_Module(cc2420)
 
-Radio::Radio()
+cc2420::cc2420()
 {
   this->broadcastMessage = NULL;
 }
 
-Radio::~Radio()
+cc2420::~cc2420()
 {
   this->neighbor.clear();
 }
 
-void Radio::initialize()
+void cc2420::initialize()
 {
   this->trRange = par("trRange");
   this->coRange = par("coRange");
 }
 
-void Radio::handleMessage(cMessage* msg)
+void cc2420::handleMessage(cMessage* msg)
 {
   if (msg->getKind() == TRX_BROADCAST)
   {
@@ -62,14 +62,14 @@ void Radio::handleMessage(cMessage* msg)
   }
 }
 
-void Radio::finish()
+void cc2420::finish()
 {
 }
 
 /*
  * Turn on to transmit
  */
-void Radio::transmit_on(Raw *msg)
+void cc2420::transmit_on(Raw *msg)
 {
   if (DEBUG)
     ev << "Trans on" << endl;
@@ -92,7 +92,7 @@ void Radio::transmit_on(Raw *msg)
 
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
-    Radio *recver = (Radio*) simulation.getModule(neighbor.at(i));
+    cc2420 *recver = (cc2420*) simulation.getModule(neighbor.at(i));
     // register transmission
     ((World*) simulation.getModuleByPath("world"))->registerTranmission(new Transmission(this, recver));
 
@@ -109,7 +109,7 @@ void Radio::transmit_on(Raw *msg)
 /*
  *   Turn off transmitting
  */
-void Radio::transmit_off()
+void cc2420::transmit_off()
 {
   if (DEBUG)
     ev << "Trans off" << endl;
@@ -119,7 +119,7 @@ void Radio::transmit_off()
 
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
-    Radio* recver = (Radio*) simulation.getModule(neighbor.at(i));
+    cc2420* recver = (cc2420*) simulation.getModule(neighbor.at(i));
 
     Transmission *completeTranmission = new Transmission(this, recver);
 
@@ -172,7 +172,7 @@ void Radio::transmit_off()
 /*
  *   Turn on receiving
  */
-void Radio::receive_on()
+void cc2420::receive_on()
 {
   if (DEBUG)
     ev << "Recv on" << endl;
@@ -183,7 +183,7 @@ void Radio::receive_on()
 /*
  *   Turn off receiving
  */
-void Radio::receive_off()
+void cc2420::receive_off()
 {
   if (DEBUG)
     ev << "Recv off" << endl;

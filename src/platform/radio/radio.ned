@@ -18,7 +18,7 @@ package wsn_energy.platform.radio;
 //
 // TODO auto-generated type
 //
-simple Radio
+moduleinterface iRadio
 {
     parameters:
         int trRange;

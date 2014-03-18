@@ -18,23 +18,22 @@
 #include "world.h"
 #include "statistic.h"
 #include "app.h"
-#include "net.h"
+#include "ipv6.h"
 #include "rpl.h"
-#include "radio.h"
 
 namespace wsn_energy {
 
-Define_Module(Net);
+Define_Module(IPv6);
 
-Net::Net()
+IPv6::IPv6()
 {
 }
-Net::~Net()
+IPv6::~IPv6()
 {
 }
 
 //---------------------------------------------------------------------------//
-void Net::initialize()
+void IPv6::initialize()
 {
   this->rpl = new RPL(this);
 
@@ -42,7 +41,7 @@ void Net::initialize()
     this->rpl->rpl_set_root();
 }
 //---------------------------------------------------------------------------//
-void Net::handleMessage(cMessage *msg)
+void IPv6::handleMessage(cMessage *msg)
 {
   ev << msg->getKind() << endl;
 
@@ -148,12 +147,12 @@ void Net::handleMessage(cMessage *msg)
   // WSN Enviroment message
 }
 
-void Net::finish()
+void IPv6::finish()
 {
 }
 
 //---------------------------------------------------------------------------//
-void Net::broadcast(IpPacket *msg)
+void IPv6::broadcast(IpPacket *msg)
 {
   msg->setSenderIpAddress(this->getId());
   msg->setRecverIpAddress(getModuleByPath("server.net")->getId());

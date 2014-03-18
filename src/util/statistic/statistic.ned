@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.world;
+package wsn_energy.util.statistic;
 
 //
 // Statistics Collector

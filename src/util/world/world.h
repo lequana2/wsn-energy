@@ -13,35 +13,42 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-/*
- * This is simulation of the on the air tranmission
- * The sender and receiver is recorded
- * If the tranmission is spoiled, isCollided should return true;
- */
-#ifndef TRANMISSION_H_
-#define TRANMISSION_H_
+#ifndef ENVIROMENT_H_
+#define ENVIROMENT_H_
 
-#include "radio.h"
+#include <omnetpp.h>
+
+#include "transmission.h"
+#include "cc2420.h"
 
 namespace wsn_energy {
 
-class Transmission
+class World : public cSimpleModule
 {
   public:
-    Transmission(Radio *sender, Radio *recver);
+    int numberClient;
 
-    virtual Radio* getSender();
-    virtual Radio* getRecver();
+    void registerTranmission(Transmission*);
+    bool isFeasibleTranmission(Transmission*);
+    void stopTranmission(Transmission*);
 
-    virtual bool isCollided();
-    virtual void collide();
+    double calculateDistance(cc2420*, cc2420*);
+    double calculateDistance(int, int, int, int);
+
+    std::list<Transmission*> onTheAir;
 
   private:
-    Radio *sender;
-    Radio *recver;
-    bool collision;
+    void arrangeNodes(); // Arrange nodes in positions
+    void connectNodes(); // Connect adjacent nodes
+
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+
+    void checkConnection(cc2420*);
+    int deployConnection(cc2420*, cc2420*);
 };
 
 } /* namespace wsn_energy */
 
-#endif /* TRANMISSION_H_ */
+#endif /* ENVIROMENT_H_ */

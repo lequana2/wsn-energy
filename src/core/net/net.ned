@@ -18,7 +18,7 @@ package wsn_energy.core.net;
 //
 // TODO auto-generated type
 //
-simple Net
+moduleinterface iNet
 {
     gates:
         input upperIn;

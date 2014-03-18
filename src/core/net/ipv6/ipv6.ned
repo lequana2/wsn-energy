@@ -13,29 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <transmission.h>
+package wsn_energy.core.net.ipv6;
 
-namespace wsn_energy {
-Transmission::Transmission(Radio *sender, Radio *recver)
+import wsn_energy.core.net.iNet;
+
+//
+// TODO auto-generated type
+//
+simple IPv6 like iNet
 {
-  this->sender = sender;
-  this->recver = recver;
-  this->collision = false;
+    gates:
+        input upperIn;
+        output upperOut;
+
+        input lowerIn;
+        output lowerOut;
 }
-Radio* Transmission::getSender()
-{
-  return this->sender;
-}
-Radio* Transmission::getRecver()
-{
-  return this->recver;
-}
-void Transmission::collide()
-{
-  this->collision = true;
-}
-bool Transmission::isCollided()
-{
-  return this->collision;
-}
-} /* namespace wsn_energy */

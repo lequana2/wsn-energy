@@ -13,43 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef NET_H_
-#define NET_H_
+package wsn_energy.util.world;
 
-#include <omnetpp.h>
-#include <list>
-
-#include "rpl.h"
-
-namespace wsn_energy {
-
-class Net : public cSimpleModule
+//
+// Utilities about simulation world
+//
+simple World
 {
-  public:
-    int numberClient;
-    int trRange;
-    int coRange;
-    int redundancy;
-    int axisX;
-    int axisY;
-    int energy;
+    parameters:
+        int numberClient;
 
-    //WSN RPL
-    RPL *rpl;
-
-    void broadcast(IpPacket*);
-
-    Net();
-    ~Net();
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
-};
-
+        @display("p=-50,-10;i=misc/globe");
 }
-;
-// namespace
-
-#endif /* NET_H_ */

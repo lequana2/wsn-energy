@@ -21,7 +21,7 @@
 
 namespace wsn_energy {
 
-class Radio : public cSimpleModule
+class cc2420 : public cSimpleModule
 {
   private:
     virtual void transmit_on(Raw *raw);
@@ -42,8 +42,8 @@ class Radio : public cSimpleModule
     // neighbor list
     std::vector<int> neighbor;
 
-    Radio();
-    ~Radio();
+    cc2420();
+    ~cc2420();
 
     // control other mote(s) without sending message
     virtual void receive_off();

@@ -13,42 +13,43 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef ENVIROMENT_H_
-#define ENVIROMENT_H_
+#ifndef NET_H_
+#define NET_H_
 
 #include <omnetpp.h>
+#include <list>
 
-#include "transmission.h"
-#include "radio.h"
+#include "rpl.h"
 
 namespace wsn_energy {
 
-class World : public cSimpleModule
+class IPv6 : public cSimpleModule
 {
   public:
     int numberClient;
+    int trRange;
+    int coRange;
+    int redundancy;
+    int axisX;
+    int axisY;
+    int energy;
 
-    void registerTranmission(Transmission*);
-    bool isFeasibleTranmission(Transmission*);
-    void stopTranmission(Transmission*);
+    //WSN RPL
+    RPL *rpl;
 
-    double calculateDistance(Radio*, Radio*);
-    double calculateDistance(int, int, int, int);
+    void broadcast(IpPacket*);
 
-    std::list<Transmission*> onTheAir;
-
-  private:
-    void arrangeNodes(); // Arrange nodes in positions
-    void connectNodes(); // Connect adjacent nodes
+    IPv6();
+    ~IPv6();
 
   protected:
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-
-    void checkConnection(Radio*);
-    int deployConnection(Radio*, Radio*);
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
 };
 
-} /* namespace wsn_energy */
+}
+;
+// namespace
 
-#endif /* ENVIROMENT_H_ */
+#endif /* NET_H_ */

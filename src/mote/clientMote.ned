@@ -16,10 +16,10 @@
 package wsn_energy.mote;
 
 import wsn_energy.apps.iApp;
-import wsn_energy.core.net.Net;
+import wsn_energy.core.net.iNet;
 import wsn_energy.core.mac.iMAC;
 import wsn_energy.core.rdc.iRDC;
-import wsn_energy.platform.radio.Radio;
+import wsn_energy.platform.radio.iRadio;
 import wsn_energy.platform.battery.Battery;
 
 //
@@ -28,9 +28,11 @@ import wsn_energy.platform.battery.Battery;
 module ClientMote
 {
     parameters:
-        string appClientType;
+        string appType;
+        string netType;
         string macType;
         string rdcType;
+        string radioType;
         
         int axisX;
         int axisY;
@@ -39,11 +41,11 @@ module ClientMote
         @display("p=$axisX,$axisY;i=misc/node;is=vs");
 
     submodules:
-        app: <appClientType> like iApp;
-        net: Net;
+        app: <appType> like iApp;
+        net: <netType> like iNet;
         mac: <macType> like iMAC;
         rdc: <rdcType> like iRDC;
-        radio: Radio {
+        radio: <radioType> like iRadio {
             parameters:
                 trRange = trRange;
                 coRange = coRange;

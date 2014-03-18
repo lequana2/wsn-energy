@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include <net.h>
+#include "ipv6.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -34,7 +34,7 @@ RPL::~RPL()
 //  this->neighborList.clear();
 }
 
-RPL::RPL(Net *net)
+RPL::RPL(IPv6 *net)
 {
   this->rpl_init();
   this->net = net;

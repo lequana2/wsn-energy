@@ -83,7 +83,7 @@ void World::arrangeNodes()
 void World::connectNodes()
 {
   // Connect server to other(s)
-  Radio *server = (Radio*) simulation.getModuleByPath("server.radio");
+  cc2420 *server = (cc2420*) simulation.getModuleByPath("server.radio");
   this->checkConnection(server);
 
   // Connect client(s) to other(s)
@@ -91,17 +91,17 @@ void World::connectNodes()
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d].radio", i);
-    this->checkConnection((Radio*) simulation.getModuleByPath(modulePath));
+    this->checkConnection((cc2420*) simulation.getModuleByPath(modulePath));
   }
 }
 
 /*
  * Create connection from node to others
  */
-void World::checkConnection(Radio *radio)
+void World::checkConnection(cc2420 *radio)
 {
   // Check with server
-  Radio *server = (Radio*) simulation.getModuleByPath("server.radio");
+  cc2420 *server = (cc2420*) simulation.getModuleByPath("server.radio");
   if (deployConnection(radio, server))
     radio->neighbor.push_back(server->getParentModule()->getModuleByPath(".radio")->getId());
 
@@ -110,7 +110,7 @@ void World::checkConnection(Radio *radio)
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d].radio", i);
-    Radio *client = (Radio*) simulation.getModuleByPath(modulePath);
+    cc2420 *client = (cc2420*) simulation.getModuleByPath(modulePath);
 
     if (deployConnection(radio, client))
       radio->neighbor.push_back(client->getParentModule()->getModuleByPath(".radio")->getId());
@@ -120,7 +120,7 @@ void World::checkConnection(Radio *radio)
 /*
  * Check and create connection
  */
-int World::deployConnection(Radio *x, Radio *y)
+int World::deployConnection(cc2420 *x, cc2420 *y)
 {
   if (calculateDistance(x, y) > x->trRange)
     return 0;
@@ -151,7 +151,7 @@ int World::deployConnection(Radio *x, Radio *y)
 /*
  * Calculate distance util
  */
-double World::calculateDistance(Radio *a, Radio *b)
+double World::calculateDistance(cc2420 *a, cc2420 *b)
 {
   int x1 = a->getParentModule()->par("axisX");
   int y1 = a->getParentModule()->par("axisY");
@@ -181,14 +181,14 @@ void World::registerTranmission(Transmission *tranmission)
   if (this->onTheAir.size() == 1)
     return;
 
-  Radio* sender = tranmission->getSender();
-  Radio* recver = tranmission->getRecver();
+  cc2420* sender = tranmission->getSender();
+  cc2420* recver = tranmission->getRecver();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
   {
-    Radio *otherSender = (*otherTranmission)->getSender();
+    cc2420 *otherSender = (*otherTranmission)->getSender();
 
     // check is same source
     if (otherSender == sender)
@@ -196,22 +196,22 @@ void World::registerTranmission(Transmission *tranmission)
     // check interference
     else
     {
-      Radio *otherRecver = (*otherTranmission)->getRecver();
+      cc2420 *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
       if (tranmission->isCollided())
         ;
-      else if (calculateDistance((Radio*) otherSender->getParentModule()->getModuleByPath(".radio"),
-          (Radio*) recver->getParentModule()->getModuleByPath(".radio"))
-          < ((Radio*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
+      else if (calculateDistance((cc2420*) otherSender->getParentModule()->getModuleByPath(".radio"),
+          (cc2420*) recver->getParentModule()->getModuleByPath(".radio"))
+          < ((cc2420*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
         tranmission->collide();
 
       // at other transmission
       if ((*otherTranmission)->isCollided())
         ;
-      else if (calculateDistance((Radio*) sender->getParentModule()->getModuleByPath(".radio"),
-          (Radio*) otherRecver->getParentModule()->getModuleByPath(".radio"))
-          < ((Radio*) sender->getParentModule()->getModuleByPath(".radio"))->coRange)
+      else if (calculateDistance((cc2420*) sender->getParentModule()->getModuleByPath(".radio"),
+          (cc2420*) otherRecver->getParentModule()->getModuleByPath(".radio"))
+          < ((cc2420*) sender->getParentModule()->getModuleByPath(".radio"))->coRange)
         (*otherTranmission)->collide();
     }
   }
@@ -222,8 +222,8 @@ bool World::isFeasibleTranmission(Transmission* transmission)
   if (this->onTheAir.size() == 1)
     return true;
 
-  Radio* sender = transmission->getSender();
-  Radio* recver = transmission->getRecver();
+  cc2420* sender = transmission->getSender();
+  cc2420* recver = transmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)
@@ -240,8 +240,8 @@ void World::stopTranmission(Transmission* transmission)
 {
   //??? do not remove
 
-  Radio* sender = transmission->getSender();
-  Radio* recver = transmission->getRecver();
+  cc2420* sender = transmission->getSender();
+  cc2420* recver = transmission->getRecver();
 
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
       otherTranmission != this->onTheAir.end(); otherTranmission++)

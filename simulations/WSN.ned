@@ -17,8 +17,8 @@ package wsn_energy.simulations;
 
 import wsn_energy.mote.ClientMote;
 import wsn_energy.mote.ServerMote;
-import wsn_energy.world.World;
-import wsn_energy.world.Statistic;
+import wsn_energy.util.world.World;
+import wsn_energy.util.statistic.Statistic;
 
 //
 // Sample network, consisting of a source and a sink.

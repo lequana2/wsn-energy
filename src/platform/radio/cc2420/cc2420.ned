@@ -13,15 +13,22 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.world;
+package wsn_energy.platform.radio.cc2420;
+
+import wsn_energy.platform.radio.iRadio;
 
 //
-// Utilities about simulation world
+// TODO auto-generated type
 //
-simple World
+simple cc2420 like iRadio
 {
     parameters:
-        int numberClient;
+        int trRange;
+        int coRange;
 
-        @display("p=-50,-10;i=misc/globe");
+    gates:
+        input upperIn;
+        output upperOut;
+
+        input radioIn @directin;
 }
