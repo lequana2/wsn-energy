@@ -28,12 +28,14 @@ class Statistic : public cSimpleModule
   private:
     cMessage *polling; // Timer for polling total sensor energy
 
+    double numTotalEnergy;
     int numRecvPacket; // Number of successfully received packets
     int numLostPacket; // Number of lost packets
     int numSensData; // Number of data sending by client
     int numRecvData; // Number of data recving by server
 
-    simsignal_t totalSensorEnergySignal;
+    simsignal_t sigNodeEnergy;
+    simsignal_t sigTotalEnergy;
 
     simsignal_t sigRecvPacket;
     simsignal_t sigLostPacket;

@@ -16,6 +16,10 @@
 #include "nullRDC.h"
 #include "packet_m.h"
 
+#ifndef  DEBUG
+#define DEBUG 1
+#endif
+
 namespace wsn_energy {
 
 Define_Module(nullRDC);
@@ -45,7 +49,15 @@ void nullRDC::handleMessage(cMessage *msg)
   }
   else
   {
-    send(frame, gate("upperOut"));
+    if (((Raw*) msg)->getBitError())
+    {
+      send(frame, gate("upperOut"));
+    }
+    else
+    {
+      if(DEBUG)
+        ev << "Collision message" << endl;
+    }
   }
 }
 

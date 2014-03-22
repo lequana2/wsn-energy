@@ -33,8 +33,10 @@ Statistic::Statistic()
   numLostPacket = 0;
   numSensData = 0;
   numRecvData = 0;
+  numTotalEnergy = 0;
 
-  totalSensorEnergySignal = registerSignal("total_sensor_energy");
+  sigNodeEnergy = registerSignal("node_energy");
+  sigTotalEnergy = registerSignal("total_sensor_energy");
 
   sigRecvPacket = registerSignal("recv_packet");
   sigLostPacket = registerSignal("lost_packet");
@@ -82,7 +84,11 @@ void Statistic::pollTotalSensorEnergy()
     totalEnergy += battery->capsuleCumulativeEnergest;
   }
 
-  emit(totalSensorEnergySignal, totalEnergy);
+  emit(sigNodeEnergy, totalEnergy - numTotalEnergy);
+//  emit(sigNodeEnergy, simTime());
+  emit(sigTotalEnergy, totalEnergy);
+
+  numTotalEnergy = totalEnergy;
 }
 
 void Statistic::incRecvPacket()

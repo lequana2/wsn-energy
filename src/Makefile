@@ -203,7 +203,8 @@ $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_m.h
 $O/platform/battery/battery.o: platform/battery/battery.cc \
 	packet/packet_m.h \
-	platform/battery/battery.h
+	platform/battery/battery.h \
+	platform/radio/cc2420/cc2420-const.h
 $O/platform/radio/cc2420/cc2420.o: platform/radio/cc2420/cc2420.cc \
 	packet/packet_m.h \
 	platform/battery/battery.h \
@@ -216,8 +217,6 @@ $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	platform/battery/battery.h \
 	util/statistic/statistic.h
 $O/util/transmission/transmission.o: util/transmission/transmission.cc \
-	packet/packet_m.h \
-	platform/radio/cc2420/cc2420.h \
 	util/transmission/transmission.h
 $O/util/world/world.o: util/world/world.cc \
 	packet/packet_m.h \

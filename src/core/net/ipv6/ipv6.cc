@@ -25,13 +25,6 @@ namespace wsn_energy {
 
 Define_Module(IPv6);
 
-IPv6::IPv6()
-{
-}
-IPv6::~IPv6()
-{
-}
-
 //---------------------------------------------------------------------------//
 void IPv6::initialize()
 {
@@ -43,7 +36,7 @@ void IPv6::initialize()
 //---------------------------------------------------------------------------//
 void IPv6::handleMessage(cMessage *msg)
 {
-  ev << msg->getKind() << endl;
+  ev << "Message type: " << msg->getKind() << endl;
 
   // dispatch event
   if (msg->getKind() == RPL_CONSTRUCT)
@@ -57,7 +50,7 @@ void IPv6::handleMessage(cMessage *msg)
     return;
   }
   // Enviroment flag
-  else if (msg->getKind() == ENVIRON_FLAG)
+  else if (msg->getKind() == APP_SENSING_FLAG)
   {
     ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
 
@@ -71,7 +64,7 @@ void IPv6::handleMessage(cMessage *msg)
 
       IpPacket* broadcastMessage = (IpPacket*) msg;
       broadcastMessage->setRecverIpAddress(des->neighborID);
-      broadcastMessage->setType(IP_DATA);
+      broadcastMessage->setType(NET_DATA);
 
       broadcast(broadcastMessage);
 
@@ -84,28 +77,24 @@ void IPv6::handleMessage(cMessage *msg)
     }
   }
   // IP messeage
-  else if (msg->getKind() == WORKING_FLAG)
+  else if (msg->getKind() == LAYER_NET)
   {
     // WSN dismiss if recvID is not the same
 //    if (((IpPacket*) msg)->getRecverIpAddress() != 0
 //        && ((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
 //      return;
 
-    // receive RPL construct
-    if (((IpPacket*) msg)->getType() == IP_ICMP)
+// receive RPL construct
+    if (((IpPacket*) msg)->getType() == NET_ICMP_DIO)
     {
-      switch (((ICMP*) msg)->getIcmp_code())
-      {
-        case ICMP_DIO_CODE:
-          this->rpl->receiveDIO((DIO*) msg);
-          break;
-        case ICMP_DIS_CODE:
-          this->rpl->receiveDIS((DIS*) msg);
-          break;
-      }
+      this->rpl->receiveDIO((DIO*) msg);
+    }
+    else if (((IpPacket*) msg)->getType() == NET_ICMP_DIS)
+    {
+      this->rpl->receiveDIS((DIS*) msg);
     }
     //WSN forward data
-    else if (((IpPacket*) msg)->getType() == IP_DATA)
+    else if (((IpPacket*) msg)->getType() == NET_DATA)
     {
       if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
         return;
@@ -133,7 +122,7 @@ void IPv6::handleMessage(cMessage *msg)
 
           IpPacket* broadcastMessage = (IpPacket*) msg;
           broadcastMessage->setRecverIpAddress(des->neighborID);
-          broadcastMessage->setType(IP_DATA);
+          broadcastMessage->setType(NET_DATA);
 
           broadcast(broadcastMessage);
         }

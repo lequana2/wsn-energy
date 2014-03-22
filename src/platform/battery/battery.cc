@@ -8,6 +8,7 @@
  */
 
 #include <battery.h>
+#include "cc2420-const.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -19,9 +20,10 @@ Define_Module(Battery);
 
 Battery::Battery()
 {
-  for (int i = 0; i < ENERGEST_TYPE_MAX; i++){
-    this->capsuleTotalTime[i] = 0;
+  for (int i = 0; i < ENERGEST_TYPE_MAX; i++)
+  {
     this->capsuleIsActivated[i] = false;
+    this->capsuleTotalTime[i] = 0;
     this->capsuleStartTime[i] = 0;
   }
   this->capsuleCumulativeEnergest = 0;
@@ -43,24 +45,28 @@ void Battery::energestOff(int type)
   if (this->capsuleIsActivated[type])
   {
     this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
-    if (DEBUG)
-    {
-      char s[30];
-      sprintf(s, "Different: %f", this->capsuleTotalTime[type]);
-      ev << s << endl;
-    }
     this->capsuleIsActivated[type] = false;
   }
+  else
+  {
+    return;
+  }
 
-  // cumulative
-  for (int i = 0; i < ENERGEST_TYPE_MAX; i++){
-   this->capsuleCumulativeEnergest += this->capsuleTotalTime[i];
+  // Update
+  switch (type)
+  {
+    case ENERGEST_TYPE_TRANSMIT:
+      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * TXPOWER_CURRENT * VOLTAGE;
+      break;
+    case ENERGEST_TYPE_LISTEN:
+      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * RXPOWER_CURRENT * VOLTAGE;
+      break;
   }
 
   if (DEBUG)
   {
     char s[30];
-    sprintf(s, "%d: %f", this->getParentModule()->getId(), this->capsuleCumulativeEnergest);
+    sprintf(s, "%d: %f", type, this->capsuleTotalTime[type]);
     ev << s << endl;
   }
 }

@@ -21,7 +21,11 @@
 #ifndef TRANMISSION_H_
 #define TRANMISSION_H_
 
-#include <cc2420.h>
+//#include <cc2420.h>
+
+namespace wsn_energy {
+class cc2420;
+} /* namespace wsn_energy */
 
 namespace wsn_energy {
 
@@ -34,7 +38,7 @@ class Transmission
     virtual cc2420* getRecver();
 
     virtual bool isCollided();
-    virtual void collide();
+    virtual void corrupted();
 
   private:
     cc2420 *sender;

@@ -16,7 +16,6 @@ enum ENERGEST_TYPE
 };
 
 #include <omnetpp.h>
-
 #include <packet_m.h>
 
 namespace wsn_energy {

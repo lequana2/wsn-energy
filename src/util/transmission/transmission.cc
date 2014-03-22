@@ -30,7 +30,7 @@ cc2420* Transmission::getRecver()
 {
   return this->recver;
 }
-void Transmission::collide()
+void Transmission::corrupted()
 {
   this->collision = true;
 }

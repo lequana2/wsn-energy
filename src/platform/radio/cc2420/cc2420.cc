@@ -21,17 +21,12 @@
 #include "battery.h"
 
 #ifndef  DEBUG
-#define  DEBUG 0
+#define  DEBUG 1
 #endif
 
 namespace wsn_energy {
 
 Define_Module(cc2420)
-
-cc2420::cc2420()
-{
-  this->broadcastMessage = NULL;
-}
 
 cc2420::~cc2420()
 {
@@ -42,6 +37,9 @@ void cc2420::initialize()
 {
   this->trRange = par("trRange");
   this->coRange = par("coRange");
+  this->broadcastMessage = NULL;
+
+  receive_on();
 }
 
 void cc2420::handleMessage(cMessage* msg)
@@ -57,7 +55,7 @@ void cc2420::handleMessage(cMessage* msg)
   else if (msg->getKind() == ROF_BROADCAST)
   {
     // to upper layer
-    msg->setKind(WORKING_FLAG);
+    msg->setKind(LAYER_NET);
     send(msg, gate("upperOut"));
   }
 }
@@ -73,6 +71,15 @@ void cc2420::transmit_on(Raw *msg)
 {
   if (DEBUG)
     ev << "Trans on" << endl;
+
+  // WSN Carrier sense
+  if (((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new Transmission(this, NULL)))
+  {
+    if (DEBUG)
+      ev << "busy channel" << endl;
+//    scheduleAt(simTime() + 0.01, msg);
+    return;
+  }
 
   // buffer
   broadcastMessage = (Raw*) msg;
@@ -94,15 +101,14 @@ void cc2420::transmit_on(Raw *msg)
   {
     cc2420 *recver = (cc2420*) simulation.getModule(neighbor.at(i));
     // register transmission
-    ((World*) simulation.getModuleByPath("world"))->registerTranmission(new Transmission(this, recver));
-
-    // WSN turn receiving mote on self-synchronize
-    recver->receive_on();
+    ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  int finishTime = 1;
+  // WSN finish time = len / data rate
+  double finishTime = 127.0 * 8 / 250000;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, TOF_BROADCAST));
 
+  receive_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
 }
 
@@ -124,31 +130,26 @@ void cc2420::transmit_off()
     Transmission *completeTranmission = new Transmission(this, recver);
 
     // check feasible
-    if (((World*) simulation.getModuleByPath("world"))->isFeasibleTranmission(completeTranmission))
+    if (((World*) simulation.getModuleByPath("world"))->isFeasibleTransmission(completeTranmission))
     {
       // EV << "Received" << endl;
-      broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
-
-      cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
-      sendDirect(broadcastMessage->dup(), gate);
-
+      broadcastMessage->setBitError(true);
       ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
     }
     else
     {
       // EV << "Disposed" << endl;
-
-//      recver->getParentModule()->bubble("dispose");
-
-      broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
-      cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
-      sendDirect(broadcastMessage->dup(), gate);
-
+      recver->getParentModule()->bubble("Collision");
+      broadcastMessage->setBitError(false);
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
 
+    broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
+    cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
+    sendDirect(broadcastMessage->dup(), gate);
+
     // Turn receiving mote off
-    ((World*) simulation.getModuleByPath("world"))->stopTranmission(completeTranmission);
+    ((World*) simulation.getModuleByPath("world"))->stopTransmission(completeTranmission);
 
     recver->receive_off();
   }
@@ -167,6 +168,8 @@ void cc2420::transmit_off()
   getParentModule()->setDisplayString(newDisplay);
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
+  //WSN turn listen on
+  receive_on();
 }
 
 /*
@@ -176,7 +179,7 @@ void cc2420::receive_on()
 {
   if (DEBUG)
     ev << "Recv on" << endl;
-
+  this->isListen = true;
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN);
 }
 
@@ -187,7 +190,7 @@ void cc2420::receive_off()
 {
   if (DEBUG)
     ev << "Recv off" << endl;
-
+  this->isListen = false;
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
 }
 }

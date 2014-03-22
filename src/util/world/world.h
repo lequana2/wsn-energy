@@ -28,9 +28,10 @@ class World : public cSimpleModule
   public:
     int numberClient;
 
-    void registerTranmission(Transmission*);
-    bool isFeasibleTranmission(Transmission*);
-    void stopTranmission(Transmission*);
+    void registerTransmission(Transmission*);
+    bool isFeasibleTransmission(Transmission*);
+    void stopTransmission(Transmission*);
+    bool senseBusyTransmission(Transmission*);
 
     double calculateDistance(cc2420*, cc2420*);
     double calculateDistance(int, int, int, int);

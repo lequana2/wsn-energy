@@ -27,10 +27,10 @@ void Client::initialize()
   App::initialize();
 
   // WSN Client scheme
-//  cMessage *event = new cMessage;
+  cMessage *event = new cMessage;
 //  event->setKind(RPL_SOLICIT);
 //  event->setKind(RPL_CONSTRUCT);
-//  event->setKind(ENVIRON_FLAG);
+  event->setKind(APP_SENSING_FLAG);
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
 //    send(event, gate("appOut"));
@@ -60,12 +60,12 @@ void Client::handleMessage(cMessage *msg)
 //  {
 //    send(msg, gate("lowerOut"));
 //  }
-//  if (msg->getKind() == ENVIRON_FLAG){
-//    Data *emsg = new Data;
-//    emsg->setKind(ENVIRON_FLAG);
-//    emsg->setValue(69);
-//    send(emsg, gate("lowerOut"));
-//  }
+  if (msg->getKind() == APP_SENSING_FLAG){
+    Data *emsg = new Data;
+    emsg->setKind(APP_SENSING_FLAG);
+    emsg->setValue(69);
+    send(emsg, gate("lowerOut"));
+  }
 }
 
 void Client::finish()

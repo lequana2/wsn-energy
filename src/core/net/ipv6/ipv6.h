@@ -26,21 +26,10 @@ namespace wsn_energy {
 class IPv6 : public cSimpleModule
 {
   public:
-    int numberClient;
-    int trRange;
-    int coRange;
-    int redundancy;
-    int axisX;
-    int axisY;
-    int energy;
-
     //WSN RPL
     RPL *rpl;
 
     void broadcast(IpPacket*);
-
-    IPv6();
-    ~IPv6();
 
   protected:
     virtual void initialize();

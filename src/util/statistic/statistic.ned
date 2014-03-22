@@ -21,10 +21,11 @@ package wsn_energy.util.statistic;
 simple Statistic
 {
     parameters:
-        double pollTSEInterval = default(0.5);
+        @signal[node_energy](type="double");
+        @statistic[node_energy](title="Node energy"; source="node_energy"; record=vector);
 
-        @signal[total_sensor_energy](type="double");
-        @statistic[totalEnergy](title="Total energy"; source="total_sensor_energy"; record=vector);
+ 		@signal[total_sensor_energy](type="double");
+        @statistic[totalEnergy](title="Total energy"; source="total_sensor_energy"; record=last);
 
         @signal[recv_packet](type="int");
         @statistic[numRecvPacket](title="Number of received packets"; source="recv_packet"; record=last);

@@ -19,110 +19,72 @@ namespace wsn_energy {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum MESSAGE{
+ * enum MESSAGE
+ * {
  * 	
- *  	TRX_BROADCAST = 4;
- *  	RCX_BROADCAST = 3;
- * 	TOF_BROADCAST = 2;
- * 	ROF_BROADCAST = 1;
- * 	
- * 	
- * 	RPL_CONSTRUCT = 7;
- * 	RPL_SOLICIT   = 8;
+ * 	NODE_STARTUP  = 0;
+ * 	NODE_DESTRUCT = 1;
+ * 	OUT_OF_ENERGY = 2;
+ * 	RPL_CONSTRUCT = 3;
+ * 	RPL_SOLICIT   = 4;
  * 
  * 	
- * 	WORKING_FLAG = 5;
- * 	ENVIRON_FLAG = 6;
+ * 	LAYER_RADIO   = 10; 
+ *  	TRX_BROADCAST = 11;
+ *  	RCX_BROADCAST = 12;
+ * 	TOF_BROADCAST = 13;
+ * 	ROF_BROADCAST = 14;
+ * 
+ * 	
+ * 	LAYER_RDC     = 21; 
+ * 	
+ * 	
+ * 	LAYER_MAC     = 31; 
+ * 
+ * 	
+ * 	LAYER_NET     = 32; 
+ * 	NET_ICMP_DIO  = 40;
+ * 	NET_ICMP_DIS  = 41;
+ * 	NET_DATA      = 42;
+ * 	
+ * 	
+ * 	LAYER_APP		 = 50; 
+ * 	APP_WORKING_FLAG = 51; 
+ * 	APP_ENVIRON_FLAG = 52;
+ * 	APP_SENSING_FLAG = 53;
  * }
  * </pre>
  */
 enum MESSAGE {
-    TRX_BROADCAST = 4,
-    RCX_BROADCAST = 3,
-    TOF_BROADCAST = 2,
-    ROF_BROADCAST = 1,
-    RPL_CONSTRUCT = 7,
-    RPL_SOLICIT = 8,
-    WORKING_FLAG = 5,
-    ENVIRON_FLAG = 6
+    NODE_STARTUP = 0,
+    NODE_DESTRUCT = 1,
+    OUT_OF_ENERGY = 2,
+    RPL_CONSTRUCT = 3,
+    RPL_SOLICIT = 4,
+    LAYER_RADIO = 10,
+    TRX_BROADCAST = 11,
+    RCX_BROADCAST = 12,
+    TOF_BROADCAST = 13,
+    ROF_BROADCAST = 14,
+    LAYER_RDC = 21,
+    LAYER_MAC = 31,
+    LAYER_NET = 32,
+    NET_ICMP_DIO = 40,
+    NET_ICMP_DIS = 41,
+    NET_DATA = 42,
+    LAYER_APP = 50,
+    APP_WORKING_FLAG = 51,
+    APP_ENVIRON_FLAG = 52,
+    APP_SENSING_FLAG = 53
 };
-
-/**
- * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
- * enum IP_CODE {
- * 	
- * 	IP_ICMP = 0;
- * 	IP_DATA = 1;
- * }
- * </pre>
- */
-enum IP_CODE {
-    IP_ICMP = 0,
-    IP_DATA = 1
-};
-
-/**
- * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
- * enum RPL_CODE {
- * 	
- * 	ICMP_DIO_CODE = 0;
- * 	ICMP_DIS_CODE = 1;
- * }
- * </pre>
- */
-enum RPL_CODE {
-    ICMP_DIO_CODE = 0,
-    ICMP_DIS_CODE = 1
-};
-
-/**
- * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
- * packet Energest{
- * 	int capsule;
- * 	int command;
- * }
- * </pre>
- */
-class Energest : public ::cPacket
-{
-  protected:
-    int capsule_var;
-    int command_var;
-
-  private:
-    void copy(const Energest& other);
-
-  protected:
-    // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Energest&);
-
-  public:
-    Energest(const char *name=NULL, int kind=0);
-    Energest(const Energest& other);
-    virtual ~Energest();
-    Energest& operator=(const Energest& other);
-    virtual Energest *dup() const {return new Energest(*this);}
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
-
-    // field getter/setter methods
-    virtual int getCapsule() const;
-    virtual void setCapsule(int capsule);
-    virtual int getCommand() const;
-    virtual void setCommand(int command);
-};
-
-inline void doPacking(cCommBuffer *b, Energest& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Energest& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Raw{
  *     int type;
+ *     int len;
+ *     bool bitError;
  *     int radioSendId;
  *     int radioRecvId;
  * }
@@ -132,6 +94,8 @@ class Raw : public ::cPacket
 {
   protected:
     int type_var;
+    int len_var;
+    bool bitError_var;
     int radioSendId_var;
     int radioRecvId_var;
 
@@ -154,6 +118,10 @@ class Raw : public ::cPacket
     // field getter/setter methods
     virtual int getType() const;
     virtual void setType(int type);
+    virtual int getLen() const;
+    virtual void setLen(int len);
+    virtual bool getBitError() const;
+    virtual void setBitError(bool bitError);
     virtual int getRadioSendId() const;
     virtual void setRadioSendId(int radioSendId);
     virtual int getRadioRecvId() const;
@@ -293,51 +261,14 @@ inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet ICMP extends IpPacket{
- *     int icmp_code;
- * }
- * </pre>
- */
-class ICMP : public ::wsn_energy::IpPacket
-{
-  protected:
-    int icmp_code_var;
-
-  private:
-    void copy(const ICMP& other);
-
-  protected:
-    // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const ICMP&);
-
-  public:
-    ICMP(const char *name=NULL, int kind=0);
-    ICMP(const ICMP& other);
-    virtual ~ICMP();
-    ICMP& operator=(const ICMP& other);
-    virtual ICMP *dup() const {return new ICMP(*this);}
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
-
-    // field getter/setter methods
-    virtual int getIcmp_code() const;
-    virtual void setIcmp_code(int icmp_code);
-};
-
-inline void doPacking(cCommBuffer *b, ICMP& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, ICMP& obj) {obj.parsimUnpack(b);}
-
-/**
- * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
- * packet DIO extends ICMP{
+ * packet DIO extends IpPacket {
  * 	int dodagID;
  * 	unsigned long rank;
  * 	int version;
  * }
  * </pre>
  */
-class DIO : public ::wsn_energy::ICMP
+class DIO : public ::wsn_energy::IpPacket
 {
   protected:
     int dodagID_var;
@@ -375,12 +306,12 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet DIS extends ICMP{
+ * packet DIS extends IpPacket {
  * 	int convergence;
  * }
  * </pre>
  */
-class DIS : public ::wsn_energy::ICMP
+class DIS : public ::wsn_energy::IpPacket
 {
   protected:
     int convergence_var;

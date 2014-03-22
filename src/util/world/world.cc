@@ -171,7 +171,7 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
   return sqrt(x + y);
 }
 
-void World::registerTranmission(Transmission *tranmission)
+void World::registerTransmission(Transmission *tranmission)
 {
   if (DEBUG)
     ev << "On the air transmision: " << this->onTheAir.size() << endl;
@@ -183,6 +183,10 @@ void World::registerTranmission(Transmission *tranmission)
 
   cc2420* sender = tranmission->getSender();
   cc2420* recver = tranmission->getRecver();
+
+  // check receiver turned on
+  if(!recver->isListen)
+    tranmission->corrupted();
 
 //  check collision with activated tranmission
   for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
@@ -204,7 +208,7 @@ void World::registerTranmission(Transmission *tranmission)
       else if (calculateDistance((cc2420*) otherSender->getParentModule()->getModuleByPath(".radio"),
           (cc2420*) recver->getParentModule()->getModuleByPath(".radio"))
           < ((cc2420*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
-        tranmission->collide();
+        tranmission->corrupted();
 
       // at other transmission
       if ((*otherTranmission)->isCollided())
@@ -212,12 +216,12 @@ void World::registerTranmission(Transmission *tranmission)
       else if (calculateDistance((cc2420*) sender->getParentModule()->getModuleByPath(".radio"),
           (cc2420*) otherRecver->getParentModule()->getModuleByPath(".radio"))
           < ((cc2420*) sender->getParentModule()->getModuleByPath(".radio"))->coRange)
-        (*otherTranmission)->collide();
+        (*otherTranmission)->corrupted();
     }
   }
 }
 
-bool World::isFeasibleTranmission(Transmission* transmission)
+bool World::isFeasibleTransmission(Transmission* transmission)
 {
   if (this->onTheAir.size() == 1)
     return true;
@@ -236,7 +240,7 @@ bool World::isFeasibleTranmission(Transmission* transmission)
   return false;
 }
 
-void World::stopTranmission(Transmission* transmission)
+void World::stopTransmission(Transmission* transmission)
 {
   //??? do not remove
 
@@ -256,4 +260,27 @@ void World::stopTranmission(Transmission* transmission)
       ev << "missing transmission" << endl;
   }
 }
+
+bool World::senseBusyTransmission(Transmission *transmission)
+{
+  cc2420* sender = transmission->getSender();
+
+  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
+      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  {
+    cc2420 *otherSender = (*otherTranmission)->getSender();
+
+    if (calculateDistance((cc2420*) otherSender->getParentModule()->getModuleByPath(".radio"),
+        (cc2420*) sender->getParentModule()->getModuleByPath(".radio"))
+        < ((cc2420*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
+
+      return true;
+  }
+
+  if (DEBUG)
+    ev << "Clear channel" << endl;
+
+  return false;
+}
+
 } /* namespace wsn_energy */

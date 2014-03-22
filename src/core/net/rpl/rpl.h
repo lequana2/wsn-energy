@@ -51,8 +51,6 @@ class RPL
   public:
     RPL_dag rplDag;
 
-    RPL();
-    ~RPL();
     RPL(IPv6 *net);
 
     void rpl_set_root();

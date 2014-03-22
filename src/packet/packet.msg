@@ -15,41 +15,45 @@
 
 namespace wsn_energy;
 
-enum MESSAGE{
-	// radio event
- 	TRX_BROADCAST = 4;
- 	RCX_BROADCAST = 3;
-	TOF_BROADCAST = 2;
-	ROF_BROADCAST = 1;
-	
+enum MESSAGE
+{
 	// specialize event
-	RPL_CONSTRUCT = 7;
-	RPL_SOLICIT   = 8;
+	NODE_STARTUP  = 0;
+	NODE_DESTRUCT = 1;
+	OUT_OF_ENERGY = 2;
+	RPL_CONSTRUCT = 3;
+	RPL_SOLICIT   = 4;
 
-	// information event
-	WORKING_FLAG = 5;
-	ENVIRON_FLAG = 6;
-}
+	// radio
+	LAYER_RADIO   = 10; // KIND
+ 	TRX_BROADCAST = 11;
+ 	RCX_BROADCAST = 12;
+	TOF_BROADCAST = 13;
+	ROF_BROADCAST = 14;
 
-enum IP_CODE {
-	// IP
-	IP_ICMP = 0;
-	IP_DATA = 1;
-}
+	// rdc
+	LAYER_RDC     = 21; // KIND
+	
+	// mac
+	LAYER_MAC     = 31; // KIND
 
-enum RPL_CODE {
-	// RPL
-	ICMP_DIO_CODE = 0;
-	ICMP_DIS_CODE = 1;
-}
-
-packet Energest{
-	int capsule;
-	int command;
+	// net
+	LAYER_NET     = 32; // KIND
+	NET_ICMP_DIO  = 40;
+	NET_ICMP_DIS  = 41;
+	NET_DATA      = 42;
+	
+	// event
+	LAYER_APP		 = 50; // KIND
+	APP_WORKING_FLAG = 51; 
+	APP_ENVIRON_FLAG = 52;
+	APP_SENSING_FLAG = 53;
 }
 
 packet Raw{
     int type;
+    int len;
+    bool bitError;
     int radioSendId;
     int radioRecvId;
 }
@@ -70,16 +74,12 @@ packet Data extends IpPacket {
 	int value;
 }
 
-packet ICMP extends IpPacket{
-    int icmp_code;
-}
-
-packet DIO extends ICMP{
+packet DIO extends IpPacket {
 	int dodagID;
 	unsigned long rank;
 	int version;
 }
 
-packet DIS extends ICMP{
+packet DIS extends IpPacket {
 	int convergence;
 }

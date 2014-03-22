@@ -33,6 +33,7 @@ class cc2420 : public cSimpleModule
     virtual void finish();
 
   public:
+    bool isListen;
     int trRange;
     int coRange;
 
@@ -42,7 +43,6 @@ class cc2420 : public cSimpleModule
     // neighbor list
     std::vector<int> neighbor;
 
-    cc2420();
     ~cc2420();
 
     // control other mote(s) without sending message

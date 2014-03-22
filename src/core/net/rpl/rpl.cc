@@ -25,19 +25,10 @@
 
 namespace wsn_energy {
 
-RPL::RPL()
-{
-}
-
-RPL::~RPL()
-{
-//  this->neighborList.clear();
-}
-
 RPL::RPL(IPv6 *net)
 {
-  this->rpl_init();
   this->net = net;
+  this->rpl_init();
 }
 
 void RPL::rpl_init()
@@ -64,8 +55,7 @@ void RPL::sendDIO()
   ev << "broadcast DIO" << endl;
 
   DIO *icmp = new DIO();
-  ((ICMP*) icmp)->setIcmp_code(ICMP_DIO_CODE);
-  ((IpPacket*) icmp)->setType(IP_ICMP);
+  ((IpPacket*) icmp)->setType(NET_ICMP_DIO);
 
   icmp->setDodagID(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
@@ -78,8 +68,7 @@ void RPL::sendDIS(int convergence)
   ev << "broadcast DIS" << endl;
 
   DIS *icmp = new DIS();
-  ((ICMP*) icmp)->setIcmp_code(ICMP_DIS_CODE);
-  ((IpPacket*) icmp)->setType(IP_ICMP);
+  ((IpPacket*) icmp)->setType(NET_ICMP_DIO);
 
   icmp->setConvergence(convergence);
 
