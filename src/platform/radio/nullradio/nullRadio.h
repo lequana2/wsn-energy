@@ -13,17 +13,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef APP_H_
-#define APP_H_
+#ifndef NULLRADIO_H_
+#define NULLRADIO_H_
 
-#include <omnetpp.h>
+#include "radio.h"
 
 namespace wsn_energy {
 
-class App : public cSimpleModule
+class nullRadio : public RadioDriver
 {
+  private:
+    virtual void transmit_on(Raw *raw);
+    virtual void transmit_off();
+    virtual void listen_off();
+    virtual void listen_on();
+
+    Raw *broadcastMessage; // buffer message
+
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
+
+    virtual double getTxPower();
+    virtual double getRxPower();
 };
 
 } /* namespace wsn_energy */
 
-#endif /* APP_H_ */
+#endif /* NULLRADIO_H_ */

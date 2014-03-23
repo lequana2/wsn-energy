@@ -13,24 +13,24 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <app.h>
+package wsn_energy.platform.radio.nullradio;
 
-namespace wsn_energy {
+import wsn_energy.platform.radio.iRadio;
 
-App::App()
+//
+// TODO auto-generated type
+//
+simple nullRadio like iRadio
 {
-}
+    parameters:
+        @class("nullRadio");
 
-App::~App()
-{
-}
+        int trRange;
+        int coRange;
 
-void App::initialize()
-{
-//  this->axisX = par("axisX");
-//  this->axisY = par("axisY");
-//  this->trRange = par("trRange");
-//  this->coRange = par("coRange");
-}
+    gates:
+        input upperIn;
+        output upperOut;
 
-} /* namespace wsn_energy */
+        input radioIn @directin;
+}

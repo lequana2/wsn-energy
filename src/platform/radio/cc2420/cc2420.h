@@ -13,43 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef RADIO_H_
-#define RADIO_H_
+#ifndef CC2420_H_
+#define CC2420_H_
 
-#include <omnetpp.h>
-#include "packet_m.h"
+#include "radio.h"
 
 namespace wsn_energy {
 
-class cc2420 : public cSimpleModule
+class cc2420 : public RadioDriver
 {
   private:
     virtual void transmit_on(Raw *raw);
     virtual void transmit_off();
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
+    virtual void listen_off();
+    virtual void listen_on();
 
   public:
-    bool isListen;
-    int trRange;
-    int coRange;
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 
-    // on the air broadcast
-    Raw *broadcastMessage;
-
-    // neighbor list
-    std::vector<int> neighbor;
-
-    ~cc2420();
-
-    // control other mote(s) without sending message
-    virtual void receive_off();
-    virtual void receive_on();
+    virtual double getTxPower();
+    virtual double getRxPower();
 };
 
 } /* namespace wsn_energy */
 
-#endif /* RADIO_H_ */
+#endif /* CC2420_H_ */

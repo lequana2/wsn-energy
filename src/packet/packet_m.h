@@ -30,10 +30,14 @@ namespace wsn_energy {
  * 
  * 	
  * 	LAYER_RADIO   = 10; 
- *  	TRX_BROADCAST = 11;
+ *  	TRX_BROADCAST = 11; 
  *  	RCX_BROADCAST = 12;
  * 	TOF_BROADCAST = 13;
  * 	ROF_BROADCAST = 14;
+ * 	TX_OK         = 15; 
+ * 	TX_ERR		  = 16; 
+ * 	TX_COLLISION  = 17;
+ * 	TX_NOACK      = 18;
  * 
  * 	
  * 	LAYER_RDC     = 21; 
@@ -66,6 +70,10 @@ enum MESSAGE {
     RCX_BROADCAST = 12,
     TOF_BROADCAST = 13,
     ROF_BROADCAST = 14,
+    TX_OK = 15,
+    TX_ERR = 16,
+    TX_COLLISION = 17,
+    TX_NOACK = 18,
     LAYER_RDC = 21,
     LAYER_MAC = 31,
     LAYER_NET = 32,

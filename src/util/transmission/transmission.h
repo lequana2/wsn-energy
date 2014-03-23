@@ -21,28 +21,28 @@
 #ifndef TRANMISSION_H_
 #define TRANMISSION_H_
 
-//#include <cc2420.h>
+#include "radio.h"
 
-namespace wsn_energy {
-class cc2420;
-} /* namespace wsn_energy */
+//namespace wsn_energy {
+//class Radio;
+//} /* namespace wsn_energy */
 
 namespace wsn_energy {
 
 class Transmission
 {
   public:
-    Transmission(cc2420 *sender, cc2420 *recver);
+    Transmission(RadioDriver *sender, RadioDriver *recver);
 
-    virtual cc2420* getSender();
-    virtual cc2420* getRecver();
+    virtual RadioDriver* getSender();
+    virtual RadioDriver* getRecver();
 
     virtual bool isCollided();
     virtual void corrupted();
 
   private:
-    cc2420 *sender;
-    cc2420 *recver;
+    RadioDriver *sender;
+    RadioDriver *recver;
     bool collision;
 };
 

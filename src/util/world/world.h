@@ -19,7 +19,6 @@
 #include <omnetpp.h>
 
 #include "transmission.h"
-#include "cc2420.h"
 
 namespace wsn_energy {
 
@@ -33,7 +32,7 @@ class World : public cSimpleModule
     void stopTransmission(Transmission*);
     bool senseBusyTransmission(Transmission*);
 
-    double calculateDistance(cc2420*, cc2420*);
+    double calculateDistance(RadioDriver*, RadioDriver*);
     double calculateDistance(int, int, int, int);
 
     std::list<Transmission*> onTheAir;
@@ -46,8 +45,8 @@ class World : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-    void checkConnection(cc2420*);
-    int deployConnection(cc2420*, cc2420*);
+    void checkConnection(RadioDriver*);
+    int deployConnection(RadioDriver*, RadioDriver*);
 };
 
 } /* namespace wsn_energy */

@@ -29,7 +29,7 @@ class Battery : public cSimpleModule
     virtual ~Battery();
 
     void energestOn(int);
-    void energestOff(int);
+    void energestOff(int,double);
 
   protected:
     virtual void initialize();

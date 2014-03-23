@@ -46,6 +46,10 @@ EXECUTE_ON_STARTUP(
     e->insert(RCX_BROADCAST, "RCX_BROADCAST");
     e->insert(TOF_BROADCAST, "TOF_BROADCAST");
     e->insert(ROF_BROADCAST, "ROF_BROADCAST");
+    e->insert(TX_OK, "TX_OK");
+    e->insert(TX_ERR, "TX_ERR");
+    e->insert(TX_COLLISION, "TX_COLLISION");
+    e->insert(TX_NOACK, "TX_NOACK");
     e->insert(LAYER_RDC, "LAYER_RDC");
     e->insert(LAYER_MAC, "LAYER_MAC");
     e->insert(LAYER_NET, "LAYER_NET");

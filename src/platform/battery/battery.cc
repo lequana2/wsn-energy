@@ -8,7 +8,6 @@
  */
 
 #include <battery.h>
-#include "cc2420-const.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -40,7 +39,7 @@ void Battery::energestOn(int type)
   this->capsuleIsActivated[type] = true;
 }
 
-void Battery::energestOff(int type)
+void Battery::energestOff(int type, double power)
 {
   if (this->capsuleIsActivated[type])
   {
@@ -56,10 +55,10 @@ void Battery::energestOff(int type)
   switch (type)
   {
     case ENERGEST_TYPE_TRANSMIT:
-      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * TXPOWER_CURRENT * VOLTAGE;
+      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power;
       break;
     case ENERGEST_TYPE_LISTEN:
-      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * RXPOWER_CURRENT * VOLTAGE;
+      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power;
       break;
   }
 

@@ -33,6 +33,7 @@ INCLUDE_PATH = \
     -Iplatform/battery \
     -Iplatform/radio \
     -Iplatform/radio/cc2420 \
+    -Iplatform/radio/nullradio \
     -Iutil \
     -Iutil/statistic \
     -Iutil/transmission \
@@ -51,7 +52,6 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/apps/app.o \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
     $O/core/mac/nullmac/nullMAC.o \
@@ -60,6 +60,7 @@ OBJS = \
     $O/core/rdc/nullrdc/nullRDC.o \
     $O/platform/battery/battery.o \
     $O/platform/radio/cc2420/cc2420.o \
+    $O/platform/radio/nullradio/nullRadio.o \
     $O/util/statistic/statistic.o \
     $O/util/transmission/transmission.o \
     $O/util/world/world.o \
@@ -158,6 +159,7 @@ clean:
 	$(Q)-rm -f platform/battery/*_m.cc platform/battery/*_m.h
 	$(Q)-rm -f platform/radio/*_m.cc platform/radio/*_m.h
 	$(Q)-rm -f platform/radio/cc2420/*_m.cc platform/radio/cc2420/*_m.h
+	$(Q)-rm -f platform/radio/nullradio/*_m.cc platform/radio/nullradio/*_m.h
 	$(Q)-rm -f util/*_m.cc util/*_m.h
 	$(Q)-rm -f util/statistic/*_m.cc util/statistic/*_m.h
 	$(Q)-rm -f util/transmission/*_m.cc util/transmission/*_m.h
@@ -168,11 +170,9 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/rdc/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc platform/radio/cc2420/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/rdc/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc platform/radio/cc2420/*.cc platform/radio/nullradio/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-$O/apps/app.o: apps/app.cc \
-	apps/app.h
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/app.h \
 	apps/client/client.h \
@@ -188,7 +188,7 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	packet/packet_m.h \
-	platform/radio/cc2420/cc2420.h \
+	platform/radio/radio.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
 	util/world/world.h
@@ -203,12 +203,21 @@ $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_m.h
 $O/platform/battery/battery.o: platform/battery/battery.cc \
 	packet/packet_m.h \
-	platform/battery/battery.h \
-	platform/radio/cc2420/cc2420-const.h
+	platform/battery/battery.h
 $O/platform/radio/cc2420/cc2420.o: platform/radio/cc2420/cc2420.cc \
 	packet/packet_m.h \
 	platform/battery/battery.h \
+	platform/radio/cc2420/cc2420-const.h \
 	platform/radio/cc2420/cc2420.h \
+	platform/radio/radio.h \
+	util/statistic/statistic.h \
+	util/transmission/transmission.h \
+	util/world/world.h
+$O/platform/radio/nullradio/nullRadio.o: platform/radio/nullradio/nullRadio.cc \
+	packet/packet_m.h \
+	platform/battery/battery.h \
+	platform/radio/nullradio/nullRadio.h \
+	platform/radio/radio.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
 	util/world/world.h
@@ -217,10 +226,12 @@ $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	platform/battery/battery.h \
 	util/statistic/statistic.h
 $O/util/transmission/transmission.o: util/transmission/transmission.cc \
+	packet/packet_m.h \
+	platform/radio/radio.h \
 	util/transmission/transmission.h
 $O/util/world/world.o: util/world/world.cc \
 	packet/packet_m.h \
-	platform/radio/cc2420/cc2420.h \
+	platform/radio/radio.h \
 	util/transmission/transmission.h \
 	util/world/world.h
 

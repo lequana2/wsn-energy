@@ -16,17 +16,17 @@
 #include <transmission.h>
 
 namespace wsn_energy {
-Transmission::Transmission(cc2420 *sender, cc2420 *recver)
+Transmission::Transmission(RadioDriver *sender, RadioDriver *recver)
 {
   this->sender = sender;
   this->recver = recver;
   this->collision = false;
 }
-cc2420* Transmission::getSender()
+RadioDriver* Transmission::getSender()
 {
   return this->sender;
 }
-cc2420* Transmission::getRecver()
+RadioDriver* Transmission::getRecver()
 {
   return this->recver;
 }

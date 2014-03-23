@@ -13,22 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "cc2420.h"
-#include "cc2420-const.h"
+#include "nullRadio.h"
 
 #include "world.h"
 #include "statistic.h"
 #include "battery.h"
 
-#ifndef  DEBUG
-#define  DEBUG 1
+#ifndef DEBUG
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
 
-Define_Module(cc2420);
+Define_Module(nullRadio);
 
-void cc2420::initialize()
+void nullRadio::initialize()
 {
   this->trRange = par("trRange");
   this->coRange = par("coRange");
@@ -37,16 +36,20 @@ void cc2420::initialize()
   listen_on();
 }
 
-void cc2420::handleMessage(cMessage* msg)
+void nullRadio::handleMessage(cMessage* msg)
 {
+  // demand to transmit from upper layer
   if (msg->getKind() == TRX_BROADCAST)
   {
     transmit_on((Raw*) msg);
   }
+  // callback when finishing transmitted
   else if (msg->getKind() == TOF_BROADCAST)
   {
     transmit_off();
+    getTxPower();
   }
+  // Just receive a packet
   else if (msg->getKind() == ROF_BROADCAST)
   {
     // to upper layer
@@ -55,7 +58,7 @@ void cc2420::handleMessage(cMessage* msg)
   }
 }
 
-void cc2420::finish()
+void nullRadio::finish()
 {
   this->neighbor.clear();
   this->broadcastMessage = NULL;
@@ -64,7 +67,7 @@ void cc2420::finish()
 /*
  * Turn on to transmit
  */
-void cc2420::transmit_on(Raw *msg)
+void nullRadio::transmit_on(Raw *msg)
 {
   if (DEBUG)
     ev << "Trans on" << endl;
@@ -74,7 +77,7 @@ void cc2420::transmit_on(Raw *msg)
   {
     if (DEBUG)
       ev << "busy channel" << endl;
-//    scheduleAt(simTime() + 0.01, msg);
+    //    scheduleAt(simTime() + 0.01, msg);
     return;
   }
 
@@ -112,7 +115,7 @@ void cc2420::transmit_on(Raw *msg)
 /*
  *   Turn off transmitting
  */
-void cc2420::transmit_off()
+void nullRadio::transmit_off()
 {
   if (DEBUG)
     ev << "Trans off" << endl;
@@ -163,14 +166,12 @@ void cc2420::transmit_off()
   getParentModule()->setDisplayString(newDisplay);
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
-  //WSN turn listen on
-  listen_on();
 }
 
 /*
  *   Turn on receiving
  */
-void cc2420::listen_on()
+void nullRadio::listen_on()
 {
   if (DEBUG)
     ev << "Recv on" << endl;
@@ -181,7 +182,7 @@ void cc2420::listen_on()
 /*
  *   Turn off receiving
  */
-void cc2420::listen_off()
+void nullRadio::listen_off()
 {
   if (DEBUG)
     ev << "Recv off" << endl;
@@ -189,14 +190,14 @@ void cc2420::listen_off()
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN, getRxPower());
 }
 
-
-double cc2420::getTxPower(){
-  return TXPOWER_CURRENT * SUPPLY_VOLTAGE;
+double nullRadio::getTxPower()
+{
+  return 1;
 }
 
-double cc2420::getRxPower(){
-  return RXPOWER_CURRENT * SUPPLY_VOLTAGE;
+double nullRadio::getRxPower()
+{
+  return 1;
 }
 
-}
-/* namespace wsn_energy */
+} /* namespace wsn_energy */

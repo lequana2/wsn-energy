@@ -23,6 +23,8 @@ import wsn_energy.platform.radio.iRadio;
 simple cc2420 like iRadio
 {
     parameters:
+        @class("cc2420");
+        
         int trRange;
         int coRange;
 
