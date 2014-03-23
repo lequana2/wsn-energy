@@ -29,18 +29,14 @@ namespace wsn_energy {
  * 	RPL_SOLICIT   = 4;
  * 
  * 	
- * 	LAYER_RADIO   = 10; 
- *  	TRX_BROADCAST = 11; 
- *  	RCX_BROADCAST = 12;
- * 	TOF_BROADCAST = 13;
- * 	ROF_BROADCAST = 14;
- * 	TX_OK         = 15; 
- * 	TX_ERR		  = 16; 
- * 	TX_COLLISION  = 17;
- * 	TX_NOACK      = 18;
+ *  	LAYER_RADIO     		= 10; 
+ *  	LAYER_RADIO_END_TRANS	= 11;
+ *  	LAYER_RADIO_END_RECV    = 12;
+ * 	LAYER_RADIO_OK			= 13;
+ * 	LAYER_RADIO_COL 		= 14;
  * 
  * 	
- * 	LAYER_RDC     = 21; 
+ * 	LAYER_RDC        = 20; 
  * 	
  * 	
  * 	LAYER_MAC     = 31; 
@@ -66,15 +62,11 @@ enum MESSAGE {
     RPL_CONSTRUCT = 3,
     RPL_SOLICIT = 4,
     LAYER_RADIO = 10,
-    TRX_BROADCAST = 11,
-    RCX_BROADCAST = 12,
-    TOF_BROADCAST = 13,
-    ROF_BROADCAST = 14,
-    TX_OK = 15,
-    TX_ERR = 16,
-    TX_COLLISION = 17,
-    TX_NOACK = 18,
-    LAYER_RDC = 21,
+    LAYER_RADIO_END_TRANS = 11,
+    LAYER_RADIO_END_RECV = 12,
+    LAYER_RADIO_OK = 13,
+    LAYER_RADIO_COL = 14,
+    LAYER_RDC = 20,
     LAYER_MAC = 31,
     LAYER_NET = 32,
     NET_ICMP_DIO = 40,
@@ -90,7 +82,7 @@ enum MESSAGE {
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Raw{
- *     int type;
+ *     int typeRadioLayer;
  *     int len;
  *     bool bitError;
  *     int radioSendId;
@@ -101,7 +93,7 @@ enum MESSAGE {
 class Raw : public ::cPacket
 {
   protected:
-    int type_var;
+    int typeRadioLayer_var;
     int len_var;
     bool bitError_var;
     int radioSendId_var;
@@ -124,8 +116,8 @@ class Raw : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getType() const;
-    virtual void setType(int type);
+    virtual int getTypeRadioLayer() const;
+    virtual void setTypeRadioLayer(int typeRadioLayer);
     virtual int getLen() const;
     virtual void setLen(int len);
     virtual bool getBitError() const;
@@ -143,7 +135,7 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Frame extends Raw{
- * 	int type;
+ * 	int typeMacLayer;
  * 	int senderMacAddress;
  * 	int recverMacAddress;
  * }
@@ -152,7 +144,7 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
 class Frame : public ::wsn_energy::Raw
 {
   protected:
-    int type_var;
+    int typeMacLayer_var;
     int senderMacAddress_var;
     int recverMacAddress_var;
 
@@ -173,8 +165,8 @@ class Frame : public ::wsn_energy::Raw
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getType() const;
-    virtual void setType(int type);
+    virtual int getTypeMacLayer() const;
+    virtual void setTypeMacLayer(int typeMacLayer);
     virtual int getSenderMacAddress() const;
     virtual void setSenderMacAddress(int senderMacAddress);
     virtual int getRecverMacAddress() const;
@@ -188,7 +180,7 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet IpPacket extends Frame{
- *     int type;
+ *     int typeNetLayer;
  *     int senderIpAddress;
  *     int recverIpAddress;
  * }
@@ -197,7 +189,7 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
 class IpPacket : public ::wsn_energy::Frame
 {
   protected:
-    int type_var;
+    int typeNetLayer_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
 
@@ -218,8 +210,8 @@ class IpPacket : public ::wsn_energy::Frame
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getType() const;
-    virtual void setType(int type);
+    virtual int getTypeNetLayer() const;
+    virtual void setTypeNetLayer(int typeNetLayer);
     virtual int getSenderIpAddress() const;
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;

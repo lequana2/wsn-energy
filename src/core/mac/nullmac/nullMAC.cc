@@ -38,15 +38,28 @@ void nullMAC::initialize()
 void nullMAC::handleMessage(cMessage *msg)
 {
   Frame *frame = (Frame*) msg;
-  if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".net")->getId())
+
+  // Control message
+  if (msg->getKind() == LAYER_MAC)
   {
+  }
+  // From net layer
+  else if (msg->getKind() == LAYER_NET)
+  {
+//    if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".net")->getId())
+//    {
     frame->setSenderMacAddress(this->getId());
     frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+    msg->setKind(LAYER_MAC);
 
     send(msg, gate("lowerOut"));
+//    }
   }
-  else
+  // From mac layer
+  else if (msg->getKind() == LAYER_RDC)
   {
+    msg->setKind(LAYER_MAC);
+
     send(frame, gate("upperOut"));
   }
 }

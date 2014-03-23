@@ -33,9 +33,9 @@ class RadioDriver : public cSimpleModule
 //    Raw *broadcastMessage; // buffer message
 
   protected:
-    virtual void initialize() = 0;
-    virtual void handleMessage(cMessage*) = 0;
-    virtual void finish() = 0;
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
 
     // Reserved
     virtual void transmit_on(Raw *raw) = 0;

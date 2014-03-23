@@ -29,39 +29,17 @@ Define_Module(nullRadio);
 
 void nullRadio::initialize()
 {
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
-  this->broadcastMessage = NULL;
-
-  listen_on();
+  RadioDriver::initialize();
 }
 
 void nullRadio::handleMessage(cMessage* msg)
 {
-  // demand to transmit from upper layer
-  if (msg->getKind() == TRX_BROADCAST)
-  {
-    transmit_on((Raw*) msg);
-  }
-  // callback when finishing transmitted
-  else if (msg->getKind() == TOF_BROADCAST)
-  {
-    transmit_off();
-    getTxPower();
-  }
-  // Just receive a packet
-  else if (msg->getKind() == ROF_BROADCAST)
-  {
-    // to upper layer
-    msg->setKind(LAYER_NET);
-    send(msg, gate("upperOut"));
-  }
+  RadioDriver::handleMessage(msg);
 }
 
 void nullRadio::finish()
 {
-  this->neighbor.clear();
-  this->broadcastMessage = NULL;
+  RadioDriver::finish();
 }
 
 /*
@@ -71,15 +49,6 @@ void nullRadio::transmit_on(Raw *msg)
 {
   if (DEBUG)
     ev << "Trans on" << endl;
-
-  // WSN Carrier sense
-  if (((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new Transmission(this, NULL)))
-  {
-    if (DEBUG)
-      ev << "busy channel" << endl;
-    //    scheduleAt(simTime() + 0.01, msg);
-    return;
-  }
 
   // buffer
   broadcastMessage = (Raw*) msg;
@@ -106,7 +75,7 @@ void nullRadio::transmit_on(Raw *msg)
 
   // WSN finish time = len / data rate
   double finishTime = 127.0 * 8 / 250000;
-  scheduleAt(simTime() + finishTime, new cMessage(NULL, TOF_BROADCAST));
+  scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
   listen_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
@@ -120,7 +89,7 @@ void nullRadio::transmit_off()
   if (DEBUG)
     ev << "Trans off" << endl;
 
-  broadcastMessage->setKind(ROF_BROADCAST);
+  broadcastMessage->setKind(LAYER_RADIO_END_RECV);
   broadcastMessage->setRadioSendId(this->getParentModule()->getId());
 
   for (unsigned int i = 0; i < neighbor.size(); i++)
@@ -129,22 +98,10 @@ void nullRadio::transmit_off()
 
     Transmission *completeTranmission = new Transmission(this, recver);
 
-    // check feasible
-    if (((World*) simulation.getModuleByPath("world"))->isFeasibleTransmission(completeTranmission))
-    {
-      // EV << "Received" << endl;
-      broadcastMessage->setBitError(true);
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
-    }
-    else
-    {
-      // EV << "Disposed" << endl;
-      recver->getParentModule()->bubble("Collision");
-      broadcastMessage->setBitError(false);
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
-    }
-
+    broadcastMessage->setBitError(true);
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
+    broadcastMessage->setTypeRadioLayer(LAYER_RADIO_OK);
+
     cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
     sendDirect(broadcastMessage->dup(), gate);
 
@@ -154,15 +111,12 @@ void nullRadio::transmit_off()
 
   // Turn off sending broadcast
   char newDisplay[20];
-
   int x = getParentModule()->par("axisX");
   int y = getParentModule()->par("axisY");
-
   if (this->getId() == simulation.getModuleByPath("server.radio")->getId())
     sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s", x, y);
   else
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", x, y);
-
   getParentModule()->setDisplayString(newDisplay);
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());

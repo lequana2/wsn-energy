@@ -59,6 +59,7 @@ OBJS = \
     $O/core/net/rpl/rpl.o \
     $O/core/rdc/nullrdc/nullRDC.o \
     $O/platform/battery/battery.o \
+    $O/platform/radio/radio.o \
     $O/platform/radio/cc2420/cc2420.o \
     $O/platform/radio/nullradio/nullRadio.o \
     $O/util/statistic/statistic.o \
@@ -204,6 +205,9 @@ $O/packet/packet_m.o: packet/packet_m.cc \
 $O/platform/battery/battery.o: platform/battery/battery.cc \
 	packet/packet_m.h \
 	platform/battery/battery.h
+$O/platform/radio/radio.o: platform/radio/radio.cc \
+	packet/packet_m.h \
+	platform/radio/radio.h
 $O/platform/radio/cc2420/cc2420.o: platform/radio/cc2420/cc2420.cc \
 	packet/packet_m.h \
 	platform/battery/battery.h \

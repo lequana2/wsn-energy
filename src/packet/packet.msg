@@ -25,18 +25,14 @@ enum MESSAGE
 	RPL_SOLICIT   = 4;
 
 	// radio
-	LAYER_RADIO   = 10; // kind
- 	TRX_BROADCAST = 11; // from upper
- 	RCX_BROADCAST = 12;
-	TOF_BROADCAST = 13;
-	ROF_BROADCAST = 14;
-	TX_OK         = 15; // to upper
-	TX_ERR		  = 16; 
-	TX_COLLISION  = 17;
-	TX_NOACK      = 18;
+ 	LAYER_RADIO     		= 10; // kind
+ 	LAYER_RADIO_END_TRANS	= 11;
+ 	LAYER_RADIO_END_RECV    = 12;
+	LAYER_RADIO_OK			= 13;
+	LAYER_RADIO_COL 		= 14;
 
 	// rdc
-	LAYER_RDC     = 21; // kind
+	LAYER_RDC        = 20; // kind
 	
 	// mac
 	LAYER_MAC     = 31; // kind
@@ -55,7 +51,7 @@ enum MESSAGE
 }
 
 packet Raw{
-    int type;
+    int typeRadioLayer;
     int len;
     bool bitError;
     int radioSendId;
@@ -63,13 +59,13 @@ packet Raw{
 }
 
 packet Frame extends Raw{
-	int type;
+	int typeMacLayer;
 	int senderMacAddress;
 	int recverMacAddress;
 }
 
 packet IpPacket extends Frame{
-    int type;
+    int typeNetLayer;
     int senderIpAddress;
     int recverIpAddress;
 }

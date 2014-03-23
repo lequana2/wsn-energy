@@ -30,35 +30,17 @@ Define_Module(cc2420);
 
 void cc2420::initialize()
 {
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
-  this->broadcastMessage = NULL;
-
-  listen_on();
+  RadioDriver::initialize();
 }
 
 void cc2420::handleMessage(cMessage* msg)
 {
-  if (msg->getKind() == TRX_BROADCAST)
-  {
-    transmit_on((Raw*) msg);
-  }
-  else if (msg->getKind() == TOF_BROADCAST)
-  {
-    transmit_off();
-  }
-  else if (msg->getKind() == ROF_BROADCAST)
-  {
-    // to upper layer
-    msg->setKind(LAYER_NET);
-    send(msg, gate("upperOut"));
-  }
+  RadioDriver::handleMessage(msg);
 }
 
 void cc2420::finish()
 {
-  this->neighbor.clear();
-  this->broadcastMessage = NULL;
+  RadioDriver::finish();
 }
 
 /*
@@ -103,7 +85,7 @@ void cc2420::transmit_on(Raw *msg)
 
   // WSN finish time = len / data rate
   double finishTime = 127.0 * 8 / 250000;
-  scheduleAt(simTime() + finishTime, new cMessage(NULL, TOF_BROADCAST));
+  scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
   listen_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
@@ -117,7 +99,7 @@ void cc2420::transmit_off()
   if (DEBUG)
     ev << "Trans off" << endl;
 
-  broadcastMessage->setKind(ROF_BROADCAST);
+  broadcastMessage->setKind(LAYER_RADIO_END_RECV);
   broadcastMessage->setRadioSendId(this->getParentModule()->getId());
 
   for (unsigned int i = 0; i < neighbor.size(); i++)
@@ -132,6 +114,7 @@ void cc2420::transmit_off()
       // EV << "Received" << endl;
       broadcastMessage->setBitError(true);
       ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
+      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_OK);
     }
     else
     {
@@ -139,6 +122,7 @@ void cc2420::transmit_off()
       recver->getParentModule()->bubble("Collision");
       broadcastMessage->setBitError(false);
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
+      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_COL);
     }
 
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
@@ -189,12 +173,13 @@ void cc2420::listen_off()
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN, getRxPower());
 }
 
-
-double cc2420::getTxPower(){
+double cc2420::getTxPower()
+{
   return TXPOWER_CURRENT * SUPPLY_VOLTAGE;
 }
 
-double cc2420::getRxPower(){
+double cc2420::getRxPower()
+{
   return RXPOWER_CURRENT * SUPPLY_VOLTAGE;
 }
 

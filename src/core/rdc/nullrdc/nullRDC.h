@@ -22,10 +22,6 @@ namespace wsn_energy {
 
 class nullRDC : public cSimpleModule
 {
-  public:
-    nullRDC();
-    virtual ~nullRDC();
-
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);

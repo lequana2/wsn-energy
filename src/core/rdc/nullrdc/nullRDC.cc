@@ -24,39 +24,37 @@ namespace wsn_energy {
 
 Define_Module(nullRDC);
 
-nullRDC::nullRDC()
-{
-  // TODO Auto-generated constructor stub
-
-}
-
-nullRDC::~nullRDC()
-{
-  // TODO Auto-generated destructor stub
-}
-
 void nullRDC::initialize()
 {
 }
 
 void nullRDC::handleMessage(cMessage *msg)
 {
-  Frame *frame = (Frame*) msg;
-  if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
+  // Control message
+  if (msg->getKind() == LAYER_RDC)
   {
-    msg->setKind(TRX_BROADCAST);
+  }
+  // From upper
+  else if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
+  {
+    msg->setKind(LAYER_RDC);
     send(msg, gate("lowerOut"));
   }
-  else
+  // From radio layer
+  else if (msg->getKind() == LAYER_RADIO)
   {
-    if (((Raw*) msg)->getBitError())
+    switch (((Raw*) msg)->getTypeRadioLayer())
     {
-      send(frame, gate("upperOut"));
-    }
-    else
-    {
-      if(DEBUG)
-        ev << "Collision message" << endl;
+      case LAYER_RADIO_OK:
+        msg->setKind(LAYER_RDC);
+        send(msg, gate("upperOut"));
+        ev << "OK message" << endl;
+        break;
+
+      case LAYER_RADIO_COL:
+        if (DEBUG)
+          ev << "Collision message" << endl;
+        break;
     }
   }
 }

@@ -42,14 +42,10 @@ EXECUTE_ON_STARTUP(
     e->insert(RPL_CONSTRUCT, "RPL_CONSTRUCT");
     e->insert(RPL_SOLICIT, "RPL_SOLICIT");
     e->insert(LAYER_RADIO, "LAYER_RADIO");
-    e->insert(TRX_BROADCAST, "TRX_BROADCAST");
-    e->insert(RCX_BROADCAST, "RCX_BROADCAST");
-    e->insert(TOF_BROADCAST, "TOF_BROADCAST");
-    e->insert(ROF_BROADCAST, "ROF_BROADCAST");
-    e->insert(TX_OK, "TX_OK");
-    e->insert(TX_ERR, "TX_ERR");
-    e->insert(TX_COLLISION, "TX_COLLISION");
-    e->insert(TX_NOACK, "TX_NOACK");
+    e->insert(LAYER_RADIO_END_TRANS, "LAYER_RADIO_END_TRANS");
+    e->insert(LAYER_RADIO_END_RECV, "LAYER_RADIO_END_RECV");
+    e->insert(LAYER_RADIO_OK, "LAYER_RADIO_OK");
+    e->insert(LAYER_RADIO_COL, "LAYER_RADIO_COL");
     e->insert(LAYER_RDC, "LAYER_RDC");
     e->insert(LAYER_MAC, "LAYER_MAC");
     e->insert(LAYER_NET, "LAYER_NET");
@@ -66,7 +62,7 @@ Register_Class(Raw);
 
 Raw::Raw(const char *name, int kind) : cPacket(name,kind)
 {
-    this->type_var = 0;
+    this->typeRadioLayer_var = 0;
     this->len_var = 0;
     this->bitError_var = 0;
     this->radioSendId_var = 0;
@@ -92,7 +88,7 @@ Raw& Raw::operator=(const Raw& other)
 
 void Raw::copy(const Raw& other)
 {
-    this->type_var = other.type_var;
+    this->typeRadioLayer_var = other.typeRadioLayer_var;
     this->len_var = other.len_var;
     this->bitError_var = other.bitError_var;
     this->radioSendId_var = other.radioSendId_var;
@@ -102,7 +98,7 @@ void Raw::copy(const Raw& other)
 void Raw::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
-    doPacking(b,this->type_var);
+    doPacking(b,this->typeRadioLayer_var);
     doPacking(b,this->len_var);
     doPacking(b,this->bitError_var);
     doPacking(b,this->radioSendId_var);
@@ -112,21 +108,21 @@ void Raw::parsimPack(cCommBuffer *b)
 void Raw::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
-    doUnpacking(b,this->type_var);
+    doUnpacking(b,this->typeRadioLayer_var);
     doUnpacking(b,this->len_var);
     doUnpacking(b,this->bitError_var);
     doUnpacking(b,this->radioSendId_var);
     doUnpacking(b,this->radioRecvId_var);
 }
 
-int Raw::getType() const
+int Raw::getTypeRadioLayer() const
 {
-    return type_var;
+    return typeRadioLayer_var;
 }
 
-void Raw::setType(int type)
+void Raw::setTypeRadioLayer(int typeRadioLayer)
 {
-    this->type_var = type;
+    this->typeRadioLayer_var = typeRadioLayer;
 }
 
 int Raw::getLen() const
@@ -246,7 +242,7 @@ const char *RawDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "type",
+        "typeRadioLayer",
         "len",
         "bitError",
         "radioSendId",
@@ -259,7 +255,7 @@ int RawDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+0;
+    if (fieldName[0]=='t' && strcmp(fieldName, "typeRadioLayer")==0) return base+0;
     if (fieldName[0]=='l' && strcmp(fieldName, "len")==0) return base+1;
     if (fieldName[0]=='b' && strcmp(fieldName, "bitError")==0) return base+2;
     if (fieldName[0]=='r' && strcmp(fieldName, "radioSendId")==0) return base+3;
@@ -322,7 +318,7 @@ std::string RawDescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getType());
+        case 0: return long2string(pp->getTypeRadioLayer());
         case 1: return long2string(pp->getLen());
         case 2: return bool2string(pp->getBitError());
         case 3: return long2string(pp->getRadioSendId());
@@ -341,7 +337,7 @@ bool RawDescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: pp->setType(string2long(value)); return true;
+        case 0: pp->setTypeRadioLayer(string2long(value)); return true;
         case 1: pp->setLen(string2long(value)); return true;
         case 2: pp->setBitError(string2bool(value)); return true;
         case 3: pp->setRadioSendId(string2long(value)); return true;
@@ -386,7 +382,7 @@ Register_Class(Frame);
 
 Frame::Frame(const char *name, int kind) : wsn_energy::Raw(name,kind)
 {
-    this->type_var = 0;
+    this->typeMacLayer_var = 0;
     this->senderMacAddress_var = 0;
     this->recverMacAddress_var = 0;
 }
@@ -410,7 +406,7 @@ Frame& Frame::operator=(const Frame& other)
 
 void Frame::copy(const Frame& other)
 {
-    this->type_var = other.type_var;
+    this->typeMacLayer_var = other.typeMacLayer_var;
     this->senderMacAddress_var = other.senderMacAddress_var;
     this->recverMacAddress_var = other.recverMacAddress_var;
 }
@@ -418,7 +414,7 @@ void Frame::copy(const Frame& other)
 void Frame::parsimPack(cCommBuffer *b)
 {
     wsn_energy::Raw::parsimPack(b);
-    doPacking(b,this->type_var);
+    doPacking(b,this->typeMacLayer_var);
     doPacking(b,this->senderMacAddress_var);
     doPacking(b,this->recverMacAddress_var);
 }
@@ -426,19 +422,19 @@ void Frame::parsimPack(cCommBuffer *b)
 void Frame::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::Raw::parsimUnpack(b);
-    doUnpacking(b,this->type_var);
+    doUnpacking(b,this->typeMacLayer_var);
     doUnpacking(b,this->senderMacAddress_var);
     doUnpacking(b,this->recverMacAddress_var);
 }
 
-int Frame::getType() const
+int Frame::getTypeMacLayer() const
 {
-    return type_var;
+    return typeMacLayer_var;
 }
 
-void Frame::setType(int type)
+void Frame::setTypeMacLayer(int typeMacLayer)
 {
-    this->type_var = type;
+    this->typeMacLayer_var = typeMacLayer;
 }
 
 int Frame::getSenderMacAddress() const
@@ -536,7 +532,7 @@ const char *FrameDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "type",
+        "typeMacLayer",
         "senderMacAddress",
         "recverMacAddress",
     };
@@ -547,7 +543,7 @@ int FrameDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+0;
+    if (fieldName[0]=='t' && strcmp(fieldName, "typeMacLayer")==0) return base+0;
     if (fieldName[0]=='s' && strcmp(fieldName, "senderMacAddress")==0) return base+1;
     if (fieldName[0]=='r' && strcmp(fieldName, "recverMacAddress")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
@@ -606,7 +602,7 @@ std::string FrameDescriptor::getFieldAsString(void *object, int field, int i) co
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getType());
+        case 0: return long2string(pp->getTypeMacLayer());
         case 1: return long2string(pp->getSenderMacAddress());
         case 2: return long2string(pp->getRecverMacAddress());
         default: return "";
@@ -623,7 +619,7 @@ bool FrameDescriptor::setFieldAsString(void *object, int field, int i, const cha
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
-        case 0: pp->setType(string2long(value)); return true;
+        case 0: pp->setTypeMacLayer(string2long(value)); return true;
         case 1: pp->setSenderMacAddress(string2long(value)); return true;
         case 2: pp->setRecverMacAddress(string2long(value)); return true;
         default: return false;
@@ -664,7 +660,7 @@ Register_Class(IpPacket);
 
 IpPacket::IpPacket(const char *name, int kind) : wsn_energy::Frame(name,kind)
 {
-    this->type_var = 0;
+    this->typeNetLayer_var = 0;
     this->senderIpAddress_var = 0;
     this->recverIpAddress_var = 0;
 }
@@ -688,7 +684,7 @@ IpPacket& IpPacket::operator=(const IpPacket& other)
 
 void IpPacket::copy(const IpPacket& other)
 {
-    this->type_var = other.type_var;
+    this->typeNetLayer_var = other.typeNetLayer_var;
     this->senderIpAddress_var = other.senderIpAddress_var;
     this->recverIpAddress_var = other.recverIpAddress_var;
 }
@@ -696,7 +692,7 @@ void IpPacket::copy(const IpPacket& other)
 void IpPacket::parsimPack(cCommBuffer *b)
 {
     wsn_energy::Frame::parsimPack(b);
-    doPacking(b,this->type_var);
+    doPacking(b,this->typeNetLayer_var);
     doPacking(b,this->senderIpAddress_var);
     doPacking(b,this->recverIpAddress_var);
 }
@@ -704,19 +700,19 @@ void IpPacket::parsimPack(cCommBuffer *b)
 void IpPacket::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::Frame::parsimUnpack(b);
-    doUnpacking(b,this->type_var);
+    doUnpacking(b,this->typeNetLayer_var);
     doUnpacking(b,this->senderIpAddress_var);
     doUnpacking(b,this->recverIpAddress_var);
 }
 
-int IpPacket::getType() const
+int IpPacket::getTypeNetLayer() const
 {
-    return type_var;
+    return typeNetLayer_var;
 }
 
-void IpPacket::setType(int type)
+void IpPacket::setTypeNetLayer(int typeNetLayer)
 {
-    this->type_var = type;
+    this->typeNetLayer_var = typeNetLayer;
 }
 
 int IpPacket::getSenderIpAddress() const
@@ -814,7 +810,7 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "type",
+        "typeNetLayer",
         "senderIpAddress",
         "recverIpAddress",
     };
@@ -825,7 +821,7 @@ int IpPacketDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+0;
+    if (fieldName[0]=='t' && strcmp(fieldName, "typeNetLayer")==0) return base+0;
     if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+1;
     if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
@@ -884,7 +880,7 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getType());
+        case 0: return long2string(pp->getTypeNetLayer());
         case 1: return long2string(pp->getSenderIpAddress());
         case 2: return long2string(pp->getRecverIpAddress());
         default: return "";
@@ -901,7 +897,7 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
     switch (field) {
-        case 0: pp->setType(string2long(value)); return true;
+        case 0: pp->setTypeNetLayer(string2long(value)); return true;
         case 1: pp->setSenderIpAddress(string2long(value)); return true;
         case 2: pp->setRecverIpAddress(string2long(value)); return true;
         default: return false;

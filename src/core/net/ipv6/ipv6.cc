@@ -21,6 +21,10 @@
 #include "ipv6.h"
 #include "rpl.h"
 
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+
 namespace wsn_energy {
 
 Define_Module(IPv6);
@@ -38,7 +42,7 @@ void IPv6::handleMessage(cMessage *msg)
 {
   ev << "Message type: " << msg->getKind() << endl;
 
-  // dispatch event
+  // Control message
   if (msg->getKind() == RPL_CONSTRUCT)
   {
     this->rpl->sendDIO();
@@ -49,7 +53,7 @@ void IPv6::handleMessage(cMessage *msg)
     this->rpl->sendDIS(5);
     return;
   }
-  // Enviroment flag
+  // From application layer
   else if (msg->getKind() == APP_SENSING_FLAG)
   {
     ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
@@ -64,7 +68,7 @@ void IPv6::handleMessage(cMessage *msg)
 
       IpPacket* broadcastMessage = (IpPacket*) msg;
       broadcastMessage->setRecverIpAddress(des->neighborID);
-      broadcastMessage->setType(NET_DATA);
+      broadcastMessage->setTypeNetLayer(NET_DATA);
 
       broadcast(broadcastMessage);
 
@@ -76,25 +80,23 @@ void IPv6::handleMessage(cMessage *msg)
       // WSN dismiss message ?
     }
   }
-  // IP messeage
-  else if (msg->getKind() == LAYER_NET)
+  // From mac layer
+  else if (msg->getKind() == LAYER_MAC)
   {
-    // WSN dismiss if recvID is not the same
-//    if (((IpPacket*) msg)->getRecverIpAddress() != 0
-//        && ((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
-//      return;
-
-// receive RPL construct
-    if (((IpPacket*) msg)->getType() == NET_ICMP_DIO)
+    // receive RPL DODAG information
+    if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIO)
     {
       this->rpl->receiveDIO((DIO*) msg);
     }
-    else if (((IpPacket*) msg)->getType() == NET_ICMP_DIS)
+
+    // receive RPL DODAG solicitation
+    else if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIS)
     {
       this->rpl->receiveDIS((DIS*) msg);
     }
+
     //WSN forward data
-    else if (((IpPacket*) msg)->getType() == NET_DATA)
+    else if (((IpPacket*) msg)->getTypeNetLayer()== NET_DATA)
     {
       if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
         return;
@@ -122,7 +124,7 @@ void IPv6::handleMessage(cMessage *msg)
 
           IpPacket* broadcastMessage = (IpPacket*) msg;
           broadcastMessage->setRecverIpAddress(des->neighborID);
-          broadcastMessage->setType(NET_DATA);
+          broadcastMessage->setTypeNetLayer(NET_DATA);
 
           broadcast(broadcastMessage);
         }
@@ -145,6 +147,7 @@ void IPv6::broadcast(IpPacket *msg)
 {
   msg->setSenderIpAddress(this->getId());
   msg->setRecverIpAddress(getModuleByPath("server.net")->getId());
+  msg->setKind(LAYER_NET);
 
   send(msg, gate("lowerOut"));
 }
