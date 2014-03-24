@@ -13,24 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.platform.radio.nullradio;
-
-import wsn_energy.platform.radio.iRadio;
+package wsn_energy.core.platform.radio;
 
 //
 // TODO auto-generated type
 //
-simple nullRadio like iRadio
+moduleinterface iRadio
 {
     parameters:
-        @class("nullRadio");
-
         int trRange;
         int coRange;
-
+        
     gates:
         input upperIn;
         output upperOut;
-
-        input radioIn @directin;
+        
+        input radioIn@directin;
 }

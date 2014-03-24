@@ -19,8 +19,8 @@ import wsn_energy.apps.iApp;
 import wsn_energy.core.net.iNet;
 import wsn_energy.core.mac.iMAC;
 import wsn_energy.core.rdc.iRDC;
-import wsn_energy.platform.radio.iRadio;
-import wsn_energy.platform.battery.Battery;
+import wsn_energy.core.platform.radio.iRadio;
+import wsn_energy.core.platform.battery.Battery;
 
 //
 // TODO auto-generated type

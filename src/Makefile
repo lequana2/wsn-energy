@@ -25,16 +25,16 @@ INCLUDE_PATH = \
     -Icore/net \
     -Icore/net/ipv6 \
     -Icore/net/rpl \
+    -Icore/platform \
+    -Icore/platform/battery \
+    -Icore/platform/radio \
+    -Icore/platform/radio/cc2420 \
+    -Icore/platform/radio/nullradio \
     -Icore/rdc \
     -Icore/rdc/contikiMac \
     -Icore/rdc/nullrdc \
     -Imote \
     -Ipacket \
-    -Iplatform \
-    -Iplatform/battery \
-    -Iplatform/radio \
-    -Iplatform/radio/cc2420 \
-    -Iplatform/radio/nullradio \
     -Iutil \
     -Iutil/statistic \
     -Iutil/transmission \
@@ -58,12 +58,12 @@ OBJS = \
     $O/core/mac/nullmac/nullMAC.o \
     $O/core/net/ipv6/ipv6.o \
     $O/core/net/rpl/rpl.o \
+    $O/core/platform/battery/battery.o \
+    $O/core/platform/radio/radio.o \
+    $O/core/platform/radio/cc2420/cc2420.o \
+    $O/core/platform/radio/nullradio/nullRadio.o \
     $O/core/rdc/rdc.o \
     $O/core/rdc/nullrdc/nullRDC.o \
-    $O/platform/battery/battery.o \
-    $O/platform/radio/radio.o \
-    $O/platform/radio/cc2420/cc2420.o \
-    $O/platform/radio/nullradio/nullRadio.o \
     $O/util/statistic/statistic.o \
     $O/util/transmission/transmission.o \
     $O/util/world/world.o \
@@ -154,16 +154,16 @@ clean:
 	$(Q)-rm -f core/net/*_m.cc core/net/*_m.h
 	$(Q)-rm -f core/net/ipv6/*_m.cc core/net/ipv6/*_m.h
 	$(Q)-rm -f core/net/rpl/*_m.cc core/net/rpl/*_m.h
+	$(Q)-rm -f core/platform/*_m.cc core/platform/*_m.h
+	$(Q)-rm -f core/platform/battery/*_m.cc core/platform/battery/*_m.h
+	$(Q)-rm -f core/platform/radio/*_m.cc core/platform/radio/*_m.h
+	$(Q)-rm -f core/platform/radio/cc2420/*_m.cc core/platform/radio/cc2420/*_m.h
+	$(Q)-rm -f core/platform/radio/nullradio/*_m.cc core/platform/radio/nullradio/*_m.h
 	$(Q)-rm -f core/rdc/*_m.cc core/rdc/*_m.h
 	$(Q)-rm -f core/rdc/contikiMac/*_m.cc core/rdc/contikiMac/*_m.h
 	$(Q)-rm -f core/rdc/nullrdc/*_m.cc core/rdc/nullrdc/*_m.h
 	$(Q)-rm -f mote/*_m.cc mote/*_m.h
 	$(Q)-rm -f packet/*_m.cc packet/*_m.h
-	$(Q)-rm -f platform/*_m.cc platform/*_m.h
-	$(Q)-rm -f platform/battery/*_m.cc platform/battery/*_m.h
-	$(Q)-rm -f platform/radio/*_m.cc platform/radio/*_m.h
-	$(Q)-rm -f platform/radio/cc2420/*_m.cc platform/radio/cc2420/*_m.h
-	$(Q)-rm -f platform/radio/nullradio/*_m.cc platform/radio/nullradio/*_m.h
 	$(Q)-rm -f util/*_m.cc util/*_m.h
 	$(Q)-rm -f util/statistic/*_m.cc util/statistic/*_m.h
 	$(Q)-rm -f util/transmission/*_m.cc util/transmission/*_m.h
@@ -174,7 +174,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc platform/radio/cc2420/*.cc platform/radio/nullradio/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/platform/*.cc core/platform/battery/*.cc core/platform/radio/*.cc core/platform/radio/cc2420/*.cc core/platform/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
@@ -191,8 +191,8 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	apps/app.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
+	core/platform/radio/radio.h \
 	packet/packet_m.h \
-	platform/radio/radio.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
 	util/world/world.h
@@ -200,6 +200,30 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	packet/packet_m.h
+$O/core/platform/battery/battery.o: core/platform/battery/battery.cc \
+	core/platform/battery/battery.h \
+	packet/packet_m.h
+$O/core/platform/radio/radio.o: core/platform/radio/radio.cc \
+	core/platform/battery/battery.h \
+	core/platform/radio/radio.h \
+	packet/packet_m.h
+$O/core/platform/radio/cc2420/cc2420.o: core/platform/radio/cc2420/cc2420.cc \
+	core/platform/battery/battery.h \
+	core/platform/radio/cc2420/cc2420-const.h \
+	core/platform/radio/cc2420/cc2420.h \
+	core/platform/radio/radio.h \
+	packet/packet_m.h \
+	util/statistic/statistic.h \
+	util/transmission/transmission.h \
+	util/world/world.h
+$O/core/platform/radio/nullradio/nullRadio.o: core/platform/radio/nullradio/nullRadio.cc \
+	core/platform/battery/battery.h \
+	core/platform/radio/nullradio/nullRadio.h \
+	core/platform/radio/radio.h \
+	packet/packet_m.h \
+	util/statistic/statistic.h \
+	util/transmission/transmission.h \
+	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/rdc/rdc.h \
 	packet/packet_m.h
@@ -209,41 +233,17 @@ $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
 	packet/packet_m.h
 $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_m.h
-$O/platform/battery/battery.o: platform/battery/battery.cc \
-	packet/packet_m.h \
-	platform/battery/battery.h
-$O/platform/radio/radio.o: platform/radio/radio.cc \
-	packet/packet_m.h \
-	platform/battery/battery.h \
-	platform/radio/radio.h
-$O/platform/radio/cc2420/cc2420.o: platform/radio/cc2420/cc2420.cc \
-	packet/packet_m.h \
-	platform/battery/battery.h \
-	platform/radio/cc2420/cc2420-const.h \
-	platform/radio/cc2420/cc2420.h \
-	platform/radio/radio.h \
-	util/statistic/statistic.h \
-	util/transmission/transmission.h \
-	util/world/world.h
-$O/platform/radio/nullradio/nullRadio.o: platform/radio/nullradio/nullRadio.cc \
-	packet/packet_m.h \
-	platform/battery/battery.h \
-	platform/radio/nullradio/nullRadio.h \
-	platform/radio/radio.h \
-	util/statistic/statistic.h \
-	util/transmission/transmission.h \
-	util/world/world.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
+	core/platform/battery/battery.h \
 	packet/packet_m.h \
-	platform/battery/battery.h \
 	util/statistic/statistic.h
 $O/util/transmission/transmission.o: util/transmission/transmission.cc \
+	core/platform/radio/radio.h \
 	packet/packet_m.h \
-	platform/radio/radio.h \
 	util/transmission/transmission.h
 $O/util/world/world.o: util/world/world.cc \
+	core/platform/radio/radio.h \
 	packet/packet_m.h \
-	platform/radio/radio.h \
 	util/transmission/transmission.h \
 	util/world/world.h
 
