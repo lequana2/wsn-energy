@@ -77,6 +77,7 @@ void nullRadio::transmit_on(Raw *msg)
   double finishTime = 127.0 * 8 / 250000;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
+  // turn off listening and transmitting
   listen_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
 }
@@ -100,6 +101,7 @@ void nullRadio::transmit_off()
 
     broadcastMessage->setBitError(true);
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
+
     broadcastMessage->setTypeRadioLayer(LAYER_RADIO_OK);
 
     cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
@@ -122,26 +124,9 @@ void nullRadio::transmit_off()
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
 }
 
-/*
- *   Turn on receiving
- */
-void nullRadio::listen_on()
+bool nullRadio::isClearChannel()
 {
-  if (DEBUG)
-    ev << "Recv on" << endl;
-  this->isListen = true;
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN);
-}
-
-/*
- *   Turn off receiving
- */
-void nullRadio::listen_off()
-{
-  if (DEBUG)
-    ev << "Recv off" << endl;
-  this->isListen = false;
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN, getRxPower());
+  return true;
 }
 
 double nullRadio::getTxPower()

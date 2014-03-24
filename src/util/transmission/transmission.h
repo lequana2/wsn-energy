@@ -37,13 +37,13 @@ class Transmission
     virtual RadioDriver* getSender();
     virtual RadioDriver* getRecver();
 
-    virtual bool isCollided();
-    virtual void corrupted();
+    virtual bool isCorrupted();
+    virtual void corrupt();
 
   private:
     RadioDriver *sender;
     RadioDriver *recver;
-    bool collision;
+    bool corrupted;
 };
 
 } /* namespace wsn_energy */

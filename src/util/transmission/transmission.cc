@@ -16,26 +16,31 @@
 #include <transmission.h>
 
 namespace wsn_energy {
+
 Transmission::Transmission(RadioDriver *sender, RadioDriver *recver)
 {
   this->sender = sender;
   this->recver = recver;
-  this->collision = false;
+  this->corrupted = false;
 }
+
 RadioDriver* Transmission::getSender()
 {
   return this->sender;
 }
+
 RadioDriver* Transmission::getRecver()
 {
   return this->recver;
 }
-void Transmission::corrupted()
+
+void Transmission::corrupt()
 {
-  this->collision = true;
+  this->corrupted = true;
 }
-bool Transmission::isCollided()
+
+bool Transmission::isCorrupted()
 {
-  return this->collision;
+  return this->corrupted;
 }
 } /* namespace wsn_energy */

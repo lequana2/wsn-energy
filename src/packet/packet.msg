@@ -32,7 +32,9 @@ enum MESSAGE
 	LAYER_RADIO_COL 		= 14;
 
 	// rdc
-	LAYER_RDC        = 20; // kind
+	LAYER_RDC                = 20; // kind
+	LAYER_RDC_TURN_RADIO_OFF = 21; 
+	LAYER_RDC_TURN_RADIO_ON  = 22;
 	
 	// mac
 	LAYER_MAC     = 31; // kind

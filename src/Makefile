@@ -26,6 +26,7 @@ INCLUDE_PATH = \
     -Icore/net/ipv6 \
     -Icore/net/rpl \
     -Icore/rdc \
+    -Icore/rdc/contikiMac \
     -Icore/rdc/nullrdc \
     -Imote \
     -Ipacket \
@@ -57,6 +58,7 @@ OBJS = \
     $O/core/mac/nullmac/nullMAC.o \
     $O/core/net/ipv6/ipv6.o \
     $O/core/net/rpl/rpl.o \
+    $O/core/rdc/rdc.o \
     $O/core/rdc/nullrdc/nullRDC.o \
     $O/platform/battery/battery.o \
     $O/platform/radio/radio.o \
@@ -153,6 +155,7 @@ clean:
 	$(Q)-rm -f core/net/ipv6/*_m.cc core/net/ipv6/*_m.h
 	$(Q)-rm -f core/net/rpl/*_m.cc core/net/rpl/*_m.h
 	$(Q)-rm -f core/rdc/*_m.cc core/rdc/*_m.h
+	$(Q)-rm -f core/rdc/contikiMac/*_m.cc core/rdc/contikiMac/*_m.h
 	$(Q)-rm -f core/rdc/nullrdc/*_m.cc core/rdc/nullrdc/*_m.h
 	$(Q)-rm -f mote/*_m.cc mote/*_m.h
 	$(Q)-rm -f packet/*_m.cc packet/*_m.h
@@ -171,7 +174,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/rdc/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc platform/radio/cc2420/*.cc platform/radio/nullradio/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc platform/*.cc platform/battery/*.cc platform/radio/*.cc platform/radio/cc2420/*.cc platform/radio/nullradio/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
@@ -197,8 +200,12 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	packet/packet_m.h
+$O/core/rdc/rdc.o: core/rdc/rdc.cc \
+	core/rdc/rdc.h \
+	packet/packet_m.h
 $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
 	core/rdc/nullrdc/nullRDC.h \
+	core/rdc/rdc.h \
 	packet/packet_m.h
 $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_m.h
@@ -207,6 +214,7 @@ $O/platform/battery/battery.o: platform/battery/battery.cc \
 	platform/battery/battery.h
 $O/platform/radio/radio.o: platform/radio/radio.cc \
 	packet/packet_m.h \
+	platform/battery/battery.h \
 	platform/radio/radio.h
 $O/platform/radio/cc2420/cc2420.o: platform/radio/cc2420/cc2420.cc \
 	packet/packet_m.h \

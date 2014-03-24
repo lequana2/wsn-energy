@@ -24,43 +24,46 @@ namespace wsn_energy {
 
 Define_Module(nullRDC);
 
-void nullRDC::initialize()
+void nullRDC::sendPacket(cMessage *msg)
 {
+  send(msg, gate("lowerOut"));
 }
 
-void nullRDC::handleMessage(cMessage *msg)
+void nullRDC::recvPacket(cMessage *msg)
 {
-  // Control message
-  if (msg->getKind() == LAYER_RDC)
+  switch (((Raw*) msg)->getTypeRadioLayer())
   {
-  }
-  // From upper
-  else if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
-  {
-    msg->setKind(LAYER_RDC);
-    send(msg, gate("lowerOut"));
-  }
-  // From radio layer
-  else if (msg->getKind() == LAYER_RADIO)
-  {
-    switch (((Raw*) msg)->getTypeRadioLayer())
-    {
-      case LAYER_RADIO_OK:
-        msg->setKind(LAYER_RDC);
-        send(msg, gate("upperOut"));
-        ev << "OK message" << endl;
-        break;
+    case LAYER_RADIO_OK:
+      // Good message
+      msg->setKind(LAYER_RDC);
+      send(msg, gate("upperOut"));
+      break;
 
-      case LAYER_RADIO_COL:
-        if (DEBUG)
-          ev << "Collision message" << endl;
-        break;
-    }
+    case LAYER_RADIO_COL:
+      // Corrupted message
+      break;
   }
+
+  // Turn off listening after receiving
+  off();
 }
 
-void nullRDC::finish()
+void nullRDC::on()
 {
+  Frame *msg = new Frame;
+  msg->setKind(LAYER_RDC);
+  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_ON);
+
+  send(msg, gate("lowerOut"));
+}
+
+void nullRDC::off()
+{
+  Frame *msg = new Frame;
+  msg->setKind(LAYER_RDC);
+  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_OFF);
+
+  send(msg, gate("lowerOut"));
 }
 
 } /* namespace wsn_energy */

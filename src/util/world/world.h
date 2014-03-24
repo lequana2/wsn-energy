@@ -35,7 +35,7 @@ class World : public cSimpleModule
     double calculateDistance(RadioDriver*, RadioDriver*);
     double calculateDistance(int, int, int, int);
 
-    std::list<Transmission*> onTheAir;
+    std::list<Transmission*> onAir;
 
   private:
     void arrangeNodes(); // Arrange nodes in positions

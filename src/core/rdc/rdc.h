@@ -13,22 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef RDC_H_
-#define RDC_H_
+#ifndef RDCDRIVER_H_
+#define RDCDRIVER_H_
 
-#include "rdc.h"
+#include <omnetpp.h>
 
 namespace wsn_energy {
 
-class nullRDC : public RDCdriver
+class RDCdriver : public cSimpleModule
 {
   protected:
-    virtual void sendPacket(cMessage*);
-    virtual void recvPacket(cMessage*);
-    virtual void on();
-    virtual void off();
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
+
+    virtual void sendPacket(cMessage*) = 0;
+    virtual void recvPacket(cMessage*) = 0;
+    virtual void on()  = 0;
+    virtual void off() = 0;
 };
 
 } /* namespace wsn_energy */
 
-#endif /* RDC_H_ */
+#endif /* RDCDRIVER_H_ */

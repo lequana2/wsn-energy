@@ -37,19 +37,24 @@ class RadioDriver : public cSimpleModule
     virtual void handleMessage(cMessage*);
     virtual void finish();
 
-    // Reserved
+    // Functioning
     virtual void transmit_on(Raw *raw) = 0;
     virtual void transmit_off() = 0;
-    virtual void listen_off() = 0;
-    virtual void listen_on() = 0;
+    virtual void listen_off();
+    virtual void listen_on();
 
+    // CCA
+    virtual bool isClearChannel() = 0;
+
+    // power
     virtual double getTxPower() = 0;
     virtual double getRxPower() = 0;
 
     Raw *broadcastMessage; // buffer message
 
   public:
-    bool isListen;
+    bool isListening;
+    bool isReceiving;
     int trRange;
     int coRange;
     std::vector<int> neighbor; // simulated neighbor list, for world util

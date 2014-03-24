@@ -13,22 +13,45 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef RDC_H_
-#define RDC_H_
+#include <rdc.h>
 
-#include "rdc.h"
+#include "packet_m.h"
 
 namespace wsn_energy {
 
-class nullRDC : public RDCdriver
+void RDCdriver::initialize()
 {
-  protected:
-    virtual void sendPacket(cMessage*);
-    virtual void recvPacket(cMessage*);
-    virtual void on();
-    virtual void off();
-};
+}
+
+void RDCdriver::handleMessage(cMessage *msg)
+{
+  // Control message
+  if (msg->getKind() == LAYER_RDC)
+  {
+  }
+  // From upper
+  else if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
+  {
+    msg->setKind(LAYER_RDC);
+    sendPacket(msg);
+  }
+  // From radio layer
+  else if (msg->getKind() == LAYER_RADIO)
+  {
+    switch (((Raw*) msg)->getTypeRadioLayer())
+    {
+      case LAYER_RADIO_COL:
+        break;
+
+      case LAYER_RADIO_OK:
+        recvPacket((Frame*) msg);
+        break;
+    }
+  }
+}
+
+void RDCdriver::finish()
+{
+}
 
 } /* namespace wsn_energy */
-
-#endif /* RDC_H_ */

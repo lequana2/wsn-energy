@@ -52,11 +52,14 @@ void cc2420::transmit_on(Raw *msg)
     ev << "Trans on" << endl;
 
   // WSN Carrier sense
-  if (((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new Transmission(this, NULL)))
+  if (isClearChannel())
   {
     if (DEBUG)
       ev << "busy channel" << endl;
-//    scheduleAt(simTime() + 0.01, msg);
+    Raw *msg = new Raw;
+    msg->setKind(LAYER_RADIO);
+    msg->setTypeRadioLayer(LAYER_RADIO_COL);
+    send(msg,gate("upperOut"));
     return;
   }
 
@@ -87,6 +90,7 @@ void cc2420::transmit_on(Raw *msg)
   double finishTime = 127.0 * 8 / 250000;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
+  // turn off listening and transmitting
   listen_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
 }
@@ -113,16 +117,18 @@ void cc2420::transmit_off()
     {
       // EV << "Received" << endl;
       broadcastMessage->setBitError(true);
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
       broadcastMessage->setTypeRadioLayer(LAYER_RADIO_OK);
+
+      ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
     }
     else
     {
       // EV << "Disposed" << endl;
-      recver->getParentModule()->bubble("Collision");
+      recver->getParentModule()->bubble("Corrupted");
       broadcastMessage->setBitError(false);
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
       broadcastMessage->setTypeRadioLayer(LAYER_RADIO_COL);
+
+      ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
 
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
@@ -147,30 +153,10 @@ void cc2420::transmit_off()
   getParentModule()->setDisplayString(newDisplay);
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
-  //WSN turn listen on
-  listen_on();
 }
 
-/*
- *   Turn on receiving
- */
-void cc2420::listen_on()
-{
-  if (DEBUG)
-    ev << "Recv on" << endl;
-  this->isListen = true;
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN);
-}
-
-/*
- *   Turn off receiving
- */
-void cc2420::listen_off()
-{
-  if (DEBUG)
-    ev << "Recv off" << endl;
-  this->isListen = false;
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN, getRxPower());
+bool cc2420::isClearChannel(){
+  return ((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new Transmission(this, NULL));
 }
 
 double cc2420::getTxPower()

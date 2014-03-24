@@ -18,7 +18,7 @@
 #include <math.h>
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 namespace wsn_energy {
@@ -174,23 +174,23 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
 void World::registerTransmission(Transmission *tranmission)
 {
   if (DEBUG)
-    ev << "On the air transmision: " << this->onTheAir.size() << endl;
-
-  this->onTheAir.push_back(tranmission);
-
-  if (this->onTheAir.size() == 1)
-    return;
+    ev << "On the air transmision: " << this->onAir.size() << endl;
 
   RadioDriver* sender = tranmission->getSender();
   RadioDriver* recver = tranmission->getRecver();
 
   // check receiver turned on
-  if(!recver->isListen)
-    tranmission->corrupted();
+  if (!recver->isListening)
+    tranmission->corrupt();
+
+  this->onAir.push_back(tranmission);
+
+  if (this->onAir.size() == 1)
+    return;
 
 //  check collision with activated tranmission
-  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
-      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
+      otherTranmission != this->onAir.end(); otherTranmission++)
   {
     RadioDriver *otherSender = (*otherTranmission)->getSender();
 
@@ -203,37 +203,34 @@ void World::registerTransmission(Transmission *tranmission)
       RadioDriver *otherRecver = (*otherTranmission)->getRecver();
 
       // at this transmission
-      if (tranmission->isCollided())
+      if (tranmission->isCorrupted())
         ;
       else if (calculateDistance((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"),
           (RadioDriver*) recver->getParentModule()->getModuleByPath(".radio"))
           < ((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
-        tranmission->corrupted();
+        tranmission->corrupt();
 
       // at other transmission
-      if ((*otherTranmission)->isCollided())
+      if ((*otherTranmission)->isCorrupted())
         ;
       else if (calculateDistance((RadioDriver*) sender->getParentModule()->getModuleByPath(".radio"),
           (RadioDriver*) otherRecver->getParentModule()->getModuleByPath(".radio"))
           < ((RadioDriver*) sender->getParentModule()->getModuleByPath(".radio"))->coRange)
-        (*otherTranmission)->corrupted();
+        (*otherTranmission)->corrupt();
     }
   }
 }
 
 bool World::isFeasibleTransmission(Transmission* transmission)
 {
-  if (this->onTheAir.size() == 1)
-    return true;
-
   RadioDriver* sender = transmission->getSender();
   RadioDriver* recver = transmission->getRecver();
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
-      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
+      otherTranmission != this->onAir.end(); otherTranmission++)
   {
     if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
-        && !(*otherTranmission)->isCollided())
+        && !(*otherTranmission)->isCorrupted())
       return true;
   }
 
@@ -242,31 +239,29 @@ bool World::isFeasibleTransmission(Transmission* transmission)
 
 void World::stopTransmission(Transmission* transmission)
 {
-  //??? do not remove
-
   RadioDriver* sender = transmission->getSender();
   RadioDriver* recver = transmission->getRecver();
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
-      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
+      otherTranmission != this->onAir.end(); otherTranmission++)
   {
     if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver())
     {
-      this->onTheAir.remove(*otherTranmission);
+      this->onAir.remove(*otherTranmission);
       return;
     }
-
-    if (DEBUG)
-      ev << "missing transmission" << endl;
   }
+
+  if (DEBUG)
+    ev << "missing transmission" << endl;
 }
 
 bool World::senseBusyTransmission(Transmission *transmission)
 {
   RadioDriver* sender = transmission->getSender();
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onTheAir.begin();
-      otherTranmission != this->onTheAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
+      otherTranmission != this->onAir.end(); otherTranmission++)
   {
     RadioDriver *otherSender = (*otherTranmission)->getSender();
 

@@ -25,13 +25,13 @@ class cc2420 : public RadioDriver
   private:
     virtual void transmit_on(Raw *raw);
     virtual void transmit_off();
-    virtual void listen_off();
-    virtual void listen_on();
 
   public:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual bool isClearChannel();
 
     virtual double getTxPower();
     virtual double getRxPower();

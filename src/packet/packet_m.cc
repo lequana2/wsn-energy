@@ -47,6 +47,8 @@ EXECUTE_ON_STARTUP(
     e->insert(LAYER_RADIO_OK, "LAYER_RADIO_OK");
     e->insert(LAYER_RADIO_COL, "LAYER_RADIO_COL");
     e->insert(LAYER_RDC, "LAYER_RDC");
+    e->insert(LAYER_RDC_TURN_RADIO_OFF, "LAYER_RDC_TURN_RADIO_OFF");
+    e->insert(LAYER_RDC_TURN_RADIO_ON, "LAYER_RDC_TURN_RADIO_ON");
     e->insert(LAYER_MAC, "LAYER_MAC");
     e->insert(LAYER_NET, "LAYER_NET");
     e->insert(NET_ICMP_DIO, "NET_ICMP_DIO");
