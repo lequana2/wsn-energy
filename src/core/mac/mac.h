@@ -13,30 +13,27 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef RDC_H_
-#define RDC_H_
+#ifndef MACDRIVER_H_
+#define MACDRIVER_H_
 
-#include "rdc.h"
+#include <omnetpp.h>
 
 namespace wsn_energy {
 
-class nullRDC : public RDCdriver
+class MACdriver : public cSimpleModule
 {
   protected:
-    virtual void deferPacket(cMessage*);
+    virtual void initialize();
+    virtual void handleMessage(cMessage*);
+    virtual void finish();
 
-    virtual void sendPacket(cMessage*);
+    virtual void sendPacket(cMessage*) = 0;
+    virtual void receivePacket(cMessage*) = 0;
 
-    virtual void sendSuccess();
-    virtual void sendFailure();
-
-    virtual void receiveSuccess(cMessage*);
-    virtual void receiveFailure();
-
-    virtual void on();
-    virtual void off();
+    virtual void on() = 0;
+    virtual void off() = 0;
 };
 
 } /* namespace wsn_energy */
 
-#endif /* RDC_H_ */
+#endif /* RDCDRIVER_H_ */

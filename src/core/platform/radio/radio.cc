@@ -13,6 +13,9 @@ void RadioDriver::initialize()
   this->coRange = par("coRange");
   this->broadcastMessage = NULL;
 
+  this->isReceiving = false;
+  this->isPending = false;
+
   listen_on();
 }
 
@@ -26,10 +29,26 @@ void RadioDriver::handleMessage(cMessage* msg)
       case LAYER_RDC_TURN_RADIO_ON:
         listen_on();
         break;
+
       case LAYER_RDC_TURN_RADIO_OFF:
         listen_off();
         break;
-      default:
+
+      case LAYER_RDC_CHECK_FREE:
+        msg->setKind(LAYER_RADIO);
+
+        if (isReceiving || isPending)
+        {
+          ((Raw*) msg)->setTypeRadioLayer(LAYER_RADIO_NOT_FREE);
+        }
+        else
+        {
+          ((Raw*) msg)->setTypeRadioLayer(LAYER_RADIO_FREE);
+        }
+        send(msg, gate("upperOut"));
+        break;
+
+      case LAYER_RDC_TURN_RADIO_TRANS:
         transmit_on((Raw*) msg);
         break;
     }

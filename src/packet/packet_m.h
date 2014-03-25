@@ -29,19 +29,31 @@ namespace wsn_energy {
  * 	RPL_SOLICIT   = 4;
  * 
  * 	
- *  	LAYER_RADIO     		= 10; 
- *  	LAYER_RADIO_END_TRANS	= 11;
- *  	LAYER_RADIO_END_RECV    = 12;
- * 	LAYER_RADIO_OK			= 13;
- * 	LAYER_RADIO_COL 		= 14;
- * 
+ *  	LAYER_RADIO     			= 10; 
+ *  	LAYER_RADIO_END_TRANS		= 11; 
+ *  	LAYER_RADIO_END_RECV    	= 12;
+ * 	LAYER_RADIO_TRANS_OK		= 13; 
+ * 	LAYER_RADIO_COLLISION   	= 14;
+ * 	LAYER_RADIO_RECV_OK     	= 15; 
+ * 	LAYER_RADIO_CORRUPT			= 16;
+ * 	LAYER_RADIO_NOT_FREE	   	= 17; 
+ * 	LAYER_RADIO_FREE			= 18;
  * 	
- * 	LAYER_RDC                = 20; 
- * 	LAYER_RDC_TURN_RADIO_OFF = 21; 
- * 	LAYER_RDC_TURN_RADIO_ON  = 22;
+ * 	
+ * 	LAYER_RDC                	= 20; 
+ * 	LAYER_RDC_CHECK_FREE 	 	= 21; 
+ * 	LAYER_RDC_TURN_RADIO_OFF 	= 22; 
+ * 	LAYER_RDC_TURN_RADIO_ON  	= 23;
+ * 	LAYER_RDC_TURN_RADIO_TRANS 	= 24; 
+ * 	LAYER_RDC_RADIO_NOT_FREE    = 25; 
  * 	
  * 	
- * 	LAYER_MAC     = 31; 
+ * 	LAYER_MAC 		    = 31; 
+ * 	LAYER_MAC_SEND_OK	= 32;
+ * 	LAYER_MAC_NO_ACK  	= 33;
+ * 	LAYER_MAC_DEFER		= 34;
+ * 	LAYER_MAC_ERR		= 35;
+ * 	LAYER_MAC_ERR_FATAL = 36;
  * 
  * 	
  * 	LAYER_NET     = 32; 
@@ -66,12 +78,24 @@ enum MESSAGE {
     LAYER_RADIO = 10,
     LAYER_RADIO_END_TRANS = 11,
     LAYER_RADIO_END_RECV = 12,
-    LAYER_RADIO_OK = 13,
-    LAYER_RADIO_COL = 14,
+    LAYER_RADIO_TRANS_OK = 13,
+    LAYER_RADIO_COLLISION = 14,
+    LAYER_RADIO_RECV_OK = 15,
+    LAYER_RADIO_CORRUPT = 16,
+    LAYER_RADIO_NOT_FREE = 17,
+    LAYER_RADIO_FREE = 18,
     LAYER_RDC = 20,
-    LAYER_RDC_TURN_RADIO_OFF = 21,
-    LAYER_RDC_TURN_RADIO_ON = 22,
+    LAYER_RDC_CHECK_FREE = 21,
+    LAYER_RDC_TURN_RADIO_OFF = 22,
+    LAYER_RDC_TURN_RADIO_ON = 23,
+    LAYER_RDC_TURN_RADIO_TRANS = 24,
+    LAYER_RDC_RADIO_NOT_FREE = 25,
     LAYER_MAC = 31,
+    LAYER_MAC_SEND_OK = 32,
+    LAYER_MAC_NO_ACK = 33,
+    LAYER_MAC_DEFER = 34,
+    LAYER_MAC_ERR = 35,
+    LAYER_MAC_ERR_FATAL = 36,
     LAYER_NET = 32,
     NET_ICMP_DIO = 40,
     NET_ICMP_DIS = 41,
@@ -87,7 +111,7 @@ enum MESSAGE {
  * <pre>
  * packet Raw{
  *     int typeRadioLayer;
- *     int len;
+ *     int len = 0;
  *     bool bitError;
  *     int radioSendId;
  *     int radioRecvId;

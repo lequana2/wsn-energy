@@ -18,7 +18,7 @@
 #include <math.h>
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -183,6 +183,9 @@ void World::registerTransmission(Transmission *tranmission)
   if (!recver->isListening)
     tranmission->corrupt();
 
+  // receiving
+  recver->isReceiving = true;
+
   this->onAir.push_back(tranmission);
 
   if (this->onAir.size() == 1)
@@ -247,6 +250,7 @@ void World::stopTransmission(Transmission* transmission)
   {
     if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver())
     {
+      recver->isReceiving = false;
       this->onAir.remove(*otherTranmission);
       return;
     }

@@ -55,6 +55,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 OBJS = \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
+    $O/core/mac/mac.o \
     $O/core/mac/nullmac/nullMAC.o \
     $O/core/net/ipv6/ipv6.o \
     $O/core/net/rpl/rpl.o \
@@ -184,7 +185,11 @@ $O/apps/client/client.o: apps/client/client.cc \
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/app.h \
 	apps/server/server.h
+$O/core/mac/mac.o: core/mac/mac.cc \
+	core/mac/mac.h \
+	packet/packet_m.h
 $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
+	core/mac/mac.h \
 	core/mac/nullmac/nullMAC.h \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \

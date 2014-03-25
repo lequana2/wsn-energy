@@ -27,10 +27,6 @@ class cc2420 : public RadioDriver
     virtual void transmit_off();
 
   public:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-
     virtual bool isClearChannel();
 
     virtual double getTxPower();

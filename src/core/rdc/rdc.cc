@@ -14,7 +14,6 @@
 // 
 
 #include <rdc.h>
-
 #include "packet_m.h"
 
 namespace wsn_energy {
@@ -33,18 +32,37 @@ void RDCdriver::handleMessage(cMessage *msg)
   else if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
   {
     msg->setKind(LAYER_RDC);
-    sendPacket(msg);
+    ((Frame*)msg)->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
+    send(msg,gate("lowerOut"));
   }
   // From radio layer
   else if (msg->getKind() == LAYER_RADIO)
   {
+    ev << ((Raw*) msg)->getTypeRadioLayer()<< endl;
     switch (((Raw*) msg)->getTypeRadioLayer())
     {
-      case LAYER_RADIO_COL:
+      case LAYER_RADIO_NOT_FREE:
+        deferPacket(msg);
         break;
 
-      case LAYER_RADIO_OK:
-        recvPacket((Frame*) msg);
+      case LAYER_RADIO_FREE:
+        sendPacket(msg);
+        break;
+
+      case LAYER_RADIO_TRANS_OK:
+        sendSuccess();
+        break;
+
+      case LAYER_RADIO_COLLISION:
+        sendFailure();
+        break;
+
+      case LAYER_RADIO_RECV_OK:
+        receiveSuccess(msg);
+        break;
+
+      case LAYER_RADIO_CORRUPT:
+        receiveFailure();
         break;
     }
   }

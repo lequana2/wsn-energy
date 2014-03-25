@@ -24,28 +24,40 @@ namespace wsn_energy {
 
 Define_Module(nullRDC);
 
+void nullRDC::deferPacket(cMessage* msg)
+{
+  msg->setKind(LAYER_RDC);
+  ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_RADIO_NOT_FREE);
+  send(msg, gate("upperOut"));
+}
+
 void nullRDC::sendPacket(cMessage *msg)
 {
+  msg->setKind(LAYER_RDC);
+  ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
   send(msg, gate("lowerOut"));
 }
 
-void nullRDC::recvPacket(cMessage *msg)
+void nullRDC::sendSuccess()
 {
-  switch (((Raw*) msg)->getTypeRadioLayer())
-  {
-    case LAYER_RADIO_OK:
-      // Good message
-      msg->setKind(LAYER_RDC);
-      send(msg, gate("upperOut"));
-      break;
+  return;
+}
 
-    case LAYER_RADIO_COL:
-      // Corrupted message
-      break;
-  }
+void nullRDC::sendFailure()
+{
+  return;
+}
 
-  // Turn off listening after receiving
-  off();
+void nullRDC::receiveSuccess(cMessage* msg)
+{
+  msg->setKind(LAYER_RDC);
+  send(msg, gate("upperOut"));
+  on(); // turn on listening upon receving success
+}
+
+void nullRDC::receiveFailure()
+{
+  return;
 }
 
 void nullRDC::on()

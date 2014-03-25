@@ -13,30 +13,35 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef RDC_H_
-#define RDC_H_
-
-#include "rdc.h"
+#include <mac.h>
+#include "packet_m.h"
 
 namespace wsn_energy {
 
-class nullRDC : public RDCdriver
+void MACdriver::initialize()
 {
-  protected:
-    virtual void deferPacket(cMessage*);
+}
 
-    virtual void sendPacket(cMessage*);
+void MACdriver::handleMessage(cMessage *msg)
+{
+  // Control message
+  if (msg->getKind() == LAYER_MAC)
+  {
+  }
+  // From net layer
+  else if (msg->getKind() == LAYER_NET)
+  {
+   sendPacket(msg);
+  }
+  // From rdc layer
+  else if (msg->getKind() == LAYER_RDC)
+  {
+    receivePacket(msg);
+  }
+}
 
-    virtual void sendSuccess();
-    virtual void sendFailure();
-
-    virtual void receiveSuccess(cMessage*);
-    virtual void receiveFailure();
-
-    virtual void on();
-    virtual void off();
-};
+void MACdriver::finish()
+{
+}
 
 } /* namespace wsn_energy */
-
-#endif /* RDC_H_ */

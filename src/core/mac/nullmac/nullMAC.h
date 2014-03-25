@@ -16,20 +16,18 @@
 #ifndef NULLMAC_H_
 #define NULLMAC_H_
 
-#include <omnetpp.h>
+#include "mac.h"
 
 namespace wsn_energy {
 
-class nullMAC : public cSimpleModule
+class nullMAC : public MACdriver
 {
-  public:
-    nullMAC();
-    virtual ~nullMAC();
-
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
+    virtual void sendPacket(cMessage*);
+    virtual void receivePacket(cMessage*);
+
+    virtual void on();
+    virtual void off();
 };
 
 } /* namespace wsn_energy */

@@ -25,19 +25,31 @@ enum MESSAGE
 	RPL_SOLICIT   = 4;
 
 	// radio
- 	LAYER_RADIO     		= 10; // kind
- 	LAYER_RADIO_END_TRANS	= 11;
- 	LAYER_RADIO_END_RECV    = 12;
-	LAYER_RADIO_OK			= 13;
-	LAYER_RADIO_COL 		= 14;
-
+ 	LAYER_RADIO     			= 10; // kind
+ 	LAYER_RADIO_END_TRANS		= 11; // control
+ 	LAYER_RADIO_END_RECV    	= 12;
+	LAYER_RADIO_TRANS_OK		= 13; // send
+	LAYER_RADIO_COLLISION   	= 14;
+	LAYER_RADIO_RECV_OK     	= 15; // receive
+	LAYER_RADIO_CORRUPT			= 16;
+	LAYER_RADIO_NOT_FREE	   	= 17; // radio is on duty
+	LAYER_RADIO_FREE			= 18;
+	
 	// rdc
-	LAYER_RDC                = 20; // kind
-	LAYER_RDC_TURN_RADIO_OFF = 21; 
-	LAYER_RDC_TURN_RADIO_ON  = 22;
+	LAYER_RDC                	= 20; // kind
+	LAYER_RDC_CHECK_FREE 	 	= 21; // is radio sleep or listening mode
+	LAYER_RDC_TURN_RADIO_OFF 	= 22; // listening control
+	LAYER_RDC_TURN_RADIO_ON  	= 23;
+	LAYER_RDC_TURN_RADIO_TRANS 	= 24; // transmitting control
+	LAYER_RDC_RADIO_NOT_FREE    = 25; // radio is on mission
 	
 	// mac
-	LAYER_MAC     = 31; // kind
+	LAYER_MAC 		    = 31; // kind
+	LAYER_MAC_SEND_OK	= 32;
+	LAYER_MAC_NO_ACK  	= 33;
+	LAYER_MAC_DEFER		= 34;
+	LAYER_MAC_ERR		= 35;
+	LAYER_MAC_ERR_FATAL = 36;
 
 	// net
 	LAYER_NET     = 32; // kind
@@ -54,7 +66,7 @@ enum MESSAGE
 
 packet Raw{
     int typeRadioLayer;
-    int len;
+    int len = 0;
     bool bitError;
     int radioSendId;
     int radioRecvId;

@@ -27,8 +27,16 @@ class RDCdriver : public cSimpleModule
     virtual void handleMessage(cMessage*);
     virtual void finish();
 
+    virtual void deferPacket(cMessage*) = 0;
+
     virtual void sendPacket(cMessage*) = 0;
-    virtual void recvPacket(cMessage*) = 0;
+
+    virtual void sendSuccess() = 0;
+    virtual void sendFailure() = 0;
+
+    virtual void receiveSuccess(cMessage*) = 0;
+    virtual void receiveFailure() = 0;
+
     virtual void on()  = 0;
     virtual void off() = 0;
 };

@@ -20,51 +20,28 @@ namespace wsn_energy {
 
 Define_Module(nullMAC);
 
-nullMAC::nullMAC()
-{
-  // TODO Auto-generated constructor stub
-
-}
-
-nullMAC::~nullMAC()
-{
-  // TODO Auto-generated destructor stub
-}
-
-void nullMAC::initialize()
-{
-}
-
-void nullMAC::handleMessage(cMessage *msg)
+void nullMAC::sendPacket(cMessage* msg)
 {
   Frame *frame = (Frame*) msg;
 
-  // Control message
-  if (msg->getKind() == LAYER_MAC)
-  {
-  }
-  // From net layer
-  else if (msg->getKind() == LAYER_NET)
-  {
-//    if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".net")->getId())
-//    {
-    frame->setSenderMacAddress(this->getId());
-    frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
-    msg->setKind(LAYER_MAC);
+  frame->setSenderMacAddress(this->getId());
+  frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+  msg->setKind(LAYER_MAC);
 
-    send(msg, gate("lowerOut"));
-//    }
-  }
-  // From mac layer
-  else if (msg->getKind() == LAYER_RDC)
-  {
-    msg->setKind(LAYER_MAC);
-
-    send(frame, gate("upperOut"));
-  }
+  send(msg, gate("lowerOut"));
 }
 
-void nullMAC::finish()
+void nullMAC::receivePacket(cMessage* msg)
+{
+  msg->setKind(LAYER_MAC);
+
+  send(msg, gate("upperOut"));
+}
+
+void nullMAC::on()
+{
+}
+void nullMAC::off()
 {
 }
 

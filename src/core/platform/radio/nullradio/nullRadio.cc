@@ -27,21 +27,6 @@ namespace wsn_energy {
 
 Define_Module(nullRadio);
 
-void nullRadio::initialize()
-{
-  RadioDriver::initialize();
-}
-
-void nullRadio::handleMessage(cMessage* msg)
-{
-  RadioDriver::handleMessage(msg);
-}
-
-void nullRadio::finish()
-{
-  RadioDriver::finish();
-}
-
 /*
  * Turn on to transmit
  */
@@ -73,8 +58,7 @@ void nullRadio::transmit_on(Raw *msg)
     ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  // WSN finish time = len / data rate
-  double finishTime = 127.0 * 8 / 250000;
+  double finishTime = 0;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
   // turn off listening and transmitting
@@ -102,7 +86,7 @@ void nullRadio::transmit_off()
     broadcastMessage->setBitError(true);
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
 
-    broadcastMessage->setTypeRadioLayer(LAYER_RADIO_OK);
+    broadcastMessage->setTypeRadioLayer(LAYER_RADIO_RECV_OK);
 
     cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
     sendDirect(broadcastMessage->dup(), gate);

@@ -55,6 +55,7 @@ class RadioDriver : public cSimpleModule
   public:
     bool isListening;
     bool isReceiving;
+    bool isPending;
     int trRange;
     int coRange;
     std::vector<int> neighbor; // simulated neighbor list, for world util

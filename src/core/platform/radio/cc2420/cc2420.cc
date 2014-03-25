@@ -28,21 +28,6 @@ namespace wsn_energy {
 
 Define_Module(cc2420);
 
-void cc2420::initialize()
-{
-  RadioDriver::initialize();
-}
-
-void cc2420::handleMessage(cMessage* msg)
-{
-  RadioDriver::handleMessage(msg);
-}
-
-void cc2420::finish()
-{
-  RadioDriver::finish();
-}
-
 /*
  * Turn on to transmit
  */
@@ -51,14 +36,25 @@ void cc2420::transmit_on(Raw *msg)
   if (DEBUG)
     ev << "Trans on" << endl;
 
-  // WSN Carrier sense
+  // framer
+  if (msg->getLen() > 127){
+    if (DEBUG)
+    ev << "Packet header is too large" << endl;
+    return;
+  }
+
+  // Hack
+  msg->setLen(127);
+  msg->setLen(msg->getLen() + 6);
+
+  // CCA
   if (isClearChannel())
   {
     if (DEBUG)
       ev << "busy channel" << endl;
     Raw *msg = new Raw;
     msg->setKind(LAYER_RADIO);
-    msg->setTypeRadioLayer(LAYER_RADIO_COL);
+    msg->setTypeRadioLayer(LAYER_RADIO_COLLISION);
     send(msg,gate("upperOut"));
     return;
   }
@@ -86,8 +82,8 @@ void cc2420::transmit_on(Raw *msg)
     ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  // WSN finish time = len / data rate
-  double finishTime = 127.0 * 8 / 250000;
+  // finish time = len / data rate
+  double finishTime = msg->getLen() * 8.0 / DATA_RATE;
   scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
   // turn off listening and transmitting
@@ -117,7 +113,7 @@ void cc2420::transmit_off()
     {
       // EV << "Received" << endl;
       broadcastMessage->setBitError(true);
-      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_OK);
+      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_RECV_OK);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
     }
@@ -126,7 +122,7 @@ void cc2420::transmit_off()
       // EV << "Disposed" << endl;
       recver->getParentModule()->bubble("Corrupted");
       broadcastMessage->setBitError(false);
-      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_COL);
+      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_CORRUPT);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }

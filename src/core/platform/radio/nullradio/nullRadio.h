@@ -29,10 +29,6 @@ class nullRadio : public RadioDriver
     Raw *broadcastMessage; // buffer message
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
-
     virtual bool isClearChannel();
 
     virtual double getTxPower();
