@@ -16,6 +16,9 @@
 #ifndef RADIO_H_
 #define RADIO_H_
 
+#define PHY_HEADER 6
+#define PACKET_802154 127
+
 #include <omnetpp.h>
 
 #include "packet_m.h"
@@ -56,7 +59,6 @@ class RadioDriver : public cSimpleModule
     bool isListening;
     bool isReceiving;
     bool isTransmitting;
-    bool isPending;
     int trRange;
     int coRange;
     std::vector<int> neighbor; // simulated neighbor list, for world util

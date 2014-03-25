@@ -16,13 +16,19 @@
 #ifndef RDCDRIVER_H_
 #define RDCDRIVER_H_
 
+#define ACK_LEN 5
+
 #include <omnetpp.h>
+#include "packet_m.h"
 
 namespace wsn_energy {
 
 class RDCdriver : public cSimpleModule
 {
   protected:
+    Frame *waitACK;
+    bool isWaitingACK;
+
     virtual void initialize();
     virtual void handleMessage(cMessage*);
     virtual void finish();
@@ -31,13 +37,13 @@ class RDCdriver : public cSimpleModule
 
     virtual void sendPacket(cMessage*) = 0;
 
-    virtual void sendSuccess() = 0;
+    virtual void sendSuccess(cMessage*) = 0;
     virtual void sendFailure() = 0;
 
     virtual void receiveSuccess(cMessage*) = 0;
     virtual void receiveFailure() = 0;
 
-    virtual void on()  = 0;
+    virtual void on() = 0;
     virtual void off() = 0;
 };
 
