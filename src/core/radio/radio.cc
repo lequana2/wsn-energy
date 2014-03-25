@@ -23,7 +23,6 @@ void RadioDriver::handleMessage(cMessage* msg)
     case LAYER_RADIO: /* control message */
     {
       Raw *raw = check_and_cast<Raw*>(msg);
-
       switch (raw->getTypeRadioLayer())
       {
         case LAYER_RADIO_SWITCH_TRANSMIT:
@@ -39,8 +38,26 @@ void RadioDriver::handleMessage(cMessage* msg)
           {
             if (DEBUG)
               ev << "Packet is too large" << endl;
-            // WSN feed back to MAC layer
+
+            raw->setTypeRadioLayer(LAYER_RADIO_PACKET_OVERSIZE);
+            send(raw, gate("upperOut"));
           }
+
+          // perform CCA
+          else if (isClearChannel())
+          {
+            raw->setTypeRadioLayer(LAYER_RADIO_CCA_NOT_VALID);
+            send(raw, gate("upperOut"));
+          }
+
+          // check radio duty
+          else if (this->status == RECEIVING || this->status == TRANSMITTING)
+          {
+            raw->setTypeRadioLayer(LAYER_RADIO_NOT_FREE);
+            send(raw, gate("upperOut"));
+          }
+
+          // feasible
           else
           {
             // packet is not over head
@@ -51,14 +68,17 @@ void RadioDriver::handleMessage(cMessage* msg)
               case SLEEPING:
                 scheduleAt(simTime() + SWITCH_MODE_DELAY_SLEEP_TO_TRANS, raw);
                 break;
+
               case LISTENING:
                 listen_off();
                 scheduleAt(simTime() + SWITCH_MODE_DELAY_LISTEN_TO_TRANS, raw);
                 break;
+
               case TRANSMITTING:
                 scheduleAt(simTime() + SWITCH_MODE_DELAY, raw);
                 break;
             }
+
             this->status = TRANSMITTING;
           }
           break; /* switch to transmit */
@@ -81,11 +101,18 @@ void RadioDriver::handleMessage(cMessage* msg)
 
         case LAYER_RADIO_BEGIN_LISTEN:
           listen_on();
-          break; /* begin listen */
+          break; /* begin listening */
 
-        case LAYER_RADIO_END_RECEIVING:
+        case LAYER_RADIO_END_LISTENING:
+          listen_off();
+          break; /* end listening */
+
+        case LAYER_RADIO_RECV_OK:
           send(raw, gate("upperOut"));
           break; /* receie a OK message */
+
+        case LAYER_RADIO_RECV_CORRUPT:
+          break; /* receie a corrupt message */
       }
     }
       break; /* control message */

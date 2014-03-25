@@ -36,18 +36,6 @@ void cc2420::transmit_on(Raw *raw)
   if (DEBUG)
     ev << "Start transmitting" << endl;
 
-//  // CCA
-//  if (isClearChannel())
-//  {
-//    if (DEBUG)
-//      ev << "busy channel" << endl;
-//    Raw *msg = new Raw;
-//    msg->setKind(LAYER_RADIO);
-////    msg->setTypeRadioLayer(LAYER_RADIO_COLLISION);
-//    send(msg, gate("upperOut"));
-//    return;
-//  }
-
   broadcastMessage = raw;
 
   // start broadcasting
@@ -88,7 +76,8 @@ void cc2420::transmit_off()
   if (DEBUG)
     ev << "Trans off" << endl;
 
-  broadcastMessage->setKind(LAYER_RADIO_END_RECEIVING);
+  //  Color here
+  //  broadcastMessage->setKind(LAYER_RADIO_END_RECEIVING);
   broadcastMessage->setRadioSendId(this->getParentModule()->getId());
 
   for (unsigned int i = 0; i < neighbor.size(); i++)

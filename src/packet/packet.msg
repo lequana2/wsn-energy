@@ -39,17 +39,23 @@ enum MESSAGE
 
 	// radio
  	LAYER_RADIO     			= 10; // kind
+ 	
  	LAYER_RADIO_SWITCH_TRANSMIT	= 11; // switch to transmit mode
  	LAYER_RADIO_SWITCH_LISTEN	= 12; // switch to listening mode
  	LAYER_RADIO_SWITCH_SLEEP    = 13; // switch to sleep mode
+ 	
  	LAYER_RADIO_BEGIN_TRANSMIT  = 14; // begin transmitting
  	LAYER_RADIO_BEGIN_LISTEN    = 15; // begin listening
+ 	
  	LAYER_RADIO_END_TRANSMIT	= 16; // ending transmitting
- 	LAYER_RADIO_END_RECEIVING  	= 17; // ending receiving
+ 	LAYER_RADIO_END_LISTENING  	= 17; // ending listening
+ 	
  	LAYER_RADIO_CCA_NOT_VALID   = 18; // channel is not clear
- 	LAYER_RADIO_RECV_OK			= 19; // packet is okay
-	LAYER_RADIO_RECV_CORRUPT	= 20; // packet is corrupt
-	LAYER_RADIO_NOT_FREE	   	= 21; // radio is currently working
+	LAYER_RADIO_NOT_FREE	   	= 19; // radio is currently working
+	LAYER_RADIO_PACKET_OVERSIZE = 20; // packet is too big
+	
+	LAYER_RADIO_RECV_OK			= 21; // packet is okay
+	LAYER_RADIO_RECV_CORRUPT	= 22; // packet is corrupt
 	
 	// rdc
 	LAYER_RDC                	= 30; // kind

@@ -36,7 +36,7 @@ void nullRadio::transmit_on(Raw *msg)
     ev << "Trans on" << endl;
 
   // buffer
-  broadcastMessage = (Raw*) msg;
+  broadcastMessage =  msg;
 
   // start broadcasting
   char newDisplay[20];
@@ -58,8 +58,10 @@ void nullRadio::transmit_on(Raw *msg)
     ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  double finishTime = 0;
-//  scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
+  double finishTime = broadcastMessage->getLen() * 8.0 / 250000;
+  broadcastMessage->setTypeRadioLayer(LAYER_RADIO_END_TRANSMIT);
+
+  scheduleAt(simTime() + finishTime, broadcastMessage);
 
   // turn off listening and transmitting
   listen_off();

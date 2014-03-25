@@ -30,8 +30,8 @@ void RDCdriver::handleMessage(cMessage *msg)
   {
     case LAYER_RDC: /* control message */
     {
+      // WSN ACK
       Frame* frame = check_and_cast<Frame*>(msg);
-
       switch (frame->getTypeMacLayer())
       {
         case LAYER_RDC_WAIT_ACK:
@@ -59,6 +59,12 @@ void RDCdriver::handleMessage(cMessage *msg)
       Raw *raw = check_and_cast<Raw*>(msg);
       switch (raw->getTypeRadioLayer())
       {
+        case LAYER_RADIO_CCA_NOT_VALID:
+          break;
+
+        case LAYER_RADIO_PACKET_OVERSIZE:
+          break;
+
         case LAYER_RADIO_NOT_FREE:
           deferPacket(raw);
           break;
@@ -66,6 +72,9 @@ void RDCdriver::handleMessage(cMessage *msg)
         case LAYER_RADIO_RECV_OK:
           raw->setLen(raw->getLen() - PHY_HEADER);
           receiveSuccess(raw);
+          break;
+
+        case LAYER_RADIO_RECV_CORRUPT:
           break;
       }
     }
