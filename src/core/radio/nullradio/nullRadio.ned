@@ -13,18 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core.platform.radio.cc2420;
+package wsn_energy.core.radio.nullradio;
 
-import wsn_energy.core.platform.radio.iRadio;
+import wsn_energy.core.radio.iRadio;
 
 //
 // TODO auto-generated type
 //
-simple cc2420 like iRadio
+simple nullRadio like iRadio
 {
     parameters:
-        @class("cc2420");
-        
+        @class("nullRadio");
+
         int trRange;
         int coRange;
 

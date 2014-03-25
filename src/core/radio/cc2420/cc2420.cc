@@ -31,25 +31,24 @@ Define_Module(cc2420);
 /*
  * Turn on to transmit
  */
-void cc2420::transmit_on(Raw *msg)
+void cc2420::transmit_on(Raw *raw)
 {
   if (DEBUG)
-    ev << "Trans on" << endl;
+    ev << "Start transmitting" << endl;
 
-  // CCA
-  if (isClearChannel())
-  {
-    if (DEBUG)
-      ev << "busy channel" << endl;
-    Raw *msg = new Raw;
-    msg->setKind(LAYER_RADIO);
-    msg->setTypeRadioLayer(LAYER_RADIO_COLLISION);
-    send(msg, gate("upperOut"));
-    return;
-  }
+//  // CCA
+//  if (isClearChannel())
+//  {
+//    if (DEBUG)
+//      ev << "busy channel" << endl;
+//    Raw *msg = new Raw;
+//    msg->setKind(LAYER_RADIO);
+////    msg->setTypeRadioLayer(LAYER_RADIO_COLLISION);
+//    send(msg, gate("upperOut"));
+//    return;
+//  }
 
-  // buffer
-  broadcastMessage = (Raw*) msg;
+  broadcastMessage = raw;
 
   // start broadcasting
   char newDisplay[20];
@@ -64,6 +63,7 @@ void cc2420::transmit_on(Raw *msg)
 
   getParentModule()->setDisplayString(newDisplay);
 
+  // register transmission to world
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
     RadioDriver *recver = (RadioDriver*) simulation.getModule(neighbor.at(i));
@@ -71,14 +71,13 @@ void cc2420::transmit_on(Raw *msg)
     ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  // finish time = len / data rate
-  double finishTime = msg->getLen() * 8.0 / DATA_RATE;
-  scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
+  double finishTime = broadcastMessage->getLen() * 8.0 / DATA_RATE;
+  broadcastMessage->setTypeRadioLayer(LAYER_RADIO_END_TRANSMIT);
+
+  scheduleAt(simTime() + finishTime, broadcastMessage);
 
   // turn off listening and transmitting
-  listen_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
-  this->isTransmitting = true;
 }
 
 /*
@@ -89,7 +88,7 @@ void cc2420::transmit_off()
   if (DEBUG)
     ev << "Trans off" << endl;
 
-  broadcastMessage->setKind(LAYER_RADIO_END_RECV);
+  broadcastMessage->setKind(LAYER_RADIO_END_RECEIVING);
   broadcastMessage->setRadioSendId(this->getParentModule()->getId());
 
   for (unsigned int i = 0; i < neighbor.size(); i++)
@@ -109,10 +108,10 @@ void cc2420::transmit_off()
     }
     else
     {
-      // EV << "Disposed" << endl;
+      // EV << "Corrupted" << endl;
       recver->getParentModule()->bubble("Corrupted");
       broadcastMessage->setBitError(false);
-      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_CORRUPT);
+      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_RECV_CORRUPT);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
@@ -139,8 +138,6 @@ void cc2420::transmit_off()
   getParentModule()->setDisplayString(newDisplay);
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
-  this->isTransmitting = false;
-  this->isListening = true; // listen to ACK
 }
 
 bool cc2420::isClearChannel()

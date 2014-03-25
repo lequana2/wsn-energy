@@ -42,8 +42,8 @@ void MACdriver::handleMessage(cMessage *msg)
       // No ACK
       ev << "No ACK received" << endl;
     }
-    else if (((Frame*) msg)->getTypeMacLayer() != LAYER_RDC_RADIO_NOT_FREE)
-      receivePacket(msg);
+//    else if (((Frame*) msg)->getTypeMacLayer() != LAYER_RDC_RADIO_NOT_FREE)
+//      receivePacket(msg);
   }
 }
 

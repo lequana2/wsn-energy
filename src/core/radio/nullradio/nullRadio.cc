@@ -59,7 +59,7 @@ void nullRadio::transmit_on(Raw *msg)
   }
 
   double finishTime = 0;
-  scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
+//  scheduleAt(simTime() + finishTime, new cMessage(NULL, LAYER_RADIO_END_TRANS));
 
   // turn off listening and transmitting
   listen_off();
@@ -74,7 +74,7 @@ void nullRadio::transmit_off()
   if (DEBUG)
     ev << "Trans off" << endl;
 
-  broadcastMessage->setKind(LAYER_RADIO_END_RECV);
+//  broadcastMessage->setKind(LAYER_RADIO_END_RECV);
   broadcastMessage->setRadioSendId(this->getParentModule()->getId());
 
   for (unsigned int i = 0; i < neighbor.size(); i++)

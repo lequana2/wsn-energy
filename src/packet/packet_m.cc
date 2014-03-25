@@ -34,6 +34,14 @@ void doUnpacking(cCommBuffer *, T& t) {
 namespace wsn_energy {
 
 EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::PACKET_SIZE");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::PACKET_SIZE"));
+    e->insert(PHY_HEADER, "PHY_HEADER");
+    e->insert(PACKET_802154, "PACKET_802154");
+    e->insert(ACK_LEN, "ACK_LEN");
+);
+
+EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::MESSAGE");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::MESSAGE"));
     e->insert(NODE_STARTUP, "NODE_STARTUP");
@@ -42,36 +50,35 @@ EXECUTE_ON_STARTUP(
     e->insert(RPL_CONSTRUCT, "RPL_CONSTRUCT");
     e->insert(RPL_SOLICIT, "RPL_SOLICIT");
     e->insert(LAYER_RADIO, "LAYER_RADIO");
-    e->insert(LAYER_RADIO_END_TRANS, "LAYER_RADIO_END_TRANS");
-    e->insert(LAYER_RADIO_END_RECV, "LAYER_RADIO_END_RECV");
-    e->insert(LAYER_RADIO_TRANS_OK, "LAYER_RADIO_TRANS_OK");
-    e->insert(LAYER_RADIO_COLLISION, "LAYER_RADIO_COLLISION");
+    e->insert(LAYER_RADIO_SWITCH_TRANSMIT, "LAYER_RADIO_SWITCH_TRANSMIT");
+    e->insert(LAYER_RADIO_SWITCH_LISTEN, "LAYER_RADIO_SWITCH_LISTEN");
+    e->insert(LAYER_RADIO_SWITCH_SLEEP, "LAYER_RADIO_SWITCH_SLEEP");
+    e->insert(LAYER_RADIO_BEGIN_TRANSMIT, "LAYER_RADIO_BEGIN_TRANSMIT");
+    e->insert(LAYER_RADIO_BEGIN_LISTEN, "LAYER_RADIO_BEGIN_LISTEN");
+    e->insert(LAYER_RADIO_END_TRANSMIT, "LAYER_RADIO_END_TRANSMIT");
+    e->insert(LAYER_RADIO_END_RECEIVING, "LAYER_RADIO_END_RECEIVING");
+    e->insert(LAYER_RADIO_CCA_NOT_VALID, "LAYER_RADIO_CCA_NOT_VALID");
     e->insert(LAYER_RADIO_RECV_OK, "LAYER_RADIO_RECV_OK");
-    e->insert(LAYER_RADIO_CORRUPT, "LAYER_RADIO_CORRUPT");
+    e->insert(LAYER_RADIO_RECV_CORRUPT, "LAYER_RADIO_RECV_CORRUPT");
     e->insert(LAYER_RADIO_NOT_FREE, "LAYER_RADIO_NOT_FREE");
-    e->insert(LAYER_RADIO_FREE, "LAYER_RADIO_FREE");
     e->insert(LAYER_RDC, "LAYER_RDC");
-    e->insert(LAYER_RDC_CHECK_FREE, "LAYER_RDC_CHECK_FREE");
-    e->insert(LAYER_RDC_TURN_RADIO_OFF, "LAYER_RDC_TURN_RADIO_OFF");
-    e->insert(LAYER_RDC_TURN_RADIO_ON, "LAYER_RDC_TURN_RADIO_ON");
-    e->insert(LAYER_RDC_TURN_RADIO_TRANS, "LAYER_RDC_TURN_RADIO_TRANS");
-    e->insert(LAYER_RDC_RADIO_NOT_FREE, "LAYER_RDC_RADIO_NOT_FREE");
-    e->insert(LAYER_RDC_ACK, "LAYER_RDC_ACK");
+    e->insert(LAYER_RDC_SEND, "LAYER_RDC_SEND");
+    e->insert(LAYER_RDC_LISTEN_ON, "LAYER_RDC_LISTEN_ON");
+    e->insert(LAYER_RDC_LISTEN_OFF, "LAYER_RDC_LISTEN_OFF");
     e->insert(LAYER_RDC_WAIT_ACK, "LAYER_RDC_WAIT_ACK");
     e->insert(LAYER_MAC, "LAYER_MAC");
     e->insert(LAYER_MAC_SEND_OK, "LAYER_MAC_SEND_OK");
     e->insert(LAYER_MAC_NO_ACK, "LAYER_MAC_NO_ACK");
     e->insert(LAYER_MAC_DEFER, "LAYER_MAC_DEFER");
     e->insert(LAYER_MAC_ERR, "LAYER_MAC_ERR");
-    e->insert(LAYER_MAC_ERR_FATAL, "LAYER_MAC_ERR_FATAL");
     e->insert(LAYER_NET, "LAYER_NET");
     e->insert(NET_ICMP_DIO, "NET_ICMP_DIO");
     e->insert(NET_ICMP_DIS, "NET_ICMP_DIS");
     e->insert(NET_DATA, "NET_DATA");
     e->insert(LAYER_APP, "LAYER_APP");
     e->insert(APP_WORKING_FLAG, "APP_WORKING_FLAG");
-    e->insert(APP_ENVIRON_FLAG, "APP_ENVIRON_FLAG");
     e->insert(APP_SENSING_FLAG, "APP_SENSING_FLAG");
+    e->insert(APP_ENVIRON_FLAG, "APP_ENVIRON_FLAG");
 );
 
 Register_Class(Raw);

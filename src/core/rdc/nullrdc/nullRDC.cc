@@ -28,7 +28,7 @@ void nullRDC::deferPacket(cMessage* msg)
 {
   // WSN If not sending ack
   msg->setKind(LAYER_RDC);
-  ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_RADIO_NOT_FREE);
+//  ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_RADIO_NOT_FREE);
   send(msg, gate("upperOut"));
 }
 
@@ -38,7 +38,7 @@ void nullRDC::sendPacket(cMessage *msg)
   if (((Frame*) msg)->getLen() != ACK_LEN)
   {
     msg->setKind(LAYER_RDC);
-    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
+//    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
     send(msg, gate("lowerOut"));
 
     // WSN After transmitting
@@ -51,7 +51,7 @@ void nullRDC::sendPacket(cMessage *msg)
   else
   {
     msg->setKind(LAYER_RDC);
-    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
+//    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
     send(msg, gate("lowerOut"));
   }
 }
@@ -91,7 +91,7 @@ void nullRDC::receiveSuccess(cMessage* msg)
     Frame* ack = new Frame;
     ack->setKind(LAYER_RDC);
     ack->setLen(ACK_LEN);
-    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
+//    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
     send(ack, gate("lowerOut"));
 
     // process to upper layer
@@ -109,7 +109,7 @@ void nullRDC::on()
 {
   Frame *msg = new Frame;
   msg->setKind(LAYER_RDC);
-  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_ON);
+//  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_ON);
 
   send(msg, gate("lowerOut"));
 }
@@ -118,7 +118,7 @@ void nullRDC::off()
 {
   Frame *msg = new Frame;
   msg->setKind(LAYER_RDC);
-  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_OFF);
+//  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_OFF);
 
   send(msg, gate("lowerOut"));
 }

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core.platform.battery;
+package wsn_energy.core.battery;
 
 //
 // TODO auto-generated type

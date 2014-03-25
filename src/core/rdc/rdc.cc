@@ -25,57 +25,51 @@ void RDCdriver::initialize()
 
 void RDCdriver::handleMessage(cMessage *msg)
 {
-  // Control message
-  if (msg->getKind() == LAYER_RDC)
+
+  switch (msg->getKind())
   {
-    switch (((Frame*) msg)->getTypeMacLayer())
+    case LAYER_RDC: /* control message */
     {
-      case LAYER_RDC_WAIT_ACK:
-        msg->setKind(LAYER_RDC);
-        // NO ACK
-        ev << "No ACK" << endl;
-        isWaitingACK = false;
-        break;
+      Frame* frame = check_and_cast<Frame*>(msg);
+
+      switch (frame->getTypeMacLayer())
+      {
+        case LAYER_RDC_WAIT_ACK:
+          msg->setKind(LAYER_RDC);
+          // NO ACK
+          ev << "No ACK" << endl;
+          isWaitingACK = false;
+          break;
+      }
     }
-  }
-  // From upper
-  else if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
-  {
-    msg->setKind(LAYER_RDC);
-    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
-    send(msg, gate("lowerOut"));
-  }
-  // From radio layer
-  else if (msg->getKind() == LAYER_RADIO)
-  {
-    ev << "Type Radio Layer: " << ((Raw*) msg)->getTypeRadioLayer() << endl;
-    switch (((Raw*) msg)->getTypeRadioLayer())
+      break; /* control message */
+
+    case LAYER_MAC: /* message from MAC layer */
     {
-      case LAYER_RADIO_NOT_FREE:
-        deferPacket(msg);
-        break;
-
-      case LAYER_RADIO_FREE:
-        sendPacket(msg);
-        break;
-
-      case LAYER_RADIO_TRANS_OK:
-        sendSuccess(msg);
-        break;
-
-      case LAYER_RADIO_COLLISION:
-        sendFailure();
-        break;
-
-      case LAYER_RADIO_RECV_OK:
-        ((Raw*) msg)->setLen(((Raw*) msg)->getLen() - 6);
-        receiveSuccess(msg);
-        break;
-
-      case LAYER_RADIO_CORRUPT:
-        receiveFailure();
-        break;
+      Frame* frame = check_and_cast<Frame*>(msg);
+      // forward to radio
+      frame->setKind(LAYER_RDC);
+      frame->setTypeMacLayer(LAYER_RDC_SEND);
+      send(frame, gate("lowerOut"));
     }
+      break; /* message from MAC layer */
+
+    case LAYER_RADIO: /* message from radio layer */
+    {
+      Raw *raw = check_and_cast<Raw*>(msg);
+      switch (raw->getTypeRadioLayer())
+      {
+        case LAYER_RADIO_NOT_FREE:
+          deferPacket(raw);
+          break;
+
+        case LAYER_RADIO_RECV_OK:
+          raw->setLen(raw->getLen() - PHY_HEADER);
+          receiveSuccess(raw);
+          break;
+      }
+    }
+      break; /* message from radio layer */
   }
 }
 

@@ -16,8 +16,6 @@
 #ifndef RDCDRIVER_H_
 #define RDCDRIVER_H_
 
-#define ACK_LEN 5
-
 #include <omnetpp.h>
 #include "packet_m.h"
 

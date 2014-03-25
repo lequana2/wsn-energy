@@ -16,8 +16,20 @@
 #ifndef RADIO_H_
 #define RADIO_H_
 
-#define PHY_HEADER 6
-#define PACKET_802154 127
+#ifndef SWITCH_MODE_DELAY
+#define SWITCH_MODE_DELAY                  0        // second
+#define SWITCH_MODE_DELAY_SLEEP_TO_TRANS   0.000002 // second
+#define SWITCH_MODE_DELAY_SLEEP_TO_LISTEN  0.000002 // second
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  0.000002 // second
+#define SWITCH_MODE_DELAY_TRANS_TO_SLEEP   0.000002 // second
+#define SWITCH_MODE_DELAY_LISTEN_TO_SLEEP  0.000002 // second
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000002 // second
+#endif
+
+#define SLEEPING        0 // do nothing
+#define TRANSMITTING    1 // transmitting something
+#define LISTENING       2 // listening to nothing
+#define RECEIVING       3 // listening to something
 
 #include <omnetpp.h>
 
@@ -27,14 +39,6 @@ namespace wsn_energy {
 
 class RadioDriver : public cSimpleModule
 {
-//  private:
-//    virtual void transmit_on(Raw *raw);
-//    virtual void transmit_off();
-//    virtual void receive_off();
-//    virtual void receive_on();
-//
-//    Raw *broadcastMessage; // buffer message
-
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);
@@ -56,11 +60,11 @@ class RadioDriver : public cSimpleModule
     Raw *broadcastMessage; // buffer message
 
   public:
-    bool isListening;
-    bool isReceiving;
-    bool isTransmitting;
-    int trRange;
-    int coRange;
+    int status; // sleep, transmitting, listening, receiving
+
+    int trRange; // simulated transmission range
+    int coRange; // simulated collission range
+
     std::vector<int> neighbor; // simulated neighbor list, for world util
 };
 

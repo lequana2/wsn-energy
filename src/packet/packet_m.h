@@ -19,6 +19,29 @@ namespace wsn_energy {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
+ * enum PACKET_SIZE{
+ * 	
+ * 	PHY_HEADER     =  6;    
+ * 	
+ * 	
+ * 	PACKET_802154  =  127;  
+ * 	ACK_LEN		   =  5;	
+ * 	
+ * 	
+ * 	
+ * 	
+ * }
+ * </pre>
+ */
+enum PACKET_SIZE {
+    PHY_HEADER = 6,
+    PACKET_802154 = 127,
+    ACK_LEN = 5
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
  * enum MESSAGE
  * {
  * 	
@@ -30,44 +53,43 @@ namespace wsn_energy {
  * 
  * 	
  *  	LAYER_RADIO     			= 10; 
- *  	LAYER_RADIO_END_TRANS		= 11; 
- *  	LAYER_RADIO_END_RECV    	= 12;
- * 	LAYER_RADIO_TRANS_OK		= 13; 
- * 	LAYER_RADIO_COLLISION   	= 14;
- * 	LAYER_RADIO_RECV_OK     	= 15; 
- * 	LAYER_RADIO_CORRUPT			= 16;
- * 	LAYER_RADIO_NOT_FREE	   	= 17; 
- * 	LAYER_RADIO_FREE			= 18;
+ *  	LAYER_RADIO_SWITCH_TRANSMIT	= 11; 
+ *  	LAYER_RADIO_SWITCH_LISTEN	= 12; 
+ *  	LAYER_RADIO_SWITCH_SLEEP    = 13; 
+ *  	LAYER_RADIO_BEGIN_TRANSMIT  = 14; 
+ *  	LAYER_RADIO_BEGIN_LISTEN    = 15; 
+ *  	LAYER_RADIO_END_TRANSMIT	= 16; 
+ *  	LAYER_RADIO_END_RECEIVING  	= 17; 
+ *  	LAYER_RADIO_CCA_NOT_VALID   = 18; 
+ *  	LAYER_RADIO_RECV_OK			= 19; 
+ * 	LAYER_RADIO_RECV_CORRUPT	= 20; 
+ * 	LAYER_RADIO_NOT_FREE	   	= 21; 
  * 	
  * 	
- * 	LAYER_RDC                	= 20; 
- * 	LAYER_RDC_CHECK_FREE 	 	= 21; 
- * 	LAYER_RDC_TURN_RADIO_OFF 	= 22; 
- * 	LAYER_RDC_TURN_RADIO_ON  	= 23;
- * 	LAYER_RDC_TURN_RADIO_TRANS 	= 24; 
- * 	LAYER_RDC_RADIO_NOT_FREE    = 25; 
- * 	LAYER_RDC_ACK				= 26; 
- * 	LAYER_RDC_WAIT_ACK			= 27; 
+ * 	LAYER_RDC                	= 30; 
+ * 	LAYER_RDC_SEND				= 31; 
+ * 	LAYER_RDC_LISTEN_ON			= 32; 
+ * 	LAYER_RDC_LISTEN_OFF		= 33; 
+ * 	LAYER_RDC_WAIT_ACK			= 34; 
  * 	
  * 	
- * 	LAYER_MAC 		    = 31; 
- * 	LAYER_MAC_SEND_OK	= 32;
- * 	LAYER_MAC_NO_ACK  	= 33;
- * 	LAYER_MAC_DEFER		= 34;
- * 	LAYER_MAC_ERR		= 35;
- * 	LAYER_MAC_ERR_FATAL = 36;
+ * 	LAYER_MAC 		    = 50; 
+ * 	LAYER_MAC_SEND_OK	= 51; 
+ * 	LAYER_MAC_NO_ACK  	= 52; 
+ * 	LAYER_MAC_DEFER		= 53; 
+ * 	LAYER_MAC_ERR		= 54; 
  * 
  * 	
- * 	LAYER_NET     = 32; 
- * 	NET_ICMP_DIO  = 40;
- * 	NET_ICMP_DIS  = 41;
- * 	NET_DATA      = 42;
+ * 	LAYER_NET     = 70; 
+ * 	NET_ICMP_DIO  = 71; 
+ * 	NET_ICMP_DIS  = 72; 
+ * 	NET_DATA      = 73; 
  * 	
  * 	
- * 	LAYER_APP		 = 50; 
- * 	APP_WORKING_FLAG = 51; 
- * 	APP_ENVIRON_FLAG = 52;
- * 	APP_SENSING_FLAG = 53;
+ * 	LAYER_APP		 = 90; 
+ * 	APP_WORKING_FLAG = 91; 
+ * 	APP_SENSING_FLAG = 92; 
+ * 	APP_ENVIRON_FLAG = 93; 
  * }
  * </pre>
  */
@@ -78,36 +100,35 @@ enum MESSAGE {
     RPL_CONSTRUCT = 3,
     RPL_SOLICIT = 4,
     LAYER_RADIO = 10,
-    LAYER_RADIO_END_TRANS = 11,
-    LAYER_RADIO_END_RECV = 12,
-    LAYER_RADIO_TRANS_OK = 13,
-    LAYER_RADIO_COLLISION = 14,
-    LAYER_RADIO_RECV_OK = 15,
-    LAYER_RADIO_CORRUPT = 16,
-    LAYER_RADIO_NOT_FREE = 17,
-    LAYER_RADIO_FREE = 18,
-    LAYER_RDC = 20,
-    LAYER_RDC_CHECK_FREE = 21,
-    LAYER_RDC_TURN_RADIO_OFF = 22,
-    LAYER_RDC_TURN_RADIO_ON = 23,
-    LAYER_RDC_TURN_RADIO_TRANS = 24,
-    LAYER_RDC_RADIO_NOT_FREE = 25,
-    LAYER_RDC_ACK = 26,
-    LAYER_RDC_WAIT_ACK = 27,
-    LAYER_MAC = 31,
-    LAYER_MAC_SEND_OK = 32,
-    LAYER_MAC_NO_ACK = 33,
-    LAYER_MAC_DEFER = 34,
-    LAYER_MAC_ERR = 35,
-    LAYER_MAC_ERR_FATAL = 36,
-    LAYER_NET = 32,
-    NET_ICMP_DIO = 40,
-    NET_ICMP_DIS = 41,
-    NET_DATA = 42,
-    LAYER_APP = 50,
-    APP_WORKING_FLAG = 51,
-    APP_ENVIRON_FLAG = 52,
-    APP_SENSING_FLAG = 53
+    LAYER_RADIO_SWITCH_TRANSMIT = 11,
+    LAYER_RADIO_SWITCH_LISTEN = 12,
+    LAYER_RADIO_SWITCH_SLEEP = 13,
+    LAYER_RADIO_BEGIN_TRANSMIT = 14,
+    LAYER_RADIO_BEGIN_LISTEN = 15,
+    LAYER_RADIO_END_TRANSMIT = 16,
+    LAYER_RADIO_END_RECEIVING = 17,
+    LAYER_RADIO_CCA_NOT_VALID = 18,
+    LAYER_RADIO_RECV_OK = 19,
+    LAYER_RADIO_RECV_CORRUPT = 20,
+    LAYER_RADIO_NOT_FREE = 21,
+    LAYER_RDC = 30,
+    LAYER_RDC_SEND = 31,
+    LAYER_RDC_LISTEN_ON = 32,
+    LAYER_RDC_LISTEN_OFF = 33,
+    LAYER_RDC_WAIT_ACK = 34,
+    LAYER_MAC = 50,
+    LAYER_MAC_SEND_OK = 51,
+    LAYER_MAC_NO_ACK = 52,
+    LAYER_MAC_DEFER = 53,
+    LAYER_MAC_ERR = 54,
+    LAYER_NET = 70,
+    NET_ICMP_DIO = 71,
+    NET_ICMP_DIS = 72,
+    NET_DATA = 73,
+    LAYER_APP = 90,
+    APP_WORKING_FLAG = 91,
+    APP_SENSING_FLAG = 92,
+    APP_ENVIRON_FLAG = 93
 };
 
 /**

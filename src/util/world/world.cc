@@ -14,6 +14,7 @@
 // 
 
 #include "world.h"
+#include "radio.h"
 
 #include <math.h>
 
@@ -174,17 +175,23 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
 void World::registerTransmission(Transmission *tranmission)
 {
   if (DEBUG)
-    ev << "On the air transmision: " << this->onAir.size() << endl;
+    ev << "On air transmision: " << this->onAir.size() << endl;
 
   RadioDriver* sender = tranmission->getSender();
   RadioDriver* recver = tranmission->getRecver();
 
   // check receiver turned on
-  if (!recver->isListening)
-    tranmission->corrupt();
-
-  // receiving
-  recver->isReceiving = true;
+  switch (recver->status)
+  {
+    case TRANSMITTING:
+    case RECEIVING:
+    case SLEEPING:
+      tranmission->corrupt();
+      break;
+    case LISTENING:
+      recver->status = RECEIVING;
+      break;
+  }
 
   this->onAir.push_back(tranmission);
 
@@ -192,8 +199,8 @@ void World::registerTransmission(Transmission *tranmission)
     return;
 
 //  check collision with activated tranmission
-  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
-      otherTranmission != this->onAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
+      otherTranmission++)
   {
     RadioDriver *otherSender = (*otherTranmission)->getSender();
 
@@ -229,8 +236,8 @@ bool World::isFeasibleTransmission(Transmission* transmission)
   RadioDriver* sender = transmission->getSender();
   RadioDriver* recver = transmission->getRecver();
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
-      otherTranmission != this->onAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
+      otherTranmission++)
   {
     if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
         && !(*otherTranmission)->isCorrupted())
@@ -245,27 +252,28 @@ void World::stopTransmission(Transmission* transmission)
   RadioDriver* sender = transmission->getSender();
   RadioDriver* recver = transmission->getRecver();
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
-      otherTranmission != this->onAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
+      otherTranmission++)
   {
     if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver())
     {
-      recver->isReceiving = false;
+      recver->status = LISTENING;
       this->onAir.remove(*otherTranmission);
+      (*otherTranmission) = NULL;
       return;
     }
   }
 
   if (DEBUG)
-    ev << "missing transmission" << endl;
+    ev << "Missing transmission" << endl;
 }
 
 bool World::senseBusyTransmission(Transmission *transmission)
 {
   RadioDriver* sender = transmission->getSender();
 
-  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin();
-      otherTranmission != this->onAir.end(); otherTranmission++)
+  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
+      otherTranmission++)
   {
     RadioDriver *otherSender = (*otherTranmission)->getSender();
 
