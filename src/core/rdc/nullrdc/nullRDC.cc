@@ -27,9 +27,9 @@ Define_Module(nullRDC);
 void nullRDC::deferPacket(cMessage* msg)
 {
   // WSN If not sending ack
-  msg->setKind(LAYER_RDC);
+//  msg->setKind(LAYER_RDC);
 //  ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_RADIO_NOT_FREE);
-  send(msg, gate("upperOut"));
+//  send(msg, gate("upperOut"));
 }
 
 void nullRDC::sendPacket(cMessage *msg)
@@ -71,11 +71,14 @@ void nullRDC::sendFailure()
 
 void nullRDC::receiveSuccess(cMessage* msg)
 {
+  Frame *frame = check_and_cast<Frame*>(msg);
+
   // WSN receive ACK
-  if (((Frame*) msg)->getLen() == ACK_LEN)
+  if (frame->getLen() == ACK_LEN)
   {
     // process ACK
     ev << "Receive ACK" << endl;
+
     // omit pending
     if (waitACK != NULL)
       cancelEvent(waitACK);
@@ -84,19 +87,20 @@ void nullRDC::receiveSuccess(cMessage* msg)
     // Turn off upon receiving ACK
     off();
   }
-  // receive data = send ACK + process to upper layer
+  // WSN receive data = send ACK + process to upper layer
   else
   {
     // send ACK
-    Frame* ack = new Frame;
-    ack->setKind(LAYER_RDC);
-    ack->setLen(ACK_LEN);
-//    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
-    send(ack, gate("lowerOut"));
+    //    Frame* ack = new Frame;
+    //    ack->setKind(LAYER_RDC);
+    //    ack->setLen(ACK_LEN);
+    //    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
+    //    send(ack, gate("lowerOut"));
 
     // process to upper layer
-    msg->setKind(LAYER_RDC);
-    send(msg, gate("upperOut"));
+    frame->setKind(LAYER_RDC);
+    frame->setTypeMacLayer(LAYER_RDC_RECV_OK);
+    send(frame, gate("upperOut"));
   }
 }
 
@@ -107,20 +111,20 @@ void nullRDC::receiveFailure()
 
 void nullRDC::on()
 {
-  Frame *msg = new Frame;
-  msg->setKind(LAYER_RDC);
-//  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_ON);
+  Frame *frame = new Frame;
+  frame->setKind(LAYER_RDC);
+  frame->setTypeMacLayer(LAYER_RDC_LISTEN_ON);
 
-  send(msg, gate("lowerOut"));
+  send(frame, gate("lowerOut"));
 }
 
 void nullRDC::off()
 {
-  Frame *msg = new Frame;
-  msg->setKind(LAYER_RDC);
-//  msg->setTypeMacLayer(LAYER_RDC_TURN_RADIO_OFF);
+  Frame *frame = new Frame;
+  frame->setKind(LAYER_RDC);
+  frame->setTypeMacLayer(LAYER_RDC_LISTEN_OFF);
 
-  send(msg, gate("lowerOut"));
+  send(frame, gate("lowerOut"));
 }
 
 } /* namespace wsn_energy */

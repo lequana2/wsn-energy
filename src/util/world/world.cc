@@ -281,13 +281,13 @@ bool World::senseBusyTransmission(Transmission *transmission)
         (RadioDriver*) sender->getParentModule()->getModuleByPath(".radio"))
         < ((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
 
-      return true;
+      return false;
   }
 
   if (DEBUG)
     ev << "Clear channel" << endl;
 
-  return false;
+  return true;
 }
 
 } /* namespace wsn_energy */

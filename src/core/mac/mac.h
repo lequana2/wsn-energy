@@ -30,8 +30,8 @@ class MACdriver : public cSimpleModule
     virtual void sendPacket(cMessage*) = 0;
     virtual void receivePacket(cMessage*) = 0;
 
-    virtual void on() = 0;
-    virtual void off() = 0;
+//    virtual void on() = 0;
+//    virtual void off() = 0;
 };
 
 } /* namespace wsn_energy */

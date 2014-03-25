@@ -16,26 +16,26 @@
 namespace wsn_energy;
 
 enum PACKET_SIZE{
-	// PHY
 	PHY_HEADER     =  6;    // PHY 802.15.4 header 6 bytes
 	
-	// MAC
 	PACKET_802154  =  127;  // MAC 802.15.4 payload 127 bytes
 	ACK_LEN		   =  5;	// MAC 802.15.4 ACK 5 bytes (header + footer)
+	MAC_LEN		   =  25;   // MAC 802.15.4 ACK 25 bytes (address long)
 	
-	// NET
+	DIO_LEN		   =  24; 	// ICMPv6 RPL DODAG INFORMATION OBJECT
+	DIS_LEN		   =  10;   // ICMPv6 RPL DODAG INFORMATION SOLICITATION
 	
-	// APP
+	DATA		   = 1; 	// 1 bytes ????
 }
 
 enum MESSAGE
 {
 	// specialize event
-	NODE_STARTUP  = 0;
-	NODE_DESTRUCT = 1;
-	OUT_OF_ENERGY = 2;
-	RPL_CONSTRUCT = 3;
-	RPL_SOLICIT   = 4;
+	NODE_STARTUP  = 0; // turn on a mote
+	NODE_DESTRUCT = 1; // turn off a mote (or) note runs out of energy
+	OUT_OF_ENERGY = 2; // out of energy flag
+	RPL_CONSTRUCT = 3; // perform broadcasting DIO
+	RPL_SOLICIT   = 4; // request DIS
 
 	// radio
  	LAYER_RADIO     			= 10; // kind
@@ -59,17 +59,27 @@ enum MESSAGE
 	
 	// rdc
 	LAYER_RDC                	= 30; // kind
+	
 	LAYER_RDC_SEND				= 31; // sending a message
-	LAYER_RDC_LISTEN_ON			= 32; // turn receiver on
-	LAYER_RDC_LISTEN_OFF		= 33; // turn receiver off
-	LAYER_RDC_WAIT_ACK			= 34; // waiting for an ACK
+	
+	LAYER_RDC_WAIT_ACK			= 32; // waiting for an ACK
+	
+	LAYER_RDC_LISTEN_ON			= 33; // turn receiver on
+	LAYER_RDC_LISTEN_OFF		= 34; // turn receiver off
+	
+	LAYER_RDC_RECV_OK			= 35; // receiving a okay message
+	LAYER_RDC_RECV_ACK			= 36; // receiving an ACK
 	
 	// mac
 	LAYER_MAC 		    = 50; // kind
+	
 	LAYER_MAC_SEND_OK	= 51; // transmitting + receiving ACK
 	LAYER_MAC_NO_ACK  	= 52; // transmitting + no ACK
+	
 	LAYER_MAC_DEFER		= 53; // radio is busy
 	LAYER_MAC_ERR		= 54; // internal error (???)
+
+	LAYER_MAC_RECV_OK	= 55; // receiving an okay message
 
 	// net
 	LAYER_NET     = 70; // kind
@@ -96,6 +106,7 @@ packet Frame extends Raw{
 	int typeMacLayer;
 	int senderMacAddress;
 	int recverMacAddress;
+	int sequenceNumber;
 }
 
 packet IpPacket extends Frame{

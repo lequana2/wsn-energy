@@ -73,7 +73,7 @@ void cc2420::transmit_on(Raw *raw)
 void cc2420::transmit_off()
 {
   if (DEBUG)
-    ev << "Trans off" << endl;
+    ev << "End transmitting" << endl;
 
   //  Color here
   //  broadcastMessage->setKind(LAYER_RADIO_END_RECEIVING);

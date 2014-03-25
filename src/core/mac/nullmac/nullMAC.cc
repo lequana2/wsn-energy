@@ -24,25 +24,18 @@ void nullMAC::sendPacket(cMessage* msg)
 {
   Frame *frame = (Frame*) msg;
 
+  frame->setKind(LAYER_MAC);
+  frame->setLen(frame->getLen() + MAC_LEN);
   frame->setSenderMacAddress(this->getId());
   frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
-  msg->setKind(LAYER_MAC);
 
-  send(msg, gate("lowerOut"));
+  send(frame, gate("lowerOut"));
 }
 
 void nullMAC::receivePacket(cMessage* msg)
 {
   msg->setKind(LAYER_MAC);
-
   send(msg, gate("upperOut"));
-}
-
-void nullMAC::on()
-{
-}
-void nullMAC::off()
-{
 }
 
 } /* namespace wsn_energy */

@@ -44,7 +44,7 @@ void RadioDriver::handleMessage(cMessage* msg)
           }
 
           // perform CCA
-          else if (isClearChannel())
+          else if (!isClearChannel())
           {
             raw->setTypeRadioLayer(LAYER_RADIO_CCA_NOT_VALID);
             send(raw, gate("upperOut"));

@@ -20,23 +20,27 @@ namespace wsn_energy {
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum PACKET_SIZE{
- * 	
  * 	PHY_HEADER     =  6;    
- * 	
  * 	
  * 	PACKET_802154  =  127;  
  * 	ACK_LEN		   =  5;	
+ * 	MAC_LEN		   =  25;   
  * 	
+ * 	DIO_LEN		   =  24; 	
+ * 	DIS_LEN		   =  10;   
  * 	
- * 	
- * 	
+ * 	DATA		   = 1; 	
  * }
  * </pre>
  */
 enum PACKET_SIZE {
     PHY_HEADER = 6,
     PACKET_802154 = 127,
-    ACK_LEN = 5
+    ACK_LEN = 5,
+    MAC_LEN = 25,
+    DIO_LEN = 24,
+    DIS_LEN = 10,
+    DATA = 1
 };
 
 /**
@@ -45,11 +49,11 @@ enum PACKET_SIZE {
  * enum MESSAGE
  * {
  * 	
- * 	NODE_STARTUP  = 0;
- * 	NODE_DESTRUCT = 1;
- * 	OUT_OF_ENERGY = 2;
- * 	RPL_CONSTRUCT = 3;
- * 	RPL_SOLICIT   = 4;
+ * 	NODE_STARTUP  = 0; 
+ * 	NODE_DESTRUCT = 1; 
+ * 	OUT_OF_ENERGY = 2; 
+ * 	RPL_CONSTRUCT = 3; 
+ * 	RPL_SOLICIT   = 4; 
  * 
  * 	
  *  	LAYER_RADIO     			= 10; 
@@ -73,17 +77,27 @@ enum PACKET_SIZE {
  * 	
  * 	
  * 	LAYER_RDC                	= 30; 
+ * 	
  * 	LAYER_RDC_SEND				= 31; 
- * 	LAYER_RDC_LISTEN_ON			= 32; 
- * 	LAYER_RDC_LISTEN_OFF		= 33; 
- * 	LAYER_RDC_WAIT_ACK			= 34; 
+ * 	
+ * 	LAYER_RDC_WAIT_ACK			= 32; 
+ * 	
+ * 	LAYER_RDC_LISTEN_ON			= 33; 
+ * 	LAYER_RDC_LISTEN_OFF		= 34; 
+ * 	
+ * 	LAYER_RDC_RECV_OK			= 35; 
+ * 	LAYER_RDC_RECV_ACK			= 36; 
  * 	
  * 	
  * 	LAYER_MAC 		    = 50; 
+ * 	
  * 	LAYER_MAC_SEND_OK	= 51; 
  * 	LAYER_MAC_NO_ACK  	= 52; 
+ * 	
  * 	LAYER_MAC_DEFER		= 53; 
  * 	LAYER_MAC_ERR		= 54; 
+ * 
+ * 	LAYER_MAC_RECV_OK	= 55; 
  * 
  * 	
  * 	LAYER_NET     = 70; 
@@ -120,14 +134,17 @@ enum MESSAGE {
     LAYER_RADIO_RECV_CORRUPT = 22,
     LAYER_RDC = 30,
     LAYER_RDC_SEND = 31,
-    LAYER_RDC_LISTEN_ON = 32,
-    LAYER_RDC_LISTEN_OFF = 33,
-    LAYER_RDC_WAIT_ACK = 34,
+    LAYER_RDC_WAIT_ACK = 32,
+    LAYER_RDC_LISTEN_ON = 33,
+    LAYER_RDC_LISTEN_OFF = 34,
+    LAYER_RDC_RECV_OK = 35,
+    LAYER_RDC_RECV_ACK = 36,
     LAYER_MAC = 50,
     LAYER_MAC_SEND_OK = 51,
     LAYER_MAC_NO_ACK = 52,
     LAYER_MAC_DEFER = 53,
     LAYER_MAC_ERR = 54,
+    LAYER_MAC_RECV_OK = 55,
     LAYER_NET = 70,
     NET_ICMP_DIO = 71,
     NET_ICMP_DIS = 72,
@@ -198,6 +215,7 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
  * 	int typeMacLayer;
  * 	int senderMacAddress;
  * 	int recverMacAddress;
+ * 	int sequenceNumber;
  * }
  * </pre>
  */
@@ -207,6 +225,7 @@ class Frame : public ::wsn_energy::Raw
     int typeMacLayer_var;
     int senderMacAddress_var;
     int recverMacAddress_var;
+    int sequenceNumber_var;
 
   private:
     void copy(const Frame& other);
@@ -231,6 +250,8 @@ class Frame : public ::wsn_energy::Raw
     virtual void setSenderMacAddress(int senderMacAddress);
     virtual int getRecverMacAddress() const;
     virtual void setRecverMacAddress(int recverMacAddress);
+    virtual int getSequenceNumber() const;
+    virtual void setSequenceNumber(int sequenceNumber);
 };
 
 inline void doPacking(cCommBuffer *b, Frame& obj) {obj.parsimPack(b);}

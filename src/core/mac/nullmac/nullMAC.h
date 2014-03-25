@@ -26,8 +26,8 @@ class nullMAC : public MACdriver
     virtual void sendPacket(cMessage*);
     virtual void receivePacket(cMessage*);
 
-    virtual void on();
-    virtual void off();
+//    virtual void on();
+//    virtual void off();
 };
 
 } /* namespace wsn_energy */

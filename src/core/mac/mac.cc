@@ -24,26 +24,31 @@ void MACdriver::initialize()
 
 void MACdriver::handleMessage(cMessage *msg)
 {
-  // Control message
-  if (msg->getKind() == LAYER_MAC)
+  Frame *frame = check_and_cast<Frame*>(msg);
+
+  switch (frame->getKind())
   {
-  }
-  // From net layer
-  else if (msg->getKind() == LAYER_NET)
-  {
-    ((Frame*) msg)->setLen(((Frame*) msg)->getLen() + 25);
-    sendPacket(msg);
-  }
-  // From rdc layer
-  else if (msg->getKind() == LAYER_RDC)
-  {
-    if (((Frame*) msg)->getTypeMacLayer() == LAYER_MAC_NO_ACK)
-    {
-      // No ACK
-      ev << "No ACK received" << endl;
-    }
-//    else if (((Frame*) msg)->getTypeMacLayer() != LAYER_RDC_RADIO_NOT_FREE)
-//      receivePacket(msg);
+    case LAYER_MAC: /* control message */
+      break; /* control message */
+
+    case LAYER_NET: /* message from NET layer */
+      sendPacket(frame);
+      break; /* message from NET layer */
+
+    case LAYER_RDC: /* message from MAC layer */
+      switch(frame->getTypeMacLayer()){
+        case LAYER_RDC_RECV_ACK:
+          ev << "No ACK received" << endl;
+          break; /* recv ACK */
+
+        case LAYER_RDC_RECV_OK:
+          frame->setKind(LAYER_MAC);
+          frame->setTypeMacLayer(LAYER_MAC_RECV_OK);
+          send(frame, gate("upperOut"));
+          break; /* okay message */
+      }
+
+      break; /* message from MAC layer */
   }
 }
 

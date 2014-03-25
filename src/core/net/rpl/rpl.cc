@@ -57,7 +57,7 @@ void RPL::sendDIO()
   DIO *icmp = new DIO();
   ((IpPacket*) icmp)->setTypeNetLayer(NET_ICMP_DIO);
 
-  icmp->setLen(24);
+  icmp->setLen(DIO_LEN);
   icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
 
@@ -71,6 +71,7 @@ void RPL::sendDIS(int convergence)
   DIS *icmp = new DIS();
   ((IpPacket*) icmp)->setTypeNetLayer(NET_ICMP_DIO);
 
+  icmp->setLen(DIS_LEN);
   icmp->setConvergence(convergence);
 
   net->broadcast(icmp);
