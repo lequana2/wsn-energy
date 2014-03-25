@@ -26,8 +26,6 @@ class nullRadio : public RadioDriver
     virtual void transmit_on(Raw *raw);
     virtual void transmit_off();
 
-    Raw *broadcastMessage; // buffer message
-
   protected:
     virtual bool isClearChannel();
 

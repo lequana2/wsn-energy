@@ -16,6 +16,7 @@
 #ifndef CC2420_H_
 #define CC2420_H_
 
+#include "cc2420-const.h"
 #include "radio.h"
 
 namespace wsn_energy {

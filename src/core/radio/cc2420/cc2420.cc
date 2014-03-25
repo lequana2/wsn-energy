@@ -14,7 +14,6 @@
 // 
 
 #include "cc2420.h"
-#include "cc2420-const.h"
 
 #include "world.h"
 #include "statistic.h"

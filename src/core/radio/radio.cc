@@ -78,7 +78,6 @@ void RadioDriver::handleMessage(cMessage* msg)
                 scheduleAt(simTime() + SWITCH_MODE_DELAY, raw);
                 break;
             }
-
             this->status = TRANSMITTING;
           }
           break; /* switch to transmit */
@@ -112,6 +111,7 @@ void RadioDriver::handleMessage(cMessage* msg)
           break; /* receie a OK message */
 
         case LAYER_RADIO_RECV_CORRUPT:
+          // Abort ???
           break; /* receie a corrupt message */
       }
     }

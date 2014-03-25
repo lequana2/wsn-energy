@@ -2,6 +2,16 @@
  * Spec for cc2420
  */
 
+#ifndef SWITCH_MODE_DELAY
+#define SWITCH_MODE_DELAY                  0        // second
+#define SWITCH_MODE_DELAY_SLEEP_TO_TRANS   0.000002 // second
+#define SWITCH_MODE_DELAY_SLEEP_TO_LISTEN  0.000002 // second
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  0.000002 // second
+#define SWITCH_MODE_DELAY_TRANS_TO_SLEEP   0.000002 // second
+#define SWITCH_MODE_DELAY_LISTEN_TO_SLEEP  0.000002 // second
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000002 // second
+#endif
+
 #define FREQUENCY 2400 // MHz
 
 #define DATA_RATE 250000 // bps
