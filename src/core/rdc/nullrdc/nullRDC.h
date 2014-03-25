@@ -16,7 +16,7 @@
 #ifndef RDC_H_
 #define RDC_H_
 
-#define WAIT_FOR_ACK 0.004 // s
+#define WAIT_FOR_ACK 0.0004 // s
 
 #include "rdc.h"
 #include "packet_m.h"

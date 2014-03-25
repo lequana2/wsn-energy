@@ -41,6 +41,7 @@ void nullRDC::sendPacket(cMessage *msg)
     ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
     send(msg, gate("lowerOut"));
 
+    // WSN After transmitting
     waitACK->setKind(LAYER_RDC);
     waitACK->setTypeMacLayer(LAYER_RDC_WAIT_ACK);
     scheduleAt(simTime() + WAIT_FOR_ACK, waitACK);
