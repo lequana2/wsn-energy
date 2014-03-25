@@ -16,7 +16,10 @@
 #ifndef RDC_H_
 #define RDC_H_
 
+#define WAIT_FOR_ACK 0.004 // s
+
 #include "rdc.h"
+#include "packet_m.h"
 
 namespace wsn_energy {
 
@@ -27,7 +30,7 @@ class nullRDC : public RDCdriver
 
     virtual void sendPacket(cMessage*);
 
-    virtual void sendSuccess();
+    virtual void sendSuccess(cMessage*);
     virtual void sendFailure();
 
     virtual void receiveSuccess(cMessage*);

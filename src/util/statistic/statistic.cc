@@ -53,7 +53,7 @@ void Statistic::initialize()
 {
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
-  scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+//  scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
 }
 
 void Statistic::handleMessage(cMessage *msg)

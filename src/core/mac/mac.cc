@@ -37,7 +37,12 @@ void MACdriver::handleMessage(cMessage *msg)
   // From rdc layer
   else if (msg->getKind() == LAYER_RDC)
   {
-    if (((Frame*) msg)->getTypeMacLayer() != LAYER_RDC_RADIO_NOT_FREE)
+    if (((Frame*) msg)->getTypeMacLayer() == LAYER_MAC_NO_ACK)
+    {
+      // No ACK
+      ev << "No ACK received" << endl;
+    }
+    else if (((Frame*) msg)->getTypeMacLayer() != LAYER_RDC_RADIO_NOT_FREE)
       receivePacket(msg);
   }
 }

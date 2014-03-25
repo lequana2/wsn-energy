@@ -20,6 +20,7 @@ namespace wsn_energy {
 
 void RDCdriver::initialize()
 {
+  waitACK = new Frame;
 }
 
 void RDCdriver::handleMessage(cMessage *msg)
@@ -27,18 +28,27 @@ void RDCdriver::handleMessage(cMessage *msg)
   // Control message
   if (msg->getKind() == LAYER_RDC)
   {
+    switch (((Frame*) msg)->getTypeMacLayer())
+    {
+      case LAYER_RDC_WAIT_ACK:
+        msg->setKind(LAYER_RDC);
+        // NO ACK
+        ev << "No ACK" << endl;
+        isWaitingACK = false;
+        break;
+    }
   }
   // From upper
   else if (msg->getSenderModule()->getId() == getParentModule()->getModuleByPath(".mac")->getId())
   {
     msg->setKind(LAYER_RDC);
-    ((Frame*)msg)->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
-    send(msg,gate("lowerOut"));
+    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
+    send(msg, gate("lowerOut"));
   }
   // From radio layer
   else if (msg->getKind() == LAYER_RADIO)
   {
-    ev << "Type Radio Layer: " << ((Raw*) msg)->getTypeRadioLayer()<< endl;
+    ev << "Type Radio Layer: " << ((Raw*) msg)->getTypeRadioLayer() << endl;
     switch (((Raw*) msg)->getTypeRadioLayer())
     {
       case LAYER_RADIO_NOT_FREE:
@@ -50,7 +60,7 @@ void RDCdriver::handleMessage(cMessage *msg)
         break;
 
       case LAYER_RADIO_TRANS_OK:
-        sendSuccess();
+        sendSuccess(msg);
         break;
 
       case LAYER_RADIO_COLLISION:
@@ -58,7 +68,7 @@ void RDCdriver::handleMessage(cMessage *msg)
         break;
 
       case LAYER_RADIO_RECV_OK:
-        ((Raw*) msg)->setLen(((Raw*)msg)->getLen() - 6);
+        ((Raw*) msg)->setLen(((Raw*) msg)->getLen() - 6);
         receiveSuccess(msg);
         break;
 

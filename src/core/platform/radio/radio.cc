@@ -13,8 +13,9 @@ void RadioDriver::initialize()
   this->coRange = par("coRange");
   this->broadcastMessage = NULL;
 
+  this->isTransmitting = false;
   this->isReceiving = false;
-  this->isPending = false;
+  this->isListening = true;
 
   listen_on();
 }
@@ -37,7 +38,7 @@ void RadioDriver::handleMessage(cMessage* msg)
       case LAYER_RDC_CHECK_FREE:
         msg->setKind(LAYER_RADIO);
 
-        if (isReceiving || isPending || isTransmitting)
+        if (isReceiving || isTransmitting)
         {
           ((Raw*) msg)->setTypeRadioLayer(LAYER_RADIO_NOT_FREE);
         }
@@ -50,12 +51,12 @@ void RadioDriver::handleMessage(cMessage* msg)
 
       case LAYER_RDC_TURN_RADIO_TRANS:
         // framer
-        ((Raw*) msg)->setLen(((Raw*) msg)->getLen() + 6);
+        ((Raw*) msg)->setLen(((Raw*) msg)->getLen() + PHY_HEADER);
 
         if (DEBUG)
           ev << "Packet length " << ((Raw*) msg)->getLen() << endl;
 
-        if (((Raw*) msg)->getLen() > 127)
+        if (((Raw*) msg)->getLen() > PACKET_802154 + PHY_HEADER)
         {
           if (DEBUG)
             ev << "Packet is too large" << endl;

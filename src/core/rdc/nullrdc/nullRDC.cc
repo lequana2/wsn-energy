@@ -26,6 +26,7 @@ Define_Module(nullRDC);
 
 void nullRDC::deferPacket(cMessage* msg)
 {
+  // WSN If not sending ack
   msg->setKind(LAYER_RDC);
   ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_RADIO_NOT_FREE);
   send(msg, gate("upperOut"));
@@ -33,13 +34,32 @@ void nullRDC::deferPacket(cMessage* msg)
 
 void nullRDC::sendPacket(cMessage *msg)
 {
-  msg->setKind(LAYER_RDC);
-  ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
-  send(msg, gate("lowerOut"));
+  // send data and wait ack
+  if (((Frame*) msg)->getLen() != ACK_LEN)
+  {
+    msg->setKind(LAYER_RDC);
+    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
+    send(msg, gate("lowerOut"));
+
+    waitACK->setKind(LAYER_RDC);
+    waitACK->setTypeMacLayer(LAYER_RDC_WAIT_ACK);
+    scheduleAt(simTime() + WAIT_FOR_ACK, waitACK);
+    isWaitingACK = true;
+  }
+  // send ack
+  else
+  {
+    msg->setKind(LAYER_RDC);
+    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
+    send(msg, gate("lowerOut"));
+  }
 }
 
-void nullRDC::sendSuccess()
+void nullRDC::sendSuccess(cMessage* msg)
 {
+  // Turn on to waiting for ACK
+  if (((Frame*) msg)->getLen() != ACK_LEN)
+    on();
   return;
 }
 
@@ -50,27 +70,32 @@ void nullRDC::sendFailure()
 
 void nullRDC::receiveSuccess(cMessage* msg)
 {
-  // WSN check ACK
-  if (((Frame*) msg)->getLen() == 5)
+  // WSN receive ACK
+  if (((Frame*) msg)->getLen() == ACK_LEN)
   {
     // process ACK
     ev << "Receive ACK" << endl;
     // omit pending
+    if (waitACK != NULL)
+      cancelEvent(waitACK);
+    isWaitingACK = false;
+
+    // Turn off upon receiving ACK
+    off();
   }
-  // WSN send ACK + process to upper layer
+  // receive data = send ACK + process to upper layer
   else
   {
     // send ACK
     Frame* ack = new Frame;
     ack->setKind(LAYER_RDC);
-    ack->setLen(5);
+    ack->setLen(ACK_LEN);
     ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
     send(ack, gate("lowerOut"));
 
     // process to upper layer
     msg->setKind(LAYER_RDC);
     send(msg, gate("upperOut"));
-    on(); // turn on listening upon receving success
   }
 }
 

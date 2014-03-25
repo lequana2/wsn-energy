@@ -44,7 +44,7 @@ void cc2420::transmit_on(Raw *msg)
     Raw *msg = new Raw;
     msg->setKind(LAYER_RADIO);
     msg->setTypeRadioLayer(LAYER_RADIO_COLLISION);
-    send(msg,gate("upperOut"));
+    send(msg, gate("upperOut"));
     return;
   }
 
@@ -140,9 +140,11 @@ void cc2420::transmit_off()
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
   this->isTransmitting = false;
+  this->isListening = true; // listen to ACK
 }
 
-bool cc2420::isClearChannel(){
+bool cc2420::isClearChannel()
+{
   return ((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new Transmission(this, NULL));
 }
 
