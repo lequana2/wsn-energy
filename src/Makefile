@@ -21,6 +21,7 @@ INCLUDE_PATH = \
     -Iapps/server \
     -Icore \
     -Icore/mac \
+    -Icore/mac/csma \
     -Icore/mac/nullmac \
     -Icore/net \
     -Icore/net/ipv6 \
@@ -151,6 +152,7 @@ clean:
 	$(Q)-rm -f apps/server/*_m.cc apps/server/*_m.h
 	$(Q)-rm -f core/*_m.cc core/*_m.h
 	$(Q)-rm -f core/mac/*_m.cc core/mac/*_m.h
+	$(Q)-rm -f core/mac/csma/*_m.cc core/mac/csma/*_m.h
 	$(Q)-rm -f core/mac/nullmac/*_m.cc core/mac/nullmac/*_m.h
 	$(Q)-rm -f core/net/*_m.cc core/net/*_m.h
 	$(Q)-rm -f core/net/ipv6/*_m.cc core/net/ipv6/*_m.h
@@ -175,7 +177,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/platform/*.cc core/platform/battery/*.cc core/platform/radio/*.cc core/platform/radio/cc2420/*.cc core/platform/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/platform/*.cc core/platform/battery/*.cc core/platform/radio/*.cc core/platform/radio/cc2420/*.cc core/platform/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \

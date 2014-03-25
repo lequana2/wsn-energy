@@ -46,6 +46,7 @@ namespace wsn_energy {
  * 	LAYER_RDC_TURN_RADIO_ON  	= 23;
  * 	LAYER_RDC_TURN_RADIO_TRANS 	= 24; 
  * 	LAYER_RDC_RADIO_NOT_FREE    = 25; 
+ * 	LAYER_RDC_ACK				= 26; 
  * 	
  * 	
  * 	LAYER_MAC 		    = 31; 
@@ -90,6 +91,7 @@ enum MESSAGE {
     LAYER_RDC_TURN_RADIO_ON = 23,
     LAYER_RDC_TURN_RADIO_TRANS = 24,
     LAYER_RDC_RADIO_NOT_FREE = 25,
+    LAYER_RDC_ACK = 26,
     LAYER_MAC = 31,
     LAYER_MAC_SEND_OK = 32,
     LAYER_MAC_NO_ACK = 33,

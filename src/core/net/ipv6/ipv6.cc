@@ -96,7 +96,7 @@ void IPv6::handleMessage(cMessage *msg)
     }
 
     //WSN forward data
-    else if (((IpPacket*) msg)->getTypeNetLayer()== NET_DATA)
+    else if (((IpPacket*) msg)->getTypeNetLayer() == NET_DATA)
     {
       if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
         return;

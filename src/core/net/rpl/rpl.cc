@@ -57,7 +57,8 @@ void RPL::sendDIO()
   DIO *icmp = new DIO();
   ((IpPacket*) icmp)->setTypeNetLayer(NET_ICMP_DIO);
 
-  icmp->setDodagID(this->rplDag.version);
+  icmp->setLen(24);
+  icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
 
   net->broadcast(icmp);
@@ -95,11 +96,11 @@ void RPL::receiveDIO(DIO* msg)
     }
   }
 
-  // Consider neighbor dodagID
-  if (this->rplDag.version < msg->getDodagID())
+  // Consider neighbor version
+  if (this->rplDag.version < msg->getVersion())
   {
     // Update self information
-    this->rplDag.version = msg->getDodagID();
+    this->rplDag.version = msg->getVersion();
     this->rplDag.joined = true;
     this->rplDag.rank = msg->getRank() + 1; // WSN hop count
 
@@ -113,7 +114,7 @@ void RPL::receiveDIO(DIO* msg)
       // draw new connection
       char channelParent[20];
       sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
-      EV << channelParent << endl;
+      EV << "new version: " << channelParent << endl;
       net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
 
       // Different
@@ -121,8 +122,9 @@ void RPL::receiveDIO(DIO* msg)
     }
   }
   // obsolete/maintenace DIO
-  else if (this->rplDag.version >= msg->getDodagID())
+  else if (this->rplDag.version >= msg->getVersion())
   {
+    // new parent
     if (this->rplDag.rank > msg->getRank())
     {
       // New neighbor
@@ -134,13 +136,14 @@ void RPL::receiveDIO(DIO* msg)
 
         // draw new connection
         char channelParent[20];
-        sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
-        EV << channelParent << endl;
+        sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
+        EV << "update: " << channelParent << endl;
         net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
       }
       // Update parent
       this->sendDIO();
     }
+    // new sibling
     else if (this->rplDag.rank == msg->getRank())
     {
       // New neighbor

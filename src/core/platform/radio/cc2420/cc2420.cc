@@ -36,17 +36,6 @@ void cc2420::transmit_on(Raw *msg)
   if (DEBUG)
     ev << "Trans on" << endl;
 
-  // framer
-  if (msg->getLen() > 127){
-    if (DEBUG)
-    ev << "Packet header is too large" << endl;
-    return;
-  }
-
-  // Hack
-  msg->setLen(127);
-  msg->setLen(msg->getLen() + 6);
-
   // CCA
   if (isClearChannel())
   {
@@ -89,6 +78,7 @@ void cc2420::transmit_on(Raw *msg)
   // turn off listening and transmitting
   listen_off();
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
+  this->isTransmitting = true;
 }
 
 /*
@@ -149,6 +139,7 @@ void cc2420::transmit_off()
   getParentModule()->setDisplayString(newDisplay);
 
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
+  this->isTransmitting = false;
 }
 
 bool cc2420::isClearChannel(){

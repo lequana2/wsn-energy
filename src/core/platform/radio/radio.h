@@ -55,6 +55,7 @@ class RadioDriver : public cSimpleModule
   public:
     bool isListening;
     bool isReceiving;
+    bool isTransmitting;
     bool isPending;
     int trRange;
     int coRange;

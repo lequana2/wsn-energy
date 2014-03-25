@@ -38,7 +38,7 @@ void RDCdriver::handleMessage(cMessage *msg)
   // From radio layer
   else if (msg->getKind() == LAYER_RADIO)
   {
-    ev << ((Raw*) msg)->getTypeRadioLayer()<< endl;
+    ev << "Type Radio Layer: " << ((Raw*) msg)->getTypeRadioLayer()<< endl;
     switch (((Raw*) msg)->getTypeRadioLayer())
     {
       case LAYER_RADIO_NOT_FREE:
@@ -58,6 +58,7 @@ void RDCdriver::handleMessage(cMessage *msg)
         break;
 
       case LAYER_RADIO_RECV_OK:
+        ((Raw*) msg)->setLen(((Raw*)msg)->getLen() - 6);
         receiveSuccess(msg);
         break;
 

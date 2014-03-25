@@ -50,9 +50,28 @@ void nullRDC::sendFailure()
 
 void nullRDC::receiveSuccess(cMessage* msg)
 {
-  msg->setKind(LAYER_RDC);
-  send(msg, gate("upperOut"));
-  on(); // turn on listening upon receving success
+  // WSN check ACK
+  if (((Frame*) msg)->getLen() == 5)
+  {
+    // process ACK
+    ev << "Receive ACK" << endl;
+    // omit pending
+  }
+  // WSN send ACK + process to upper layer
+  else
+  {
+    // send ACK
+    Frame* ack = new Frame;
+    ack->setKind(LAYER_RDC);
+    ack->setLen(5);
+    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
+    send(ack, gate("lowerOut"));
+
+    // process to upper layer
+    msg->setKind(LAYER_RDC);
+    send(msg, gate("upperOut"));
+    on(); // turn on listening upon receving success
+  }
 }
 
 void nullRDC::receiveFailure()

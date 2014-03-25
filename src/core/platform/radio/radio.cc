@@ -2,7 +2,7 @@
 #include "battery.h"
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 namespace wsn_energy {
@@ -37,7 +37,7 @@ void RadioDriver::handleMessage(cMessage* msg)
       case LAYER_RDC_CHECK_FREE:
         msg->setKind(LAYER_RADIO);
 
-        if (isReceiving || isPending)
+        if (isReceiving || isPending || isTransmitting)
         {
           ((Raw*) msg)->setTypeRadioLayer(LAYER_RADIO_NOT_FREE);
         }
@@ -49,6 +49,19 @@ void RadioDriver::handleMessage(cMessage* msg)
         break;
 
       case LAYER_RDC_TURN_RADIO_TRANS:
+        // framer
+        ((Raw*) msg)->setLen(((Raw*) msg)->getLen() + 6);
+
+        if (DEBUG)
+          ev << "Packet length " << ((Raw*) msg)->getLen() << endl;
+
+        if (((Raw*) msg)->getLen() > 127)
+        {
+          if (DEBUG)
+            ev << "Packet is too large" << endl;
+          return;
+        }
+
         transmit_on((Raw*) msg);
         break;
     }

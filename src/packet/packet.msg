@@ -42,6 +42,7 @@ enum MESSAGE
 	LAYER_RDC_TURN_RADIO_ON  	= 23;
 	LAYER_RDC_TURN_RADIO_TRANS 	= 24; // transmitting control
 	LAYER_RDC_RADIO_NOT_FREE    = 25; // radio is on mission
+	LAYER_RDC_ACK				= 26; // ACK packet
 	
 	// mac
 	LAYER_MAC 		    = 31; // kind

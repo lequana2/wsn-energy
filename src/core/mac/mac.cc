@@ -31,12 +31,14 @@ void MACdriver::handleMessage(cMessage *msg)
   // From net layer
   else if (msg->getKind() == LAYER_NET)
   {
-   sendPacket(msg);
+    ((Frame*) msg)->setLen(((Frame*) msg)->getLen() + 25);
+    sendPacket(msg);
   }
   // From rdc layer
   else if (msg->getKind() == LAYER_RDC)
   {
-    receivePacket(msg);
+    if (((Frame*) msg)->getTypeMacLayer() != LAYER_RDC_RADIO_NOT_FREE)
+      receivePacket(msg);
   }
 }
 
