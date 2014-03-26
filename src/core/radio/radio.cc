@@ -171,7 +171,7 @@ void RadioDriver::listen_on()
   if (DEBUG)
     ev << "Recv on" << endl;
   this->status = LISTENING;
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN, getRxPower());
 }
 
 /*
@@ -182,7 +182,7 @@ void RadioDriver::listen_off()
   if (DEBUG)
     ev << "Recv off" << endl;
   this->status = SLEEPING;
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN, getRxPower());
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
 }
 
 }  // namespace wsn_energy

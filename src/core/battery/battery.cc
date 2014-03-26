@@ -24,42 +24,55 @@ Battery::Battery()
     this->capsuleIsActivated[i] = false;
     this->capsuleTotalTime[i] = 0;
     this->capsuleStartTime[i] = 0;
+    this->power[i] = 0;
   }
   this->capsuleCumulativeEnergest = 0;
 }
 
-Battery::~Battery()
+void Battery::update()
 {
-  // TODO Auto-generated destructor stub
+  for (int type = 0; type < ENERGEST_TYPE_MAX; type++)
+  {
+    if (this->capsuleIsActivated[type])
+    {
+      // increase cumulative energy consumption
+      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power[type];
+
+      // increase total time
+      this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
+
+      // update milestone time
+      this->capsuleStartTime[type] = simTime().dbl();
+    }
+  }
 }
 
-void Battery::energestOn(int type)
+void Battery::energestOn(int type, double power)
 {
   this->capsuleStartTime[type] = simTime().dbl();
   this->capsuleIsActivated[type] = true;
+  this->power[type] = power;
 }
 
-void Battery::energestOff(int type, double power)
+void Battery::energestOff(int type)
 {
   if (this->capsuleIsActivated[type])
   {
+    // increase cumulative energy consumption
+    this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power[type];
+
+    // increase total time
     this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
+
+    // update milestone time (not neccessary)
+    this->capsuleStartTime[type] = simTime().dbl();
+
+    // turn off capsule
     this->capsuleIsActivated[type] = false;
   }
   else
   {
     return;
-  }
-
-  // Update
-  switch (type)
-  {
-    case ENERGEST_TYPE_TRANSMIT:
-      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power;
-      break;
-    case ENERGEST_TYPE_LISTEN:
-      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power;
-      break;
   }
 
   if (DEBUG)
@@ -69,17 +82,4 @@ void Battery::energestOff(int type, double power)
     ev << s << endl;
   }
 }
-
-void Battery::initialize()
-{
-}
-
-void Battery::handleMessage(cMessage *msg)
-{
-}
-
-void Battery::finish()
-{
-}
-
 } /* namespace wsn_energy */

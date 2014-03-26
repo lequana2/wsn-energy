@@ -25,8 +25,8 @@ simple nullRadio like iRadio
     parameters:
         @class("nullRadio");
 
-        int trRange;
-        int coRange;
+        int trRange @unit(m);
+        int coRange @unit(m);
 
     gates:
         input upperIn;

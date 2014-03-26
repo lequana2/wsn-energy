@@ -101,6 +101,9 @@ void nullRDC::receiveSuccess(cMessage* msg)
     frame->setKind(LAYER_RDC);
     frame->setTypeMacLayer(LAYER_RDC_RECV_OK);
     send(frame, gate("upperOut"));
+
+    // turn on to listening
+    on();
   }
 }
 

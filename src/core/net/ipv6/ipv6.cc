@@ -53,6 +53,7 @@ void IPv6::handleMessage(cMessage *msg)
     this->rpl->sendDIS(5);
     return;
   }
+
   // From application layer
   else if (msg->getKind() == APP_SENSING_FLAG)
   {
@@ -64,13 +65,16 @@ void IPv6::handleMessage(cMessage *msg)
       // choosing preferfed parent
       char channelParent[20];
       sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
-      getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
+      getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
       IpPacket* broadcastMessage = (IpPacket*) msg;
       broadcastMessage->setRecverIpAddress(des->neighborID);
       broadcastMessage->setTypeNetLayer(NET_DATA);
+      broadcastMessage->setRecverIpAddress(des->neighborID);
 
       broadcast(broadcastMessage);
+
+      this->rpl->switchParent();
 
       // WSN remove
       this->rpl->rplDag.parentList.remove(des);
@@ -101,6 +105,8 @@ void IPv6::handleMessage(cMessage *msg)
       if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
         return;
 
+      ev << "Forward DATA" << endl;
+
       // Root
       int value = ((Data*) msg)->getValue();
       char m[20];
@@ -120,13 +126,16 @@ void IPv6::handleMessage(cMessage *msg)
           // choosing preferfed parent
           char channelParent[20];
           sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
-          getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
+          getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
           IpPacket* broadcastMessage = (IpPacket*) msg;
+          broadcastMessage->setKind(APP_SENSING_FLAG);
           broadcastMessage->setRecverIpAddress(des->neighborID);
           broadcastMessage->setTypeNetLayer(NET_DATA);
 
           broadcast(broadcastMessage);
+
+          this->rpl->switchParent();
         }
         else
         {
@@ -146,7 +155,7 @@ void IPv6::finish()
 void IPv6::broadcast(IpPacket *msg)
 {
   msg->setSenderIpAddress(this->getId());
-  msg->setRecverIpAddress(getModuleByPath("server.net")->getId());
+//  msg->setRecverIpAddress(getModuleByPath("server.net")->getId());
   msg->setKind(LAYER_NET);
 
   send(msg, gate("lowerOut"));

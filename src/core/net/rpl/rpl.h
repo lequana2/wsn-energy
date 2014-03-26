@@ -63,6 +63,8 @@ class RPL
     void receiveDIS(DIS*);
 
     RPL_neighbor* getPrefferedParent();
+
+    void switchParent();
 };
 
 } /* namespace wsn_energy */

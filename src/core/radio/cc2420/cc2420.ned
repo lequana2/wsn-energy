@@ -25,8 +25,8 @@ simple cc2420 like iRadio
     parameters:
         @class("cc2420");
         
-        int trRange;
-        int coRange;
+        int trRange @unit(m);
+        int coRange @unit(m);
 
     gates:
         input upperIn;

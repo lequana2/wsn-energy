@@ -21,8 +21,8 @@ package wsn_energy.core.radio;
 moduleinterface iRadio
 {
     parameters:
-        int trRange;
-        int coRange;
+        int trRange @unit(m);
+        int coRange @unit(m);
         
     gates:
         input upperIn;

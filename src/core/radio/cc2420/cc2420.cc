@@ -64,7 +64,7 @@ void cc2420::transmit_on(Raw *raw)
   scheduleAt(simTime() + finishTime, broadcastMessage);
 
   // turn off listening and transmitting
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT, getTxPower());
 }
 
 /*
@@ -125,7 +125,7 @@ void cc2420::transmit_off()
 
   getParentModule()->setDisplayString(newDisplay);
 
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
 }
 
 bool cc2420::isClearChannel()

@@ -53,7 +53,8 @@ void Statistic::initialize()
 {
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
-//  scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+  if (getParentModule()->par("isPolling").doubleValue())
+    scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
 }
 
 void Statistic::handleMessage(cMessage *msg)
@@ -74,18 +75,18 @@ void Statistic::pollTotalSensorEnergy()
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();
 
-  double totalEnergy = 0;
-
   Battery *battery;
+  double totalEnergy = 0;
 
   for (int i = 0; i < numberClient; i++)
   {
     battery = check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery"));
+//    battery->update();
+
     totalEnergy += battery->capsuleCumulativeEnergest;
   }
 
   emit(sigNodeEnergy, totalEnergy - numTotalEnergy);
-//  emit(sigNodeEnergy, simTime());
   emit(sigTotalEnergy, totalEnergy);
 
   numTotalEnergy = totalEnergy;

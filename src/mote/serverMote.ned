@@ -33,12 +33,13 @@ module ServerMote
         string macType;
         string rdcType;
         string radioType;
+
+        int axisX 	@unit(m);
+        int axisY 	@unit(m);
+        int trRange @unit(m);
+        int coRange @unit(m);
         
-        int axisX;
-        int axisY;
-        int trRange;
-        int coRange;
-        @display("i=abstract/db;is=s;p=$axisX,$axisY");
+        @display("p=$axisX,$axisY;i=abstract/db;is=s");
 
     submodules:
         app: <appType> like iApp;
@@ -51,7 +52,6 @@ module ServerMote
                 coRange = coRange;
         }
         battery: Battery;
-        
     connections allowunconnected:
         app.lowerOut --> net.upperIn;
         app.lowerIn <-- net.upperOut;

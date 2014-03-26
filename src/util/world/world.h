@@ -26,6 +26,7 @@ class World : public cSimpleModule
 {
   public:
     int numberClient;
+    std::ostringstream oss;
 
     void registerTransmission(Transmission*);
     bool isFeasibleTransmission(Transmission*);

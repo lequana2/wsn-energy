@@ -37,19 +37,6 @@ void nullRadio::transmit_on(Raw *raw)
 
   broadcastMessage = raw;
 
-  // start broadcasting
-  char newDisplay[20];
-
-  int x = getParentModule()->par("axisX");
-  int y = getParentModule()->par("axisY");
-
-  if (this->getId() == simulation.getModuleByPath("server.radio")->getId())
-    sprintf(newDisplay, "p=\%d,\%d;i=abstract/db;is=s;r=%d", x, y, trRange);
-  else
-    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs;r=%d", x, y, trRange);
-
-  getParentModule()->setDisplayString(newDisplay);
-
   // register transmission to world
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
@@ -64,7 +51,7 @@ void nullRadio::transmit_on(Raw *raw)
   scheduleAt(simTime() + finishTime, broadcastMessage);
 
   // turn off listening and transmitting
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT, getTxPower());
 }
 
 /*
@@ -99,7 +86,8 @@ void nullRadio::transmit_off()
       // EV << "Corrupted" << endl;
       recver->getParentModule()->bubble("Corrupted");
       broadcastMessage->setBitError(false);
-      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_RECV_CORRUPT);
+//      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_RECV_CORRUPT);
+      broadcastMessage->setTypeRadioLayer(LAYER_RADIO_RECV_OK);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
@@ -125,7 +113,7 @@ void nullRadio::transmit_off()
 
   getParentModule()->setDisplayString(newDisplay);
 
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT, getTxPower());
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
 }
 
 bool nullRadio::isClearChannel()

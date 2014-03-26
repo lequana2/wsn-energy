@@ -26,28 +26,34 @@ import wsn_energy.util.statistic.Statistic;
 network WSN
 {
     parameters:
+        int topology;
+        
         int numberClient;
 
-        int trRange;
-        int coRange;
+        int trRange @unit(m);
+        int coRange @unit(m);
+        int ssRange @unit(m);
 
-        int width;
-        int height;
+        int width   @unit(m);
+        int height  @unit(m);
 
         double redundancy;
         double energy;
 
+        int isPolling;
         double polling;
 
-        @display("bgb=$width,$height,#C6C6FF,#0000FF,2");
+        @display("bgs=6,m;bgb=$width,$height,#C6C6FF,#0000FF,2");
 
     submodules:
         server: ServerMote {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-                axisX = width / 2;
-                axisY = 0;
+//                axisX = width  / 2;
+//                axisY = height / 2;
+				axisX = 0;
+				axisY = 0;
         }
         client[numberClient]: ClientMote {
             parameters:

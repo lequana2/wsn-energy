@@ -34,11 +34,12 @@ module ClientMote
         string rdcType;
         string radioType;
         
-        int axisX;
-        int axisY;
-        int trRange;
-        int coRange;
-        @display("p=$axisX,$axisY;i=misc/node;is=vs");
+        int axisX 	@unit(m);
+        int axisY 	@unit(m);
+        int trRange @unit(m);
+        int coRange @unit(m);
+        
+        @display("p=$axisX,$axisY;i=misc/node;is=s");
 
     submodules:
         app: <appType> like iApp;

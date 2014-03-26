@@ -46,20 +46,36 @@ void World::handleMessage(cMessage *msg)
  */
 void World::arrangeNodes()
 {
+  int col = -1; // carry out
+  int row = 0;
+  int step = 0;
+  int x, y;
+
   for (int i = 0; i < numberClient; i++)
   {
-    int x, y;
+    switch ((int) getParentModule()->par("topology").doubleValue())
+    {
+      case 0: /* server at center */
+        if (col > 8)
+        {
+          row++;
+          col = 0;
+        }
+        else
+          col++;
 
-    // Partition
-    x = (i % 10) * 100 + 20;
-    y = (i / 10) * 100 + 50;
+        // Partition
+        x = col * 30 + 15;
+        y = row * 30 + 25;
 
-    if ((i / 10) % 2 != 0)
-      x += 50;
+        // Randomize
+        x = uniform(x - 5, x + 5);
+        y = uniform(y - 5, y + 5);
+        break; /* server at center */
 
-    // Randomize
-    x = uniform(x - 20, x + 20);
-    y = uniform(y - 20, y + 20);
+      case 1: /* pyramid */
+        break; /* pyramid */
+    }
 
     char modulePath[20];
     sprintf(modulePath, "client[%d]", i);
@@ -229,6 +245,10 @@ void World::registerTransmission(Transmission *tranmission)
         (*otherTranmission)->corrupt();
     }
   }
+
+  oss.seekp(0);
+  oss << sender->trRange << endl;
+  (&sender->getParentModule()->getDisplayString())->setTagArg("r", 0, oss.str().c_str());
 }
 
 bool World::isFeasibleTransmission(Transmission* transmission)
@@ -260,6 +280,9 @@ void World::stopTransmission(Transmission* transmission)
       recver->status = LISTENING;
       this->onAir.remove(*otherTranmission);
       (*otherTranmission) = NULL;
+
+      (&sender->getParentModule()->getDisplayString())->setTagArg("r", 0, "0");
+
       return;
     }
   }

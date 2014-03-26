@@ -26,19 +26,15 @@ class Battery : public cSimpleModule
     double capsuleCumulativeEnergest;
 
     Battery();
-    virtual ~Battery();
 
-    void energestOn(int);
-    void energestOff(int,double);
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    void energestOn(int, double);
+    void energestOff(int);
+    void update();
 
   private:
     double capsuleTotalTime[ENERGEST_TYPE_MAX];
     double capsuleStartTime[ENERGEST_TYPE_MAX];
+    double power[ENERGEST_TYPE_MAX];
     bool capsuleIsActivated[ENERGEST_TYPE_MAX];
 };
 

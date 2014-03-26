@@ -215,4 +215,21 @@ RPL_neighbor* RPL::getPrefferedParent()
   return prefferedParent;
 }
 
-} /* namespace wsn_energy */
+void RPL::switchParent()
+{
+  // WSN switch best and second best parent
+  if (this->rplDag.parentList.size() < 2)
+  {
+    return;
+  }
+  else
+  {
+    ev << "switch parent " << endl;
+
+    RPL_neighbor *candidate = this->rplDag.parentList.front();
+    this->rplDag.parentList.remove(candidate);
+    this->rplDag.parentList.push_back(candidate);
+  }
+}
+
+}/* namespace wsn_energy */
