@@ -18,9 +18,9 @@ namespace wsn_energy;
 enum PACKET_SIZE{
 	PHY_HEADER     =  6;    // PHY 802.15.4 header 6 bytes
 	
-	PACKET_802154  =  127;  // MAC 802.15.4 payload 127 bytes
-	ACK_LEN		   =  5;	// MAC 802.15.4 ACK 5 bytes (header + footer)
-	MAC_LEN		   =  25;   // MAC 802.15.4 ACK 25 bytes (address long)
+	PACKET_802154  			=  127;  // MAC 802.15.4 payload 127 bytes
+	ACK_HEADER_FOOTER_LEN	=  5;	 // MAC 802.15.4 ACK 5 bytes (header + footer)
+	MAC_HEADER_FOOTER_LEN	=  25;   // MAC 802.15.4 ACK 25 bytes (address long)
 	
 	DIO_LEN		   =  24; 	// ICMPv6 RPL DODAG INFORMATION OBJECT
 	DIS_LEN		   =  10;   // ICMPv6 RPL DODAG INFORMATION SOLICITATION

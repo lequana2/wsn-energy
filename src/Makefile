@@ -211,7 +211,10 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 $O/core/radio/radio.o: core/radio/radio.cc \
 	core/battery/battery.h \
 	core/radio/radio.h \
-	packet/packet_m.h
+	packet/packet_m.h \
+	util/statistic/statistic.h \
+	util/transmission/transmission.h \
+	util/world/world.h
 $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	core/battery/battery.h \
 	core/radio/cc2420/cc2420-const.h \

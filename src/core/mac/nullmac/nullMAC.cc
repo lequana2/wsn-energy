@@ -25,7 +25,7 @@ void nullMAC::sendPacket(cMessage* msg)
   Frame *frame = (Frame*) msg;
 
   frame->setKind(LAYER_MAC);
-  frame->setLen(frame->getLen() + MAC_LEN);
+  frame->setLen(frame->getLen() + MAC_HEADER_FOOTER_LEN);
   frame->setSenderMacAddress(this->getId());
   frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
 

@@ -29,122 +29,119 @@ namespace wsn_energy {
 
 Define_Module(IPv6);
 
-//---------------------------------------------------------------------------//
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
 
+  // Server starts forming RPL construct
   if (this->getId() == simulation.getModuleByPath("server.net")->getId())
     this->rpl->rpl_set_root();
 }
-//---------------------------------------------------------------------------//
+
 void IPv6::handleMessage(cMessage *msg)
 {
   ev << "Message type: " << msg->getKind() << endl;
 
-  // Control message
-  if (msg->getKind() == RPL_CONSTRUCT)
+  switch (msg->getKind())
   {
-    this->rpl->sendDIO();
-    return;
-  }
-  else if (msg->getKind() == RPL_SOLICIT)
-  {
-    this->rpl->sendDIS(5);
-    return;
-  }
+    case RPL_CONSTRUCT: /* Construct RPL DODAG */
+      this->rpl->sendDIO();
+      break; /* Construct RPL DODAG*/
 
-  // From application layer
-  else if (msg->getKind() == APP_SENSING_FLAG)
-  {
-    ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
+    case RPL_SOLICIT: /* Solicit DODAG information*/
+      this->rpl->sendDIS(5);
+      break; /*Solicit information*/
 
-    RPL_neighbor *des = this->rpl->getPrefferedParent();
-    if (des != NULL)
+    case LAYER_APP: /* message from Application layer */
     {
-      // choosing preferfed parent
-      char channelParent[20];
-      sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
-      getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+      ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
 
-      IpPacket* broadcastMessage = (IpPacket*) msg;
-      broadcastMessage->setRecverIpAddress(des->neighborID);
-      broadcastMessage->setTypeNetLayer(NET_DATA);
-      broadcastMessage->setRecverIpAddress(des->neighborID);
-
-      broadcast(broadcastMessage);
-
-      this->rpl->switchParent();
-
-      // WSN remove
-      this->rpl->rplDag.parentList.remove(des);
-    }
-    else
-    {
-      // WSN dismiss message ?
-    }
-  }
-  // From mac layer
-  else if (msg->getKind() == LAYER_MAC)
-  {
-    // receive RPL DODAG information
-    if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIO)
-    {
-      this->rpl->receiveDIO((DIO*) msg);
-    }
-
-    // receive RPL DODAG solicitation
-    else if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIS)
-    {
-      this->rpl->receiveDIS((DIS*) msg);
-    }
-
-    //WSN forward data
-    else if (((IpPacket*) msg)->getTypeNetLayer() == NET_DATA)
-    {
-      if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
-        return;
-
-      ev << "Forward DATA" << endl;
-
-      // Root
-      int value = ((Data*) msg)->getValue();
-      char m[20];
-      sprintf(m, "%d", value);
-
-      if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+      RPL_neighbor *des = this->rpl->getPrefferedParent();
+      if (des != NULL)
       {
-        this->getParentModule()->bubble(m);
-        ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
-        // WSN send to application layer
+        // choosing preferfed parent
+        char channelParent[20];
+        sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+        getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+
+        IpPacket* broadcastMessage = (IpPacket*) msg;
+        broadcastMessage->setRecverIpAddress(des->neighborID);
+        broadcastMessage->setTypeNetLayer(NET_DATA);
+        broadcastMessage->setRecverIpAddress(des->neighborID);
+
+        broadcast(broadcastMessage);
+
+        this->rpl->switchParent();
+
+        // WSN remove
+        this->rpl->rplDag.parentList.remove(des);
       }
       else
       {
-        RPL_neighbor *des = this->rpl->getPrefferedParent();
-        if (des != NULL)
+        // WSN dismiss message ?
+      }
+    }
+      break; /* message from Application layer */
+
+    case LAYER_MAC: /* message from MAC layer */
+      // receive RPL DODAG information
+      if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIO)
+      {
+        this->rpl->receiveDIO((DIO*) msg);
+      }
+
+      // receive RPL DODAG solicitation
+      else if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIS)
+      {
+        this->rpl->receiveDIS((DIS*) msg);
+      }
+
+      //WSN forward data
+      else if (((IpPacket*) msg)->getTypeNetLayer() == NET_DATA)
+      {
+        if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
+          return;
+
+        ev << "Forward DATA" << endl;
+
+        // Root
+        int value = ((Data*) msg)->getValue();
+        char m[20];
+        sprintf(m, "%d", value);
+
+        if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
         {
-          // choosing preferfed parent
-          char channelParent[20];
-          sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
-          getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
-
-          IpPacket* broadcastMessage = (IpPacket*) msg;
-          broadcastMessage->setKind(APP_SENSING_FLAG);
-          broadcastMessage->setRecverIpAddress(des->neighborID);
-          broadcastMessage->setTypeNetLayer(NET_DATA);
-
-          broadcast(broadcastMessage);
-
-          this->rpl->switchParent();
+          this->getParentModule()->bubble(m);
+          ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
+          // WSN send to application layer
         }
         else
         {
-          // WSN dismiss message ?
+          RPL_neighbor *des = this->rpl->getPrefferedParent();
+          if (des != NULL)
+          {
+            // choosing preferfed parent
+            char channelParent[20];
+            sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+            getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+
+            IpPacket* broadcastMessage = (IpPacket*) msg;
+            broadcastMessage->setKind(APP_SENSING_FLAG);
+            broadcastMessage->setRecverIpAddress(des->neighborID);
+            broadcastMessage->setTypeNetLayer(NET_DATA);
+
+            broadcast(broadcastMessage);
+
+            this->rpl->switchParent();
+          }
+          else
+          {
+            // WSN dismiss message ?
+          }
         }
       }
-    }
+      break; /* message from MAC layer */
   }
-  // WSN Enviroment message
 }
 
 void IPv6::finish()

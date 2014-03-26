@@ -38,8 +38,8 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::PACKET_SIZE"));
     e->insert(PHY_HEADER, "PHY_HEADER");
     e->insert(PACKET_802154, "PACKET_802154");
-    e->insert(ACK_LEN, "ACK_LEN");
-    e->insert(MAC_LEN, "MAC_LEN");
+    e->insert(ACK_HEADER_FOOTER_LEN, "ACK_HEADER_FOOTER_LEN");
+    e->insert(MAC_HEADER_FOOTER_LEN, "MAC_HEADER_FOOTER_LEN");
     e->insert(DIO_LEN, "DIO_LEN");
     e->insert(DIS_LEN, "DIS_LEN");
     e->insert(DATA, "DATA");

@@ -48,7 +48,7 @@ void World::arrangeNodes()
 {
   int col = -1; // carry out
   int row = 0;
-  int step = 0;
+//  int step = 0;
   int x, y;
 
   for (int i = 0; i < numberClient; i++)
@@ -56,7 +56,7 @@ void World::arrangeNodes()
     switch ((int) getParentModule()->par("topology").doubleValue())
     {
       case 0: /* server at center */
-        if (col > 8)
+        if (col > 10)
         {
           row++;
           col = 0;
@@ -65,8 +65,8 @@ void World::arrangeNodes()
           col++;
 
         // Partition
-        x = col * 30 + 15;
-        y = row * 30 + 25;
+        x = col * 25 + 15;
+        y = row * 25 + 5;
 
         // Randomize
         x = uniform(x - 5, x + 5);
@@ -83,10 +83,6 @@ void World::arrangeNodes()
 
     mote->par("axisX").setDoubleValue(x);
     mote->par("axisY").setDoubleValue(y);
-
-//    x = mote->par("axisX");
-//    y = mote->par("axisY");
-//    ev << i << " " << x << " " << y << " " << endl;
 
     char newDisplay[20];
     sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", x, y);

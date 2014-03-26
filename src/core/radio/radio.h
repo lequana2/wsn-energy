@@ -26,6 +26,10 @@
 #define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000002 // second
 #endif
 
+#ifndef DATA_RATE
+#define DATA_RATE 250000  // 250 kbps
+#endif
+
 #define SLEEPING        0 // do nothing
 #define TRANSMITTING    1 // transmitting something
 #define LISTENING       2 // listening to nothing
@@ -45,8 +49,8 @@ class RadioDriver : public cSimpleModule
     virtual void finish();
 
     // Functioning
-    virtual void transmit_on(Raw *raw) = 0;
-    virtual void transmit_off() = 0;
+    virtual void transmit_on(Raw *raw);
+    virtual void transmit_off();
     virtual void listen_off();
     virtual void listen_on();
 

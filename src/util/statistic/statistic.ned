@@ -39,5 +39,5 @@ simple Statistic
         @signal[recv_data](type="int");
         @statistic[recvData](title="Number of received data"; source="recv_data"; record=last);
 
-        @display("p=-50,80;i=block/table2");
+        @display("p=-10,40;i=block/table2");
 }

@@ -35,7 +35,7 @@ void nullRDC::deferPacket(cMessage* msg)
 void nullRDC::sendPacket(cMessage *msg)
 {
   // send data and wait ack
-  if (((Frame*) msg)->getLen() != ACK_LEN)
+  if (((Frame*) msg)->getLen() != ACK_HEADER_FOOTER_LEN)
   {
     msg->setKind(LAYER_RDC);
 //    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
@@ -59,7 +59,7 @@ void nullRDC::sendPacket(cMessage *msg)
 void nullRDC::sendSuccess(cMessage* msg)
 {
   // Turn on to waiting for ACK
-  if (((Frame*) msg)->getLen() != ACK_LEN)
+  if (((Frame*) msg)->getLen() != ACK_HEADER_FOOTER_LEN)
     on();
   return;
 }
@@ -74,7 +74,7 @@ void nullRDC::receiveSuccess(cMessage* msg)
   Frame *frame = check_and_cast<Frame*>(msg);
 
   // WSN receive ACK
-  if (frame->getLen() == ACK_LEN)
+  if (frame->getLen() == ACK_HEADER_FOOTER_LEN)
   {
     // process ACK
     ev << "Receive ACK" << endl;

@@ -22,10 +22,6 @@ namespace wsn_energy {
 
 class nullRadio : public RadioDriver
 {
-  private:
-    virtual void transmit_on(Raw *raw);
-    virtual void transmit_off();
-
   protected:
     virtual bool isClearChannel();
 

@@ -23,10 +23,6 @@ namespace wsn_energy {
 
 class cc2420 : public RadioDriver
 {
-  private:
-    virtual void transmit_on(Raw *raw);
-    virtual void transmit_off();
-
   public:
     virtual bool isClearChannel();
 

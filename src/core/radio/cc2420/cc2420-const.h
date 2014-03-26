@@ -12,9 +12,11 @@
 #define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000002 // second
 #endif
 
-#define FREQUENCY 2400 // MHz
-
+#ifndef DATA_RATE
 #define DATA_RATE 250000 // bps
+#endif
+
+#define FREQUENCY 2400 // MHz
 
 #define TXPOWER_LEVEL_MAX 31
 #define TXPOWER_LEVEL_MIN 0

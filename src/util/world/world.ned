@@ -23,5 +23,5 @@ simple World
     parameters:
         int numberClient;
 
-        @display("p=-50,-10;i=misc/globe");
+        @display("p=-10,10;i=misc/globe");
 }

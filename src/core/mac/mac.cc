@@ -44,7 +44,7 @@ void MACdriver::handleMessage(cMessage *msg)
         case LAYER_RDC_RECV_OK:
           frame->setKind(LAYER_MAC);
           frame->setTypeMacLayer(LAYER_MAC_RECV_OK);
-          frame->setLen(frame->getLen() - MAC_LEN);
+          frame->setLen(frame->getLen() - MAC_HEADER_FOOTER_LEN);
           send(frame, gate("upperOut"));
           break; /* okay message */
       }

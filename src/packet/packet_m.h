@@ -22,9 +22,9 @@ namespace wsn_energy {
  * enum PACKET_SIZE{
  * 	PHY_HEADER     =  6;    
  * 	
- * 	PACKET_802154  =  127;  
- * 	ACK_LEN		   =  5;	
- * 	MAC_LEN		   =  25;   
+ * 	PACKET_802154  			=  127;  
+ * 	ACK_HEADER_FOOTER_LEN	=  5;	 
+ * 	MAC_HEADER_FOOTER_LEN	=  25;   
  * 	
  * 	DIO_LEN		   =  24; 	
  * 	DIS_LEN		   =  10;   
@@ -36,8 +36,8 @@ namespace wsn_energy {
 enum PACKET_SIZE {
     PHY_HEADER = 6,
     PACKET_802154 = 127,
-    ACK_LEN = 5,
-    MAC_LEN = 25,
+    ACK_HEADER_FOOTER_LEN = 5,
+    MAC_HEADER_FOOTER_LEN = 25,
     DIO_LEN = 24,
     DIS_LEN = 10,
     DATA = 1
