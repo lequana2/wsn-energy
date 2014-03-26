@@ -197,6 +197,7 @@ $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	apps/app.h \
+	core/battery/battery.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
@@ -205,6 +206,7 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
+	core/battery/battery.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	packet/packet_m.h

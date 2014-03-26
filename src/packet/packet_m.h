@@ -359,8 +359,9 @@ inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet DIO extends IpPacket {
  * 	int dodagID;
- * 	unsigned long rank;
  * 	int version;
+ * 	unsigned long rank;
+ * 	double secondCriteria;
  * }
  * </pre>
  */
@@ -368,8 +369,9 @@ class DIO : public ::wsn_energy::IpPacket
 {
   protected:
     int dodagID_var;
-    unsigned long rank_var;
     int version_var;
+    unsigned long rank_var;
+    double secondCriteria_var;
 
   private:
     void copy(const DIO& other);
@@ -390,10 +392,12 @@ class DIO : public ::wsn_energy::IpPacket
     // field getter/setter methods
     virtual int getDodagID() const;
     virtual void setDodagID(int dodagID);
-    virtual unsigned long getRank() const;
-    virtual void setRank(unsigned long rank);
     virtual int getVersion() const;
     virtual void setVersion(int version);
+    virtual unsigned long getRank() const;
+    virtual void setRank(unsigned long rank);
+    virtual double getSecondCriteria() const;
+    virtual void setSecondCriteria(double secondCriteria);
 };
 
 inline void doPacking(cCommBuffer *b, DIO& obj) {obj.parsimPack(b);}

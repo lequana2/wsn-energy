@@ -37,9 +37,6 @@ network WSN
         int width   @unit(m);
         int height  @unit(m);
 
-        double redundancy;
-        double energy;
-
         int isPolling;
         double polling;
 

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "ipv6.h"
+#include "battery.h"
 
 #ifndef ANNOTATE
 #define ANNOTATE 0
@@ -64,6 +65,7 @@ void RPL::sendDIO()
   icmp->setLen(DIO_LEN);
   icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
+  icmp->setSecondCriteria(((Battery*) this->net->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
 
   net->broadcast(icmp);
 }
@@ -89,6 +91,7 @@ void RPL::receiveDIO(DIO* msg)
   RPL_neighbor *neighbor = new RPL_neighbor();
   neighbor->neighborID = msg->getRadioSendId();
   neighbor->neighborRank = msg->getRank();
+  neighbor->secondCriteria = msg->getSecondCriteria();
 
   // incoming neighbor message
   std::list<RPL_neighbor*>::iterator candidate = this->rplDag.parentList.begin();
@@ -97,11 +100,12 @@ void RPL::receiveDIO(DIO* msg)
     // Update own neighbor
     if (neighbor->neighborID == (*candidate)->neighborID)
     {
-      neighbor->neighborRank = (*candidate)->neighborRank;
+      (*candidate)->neighborRank = neighbor->neighborRank;
+      (*candidate)->secondCriteria = neighbor->secondCriteria;
     }
   }
 
-  // Consider neighbor version
+// Consider neighbor version
   if (this->rplDag.version < msg->getVersion())
   {
     // Update self information
@@ -129,7 +133,7 @@ void RPL::receiveDIO(DIO* msg)
       this->sendDIO();
     }
   }
-  // obsolete/maintenace DIO
+// obsolete/maintenace DIO
   else if (this->rplDag.version >= msg->getVersion())
   {
     // new parent
@@ -180,7 +184,7 @@ void RPL::receiveDIO(DIO* msg)
       return;
   }
 
-  // Bubble current rank
+// Bubble current rank
   char rank[10];
   sprintf(rank, "Rank %d", (int) this->rplDag.rank);
   net->getParentModule()->bubble(rank);
@@ -210,6 +214,7 @@ RPL_neighbor* RPL::getPrefferedParent()
   if (this->rplDag.parentList.size() == 0)
     return NULL;
 
+// Collect parent + sibling node
   std::list<RPL_neighbor*> goodParent;
   for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
       iterator != this->rplDag.parentList.end(); iterator++)
@@ -218,31 +223,45 @@ RPL_neighbor* RPL::getPrefferedParent()
       goodParent.push_back(*iterator);
   }
 
+// Search thru parent list + get best energy
   RPL_neighbor *prefferedParent = goodParent.front();
   for (std::list<RPL_neighbor*>::iterator iterator = goodParent.begin(); iterator != goodParent.end(); iterator++)
   {
     if ((*iterator)->neighborRank < prefferedParent->neighborRank)
+      prefferedParent = *iterator;
+    else if ((*iterator)->neighborRank == prefferedParent->neighborRank
+        && (*iterator)->secondCriteria > prefferedParent->secondCriteria)
       prefferedParent = *iterator;
   }
 
   return prefferedParent;
 }
 
-//void RPL::switchParent()
-//{
-//  // WSN switch best and second best parent
-//  if (this->rplDag.parentList.size() < 2)
-//  {
-//    return;
-//  }
-//  else
-//  {
-//    ev << "switch parent " << endl;
-//
-//    RPL_neighbor *candidate = this->rplDag.parentList.front();
-//    this->rplDag.parentList.remove(candidate);
-//    this->rplDag.parentList.push_back(candidate);
-//  }
-//}
+void RPL::updateParent(ACK *ack)
+{
+  int parentID = ack->getRadioSendId();
 
+// WSN search thru list + update
+  if (this->rplDag.parentList.size() == 0)
+    return;
+
+  std::list<RPL_neighbor*> goodParent;
+  for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
+      iterator != this->rplDag.parentList.end(); iterator++)
+  {
+    if ((*iterator)->neighborID == parentID)
+    {
+      ev << "Update second criteria: " << (*iterator)->secondCriteria << "/" << ack->getEnergy();
+
+      (*iterator)->secondCriteria = ack->getEnergy();
+
+      ev << "/" << (*iterator)->secondCriteria << endl;
+      delete ack;
+      return;
+    }
+  }
+
+  delete ack;
+  ev << "ACK from no where " << endl;
+}
 }/* namespace wsn_energy */

@@ -20,6 +20,7 @@
 #include "app.h"
 #include "ipv6.h"
 #include "rpl.h"
+#include "battery.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -91,6 +92,9 @@ void IPv6::handleMessage(cMessage *msg)
           break; /* receiving DIS */
 
         case NET_ICMP_ACK: /* WSN update parent list */
+          if (DEBUG)
+            ev << "Receive Net ACK" << endl;
+          this->rpl->updateParent((ACK*) msg);
           break; /* WSN update parent list */
 
         case NET_DATA: /* forward data */
@@ -107,7 +111,7 @@ void IPv6::handleMessage(cMessage *msg)
             ACK *ack = new ACK;
             ack->setTypeNetLayer(NET_ICMP_ACK);
             ack->setIsRequestAck(false);
-            // WSN set energy
+            ack->setEnergy(((Battery*) this->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
             unicast(ack, ipPacket->getRecverIpAddress());
             delete ipPacket;
           }

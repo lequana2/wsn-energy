@@ -99,7 +99,6 @@ void RadioDriver::handleMessage(cMessage* msg)
 
         case LAYER_RADIO_END_TRANSMIT:
           transmit_off();
-          this->status = SLEEPING;
           raw->setTypeRadioLayer(LAYER_RADIO_SEND_OK);
           send(raw, gate("upperOut"));
           break; /* end transmitting*/
@@ -242,6 +241,7 @@ void RadioDriver::transmit_off()
     ((World*) simulation.getModuleByPath("world"))->stopTransmission(completeTranmission);
   }
 
+  this->status = SLEEPING;
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
 }
 

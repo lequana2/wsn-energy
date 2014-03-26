@@ -26,17 +26,16 @@ Battery::Battery()
     this->capsuleStartTime[i] = 0;
     this->power[i] = 0;
   }
-  this->capsuleCumulativeEnergest = 0;
+  this->energestRemaining = OPERATION_POWER * OPERATION_VOLTAGE;
 }
 
+//WSN ???
 void Battery::update()
 {
   for (int type = 0; type < ENERGEST_TYPE_MAX; type++)
   {
     if (this->capsuleIsActivated[type])
     {
-      // increase cumulative energy consumption
-      this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power[type];
 
       // increase total time
       this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
@@ -58,14 +57,13 @@ void Battery::energestOff(int type)
 {
   if (this->capsuleIsActivated[type])
   {
-    // increase cumulative energy consumption
-    this->capsuleCumulativeEnergest += (simTime().dbl() - this->capsuleStartTime[type]) * power[type];
+    double consumeTime = simTime().dbl() - this->capsuleStartTime[type];
+
+    // consume energy
+    this->energestRemaining -= consumeTime * power[type];
 
     // increase total time
-    this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
-
-    // update milestone time (not neccessary)
-    this->capsuleStartTime[type] = simTime().dbl();
+    this->capsuleTotalTime[type] += consumeTime;
 
     // turn off capsule
     this->capsuleIsActivated[type] = false;
@@ -73,13 +71,6 @@ void Battery::energestOff(int type)
   else
   {
     return;
-  }
-
-  if (DEBUG)
-  {
-    char s[30];
-    sprintf(s, "%d: %f", type, this->capsuleTotalTime[type]);
-    ev << s << endl;
   }
 }
 } /* namespace wsn_energy */

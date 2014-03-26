@@ -83,7 +83,7 @@ void Statistic::pollTotalSensorEnergy()
     battery = check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery"));
 //    battery->update();
 
-    totalEnergy += battery->capsuleCumulativeEnergest;
+    totalEnergy += battery->energestRemaining;
   }
 
   emit(sigNodeEnergy, totalEnergy - numTotalEnergy);

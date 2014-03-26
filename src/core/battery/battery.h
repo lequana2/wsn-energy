@@ -10,6 +10,9 @@
 #ifndef BATTERY_H_
 #define BATTERY_H_
 
+#define OPERATION_POWER     1000 // mAh
+#define OPERATION_VOLTAGE      3 // Voltage
+
 enum ENERGEST_TYPE
 {
   ENERGEST_TYPE_CPU, ENERGEST_TYPE_TRANSMIT, ENERGEST_TYPE_LISTEN, ENERGEST_TYPE_SENSORS, ENERGEST_TYPE_MAX,
@@ -23,7 +26,7 @@ namespace wsn_energy {
 class Battery : public cSimpleModule
 {
   public:
-    double capsuleCumulativeEnergest;
+    double energestRemaining;
 
     Battery();
 

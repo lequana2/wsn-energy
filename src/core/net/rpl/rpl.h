@@ -31,6 +31,7 @@ class RPL_neighbor
   public:
     int neighborID;
     unsigned long neighborRank;
+    double secondCriteria;
 };
 
 class RPL_dag
@@ -64,7 +65,7 @@ class RPL
 
     RPL_neighbor* getPrefferedParent();
 
-    void updateParent(RPL_neighbor*);
+    void updateParent(ACK *ack);
 };
 
 } /* namespace wsn_energy */

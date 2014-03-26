@@ -129,8 +129,9 @@ packet Data extends IpPacket {
 
 packet DIO extends IpPacket {
 	int dodagID;
-	unsigned long rank;
 	int version;
+	unsigned long rank;
+	double secondCriteria;
 }
 
 packet DIS extends IpPacket {

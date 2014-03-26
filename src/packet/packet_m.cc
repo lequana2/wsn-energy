@@ -1252,8 +1252,9 @@ Register_Class(DIO);
 DIO::DIO(const char *name, int kind) : wsn_energy::IpPacket(name,kind)
 {
     this->dodagID_var = 0;
-    this->rank_var = 0;
     this->version_var = 0;
+    this->rank_var = 0;
+    this->secondCriteria_var = 0;
 }
 
 DIO::DIO(const DIO& other) : wsn_energy::IpPacket(other)
@@ -1276,24 +1277,27 @@ DIO& DIO::operator=(const DIO& other)
 void DIO::copy(const DIO& other)
 {
     this->dodagID_var = other.dodagID_var;
-    this->rank_var = other.rank_var;
     this->version_var = other.version_var;
+    this->rank_var = other.rank_var;
+    this->secondCriteria_var = other.secondCriteria_var;
 }
 
 void DIO::parsimPack(cCommBuffer *b)
 {
     wsn_energy::IpPacket::parsimPack(b);
     doPacking(b,this->dodagID_var);
-    doPacking(b,this->rank_var);
     doPacking(b,this->version_var);
+    doPacking(b,this->rank_var);
+    doPacking(b,this->secondCriteria_var);
 }
 
 void DIO::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::IpPacket::parsimUnpack(b);
     doUnpacking(b,this->dodagID_var);
-    doUnpacking(b,this->rank_var);
     doUnpacking(b,this->version_var);
+    doUnpacking(b,this->rank_var);
+    doUnpacking(b,this->secondCriteria_var);
 }
 
 int DIO::getDodagID() const
@@ -1306,6 +1310,16 @@ void DIO::setDodagID(int dodagID)
     this->dodagID_var = dodagID;
 }
 
+int DIO::getVersion() const
+{
+    return version_var;
+}
+
+void DIO::setVersion(int version)
+{
+    this->version_var = version;
+}
+
 unsigned long DIO::getRank() const
 {
     return rank_var;
@@ -1316,14 +1330,14 @@ void DIO::setRank(unsigned long rank)
     this->rank_var = rank;
 }
 
-int DIO::getVersion() const
+double DIO::getSecondCriteria() const
 {
-    return version_var;
+    return secondCriteria_var;
 }
 
-void DIO::setVersion(int version)
+void DIO::setSecondCriteria(double secondCriteria)
 {
-    this->version_var = version;
+    this->secondCriteria_var = secondCriteria;
 }
 
 class DIODescriptor : public cClassDescriptor
@@ -1373,7 +1387,7 @@ const char *DIODescriptor::getProperty(const char *propertyname) const
 int DIODescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int DIODescriptor::getFieldTypeFlags(void *object, int field) const
@@ -1388,8 +1402,9 @@ unsigned int DIODescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DIODescriptor::getFieldName(void *object, int field) const
@@ -1402,10 +1417,11 @@ const char *DIODescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "dodagID",
-        "rank",
         "version",
+        "rank",
+        "secondCriteria",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int DIODescriptor::findField(void *object, const char *fieldName) const
@@ -1413,8 +1429,9 @@ int DIODescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='d' && strcmp(fieldName, "dodagID")==0) return base+0;
-    if (fieldName[0]=='r' && strcmp(fieldName, "rank")==0) return base+1;
-    if (fieldName[0]=='v' && strcmp(fieldName, "version")==0) return base+2;
+    if (fieldName[0]=='v' && strcmp(fieldName, "version")==0) return base+1;
+    if (fieldName[0]=='r' && strcmp(fieldName, "rank")==0) return base+2;
+    if (fieldName[0]=='s' && strcmp(fieldName, "secondCriteria")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1428,10 +1445,11 @@ const char *DIODescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "unsigned long",
         "int",
+        "unsigned long",
+        "double",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DIODescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1472,8 +1490,9 @@ std::string DIODescriptor::getFieldAsString(void *object, int field, int i) cons
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getDodagID());
-        case 1: return ulong2string(pp->getRank());
-        case 2: return long2string(pp->getVersion());
+        case 1: return long2string(pp->getVersion());
+        case 2: return ulong2string(pp->getRank());
+        case 3: return double2string(pp->getSecondCriteria());
         default: return "";
     }
 }
@@ -1489,8 +1508,9 @@ bool DIODescriptor::setFieldAsString(void *object, int field, int i, const char 
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
         case 0: pp->setDodagID(string2long(value)); return true;
-        case 1: pp->setRank(string2ulong(value)); return true;
-        case 2: pp->setVersion(string2long(value)); return true;
+        case 1: pp->setVersion(string2long(value)); return true;
+        case 2: pp->setRank(string2ulong(value)); return true;
+        case 3: pp->setSecondCriteria(string2double(value)); return true;
         default: return false;
     }
 }
@@ -1507,8 +1527,9 @@ const char *DIODescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *DIODescriptor::getFieldStructPointer(void *object, int field, int i) const
