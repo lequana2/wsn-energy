@@ -30,6 +30,7 @@ class IPv6 : public cSimpleModule
     RPL *rpl;
 
     void broadcast(IpPacket*);
+    void unicast(IpPacket*, int);
 
   protected:
     virtual void initialize();

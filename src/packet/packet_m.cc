@@ -64,10 +64,12 @@ EXECUTE_ON_STARTUP(
     e->insert(LAYER_RADIO_CCA_NOT_VALID, "LAYER_RADIO_CCA_NOT_VALID");
     e->insert(LAYER_RADIO_NOT_FREE, "LAYER_RADIO_NOT_FREE");
     e->insert(LAYER_RADIO_PACKET_OVERSIZE, "LAYER_RADIO_PACKET_OVERSIZE");
+    e->insert(LAYER_RADIO_SEND_OK, "LAYER_RADIO_SEND_OK");
     e->insert(LAYER_RADIO_RECV_OK, "LAYER_RADIO_RECV_OK");
     e->insert(LAYER_RADIO_RECV_CORRUPT, "LAYER_RADIO_RECV_CORRUPT");
     e->insert(LAYER_RDC, "LAYER_RDC");
     e->insert(LAYER_RDC_SEND, "LAYER_RDC_SEND");
+    e->insert(LAYER_RDC_SEND_OK, "LAYER_RDC_SEND_OK");
     e->insert(LAYER_RDC_WAIT_ACK, "LAYER_RDC_WAIT_ACK");
     e->insert(LAYER_RDC_LISTEN_ON, "LAYER_RDC_LISTEN_ON");
     e->insert(LAYER_RDC_LISTEN_OFF, "LAYER_RDC_LISTEN_OFF");
@@ -82,7 +84,9 @@ EXECUTE_ON_STARTUP(
     e->insert(LAYER_NET, "LAYER_NET");
     e->insert(NET_ICMP_DIO, "NET_ICMP_DIO");
     e->insert(NET_ICMP_DIS, "NET_ICMP_DIS");
+    e->insert(NET_ICMP_ACK, "NET_ICMP_ACK");
     e->insert(NET_DATA, "NET_DATA");
+    e->insert(NET_ICMP_REQUEST_ACK, "NET_ICMP_REQUEST_ACK");
     e->insert(LAYER_APP, "LAYER_APP");
     e->insert(APP_WORKING_FLAG, "APP_WORKING_FLAG");
     e->insert(APP_SENSING_FLAG, "APP_SENSING_FLAG");
@@ -715,6 +719,7 @@ IpPacket::IpPacket(const char *name, int kind) : wsn_energy::Frame(name,kind)
     this->typeNetLayer_var = 0;
     this->senderIpAddress_var = 0;
     this->recverIpAddress_var = 0;
+    this->isRequestAck_var = 0;
 }
 
 IpPacket::IpPacket(const IpPacket& other) : wsn_energy::Frame(other)
@@ -739,6 +744,7 @@ void IpPacket::copy(const IpPacket& other)
     this->typeNetLayer_var = other.typeNetLayer_var;
     this->senderIpAddress_var = other.senderIpAddress_var;
     this->recverIpAddress_var = other.recverIpAddress_var;
+    this->isRequestAck_var = other.isRequestAck_var;
 }
 
 void IpPacket::parsimPack(cCommBuffer *b)
@@ -747,6 +753,7 @@ void IpPacket::parsimPack(cCommBuffer *b)
     doPacking(b,this->typeNetLayer_var);
     doPacking(b,this->senderIpAddress_var);
     doPacking(b,this->recverIpAddress_var);
+    doPacking(b,this->isRequestAck_var);
 }
 
 void IpPacket::parsimUnpack(cCommBuffer *b)
@@ -755,6 +762,7 @@ void IpPacket::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->typeNetLayer_var);
     doUnpacking(b,this->senderIpAddress_var);
     doUnpacking(b,this->recverIpAddress_var);
+    doUnpacking(b,this->isRequestAck_var);
 }
 
 int IpPacket::getTypeNetLayer() const
@@ -785,6 +793,16 @@ int IpPacket::getRecverIpAddress() const
 void IpPacket::setRecverIpAddress(int recverIpAddress)
 {
     this->recverIpAddress_var = recverIpAddress;
+}
+
+bool IpPacket::getIsRequestAck() const
+{
+    return isRequestAck_var;
+}
+
+void IpPacket::setIsRequestAck(bool isRequestAck)
+{
+    this->isRequestAck_var = isRequestAck;
 }
 
 class IpPacketDescriptor : public cClassDescriptor
@@ -834,7 +852,7 @@ const char *IpPacketDescriptor::getProperty(const char *propertyname) const
 int IpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -849,8 +867,9 @@ unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) cons
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketDescriptor::getFieldName(void *object, int field) const
@@ -865,8 +884,9 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
         "typeNetLayer",
         "senderIpAddress",
         "recverIpAddress",
+        "isRequestAck",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int IpPacketDescriptor::findField(void *object, const char *fieldName) const
@@ -876,6 +896,7 @@ int IpPacketDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='t' && strcmp(fieldName, "typeNetLayer")==0) return base+0;
     if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+1;
     if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+2;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isRequestAck")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -891,8 +912,9 @@ const char *IpPacketDescriptor::getFieldTypeString(void *object, int field) cons
         "int",
         "int",
         "int",
+        "bool",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -935,6 +957,7 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
         case 0: return long2string(pp->getTypeNetLayer());
         case 1: return long2string(pp->getSenderIpAddress());
         case 2: return long2string(pp->getRecverIpAddress());
+        case 3: return bool2string(pp->getIsRequestAck());
         default: return "";
     }
 }
@@ -952,6 +975,7 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
         case 0: pp->setTypeNetLayer(string2long(value)); return true;
         case 1: pp->setSenderIpAddress(string2long(value)); return true;
         case 2: pp->setRecverIpAddress(string2long(value)); return true;
+        case 3: pp->setIsRequestAck(string2bool(value)); return true;
         default: return false;
     }
 }
@@ -968,8 +992,9 @@ const char *IpPacketDescriptor::getFieldStructName(void *object, int field) cons
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1027,12 +1052,12 @@ void Data::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->value_var);
 }
 
-int Data::getValue() const
+const char * Data::getValue() const
 {
-    return value_var;
+    return value_var.c_str();
 }
 
-void Data::setValue(int value)
+void Data::setValue(const char * value)
 {
     this->value_var = value;
 }
@@ -1132,7 +1157,7 @@ const char *DataDescriptor::getFieldTypeString(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldTypeStrings[] = {
-        "int",
+        "string",
     };
     return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
 }
@@ -1174,7 +1199,7 @@ std::string DataDescriptor::getFieldAsString(void *object, int field, int i) con
     }
     Data *pp = (Data *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getValue());
+        case 0: return oppstring2string(pp->getValue());
         default: return "";
     }
 }
@@ -1189,7 +1214,7 @@ bool DataDescriptor::setFieldAsString(void *object, int field, int i, const char
     }
     Data *pp = (Data *)object; (void)pp;
     switch (field) {
-        case 0: pp->setValue(string2long(value)); return true;
+        case 0: pp->setValue((value)); return true;
         default: return false;
     }
 }
@@ -1731,6 +1756,242 @@ void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const
         field -= basedesc->getFieldCount(object);
     }
     DIS *pp = (DIS *)object; (void)pp;
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+Register_Class(ACK);
+
+ACK::ACK(const char *name, int kind) : wsn_energy::IpPacket(name,kind)
+{
+    this->energy_var = 0;
+}
+
+ACK::ACK(const ACK& other) : wsn_energy::IpPacket(other)
+{
+    copy(other);
+}
+
+ACK::~ACK()
+{
+}
+
+ACK& ACK::operator=(const ACK& other)
+{
+    if (this==&other) return *this;
+    wsn_energy::IpPacket::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void ACK::copy(const ACK& other)
+{
+    this->energy_var = other.energy_var;
+}
+
+void ACK::parsimPack(cCommBuffer *b)
+{
+    wsn_energy::IpPacket::parsimPack(b);
+    doPacking(b,this->energy_var);
+}
+
+void ACK::parsimUnpack(cCommBuffer *b)
+{
+    wsn_energy::IpPacket::parsimUnpack(b);
+    doUnpacking(b,this->energy_var);
+}
+
+double ACK::getEnergy() const
+{
+    return energy_var;
+}
+
+void ACK::setEnergy(double energy)
+{
+    this->energy_var = energy;
+}
+
+class ACKDescriptor : public cClassDescriptor
+{
+  public:
+    ACKDescriptor();
+    virtual ~ACKDescriptor();
+
+    virtual bool doesSupport(cObject *obj) const;
+    virtual const char *getProperty(const char *propertyname) const;
+    virtual int getFieldCount(void *object) const;
+    virtual const char *getFieldName(void *object, int field) const;
+    virtual int findField(void *object, const char *fieldName) const;
+    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
+    virtual const char *getFieldTypeString(void *object, int field) const;
+    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
+    virtual int getArraySize(void *object, int field) const;
+
+    virtual std::string getFieldAsString(void *object, int field, int i) const;
+    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
+
+    virtual const char *getFieldStructName(void *object, int field) const;
+    virtual void *getFieldStructPointer(void *object, int field, int i) const;
+};
+
+Register_ClassDescriptor(ACKDescriptor);
+
+ACKDescriptor::ACKDescriptor() : cClassDescriptor("wsn_energy::ACK", "wsn_energy::IpPacket")
+{
+}
+
+ACKDescriptor::~ACKDescriptor()
+{
+}
+
+bool ACKDescriptor::doesSupport(cObject *obj) const
+{
+    return dynamic_cast<ACK *>(obj)!=NULL;
+}
+
+const char *ACKDescriptor::getProperty(const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : NULL;
+}
+
+int ACKDescriptor::getFieldCount(void *object) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+}
+
+unsigned int ACKDescriptor::getFieldTypeFlags(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeFlags(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+}
+
+const char *ACKDescriptor::getFieldName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldNames[] = {
+        "energy",
+    };
+    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+}
+
+int ACKDescriptor::findField(void *object, const char *fieldName) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='e' && strcmp(fieldName, "energy")==0) return base+0;
+    return basedesc ? basedesc->findField(object, fieldName) : -1;
+}
+
+const char *ACKDescriptor::getFieldTypeString(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeString(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldTypeStrings[] = {
+        "double",
+    };
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+}
+
+const char *ACKDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldProperty(object, field, propertyname);
+        field -= basedesc->getFieldCount(object);
+    }
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+int ACKDescriptor::getArraySize(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getArraySize(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    ACK *pp = (ACK *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+std::string ACKDescriptor::getFieldAsString(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldAsString(object,field,i);
+        field -= basedesc->getFieldCount(object);
+    }
+    ACK *pp = (ACK *)object; (void)pp;
+    switch (field) {
+        case 0: return double2string(pp->getEnergy());
+        default: return "";
+    }
+}
+
+bool ACKDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->setFieldAsString(object,field,i,value);
+        field -= basedesc->getFieldCount(object);
+    }
+    ACK *pp = (ACK *)object; (void)pp;
+    switch (field) {
+        case 0: pp->setEnergy(string2double(value)); return true;
+        default: return false;
+    }
+}
+
+const char *ACKDescriptor::getFieldStructName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldStructNames[] = {
+        NULL,
+    };
+    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+}
+
+void *ACKDescriptor::getFieldStructPointer(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructPointer(object, field, i);
+        field -= basedesc->getFieldCount(object);
+    }
+    ACK *pp = (ACK *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }

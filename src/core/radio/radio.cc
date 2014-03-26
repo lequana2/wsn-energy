@@ -99,6 +99,9 @@ void RadioDriver::handleMessage(cMessage* msg)
 
         case LAYER_RADIO_END_TRANSMIT:
           transmit_off();
+          this->status = SLEEPING;
+          raw->setTypeRadioLayer(LAYER_RADIO_SEND_OK);
+          send(raw, gate("upperOut"));
           break; /* end transmitting*/
 
         case LAYER_RADIO_BEGIN_LISTEN:

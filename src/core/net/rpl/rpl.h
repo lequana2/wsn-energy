@@ -64,7 +64,7 @@ class RPL
 
     RPL_neighbor* getPrefferedParent();
 
-    void switchParent();
+    void updateParent(RPL_neighbor*);
 };
 
 } /* namespace wsn_energy */

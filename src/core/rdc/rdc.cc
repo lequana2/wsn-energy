@@ -59,6 +59,12 @@ void RDCdriver::handleMessage(cMessage *msg)
       Raw *raw = check_and_cast<Raw*>(msg);
       switch (raw->getTypeRadioLayer())
       {
+        case LAYER_RADIO_SEND_OK: /* callback after sending */
+          raw->setKind(LAYER_RDC);
+          ((Frame*)raw)->setTypeMacLayer(LAYER_RDC_SEND_OK);
+          send(raw, gate("upperOut"));
+          break; /* callback after sending */
+
         case LAYER_RADIO_CCA_NOT_VALID:
           break;
 

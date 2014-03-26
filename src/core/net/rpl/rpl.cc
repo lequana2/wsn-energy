@@ -19,6 +19,10 @@
 
 #include "ipv6.h"
 
+#ifndef ANNOTATE
+#define ANNOTATE 0
+#endif
+
 #ifndef DEBUG
 #define DEBUG 1
 #endif
@@ -113,10 +117,13 @@ void RPL::receiveDIO(DIO* msg)
       this->rplDag.parentList.push_back(neighbor);
 
       // draw new connection
-      char channelParent[20];
-      sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
-      EV << "new version: " << channelParent << endl;
-      net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+      if (ANNOTATE)
+      {
+        char channelParent[20];
+        sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
+        EV << "new version: " << channelParent << endl;
+        net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+      }
 
       // Different
       this->sendDIO();
@@ -136,10 +143,13 @@ void RPL::receiveDIO(DIO* msg)
         this->rplDag.parentList.push_back(neighbor);
 
         // draw new connection
-        char channelParent[20];
-        sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
-        EV << "update: " << channelParent << endl;
-        net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+        if (ANNOTATE)
+        {
+          char channelParent[20];
+          sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
+          EV << "update: " << channelParent << endl;
+          net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+        }
       }
       // Update parent
       this->sendDIO();
@@ -155,10 +165,13 @@ void RPL::receiveDIO(DIO* msg)
         this->rplDag.parentList.push_back(neighbor);
 
         // draw new connection
-        char channelParent[20];
-        sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
-        EV << channelParent << endl;
-        net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
+        if (ANNOTATE)
+        {
+          char channelParent[20];
+          sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
+          EV << channelParent << endl;
+          net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
+        }
       }
       // Update sibling
     }
@@ -215,21 +228,21 @@ RPL_neighbor* RPL::getPrefferedParent()
   return prefferedParent;
 }
 
-void RPL::switchParent()
-{
-  // WSN switch best and second best parent
-  if (this->rplDag.parentList.size() < 2)
-  {
-    return;
-  }
-  else
-  {
-    ev << "switch parent " << endl;
-
-    RPL_neighbor *candidate = this->rplDag.parentList.front();
-    this->rplDag.parentList.remove(candidate);
-    this->rplDag.parentList.push_back(candidate);
-  }
-}
+//void RPL::switchParent()
+//{
+//  // WSN switch best and second best parent
+//  if (this->rplDag.parentList.size() < 2)
+//  {
+//    return;
+//  }
+//  else
+//  {
+//    ev << "switch parent " << endl;
+//
+//    RPL_neighbor *candidate = this->rplDag.parentList.front();
+//    this->rplDag.parentList.remove(candidate);
+//    this->rplDag.parentList.push_back(candidate);
+//  }
+//}
 
 }/* namespace wsn_energy */

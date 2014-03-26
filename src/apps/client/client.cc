@@ -44,14 +44,14 @@ void Client::initialize()
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[35]")->getId())
 //    scheduleAt(simTime() + 30, event);
 
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
-//      scheduleAt(simTime() + 1, event->dup());
+  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
+    scheduleAt(simTime() + 1, event->dup());
 //
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
-//      scheduleAt(simTime() + 2, event->dup());
+//    scheduleAt(simTime() + 2, event->dup());
 //
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
-//      scheduleAt(simTime() + 3, event->dup());
+//    scheduleAt(simTime() + 3, event->dup());
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[26]")->getId())
 //    scheduleAt(simTime() + 30, event);
@@ -63,10 +63,12 @@ void Client::handleMessage(cMessage *msg)
 //  {
 //    send(msg, gate("lowerOut"));
 //  }
-  if (msg->getKind() == APP_SENSING_FLAG){
+  if (msg->getKind() == APP_SENSING_FLAG)
+  {
     Data *data = new Data;
     data->setKind(LAYER_APP);
-    data->setValue(13);
+    std::string value = "Hello";
+    data->setValue("Hello from");
     send(data, gate("lowerOut"));
   }
 }

@@ -71,22 +71,24 @@ enum PACKET_SIZE {
  *  	LAYER_RADIO_CCA_NOT_VALID   = 18; 
  * 	LAYER_RADIO_NOT_FREE	   	= 19; 
  * 	LAYER_RADIO_PACKET_OVERSIZE = 20; 
+ * 	LAYER_RADIO_SEND_OK			= 21; 
  * 	
- * 	LAYER_RADIO_RECV_OK			= 21; 
- * 	LAYER_RADIO_RECV_CORRUPT	= 22; 
+ * 	LAYER_RADIO_RECV_OK			= 22; 
+ * 	LAYER_RADIO_RECV_CORRUPT	= 23; 
  * 	
  * 	
  * 	LAYER_RDC                	= 30; 
  * 	
  * 	LAYER_RDC_SEND				= 31; 
+ * 	LAYER_RDC_SEND_OK			= 32; 
  * 	
- * 	LAYER_RDC_WAIT_ACK			= 32; 
+ * 	LAYER_RDC_WAIT_ACK			= 33; 
  * 	
- * 	LAYER_RDC_LISTEN_ON			= 33; 
- * 	LAYER_RDC_LISTEN_OFF		= 34; 
+ * 	LAYER_RDC_LISTEN_ON			= 34; 
+ * 	LAYER_RDC_LISTEN_OFF		= 35; 
  * 	
- * 	LAYER_RDC_RECV_OK			= 35; 
- * 	LAYER_RDC_RECV_ACK			= 36; 
+ * 	LAYER_RDC_RECV_OK			= 36; 
+ * 	LAYER_RDC_RECV_ACK			= 37; 
  * 	
  * 	
  * 	LAYER_MAC 		    = 50; 
@@ -100,10 +102,15 @@ enum PACKET_SIZE {
  * 	LAYER_MAC_RECV_OK	= 55; 
  * 
  * 	
- * 	LAYER_NET     = 70; 
- * 	NET_ICMP_DIO  = 71; 
- * 	NET_ICMP_DIS  = 72; 
- * 	NET_DATA      = 73; 
+ * 	LAYER_NET       = 70; 
+ * 	
+ * 	NET_ICMP_DIO    = 71; 
+ * 	NET_ICMP_DIS    = 72; 
+ * 	NET_ICMP_ACK    = 73; 
+ * 	
+ * 	NET_DATA        = 74; 
+ * 	
+ * 	NET_ICMP_REQUEST_ACK = 75; 
  * 	
  * 	
  * 	LAYER_APP		 = 90; 
@@ -130,15 +137,17 @@ enum MESSAGE {
     LAYER_RADIO_CCA_NOT_VALID = 18,
     LAYER_RADIO_NOT_FREE = 19,
     LAYER_RADIO_PACKET_OVERSIZE = 20,
-    LAYER_RADIO_RECV_OK = 21,
-    LAYER_RADIO_RECV_CORRUPT = 22,
+    LAYER_RADIO_SEND_OK = 21,
+    LAYER_RADIO_RECV_OK = 22,
+    LAYER_RADIO_RECV_CORRUPT = 23,
     LAYER_RDC = 30,
     LAYER_RDC_SEND = 31,
-    LAYER_RDC_WAIT_ACK = 32,
-    LAYER_RDC_LISTEN_ON = 33,
-    LAYER_RDC_LISTEN_OFF = 34,
-    LAYER_RDC_RECV_OK = 35,
-    LAYER_RDC_RECV_ACK = 36,
+    LAYER_RDC_SEND_OK = 32,
+    LAYER_RDC_WAIT_ACK = 33,
+    LAYER_RDC_LISTEN_ON = 34,
+    LAYER_RDC_LISTEN_OFF = 35,
+    LAYER_RDC_RECV_OK = 36,
+    LAYER_RDC_RECV_ACK = 37,
     LAYER_MAC = 50,
     LAYER_MAC_SEND_OK = 51,
     LAYER_MAC_NO_ACK = 52,
@@ -148,7 +157,9 @@ enum MESSAGE {
     LAYER_NET = 70,
     NET_ICMP_DIO = 71,
     NET_ICMP_DIS = 72,
-    NET_DATA = 73,
+    NET_ICMP_ACK = 73,
+    NET_DATA = 74,
+    NET_ICMP_REQUEST_ACK = 75,
     LAYER_APP = 90,
     APP_WORKING_FLAG = 91,
     APP_SENSING_FLAG = 92,
@@ -264,6 +275,7 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
  *     int typeNetLayer;
  *     int senderIpAddress;
  *     int recverIpAddress;
+ *     bool isRequestAck;
  * }
  * </pre>
  */
@@ -273,6 +285,7 @@ class IpPacket : public ::wsn_energy::Frame
     int typeNetLayer_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
+    bool isRequestAck_var;
 
   private:
     void copy(const IpPacket& other);
@@ -297,6 +310,8 @@ class IpPacket : public ::wsn_energy::Frame
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;
     virtual void setRecverIpAddress(int recverIpAddress);
+    virtual bool getIsRequestAck() const;
+    virtual void setIsRequestAck(bool isRequestAck);
 };
 
 inline void doPacking(cCommBuffer *b, IpPacket& obj) {obj.parsimPack(b);}
@@ -306,14 +321,14 @@ inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Data extends IpPacket {
- * 	int value;
+ * 	string value;
  * }
  * </pre>
  */
 class Data : public ::wsn_energy::IpPacket
 {
   protected:
-    int value_var;
+    opp_string value_var;
 
   private:
     void copy(const Data& other);
@@ -332,8 +347,8 @@ class Data : public ::wsn_energy::IpPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getValue() const;
-    virtual void setValue(int value);
+    virtual const char * getValue() const;
+    virtual void setValue(const char * value);
 };
 
 inline void doPacking(cCommBuffer *b, Data& obj) {obj.parsimPack(b);}
@@ -420,6 +435,43 @@ class DIS : public ::wsn_energy::IpPacket
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet ACK extends IpPacket {
+ * 	double energy;
+ * }
+ * </pre>
+ */
+class ACK : public ::wsn_energy::IpPacket
+{
+  protected:
+    double energy_var;
+
+  private:
+    void copy(const ACK& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const ACK&);
+
+  public:
+    ACK(const char *name=NULL, int kind=0);
+    ACK(const ACK& other);
+    virtual ~ACK();
+    ACK& operator=(const ACK& other);
+    virtual ACK *dup() const {return new ACK(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual double getEnergy() const;
+    virtual void setEnergy(double energy);
+};
+
+inline void doPacking(cCommBuffer *b, ACK& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, ACK& obj) {obj.parsimUnpack(b);}
 
 }; // end namespace wsn_energy
 

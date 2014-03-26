@@ -65,16 +65,10 @@ void IPv6::handleMessage(cMessage *msg)
         getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
         IpPacket* broadcastMessage = (IpPacket*) msg;
-        broadcastMessage->setRecverIpAddress(des->neighborID);
         broadcastMessage->setTypeNetLayer(NET_DATA);
-        broadcastMessage->setRecverIpAddress(des->neighborID);
+        broadcastMessage->setIsRequestAck(false);
 
-        broadcast(broadcastMessage);
-
-        this->rpl->switchParent();
-
-        // WSN remove
-        this->rpl->rplDag.parentList.remove(des);
+        unicast(broadcastMessage, des->neighborID);
       }
       else
       {
@@ -84,62 +78,85 @@ void IPv6::handleMessage(cMessage *msg)
       break; /* message from Application layer */
 
     case LAYER_MAC: /* message from MAC layer */
-      // receive RPL DODAG information
-      if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIO)
+    {
+      IpPacket *ipPacket = check_and_cast<IpPacket*>(msg);
+      switch (ipPacket->getTypeNetLayer())
       {
-        this->rpl->receiveDIO((DIO*) msg);
-      }
+        case NET_ICMP_DIO: /* receiving DIO */
+          this->rpl->receiveDIO((DIO*) ipPacket);
+          break; /* receiving DIO */
 
-      // receive RPL DODAG solicitation
-      else if (((IpPacket*) msg)->getTypeNetLayer() == NET_ICMP_DIS)
-      {
-        this->rpl->receiveDIS((DIS*) msg);
-      }
+        case NET_ICMP_DIS: /* receiving DIS */
+          this->rpl->receiveDIS((DIS*) ipPacket);
+          break; /* receiving DIS */
 
-      //WSN forward data
-      else if (((IpPacket*) msg)->getTypeNetLayer() == NET_DATA)
-      {
-        if (((IpPacket*) msg)->getRecverIpAddress() != this->getParentModule()->getId())
-          return;
+        case NET_ICMP_ACK: /* WSN update parent list */
+          break; /* WSN update parent list */
 
-        ev << "Forward DATA" << endl;
+        case NET_DATA: /* forward data */
+          // Requesting an ACK from itself
+          if (DEBUG)
+            ev << "ACK " << ipPacket->getSenderIpAddress() << "/" << this->getParentModule()->getId() << endl;
 
-        // Root
-        int value = ((Data*) msg)->getValue();
-        char m[20];
-        sprintf(m, "%d", value);
-
-        if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
-        {
-          this->getParentModule()->bubble(m);
-          ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
-          // WSN send to application layer
-        }
-        else
-        {
-          RPL_neighbor *des = this->rpl->getPrefferedParent();
-          if (des != NULL)
+          // message from it lower self + request sending an ACK
+          if (ipPacket->getSenderIpAddress() == this->getParentModule()->getId() && ipPacket->getIsRequestAck())
           {
-            // choosing preferfed parent
-            char channelParent[20];
-            sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
-            getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+            if (DEBUG)
+              ev << "Net ignite ACK" << endl;
 
-            IpPacket* broadcastMessage = (IpPacket*) msg;
-            broadcastMessage->setKind(APP_SENSING_FLAG);
-            broadcastMessage->setRecverIpAddress(des->neighborID);
-            broadcastMessage->setTypeNetLayer(NET_DATA);
-
-            broadcast(broadcastMessage);
-
-            this->rpl->switchParent();
+            ACK *ack = new ACK;
+            ack->setTypeNetLayer(NET_ICMP_ACK);
+            ack->setIsRequestAck(false);
+            // WSN set energy
+            unicast(ack, ipPacket->getRecverIpAddress());
+            delete ipPacket;
           }
+          // Fowarding a data
           else
           {
-            // WSN dismiss message ?
+            if (ipPacket->getRecverIpAddress() != 0
+                && ipPacket->getRecverIpAddress() != this->getParentModule()->getId())
+            {
+              // wrong IP address in unicast, drop message
+              if (DEBUG)
+                ev << "Wrong IP message" << endl;
+              delete ipPacket;
+              return;
+            }
+
+            ev << "Forward Data" << endl;
+
+            // Root
+            if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+            {
+              this->getParentModule()->bubble(((Data*) ipPacket)->getValue());
+              ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
+              // WSN send to application layer
+            }
+            else
+            {
+              RPL_neighbor *des = this->rpl->getPrefferedParent();
+              if (des != NULL)
+              {
+                // choosing preferfed parent
+                char channelParent[20];
+                sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+                getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+
+                IpPacket* broadcastMessage = (IpPacket*) msg;
+                broadcastMessage->setTypeNetLayer(NET_DATA);
+                broadcastMessage->setIsRequestAck(true);
+
+                unicast(broadcastMessage, des->neighborID);
+              }
+              else
+              {
+              }
+            }
           }
-        }
+          break; /* forward data */
       }
+    }
       break; /* message from MAC layer */
   }
 }
@@ -148,12 +165,20 @@ void IPv6::finish()
 {
 }
 
-//---------------------------------------------------------------------------//
 void IPv6::broadcast(IpPacket *msg)
 {
-  msg->setSenderIpAddress(this->getId());
-//  msg->setRecverIpAddress(getModuleByPath("server.net")->getId());
   msg->setKind(LAYER_NET);
+  msg->setSenderIpAddress(this->getParentModule()->getId());
+  msg->setRecverIpAddress(0);
+
+  send(msg, gate("lowerOut"));
+}
+
+void IPv6::unicast(IpPacket *msg, int recverID)
+{
+  msg->setKind(LAYER_NET);
+  msg->setSenderIpAddress(this->getParentModule()->getId());
+  msg->setRecverIpAddress(recverID);
 
   send(msg, gate("lowerOut"));
 }

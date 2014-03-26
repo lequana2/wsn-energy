@@ -53,22 +53,24 @@ enum MESSAGE
  	LAYER_RADIO_CCA_NOT_VALID   = 18; // channel is not clear
 	LAYER_RADIO_NOT_FREE	   	= 19; // radio is currently working
 	LAYER_RADIO_PACKET_OVERSIZE = 20; // packet is too big
+	LAYER_RADIO_SEND_OK			= 21; // send okay
 	
-	LAYER_RADIO_RECV_OK			= 21; // packet is okay
-	LAYER_RADIO_RECV_CORRUPT	= 22; // packet is corrupt
+	LAYER_RADIO_RECV_OK			= 22; // packet is okay
+	LAYER_RADIO_RECV_CORRUPT	= 23; // packet is corrupt
 	
 	// rdc
 	LAYER_RDC                	= 30; // kind
 	
 	LAYER_RDC_SEND				= 31; // sending a message
+	LAYER_RDC_SEND_OK			= 32; // alreadt sent a message
 	
-	LAYER_RDC_WAIT_ACK			= 32; // waiting for an ACK
+	LAYER_RDC_WAIT_ACK			= 33; // waiting for an ACK
 	
-	LAYER_RDC_LISTEN_ON			= 33; // turn receiver on
-	LAYER_RDC_LISTEN_OFF		= 34; // turn receiver off
+	LAYER_RDC_LISTEN_ON			= 34; // turn receiver on
+	LAYER_RDC_LISTEN_OFF		= 35; // turn receiver off
 	
-	LAYER_RDC_RECV_OK			= 35; // receiving a okay message
-	LAYER_RDC_RECV_ACK			= 36; // receiving an ACK
+	LAYER_RDC_RECV_OK			= 36; // receiving a okay message
+	LAYER_RDC_RECV_ACK			= 37; // receiving an ACK
 	
 	// mac
 	LAYER_MAC 		    = 50; // kind
@@ -82,10 +84,15 @@ enum MESSAGE
 	LAYER_MAC_RECV_OK	= 55; // receiving an okay message
 
 	// net
-	LAYER_NET     = 70; // kind
-	NET_ICMP_DIO  = 71; // ICMP DIO message
-	NET_ICMP_DIS  = 72; // ICMP DIS message
-	NET_DATA      = 73; // normal data message
+	LAYER_NET       = 70; // kind
+	
+	NET_ICMP_DIO    = 71; // ICMP DIO message
+	NET_ICMP_DIS    = 72; // ICMP DIS message
+	NET_ICMP_ACK    = 73; // ICMP ACK message
+	
+	NET_DATA        = 74; // normal data message
+	
+	NET_ICMP_REQUEST_ACK = 75; // ICMP sending ACK request
 	
 	// event
 	LAYER_APP		 = 90; // kind
@@ -113,10 +120,11 @@ packet IpPacket extends Frame{
     int typeNetLayer;
     int senderIpAddress;
     int recverIpAddress;
+    bool isRequestAck;
 }
 
 packet Data extends IpPacket {
-	int value;
+	string value;
 }
 
 packet DIO extends IpPacket {
@@ -127,4 +135,8 @@ packet DIO extends IpPacket {
 
 packet DIS extends IpPacket {
 	int convergence;
+}
+
+packet ACK extends IpPacket {
+	double energy;
 }

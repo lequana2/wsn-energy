@@ -36,7 +36,17 @@ void MACdriver::handleMessage(cMessage *msg)
       break; /* message from NET layer */
 
     case LAYER_RDC: /* message from MAC layer */
-      switch(frame->getTypeMacLayer()){
+      switch (frame->getTypeMacLayer())
+      {
+        case LAYER_RDC_SEND_OK: /* callback after sending */
+          if (((IpPacket*) frame)->getIsRequestAck())
+          {
+            frame->setKind(LAYER_MAC);
+            ((IpPacket*) frame)->setTypeNetLayer(NET_DATA);
+            send(frame, gate("upperOut"));
+          }
+          break; /* callback after sending */
+
         case LAYER_RDC_RECV_ACK:
           ev << "No ACK received" << endl;
           break; /* recv ACK */
