@@ -84,9 +84,13 @@ void World::arrangeNodes()
     mote->par("axisX").setDoubleValue(x);
     mote->par("axisY").setDoubleValue(y);
 
-    char newDisplay[20];
-    sprintf(newDisplay, "p=\%d,\%d;i=misc/node;is=vs", x, y);
-    mote->setDisplayString(newDisplay);
+    oss.seekp(0);
+    oss << x << endl;
+    (&mote->getDisplayString())->setTagArg("p", 0, oss.str().c_str());
+
+    oss.seekp(0);
+    oss << y << endl;
+    (&mote->getDisplayString())->setTagArg("p", 1, oss.str().c_str());
   }
 }
 

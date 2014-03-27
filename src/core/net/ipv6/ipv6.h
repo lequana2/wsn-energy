@@ -26,8 +26,11 @@ namespace wsn_energy {
 class IPv6 : public cSimpleModule
 {
   public:
-    //WSN RPL
+    // RPL
     RPL *rpl;
+
+    // Buffer message to send
+    std::list<IpPacket*> buffer;
 
     void broadcast(IpPacket*);
     void unicast(IpPacket*, int);

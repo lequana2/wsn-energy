@@ -41,7 +41,7 @@ void IPv6::initialize()
 
 void IPv6::handleMessage(cMessage *msg)
 {
-  ev << "Message type: " << msg->getKind() << endl;
+  ev << "IpMessage type: " << msg->getKind() << endl;
 
   switch (msg->getKind())
   {
@@ -65,7 +65,7 @@ void IPv6::handleMessage(cMessage *msg)
         sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
         getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
-        IpPacket* broadcastMessage = (IpPacket*) msg;
+        IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
         broadcastMessage->setTypeNetLayer(NET_DATA);
         broadcastMessage->setIsRequestAck(false);
 
@@ -147,7 +147,7 @@ void IPv6::handleMessage(cMessage *msg)
                 sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
                 getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
-                IpPacket* broadcastMessage = (IpPacket*) msg;
+                IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
                 broadcastMessage->setTypeNetLayer(NET_DATA);
                 broadcastMessage->setIsRequestAck(true);
 
@@ -167,24 +167,31 @@ void IPv6::handleMessage(cMessage *msg)
 
 void IPv6::finish()
 {
+  this->buffer.clear();
 }
 
-void IPv6::broadcast(IpPacket *msg)
+void IPv6::broadcast(IpPacket *ipPacket)
 {
-  msg->setKind(LAYER_NET);
-  msg->setSenderIpAddress(this->getParentModule()->getId());
-  msg->setRecverIpAddress(0);
+  ipPacket->setKind(LAYER_NET);
+  ipPacket->setSenderIpAddress(this->getParentModule()->getId());
+  ipPacket->setRecverIpAddress(0);
 
-  send(msg, gate("lowerOut"));
+  send(ipPacket, gate("lowerOut"));
+
+  // WSN insert to buffer
+  buffer.insert(ipPacket);
 }
 
-void IPv6::unicast(IpPacket *msg, int recverID)
+void IPv6::unicast(IpPacket *ipPacket, int recverID)
 {
-  msg->setKind(LAYER_NET);
-  msg->setSenderIpAddress(this->getParentModule()->getId());
-  msg->setRecverIpAddress(recverID);
+  ipPacket->setKind(LAYER_NET);
+  ipPacket->setSenderIpAddress(this->getParentModule()->getId());
+  ipPacket->setRecverIpAddress(recverID);
 
-  send(msg, gate("lowerOut"));
+  send(ipPacket, gate("lowerOut"));
+
+  // WSN insert to buffer
+  buffer.insert(ipPacket);
 }
 
 } /* namespace wsn_energy */

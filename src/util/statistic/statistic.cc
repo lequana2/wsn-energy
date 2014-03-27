@@ -51,7 +51,7 @@ Statistic::~Statistic()
 
 void Statistic::initialize()
 {
-  // Record total sensor energy for first time
+  /* Record total sensor energy for first time */
   pollTotalSensorEnergy();
   if (getParentModule()->par("isPolling").doubleValue())
     scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
@@ -81,8 +81,6 @@ void Statistic::pollTotalSensorEnergy()
   for (int i = 0; i < numberClient; i++)
   {
     battery = check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery"));
-//    battery->update();
-
     totalEnergy += battery->energestRemaining;
   }
 
@@ -126,46 +124,7 @@ void Statistic::incRecvData()
 
 void Statistic::finish()
 {
-  recRemainingEnergy();
+//  recRemainingEnergy();
 }
 
-void Statistic::recRemainingEnergy()
-{
-//    using namespace std;
-//
-//    cConfigurationEx *configEx = ev.getConfigEx();
-//    string buffer;
-//    cModule *wsn = getModuleByPath("Wsn");
-//    Energy *ener;
-//    Mobility *mob;
-//    int nss = wsn->par("numSensors").longValue();
-//    int i;
-//
-//    buffer.append("results/");
-//    buffer.append(configEx->getActiveConfigName());
-//    buffer.append("_RemainEnergy.data\0");
-//    ofstream out(buffer.c_str(), ios::out | ios::trunc);
-//
-//    if (!out) {
-//        cerr << "Cannot output data\n";
-//        return;
-//    }
-//
-//    out << "# Config: " << configEx->getActiveConfigName() << '\n';
-//    out << "# Remaining energy" << endl;
-//    out << '#' << right << setw(3) << "row" << ' ' << setw(4) << "col" << ' '
-//            << setw(7) << "x" << ' ' << setw(7) << "y" << ' '
-//            << setw(10) << "energy" << endl;
-//
-//    for (i = 0; i < nss; i++) {
-//        ener = check_and_cast<Energy*>(wsn->getSubmodule("sensor", i)->getSubmodule("energy"));
-//        mob = check_and_cast<Mobility*>(wsn->getSubmodule("sensor", i)->getSubmodule("mobility"));
-//
-//        out << right << setw(4) << mob->getRow() << ' ' << setw(4) << mob->getCol() << ' '
-//                << setw(7) << mob->getX() << ' ' << setw(7) << mob->getY() << ' '
-//                << setw(10) << ener->getCapacity() << endl;
-//    }
-//
-//    out.close();
-}
 }
