@@ -34,20 +34,8 @@ void doUnpacking(cCommBuffer *, T& t) {
 namespace wsn_energy {
 
 EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::PACKET_SIZE");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::PACKET_SIZE"));
-    e->insert(PHY_HEADER, "PHY_HEADER");
-    e->insert(PACKET_802154, "PACKET_802154");
-    e->insert(ACK_HEADER_FOOTER_LEN, "ACK_HEADER_FOOTER_LEN");
-    e->insert(MAC_HEADER_FOOTER_LEN, "MAC_HEADER_FOOTER_LEN");
-    e->insert(DIO_LEN, "DIO_LEN");
-    e->insert(DIS_LEN, "DIS_LEN");
-    e->insert(DATA, "DATA");
-);
-
-EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::MESSAGE");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::MESSAGE"));
+    cEnum *e = cEnum::find("wsn_energy::COMMAND_AND_RESULT");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_AND_RESULT"));
     e->insert(NODE_STARTUP, "NODE_STARTUP");
     e->insert(NODE_DESTRUCT, "NODE_DESTRUCT");
     e->insert(OUT_OF_ENERGY, "OUT_OF_ENERGY");
@@ -82,6 +70,7 @@ EXECUTE_ON_STARTUP(
     e->insert(LAYER_MAC_ERR, "LAYER_MAC_ERR");
     e->insert(LAYER_MAC_RECV_OK, "LAYER_MAC_RECV_OK");
     e->insert(LAYER_NET, "LAYER_NET");
+    e->insert(LAYER_NET_SEND_BUFFER, "LAYER_NET_SEND_BUFFER");
     e->insert(NET_ICMP_DIO, "NET_ICMP_DIO");
     e->insert(NET_ICMP_DIS, "NET_ICMP_DIS");
     e->insert(NET_ICMP_ACK, "NET_ICMP_ACK");
@@ -97,8 +86,7 @@ Register_Class(Raw);
 
 Raw::Raw(const char *name, int kind) : cPacket(name,kind)
 {
-    this->typeRadioLayer_var = 0;
-    this->len_var = 0;
+    this->note_var = 0;
     this->bitError_var = 0;
     this->radioSendId_var = 0;
     this->radioRecvId_var = 0;
@@ -123,8 +111,7 @@ Raw& Raw::operator=(const Raw& other)
 
 void Raw::copy(const Raw& other)
 {
-    this->typeRadioLayer_var = other.typeRadioLayer_var;
-    this->len_var = other.len_var;
+    this->note_var = other.note_var;
     this->bitError_var = other.bitError_var;
     this->radioSendId_var = other.radioSendId_var;
     this->radioRecvId_var = other.radioRecvId_var;
@@ -133,8 +120,7 @@ void Raw::copy(const Raw& other)
 void Raw::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
-    doPacking(b,this->typeRadioLayer_var);
-    doPacking(b,this->len_var);
+    doPacking(b,this->note_var);
     doPacking(b,this->bitError_var);
     doPacking(b,this->radioSendId_var);
     doPacking(b,this->radioRecvId_var);
@@ -143,31 +129,20 @@ void Raw::parsimPack(cCommBuffer *b)
 void Raw::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
-    doUnpacking(b,this->typeRadioLayer_var);
-    doUnpacking(b,this->len_var);
+    doUnpacking(b,this->note_var);
     doUnpacking(b,this->bitError_var);
     doUnpacking(b,this->radioSendId_var);
     doUnpacking(b,this->radioRecvId_var);
 }
 
-int Raw::getTypeRadioLayer() const
+int Raw::getNote() const
 {
-    return typeRadioLayer_var;
+    return note_var;
 }
 
-void Raw::setTypeRadioLayer(int typeRadioLayer)
+void Raw::setNote(int note)
 {
-    this->typeRadioLayer_var = typeRadioLayer;
-}
-
-int Raw::getLen() const
-{
-    return len_var;
-}
-
-void Raw::setLen(int len)
-{
-    this->len_var = len;
+    this->note_var = note;
 }
 
 bool Raw::getBitError() const
@@ -247,7 +222,7 @@ const char *RawDescriptor::getProperty(const char *propertyname) const
 int RawDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -263,9 +238,8 @@ unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RawDescriptor::getFieldName(void *object, int field) const
@@ -277,24 +251,22 @@ const char *RawDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "typeRadioLayer",
-        "len",
+        "note",
         "bitError",
         "radioSendId",
         "radioRecvId",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int RawDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "typeRadioLayer")==0) return base+0;
-    if (fieldName[0]=='l' && strcmp(fieldName, "len")==0) return base+1;
-    if (fieldName[0]=='b' && strcmp(fieldName, "bitError")==0) return base+2;
-    if (fieldName[0]=='r' && strcmp(fieldName, "radioSendId")==0) return base+3;
-    if (fieldName[0]=='r' && strcmp(fieldName, "radioRecvId")==0) return base+4;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    if (fieldName[0]=='b' && strcmp(fieldName, "bitError")==0) return base+1;
+    if (fieldName[0]=='r' && strcmp(fieldName, "radioSendId")==0) return base+2;
+    if (fieldName[0]=='r' && strcmp(fieldName, "radioRecvId")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -308,12 +280,11 @@ const char *RawDescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "int",
         "bool",
         "int",
         "int",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *RawDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -353,11 +324,10 @@ std::string RawDescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getTypeRadioLayer());
-        case 1: return long2string(pp->getLen());
-        case 2: return bool2string(pp->getBitError());
-        case 3: return long2string(pp->getRadioSendId());
-        case 4: return long2string(pp->getRadioRecvId());
+        case 0: return long2string(pp->getNote());
+        case 1: return bool2string(pp->getBitError());
+        case 2: return long2string(pp->getRadioSendId());
+        case 3: return long2string(pp->getRadioRecvId());
         default: return "";
     }
 }
@@ -372,11 +342,10 @@ bool RawDescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: pp->setTypeRadioLayer(string2long(value)); return true;
-        case 1: pp->setLen(string2long(value)); return true;
-        case 2: pp->setBitError(string2bool(value)); return true;
-        case 3: pp->setRadioSendId(string2long(value)); return true;
-        case 4: pp->setRadioRecvId(string2long(value)); return true;
+        case 0: pp->setNote(string2long(value)); return true;
+        case 1: pp->setBitError(string2bool(value)); return true;
+        case 2: pp->setRadioSendId(string2long(value)); return true;
+        case 3: pp->setRadioRecvId(string2long(value)); return true;
         default: return false;
     }
 }
@@ -394,9 +363,8 @@ const char *RawDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
-        NULL,
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -413,104 +381,62 @@ void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const
     }
 }
 
-Register_Class(Frame);
+Register_Class(FrameRDC);
 
-Frame::Frame(const char *name, int kind) : wsn_energy::Raw(name,kind)
+FrameRDC::FrameRDC(const char *name, int kind) : cPacket(name,kind)
 {
-    this->typeMacLayer_var = 0;
-    this->senderMacAddress_var = 0;
-    this->recverMacAddress_var = 0;
-    this->sequenceNumber_var = 0;
+    this->note_var = 0;
 }
 
-Frame::Frame(const Frame& other) : wsn_energy::Raw(other)
+FrameRDC::FrameRDC(const FrameRDC& other) : cPacket(other)
 {
     copy(other);
 }
 
-Frame::~Frame()
+FrameRDC::~FrameRDC()
 {
 }
 
-Frame& Frame::operator=(const Frame& other)
+FrameRDC& FrameRDC::operator=(const FrameRDC& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Raw::operator=(other);
+    cPacket::operator=(other);
     copy(other);
     return *this;
 }
 
-void Frame::copy(const Frame& other)
+void FrameRDC::copy(const FrameRDC& other)
 {
-    this->typeMacLayer_var = other.typeMacLayer_var;
-    this->senderMacAddress_var = other.senderMacAddress_var;
-    this->recverMacAddress_var = other.recverMacAddress_var;
-    this->sequenceNumber_var = other.sequenceNumber_var;
+    this->note_var = other.note_var;
 }
 
-void Frame::parsimPack(cCommBuffer *b)
+void FrameRDC::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Raw::parsimPack(b);
-    doPacking(b,this->typeMacLayer_var);
-    doPacking(b,this->senderMacAddress_var);
-    doPacking(b,this->recverMacAddress_var);
-    doPacking(b,this->sequenceNumber_var);
+    cPacket::parsimPack(b);
+    doPacking(b,this->note_var);
 }
 
-void Frame::parsimUnpack(cCommBuffer *b)
+void FrameRDC::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Raw::parsimUnpack(b);
-    doUnpacking(b,this->typeMacLayer_var);
-    doUnpacking(b,this->senderMacAddress_var);
-    doUnpacking(b,this->recverMacAddress_var);
-    doUnpacking(b,this->sequenceNumber_var);
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->note_var);
 }
 
-int Frame::getTypeMacLayer() const
+int FrameRDC::getNote() const
 {
-    return typeMacLayer_var;
+    return note_var;
 }
 
-void Frame::setTypeMacLayer(int typeMacLayer)
+void FrameRDC::setNote(int note)
 {
-    this->typeMacLayer_var = typeMacLayer;
+    this->note_var = note;
 }
 
-int Frame::getSenderMacAddress() const
-{
-    return senderMacAddress_var;
-}
-
-void Frame::setSenderMacAddress(int senderMacAddress)
-{
-    this->senderMacAddress_var = senderMacAddress;
-}
-
-int Frame::getRecverMacAddress() const
-{
-    return recverMacAddress_var;
-}
-
-void Frame::setRecverMacAddress(int recverMacAddress)
-{
-    this->recverMacAddress_var = recverMacAddress;
-}
-
-int Frame::getSequenceNumber() const
-{
-    return sequenceNumber_var;
-}
-
-void Frame::setSequenceNumber(int sequenceNumber)
-{
-    this->sequenceNumber_var = sequenceNumber;
-}
-
-class FrameDescriptor : public cClassDescriptor
+class FrameRDCDescriptor : public cClassDescriptor
 {
   public:
-    FrameDescriptor();
-    virtual ~FrameDescriptor();
+    FrameRDCDescriptor();
+    virtual ~FrameRDCDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -529,34 +455,312 @@ class FrameDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(FrameDescriptor);
+Register_ClassDescriptor(FrameRDCDescriptor);
 
-FrameDescriptor::FrameDescriptor() : cClassDescriptor("wsn_energy::Frame", "wsn_energy::Raw")
+FrameRDCDescriptor::FrameRDCDescriptor() : cClassDescriptor("wsn_energy::FrameRDC", "cPacket")
 {
 }
 
-FrameDescriptor::~FrameDescriptor()
+FrameRDCDescriptor::~FrameRDCDescriptor()
 {
 }
 
-bool FrameDescriptor::doesSupport(cObject *obj) const
+bool FrameRDCDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Frame *>(obj)!=NULL;
+    return dynamic_cast<FrameRDC *>(obj)!=NULL;
 }
 
-const char *FrameDescriptor::getProperty(const char *propertyname) const
+const char *FrameRDCDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int FrameDescriptor::getFieldCount(void *object) const
+int FrameRDCDescriptor::getFieldCount(void *object) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+}
+
+unsigned int FrameRDCDescriptor::getFieldTypeFlags(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeFlags(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+}
+
+const char *FrameRDCDescriptor::getFieldName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldNames[] = {
+        "note",
+    };
+    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+}
+
+int FrameRDCDescriptor::findField(void *object, const char *fieldName) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    return basedesc ? basedesc->findField(object, fieldName) : -1;
+}
+
+const char *FrameRDCDescriptor::getFieldTypeString(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeString(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldTypeStrings[] = {
+        "int",
+    };
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+}
+
+const char *FrameRDCDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldProperty(object, field, propertyname);
+        field -= basedesc->getFieldCount(object);
+    }
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+int FrameRDCDescriptor::getArraySize(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getArraySize(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    FrameRDC *pp = (FrameRDC *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+std::string FrameRDCDescriptor::getFieldAsString(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldAsString(object,field,i);
+        field -= basedesc->getFieldCount(object);
+    }
+    FrameRDC *pp = (FrameRDC *)object; (void)pp;
+    switch (field) {
+        case 0: return long2string(pp->getNote());
+        default: return "";
+    }
+}
+
+bool FrameRDCDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->setFieldAsString(object,field,i,value);
+        field -= basedesc->getFieldCount(object);
+    }
+    FrameRDC *pp = (FrameRDC *)object; (void)pp;
+    switch (field) {
+        case 0: pp->setNote(string2long(value)); return true;
+        default: return false;
+    }
+}
+
+const char *FrameRDCDescriptor::getFieldStructName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldStructNames[] = {
+        NULL,
+    };
+    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+}
+
+void *FrameRDCDescriptor::getFieldStructPointer(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructPointer(object, field, i);
+        field -= basedesc->getFieldCount(object);
+    }
+    FrameRDC *pp = (FrameRDC *)object; (void)pp;
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+Register_Class(FrameMAC);
+
+FrameMAC::FrameMAC(const char *name, int kind) : cPacket(name,kind)
+{
+    this->note_var = 0;
+    this->senderMacAddress_var = 0;
+    this->recverMacAddress_var = 0;
+    this->sequenceNumber_var = 0;
+}
+
+FrameMAC::FrameMAC(const FrameMAC& other) : cPacket(other)
+{
+    copy(other);
+}
+
+FrameMAC::~FrameMAC()
+{
+}
+
+FrameMAC& FrameMAC::operator=(const FrameMAC& other)
+{
+    if (this==&other) return *this;
+    cPacket::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void FrameMAC::copy(const FrameMAC& other)
+{
+    this->note_var = other.note_var;
+    this->senderMacAddress_var = other.senderMacAddress_var;
+    this->recverMacAddress_var = other.recverMacAddress_var;
+    this->sequenceNumber_var = other.sequenceNumber_var;
+}
+
+void FrameMAC::parsimPack(cCommBuffer *b)
+{
+    cPacket::parsimPack(b);
+    doPacking(b,this->note_var);
+    doPacking(b,this->senderMacAddress_var);
+    doPacking(b,this->recverMacAddress_var);
+    doPacking(b,this->sequenceNumber_var);
+}
+
+void FrameMAC::parsimUnpack(cCommBuffer *b)
+{
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->note_var);
+    doUnpacking(b,this->senderMacAddress_var);
+    doUnpacking(b,this->recverMacAddress_var);
+    doUnpacking(b,this->sequenceNumber_var);
+}
+
+int FrameMAC::getNote() const
+{
+    return note_var;
+}
+
+void FrameMAC::setNote(int note)
+{
+    this->note_var = note;
+}
+
+int FrameMAC::getSenderMacAddress() const
+{
+    return senderMacAddress_var;
+}
+
+void FrameMAC::setSenderMacAddress(int senderMacAddress)
+{
+    this->senderMacAddress_var = senderMacAddress;
+}
+
+int FrameMAC::getRecverMacAddress() const
+{
+    return recverMacAddress_var;
+}
+
+void FrameMAC::setRecverMacAddress(int recverMacAddress)
+{
+    this->recverMacAddress_var = recverMacAddress;
+}
+
+int FrameMAC::getSequenceNumber() const
+{
+    return sequenceNumber_var;
+}
+
+void FrameMAC::setSequenceNumber(int sequenceNumber)
+{
+    this->sequenceNumber_var = sequenceNumber;
+}
+
+class FrameMACDescriptor : public cClassDescriptor
+{
+  public:
+    FrameMACDescriptor();
+    virtual ~FrameMACDescriptor();
+
+    virtual bool doesSupport(cObject *obj) const;
+    virtual const char *getProperty(const char *propertyname) const;
+    virtual int getFieldCount(void *object) const;
+    virtual const char *getFieldName(void *object, int field) const;
+    virtual int findField(void *object, const char *fieldName) const;
+    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
+    virtual const char *getFieldTypeString(void *object, int field) const;
+    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
+    virtual int getArraySize(void *object, int field) const;
+
+    virtual std::string getFieldAsString(void *object, int field, int i) const;
+    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
+
+    virtual const char *getFieldStructName(void *object, int field) const;
+    virtual void *getFieldStructPointer(void *object, int field, int i) const;
+};
+
+Register_ClassDescriptor(FrameMACDescriptor);
+
+FrameMACDescriptor::FrameMACDescriptor() : cClassDescriptor("wsn_energy::FrameMAC", "cPacket")
+{
+}
+
+FrameMACDescriptor::~FrameMACDescriptor()
+{
+}
+
+bool FrameMACDescriptor::doesSupport(cObject *obj) const
+{
+    return dynamic_cast<FrameMAC *>(obj)!=NULL;
+}
+
+const char *FrameMACDescriptor::getProperty(const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : NULL;
+}
+
+int FrameMACDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
-unsigned int FrameDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int FrameMACDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -573,7 +777,7 @@ unsigned int FrameDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
-const char *FrameDescriptor::getFieldName(void *object, int field) const
+const char *FrameMACDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -582,7 +786,7 @@ const char *FrameDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "typeMacLayer",
+        "note",
         "senderMacAddress",
         "recverMacAddress",
         "sequenceNumber",
@@ -590,18 +794,18 @@ const char *FrameDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
-int FrameDescriptor::findField(void *object, const char *fieldName) const
+int FrameMACDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "typeMacLayer")==0) return base+0;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
     if (fieldName[0]=='s' && strcmp(fieldName, "senderMacAddress")==0) return base+1;
     if (fieldName[0]=='r' && strcmp(fieldName, "recverMacAddress")==0) return base+2;
     if (fieldName[0]=='s' && strcmp(fieldName, "sequenceNumber")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *FrameDescriptor::getFieldTypeString(void *object, int field) const
+const char *FrameMACDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -618,7 +822,7 @@ const char *FrameDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *FrameDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *FrameMACDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -631,7 +835,7 @@ const char *FrameDescriptor::getFieldProperty(void *object, int field, const cha
     }
 }
 
-int FrameDescriptor::getArraySize(void *object, int field) const
+int FrameMACDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -639,13 +843,13 @@ int FrameDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Frame *pp = (Frame *)object; (void)pp;
+    FrameMAC *pp = (FrameMAC *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string FrameDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string FrameMACDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -653,9 +857,9 @@ std::string FrameDescriptor::getFieldAsString(void *object, int field, int i) co
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Frame *pp = (Frame *)object; (void)pp;
+    FrameMAC *pp = (FrameMAC *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getTypeMacLayer());
+        case 0: return long2string(pp->getNote());
         case 1: return long2string(pp->getSenderMacAddress());
         case 2: return long2string(pp->getRecverMacAddress());
         case 3: return long2string(pp->getSequenceNumber());
@@ -663,7 +867,7 @@ std::string FrameDescriptor::getFieldAsString(void *object, int field, int i) co
     }
 }
 
-bool FrameDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool FrameMACDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -671,9 +875,9 @@ bool FrameDescriptor::setFieldAsString(void *object, int field, int i, const cha
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Frame *pp = (Frame *)object; (void)pp;
+    FrameMAC *pp = (FrameMAC *)object; (void)pp;
     switch (field) {
-        case 0: pp->setTypeMacLayer(string2long(value)); return true;
+        case 0: pp->setNote(string2long(value)); return true;
         case 1: pp->setSenderMacAddress(string2long(value)); return true;
         case 2: pp->setRecverMacAddress(string2long(value)); return true;
         case 3: pp->setSequenceNumber(string2long(value)); return true;
@@ -681,7 +885,7 @@ bool FrameDescriptor::setFieldAsString(void *object, int field, int i, const cha
     }
 }
 
-const char *FrameDescriptor::getFieldStructName(void *object, int field) const
+const char *FrameMACDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -698,7 +902,7 @@ const char *FrameDescriptor::getFieldStructName(void *object, int field) const
     return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
-void *FrameDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *FrameMACDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -706,7 +910,7 @@ void *FrameDescriptor::getFieldStructPointer(void *object, int field, int i) con
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Frame *pp = (Frame *)object; (void)pp;
+    FrameMAC *pp = (FrameMAC *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
@@ -714,15 +918,16 @@ void *FrameDescriptor::getFieldStructPointer(void *object, int field, int i) con
 
 Register_Class(IpPacket);
 
-IpPacket::IpPacket(const char *name, int kind) : wsn_energy::Frame(name,kind)
+IpPacket::IpPacket(const char *name, int kind) : cPacket(name,kind)
 {
-    this->typeNetLayer_var = 0;
+    this->note_var = 0;
+    this->type_var = 0;
     this->senderIpAddress_var = 0;
     this->recverIpAddress_var = 0;
     this->isRequestAck_var = 0;
 }
 
-IpPacket::IpPacket(const IpPacket& other) : wsn_energy::Frame(other)
+IpPacket::IpPacket(const IpPacket& other) : cPacket(other)
 {
     copy(other);
 }
@@ -734,14 +939,15 @@ IpPacket::~IpPacket()
 IpPacket& IpPacket::operator=(const IpPacket& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Frame::operator=(other);
+    cPacket::operator=(other);
     copy(other);
     return *this;
 }
 
 void IpPacket::copy(const IpPacket& other)
 {
-    this->typeNetLayer_var = other.typeNetLayer_var;
+    this->note_var = other.note_var;
+    this->type_var = other.type_var;
     this->senderIpAddress_var = other.senderIpAddress_var;
     this->recverIpAddress_var = other.recverIpAddress_var;
     this->isRequestAck_var = other.isRequestAck_var;
@@ -749,8 +955,9 @@ void IpPacket::copy(const IpPacket& other)
 
 void IpPacket::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimPack(b);
-    doPacking(b,this->typeNetLayer_var);
+    cPacket::parsimPack(b);
+    doPacking(b,this->note_var);
+    doPacking(b,this->type_var);
     doPacking(b,this->senderIpAddress_var);
     doPacking(b,this->recverIpAddress_var);
     doPacking(b,this->isRequestAck_var);
@@ -758,21 +965,32 @@ void IpPacket::parsimPack(cCommBuffer *b)
 
 void IpPacket::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimUnpack(b);
-    doUnpacking(b,this->typeNetLayer_var);
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->note_var);
+    doUnpacking(b,this->type_var);
     doUnpacking(b,this->senderIpAddress_var);
     doUnpacking(b,this->recverIpAddress_var);
     doUnpacking(b,this->isRequestAck_var);
 }
 
-int IpPacket::getTypeNetLayer() const
+int IpPacket::getNote() const
 {
-    return typeNetLayer_var;
+    return note_var;
 }
 
-void IpPacket::setTypeNetLayer(int typeNetLayer)
+void IpPacket::setNote(int note)
 {
-    this->typeNetLayer_var = typeNetLayer;
+    this->note_var = note;
+}
+
+int IpPacket::getType() const
+{
+    return type_var;
+}
+
+void IpPacket::setType(int type)
+{
+    this->type_var = type;
 }
 
 int IpPacket::getSenderIpAddress() const
@@ -830,7 +1048,7 @@ class IpPacketDescriptor : public cClassDescriptor
 
 Register_ClassDescriptor(IpPacketDescriptor);
 
-IpPacketDescriptor::IpPacketDescriptor() : cClassDescriptor("wsn_energy::IpPacket", "wsn_energy::Frame")
+IpPacketDescriptor::IpPacketDescriptor() : cClassDescriptor("wsn_energy::IpPacket", "cPacket")
 {
 }
 
@@ -852,7 +1070,7 @@ const char *IpPacketDescriptor::getProperty(const char *propertyname) const
 int IpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
+    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
 }
 
 unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -868,8 +1086,9 @@ unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) cons
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketDescriptor::getFieldName(void *object, int field) const
@@ -881,22 +1100,24 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "typeNetLayer",
+        "note",
+        "type",
         "senderIpAddress",
         "recverIpAddress",
         "isRequestAck",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldNames[field] : NULL;
 }
 
 int IpPacketDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "typeNetLayer")==0) return base+0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+1;
-    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+2;
-    if (fieldName[0]=='i' && strcmp(fieldName, "isRequestAck")==0) return base+3;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+2;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+3;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isRequestAck")==0) return base+4;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -912,9 +1133,10 @@ const char *IpPacketDescriptor::getFieldTypeString(void *object, int field) cons
         "int",
         "int",
         "int",
+        "int",
         "bool",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -954,10 +1176,11 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getTypeNetLayer());
-        case 1: return long2string(pp->getSenderIpAddress());
-        case 2: return long2string(pp->getRecverIpAddress());
-        case 3: return bool2string(pp->getIsRequestAck());
+        case 0: return long2string(pp->getNote());
+        case 1: return long2string(pp->getType());
+        case 2: return long2string(pp->getSenderIpAddress());
+        case 3: return long2string(pp->getRecverIpAddress());
+        case 4: return bool2string(pp->getIsRequestAck());
         default: return "";
     }
 }
@@ -972,10 +1195,11 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
     switch (field) {
-        case 0: pp->setTypeNetLayer(string2long(value)); return true;
-        case 1: pp->setSenderIpAddress(string2long(value)); return true;
-        case 2: pp->setRecverIpAddress(string2long(value)); return true;
-        case 3: pp->setIsRequestAck(string2bool(value)); return true;
+        case 0: pp->setNote(string2long(value)); return true;
+        case 1: pp->setType(string2long(value)); return true;
+        case 2: pp->setSenderIpAddress(string2long(value)); return true;
+        case 3: pp->setRecverIpAddress(string2long(value)); return true;
+        case 4: pp->setIsRequestAck(string2bool(value)); return true;
         default: return false;
     }
 }
@@ -993,8 +1217,9 @@ const char *IpPacketDescriptor::getFieldStructName(void *object, int field) cons
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const

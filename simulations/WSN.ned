@@ -39,6 +39,9 @@ network WSN
 
         int isPolling;
         double polling;
+        
+        int serverX @unit(m);
+        int serverY @unit(m);
 
         @display("bgs=6,m;bgb=$width,$height,#C6C6FF,#0000FF,2");
 
@@ -47,10 +50,8 @@ network WSN
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-//                axisX = width  / 2;
-//                axisY = height / 2;
-				axisX = 0;
-				axisY = 0;
+				axisX = serverX;
+				axisY = serverY;
         }
         client[numberClient]: ClientMote {
             parameters:

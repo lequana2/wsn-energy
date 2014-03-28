@@ -20,22 +20,14 @@ namespace wsn_energy {
 
 Define_Module(nullMAC);
 
-void nullMAC::sendPacket(cMessage* msg)
+void nullMAC::sendPacket(FrameMAC* frameMAC)
 {
-  Frame *frame = (Frame*) msg;
-
-  frame->setKind(LAYER_MAC);
-  frame->setLen(frame->getLen() + MAC_HEADER_FOOTER_LEN);
-  frame->setSenderMacAddress(this->getId());
-  frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
-
-  send(frame, gate("lowerOut"));
 }
 
-void nullMAC::receivePacket(cMessage* msg)
+void nullMAC::receivePacket(FrameMAC* frame)
 {
-  msg->setKind(LAYER_MAC);
-  send(msg, gate("upperOut"));
+  frame->setKind(LAYER_MAC);
+  send(frame, gate("upperOut"));
 }
 
 } /* namespace wsn_energy */

@@ -14,6 +14,7 @@
 //
 
 #include "server.h"
+#include "packet_m.h"
 
 namespace wsn_energy {
 
@@ -22,11 +23,15 @@ Define_Module(Server);
 void Server::initialize()
 {
   App::initialize();
+
+  cMessage *msg = new cMessage;
+  msg->setKind(RPL_CONSTRUCT);
+  scheduleAt(simTime(), msg);
 }
 
 void Server::handleMessage(cMessage *msg)
 {
-  delete msg;
+  send(msg, gate("lowerOut"));
 }
 
 void Server::finish()

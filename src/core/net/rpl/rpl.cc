@@ -21,11 +21,11 @@
 #include "battery.h"
 
 #ifndef ANNOTATE
-#define ANNOTATE 0
+#define ANNOTATE 1
 #endif
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -48,21 +48,16 @@ void RPL::rpl_set_root()
   this->rplDag.version++;
   this->rplDag.joined = true;
   this->rplDag.rank = 0;
-
-  // WSN Should send continously, trickle timer ???
-  cMessage *constructMessage = new cMessage();
-  constructMessage->setKind(RPL_CONSTRUCT);
-  net->scheduleAt(simTime(), constructMessage);
 }
 
 void RPL::sendDIO()
 {
-  ev << "broadcast DIO" << endl;
+  ev << "Broadcast DIO" << endl;
 
   DIO *icmp = new DIO();
-  ((IpPacket*) icmp)->setTypeNetLayer(NET_ICMP_DIO);
 
-  icmp->setLen(DIO_LEN);
+  icmp->setType(NET_ICMP_DIO);
+  icmp->setByteLength(DIO_LEN);
   icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
   icmp->setSecondCriteria(((Battery*) this->net->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
@@ -72,26 +67,28 @@ void RPL::sendDIO()
 
 void RPL::sendDIS(int convergence)
 {
-  ev << "broadcast DIS" << endl;
+  if (DEBUG)
+    ev << "Broadcast DIS" << endl;
 
   DIS *icmp = new DIS();
-  ((IpPacket*) icmp)->setTypeNetLayer(NET_ICMP_DIO);
 
-  icmp->setLen(DIS_LEN);
+  icmp->setType(NET_ICMP_DIO);
+  icmp->setByteLength(DIS_LEN);
   icmp->setConvergence(convergence);
 
   net->broadcast(icmp);
 }
 
-void RPL::receiveDIO(DIO* msg)
+void RPL::receiveDIO(DIO* dio)
 {
-  ev << "Received DIO " << endl;
+  if (DEBUG)
+    ev << "Received DIO " << endl;
 
   // Consider neighborID
   RPL_neighbor *neighbor = new RPL_neighbor();
-  neighbor->neighborID = msg->getRadioSendId();
-  neighbor->neighborRank = msg->getRank();
-  neighbor->secondCriteria = msg->getSecondCriteria();
+  neighbor->neighborID = dio->getSenderIpAddress();
+  neighbor->neighborRank = dio->getRank();
+  neighbor->secondCriteria = dio->getSecondCriteria();
 
   // incoming neighbor message
   std::list<RPL_neighbor*>::iterator candidate = this->rplDag.parentList.begin();
@@ -105,18 +102,19 @@ void RPL::receiveDIO(DIO* msg)
     }
   }
 
-// Consider neighbor version
-  if (this->rplDag.version < msg->getVersion())
+  // Consider neighbor version
+  if (this->rplDag.version < dio->getVersion())
   {
     // Update self information
-    this->rplDag.version = msg->getVersion();
+    this->rplDag.version = dio->getVersion();
     this->rplDag.joined = true;
-    this->rplDag.rank = msg->getRank() + 1; // WSN hop count
+    /* WSN hop count */
+    this->rplDag.rank = dio->getRank() + 1;
 
     // New neighbor
     if (candidate == this->rplDag.parentList.end())
     {
-      ev << "new neighbor" << endl;
+      ev << "New neighbor" << endl;
       // Update new neighbor
       this->rplDag.parentList.push_back(neighbor);
 
@@ -124,7 +122,8 @@ void RPL::receiveDIO(DIO* msg)
       if (ANNOTATE)
       {
         char channelParent[20];
-        sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
+        sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+            (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
         EV << "new version: " << channelParent << endl;
         net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
       }
@@ -133,11 +132,12 @@ void RPL::receiveDIO(DIO* msg)
       this->sendDIO();
     }
   }
-// obsolete/maintenace DIO
-  else if (this->rplDag.version >= msg->getVersion())
+
+  // obsolete/maintenace DIO
+  else if (this->rplDag.version >= dio->getVersion())
   {
     // new parent
-    if (this->rplDag.rank > msg->getRank())
+    if (this->rplDag.rank > dio->getRank())
     {
       // New neighbor
       if (candidate == this->rplDag.parentList.end())
@@ -150,7 +150,8 @@ void RPL::receiveDIO(DIO* msg)
         if (ANNOTATE)
         {
           char channelParent[20];
-          sprintf(channelParent, "out %d to %d", msg->getRadioRecvId(), msg->getRadioSendId());
+          sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+              (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
           EV << "update: " << channelParent << endl;
           net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
         }
@@ -159,7 +160,7 @@ void RPL::receiveDIO(DIO* msg)
       this->sendDIO();
     }
     // new sibling
-    else if (this->rplDag.rank == msg->getRank())
+    else if (this->rplDag.rank == dio->getRank())
     {
       // New neighbor
       if (candidate == this->rplDag.parentList.end())
@@ -172,7 +173,8 @@ void RPL::receiveDIO(DIO* msg)
         if (ANNOTATE)
         {
           char channelParent[20];
-          sprintf(channelParent, "out %d to %d", ((Raw*) msg)->getRadioRecvId(), ((Raw*) msg)->getRadioSendId());
+          sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+              (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
           EV << channelParent << endl;
           net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
         }
@@ -184,28 +186,32 @@ void RPL::receiveDIO(DIO* msg)
       return;
   }
 
-// Bubble current rank
-  char rank[10];
-  sprintf(rank, "Rank %d", (int) this->rplDag.rank);
-  net->getParentModule()->bubble(rank);
+  // Bubble current rank
+  if (ANNOTATE)
+  {
+    char rank[10];
+    sprintf(rank, "Rank %d", (int) this->rplDag.rank);
+    net->getParentModule()->bubble(rank);
+  }
 }
 
 void RPL::receiveDIS(DIS* msg)
 {
-  EV << "Received DIS " << endl;
+  if (DEBUG)
+    EV << "Received DIS " << endl;
 
-// currently in DAG, then broadcast DIS
+  // currently in DAG, then broadcast DIS
   if (this->rplDag.joined)
   {
     this->sendDIO();
   }
-// already
+  // already
   else
   {
     //WSN broadcast DIS toward root
-//    int convergence = ((DIS*) msg)->getConvergence();
-//    if (convergence > 0)
-//      this->sendDIS(convergence - 1);
+    //    int convergence = ((DIS*) msg)->getConvergence();
+    //    if (convergence > 0)
+    //      this->sendDIS(convergence - 1);
   }
 }
 
@@ -214,7 +220,7 @@ RPL_neighbor* RPL::getPrefferedParent()
   if (this->rplDag.parentList.size() == 0)
     return NULL;
 
-// Collect parent + sibling node
+  // Collect parent + sibling node
   std::list<RPL_neighbor*> goodParent;
   for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
       iterator != this->rplDag.parentList.end(); iterator++)
@@ -223,7 +229,7 @@ RPL_neighbor* RPL::getPrefferedParent()
       goodParent.push_back(*iterator);
   }
 
-// Search thru parent list + get best energy
+  // Search thru parent list + get best energy
   RPL_neighbor *prefferedParent = goodParent.front();
   for (std::list<RPL_neighbor*>::iterator iterator = goodParent.begin(); iterator != goodParent.end(); iterator++)
   {
@@ -239,9 +245,9 @@ RPL_neighbor* RPL::getPrefferedParent()
 
 void RPL::updateParent(ACK *ack)
 {
-  int parentID = ack->getRadioSendId();
+  // int parentID = ack->getRadioSendId();
 
-// WSN search thru list + update
+  // WSN search thru list + update
   if (this->rplDag.parentList.size() == 0)
     return;
 
@@ -249,7 +255,7 @@ void RPL::updateParent(ACK *ack)
   for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
       iterator != this->rplDag.parentList.end(); iterator++)
   {
-    if ((*iterator)->neighborID == parentID)
+    //    if ((*iterator)->neighborID == parentID)
     {
       ev << "Update second criteria: " << (*iterator)->secondCriteria << "/" << ack->getEnergy();
 

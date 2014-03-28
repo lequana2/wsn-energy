@@ -17,6 +17,7 @@
 #define MACDRIVER_H_
 
 #include <omnetpp.h>
+#include "packet_m.h"
 
 namespace wsn_energy {
 
@@ -27,8 +28,8 @@ class MACdriver : public cSimpleModule
     virtual void handleMessage(cMessage*);
     virtual void finish();
 
-    virtual void sendPacket(cMessage*) = 0;
-    virtual void receivePacket(cMessage*) = 0;
+    virtual void sendPacket(FrameMAC*) = 0;
+    virtual void receivePacket(FrameMAC*) = 0;
 
 //    virtual void on() = 0;
 //    virtual void off() = 0;

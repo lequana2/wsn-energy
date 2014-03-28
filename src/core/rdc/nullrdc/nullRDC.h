@@ -26,14 +26,14 @@ namespace wsn_energy {
 class nullRDC : public RDCdriver
 {
   protected:
-    virtual void deferPacket(cMessage*);
+    virtual void deferPacket(FrameRDC*);
 
-    virtual void sendPacket(cMessage*);
+    virtual void sendPacket(FrameRDC*);
 
-    virtual void sendSuccess(cMessage*);
+    virtual void sendSuccess(FrameRDC*);
     virtual void sendFailure();
 
-    virtual void receiveSuccess(cMessage*);
+    virtual void receiveSuccess(FrameMAC*);
     virtual void receiveFailure();
 
     virtual void on();

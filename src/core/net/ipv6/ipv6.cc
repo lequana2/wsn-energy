@@ -33,19 +33,17 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
-
-  // Server starts forming RPL construct
-  if (this->getId() == simulation.getModuleByPath("server.net")->getId())
-    this->rpl->rpl_set_root();
 }
 
 void IPv6::handleMessage(cMessage *msg)
 {
-  ev << "IpMessage type: " << msg->getKind() << endl;
+  if (DEBUG)
+    ev << "IpMessage type: " << msg->getKind() << endl;
 
   switch (msg->getKind())
   {
     case RPL_CONSTRUCT: /* Construct RPL DODAG */
+      this->rpl->rpl_set_root();
       this->rpl->sendDIO();
       break; /* Construct RPL DODAG*/
 
@@ -66,7 +64,7 @@ void IPv6::handleMessage(cMessage *msg)
         getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
         IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
-        broadcastMessage->setTypeNetLayer(NET_DATA);
+        broadcastMessage->setType(NET_DATA);
         broadcastMessage->setIsRequestAck(false);
 
         unicast(broadcastMessage, des->neighborID);
@@ -80,8 +78,11 @@ void IPv6::handleMessage(cMessage *msg)
 
     case LAYER_MAC: /* message from MAC layer */
     {
-      IpPacket *ipPacket = check_and_cast<IpPacket*>(msg);
-      switch (ipPacket->getTypeNetLayer())
+      IpPacket* ipPacket = check_and_cast<IpPacket*>(msg);
+
+      ev << "RECV " << ipPacket->getType() << endl;
+
+      switch (ipPacket->getType())
       {
         case NET_ICMP_DIO: /* receiving DIO */
           this->rpl->receiveDIO((DIO*) ipPacket);
@@ -109,11 +110,10 @@ void IPv6::handleMessage(cMessage *msg)
               ev << "Net ignite ACK" << endl;
 
             ACK *ack = new ACK;
-            ack->setTypeNetLayer(NET_ICMP_ACK);
+            ack->setType(NET_ICMP_ACK);
             ack->setIsRequestAck(false);
             ack->setEnergy(((Battery*) this->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
             unicast(ack, ipPacket->getRecverIpAddress());
-            delete ipPacket;
           }
           // Fowarding a data
           else
@@ -148,7 +148,7 @@ void IPv6::handleMessage(cMessage *msg)
                 getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
                 IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
-                broadcastMessage->setTypeNetLayer(NET_DATA);
+                broadcastMessage->setType(NET_DATA);
                 broadcastMessage->setIsRequestAck(true);
 
                 unicast(broadcastMessage, des->neighborID);
@@ -173,25 +173,25 @@ void IPv6::finish()
 void IPv6::broadcast(IpPacket *ipPacket)
 {
   ipPacket->setKind(LAYER_NET);
-  ipPacket->setSenderIpAddress(this->getParentModule()->getId());
+  ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(0);
 
   send(ipPacket, gate("lowerOut"));
 
   // WSN insert to buffer
-  buffer.insert(ipPacket);
+  this->buffer.push_back(ipPacket);
 }
 
 void IPv6::unicast(IpPacket *ipPacket, int recverID)
 {
   ipPacket->setKind(LAYER_NET);
-  ipPacket->setSenderIpAddress(this->getParentModule()->getId());
+  ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(recverID);
 
   send(ipPacket, gate("lowerOut"));
 
   // WSN insert to buffer
-  buffer.insert(ipPacket);
+  this->buffer.push_back(ipPacket);
 }
 
 } /* namespace wsn_energy */

@@ -24,21 +24,21 @@ namespace wsn_energy {
 class RDCdriver : public cSimpleModule
 {
   protected:
-    Frame *waitACK;
+    FrameRDC *waitACK;
     bool isWaitingACK;
 
     virtual void initialize();
     virtual void handleMessage(cMessage*);
     virtual void finish();
 
-    virtual void deferPacket(cMessage*) = 0;
+    virtual void deferPacket(FrameRDC*) = 0;
 
-    virtual void sendPacket(cMessage*) = 0;
+    virtual void sendPacket(FrameRDC*) = 0;
 
-    virtual void sendSuccess(cMessage*) = 0;
+    virtual void sendSuccess(FrameRDC*) = 0;
     virtual void sendFailure() = 0;
 
-    virtual void receiveSuccess(cMessage*) = 0;
+    virtual void receiveSuccess(FrameMAC*) = 0;
     virtual void receiveFailure() = 0;
 
     virtual void on() = 0;

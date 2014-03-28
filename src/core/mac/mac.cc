@@ -24,27 +24,42 @@ void MACdriver::initialize()
 
 void MACdriver::handleMessage(cMessage *msg)
 {
-  Frame *frame = check_and_cast<Frame*>(msg);
-
-  switch (frame->getKind())
+  switch (msg->getKind())
   {
     case LAYER_MAC: /* control message */
       break; /* control message */
 
     case LAYER_NET: /* message from NET layer */
-      sendPacket(frame);
+    {
+      FrameMAC *frame = new FrameMAC;
+
+      frame->setKind(LAYER_MAC);
+      frame->encapsulate((IpPacket*) msg);
+      frame->addByteLength(MAC_HEADER_FOOTER_LEN);
+
+      // WSN MAC address
+      frame->setSenderMacAddress(this->getId());
+      frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+
+      ev << "Frame length: " << frame->getByteLength() << endl;
+
+      send(frame, gate("lowerOut"));
+    }
       break; /* message from NET layer */
 
     case LAYER_RDC: /* message from MAC layer */
-      switch (frame->getTypeMacLayer())
+    {
+      FrameMAC *frameMac = check_and_cast<FrameMAC*>(msg);
+
+      switch (frameMac->getNote())
       {
         case LAYER_RDC_SEND_OK: /* callback after sending */
-          if (((IpPacket*) frame)->getIsRequestAck())
-          {
-            frame->setKind(LAYER_MAC);
-            ((IpPacket*) frame)->setTypeNetLayer(NET_DATA);
-            send(frame, gate("upperOut"));
-          }
+//          if (((IpPacket*) msg)->getIsRequestAck())
+//          {
+//            msg->setKind(LAYER_MAC);
+//            ((IpPacket*) msg)->setTypeNetLayer(NET_DATA);
+//            send(msg, gate("upperOut"));
+//          }
           break; /* callback after sending */
 
         case LAYER_RDC_RECV_ACK:
@@ -52,13 +67,17 @@ void MACdriver::handleMessage(cMessage *msg)
           break; /* recv ACK */
 
         case LAYER_RDC_RECV_OK:
-          frame->setKind(LAYER_MAC);
-          frame->setTypeMacLayer(LAYER_MAC_RECV_OK);
-          frame->setLen(frame->getLen() - MAC_HEADER_FOOTER_LEN);
-          send(frame, gate("upperOut"));
+          ev << "RECV (MAC)" << endl;
+          IpPacket* ipPacket = new IpPacket;
+
+          ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+          ipPacket->setKind(LAYER_MAC);
+          ipPacket->setNote(LAYER_MAC_RECV_OK);
+
+          send(ipPacket, gate("upperOut"));
           break; /* okay message */
       }
-
+    }
       break; /* message from MAC layer */
   }
 }

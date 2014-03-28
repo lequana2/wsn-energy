@@ -13,27 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+cplusplus {{
+	#include "packet_len.h"
+}}
+
 namespace wsn_energy;
 
-enum PACKET_SIZE{
-	PHY_HEADER     =  6;    // PHY 802.15.4 header 6 bytes
-	
-	PACKET_802154  			=  127;  // MAC 802.15.4 payload 127 bytes
-	ACK_HEADER_FOOTER_LEN	=  5;	 // MAC 802.15.4 ACK 5 bytes (header + footer)
-	MAC_HEADER_FOOTER_LEN	=  25;   // MAC 802.15.4 ACK 25 bytes (address long)
-	
-	DIO_LEN		   =  24; 	// ICMPv6 RPL DODAG INFORMATION OBJECT
-	DIS_LEN		   =  10;   // ICMPv6 RPL DODAG INFORMATION SOLICITATION
-	
-	DATA		   = 1; 	// 1 bytes ????
-}
-
-enum MESSAGE
+enum COMMAND_AND_RESULT
 {
-	// specialize event
+	// physics event
 	NODE_STARTUP  = 0; // turn on a mote
 	NODE_DESTRUCT = 1; // turn off a mote (or) note runs out of energy
 	OUT_OF_ENERGY = 2; // out of energy flag
+	
+	// self event
 	RPL_CONSTRUCT = 3; // perform broadcasting DIO
 	RPL_SOLICIT   = 4; // request DIS
 
@@ -84,60 +77,72 @@ enum MESSAGE
 	LAYER_MAC_RECV_OK	= 55; // receiving an okay message
 
 	// net
-	LAYER_NET       = 70; // kind
+	LAYER_NET       	  = 70;	// kind
 	
-	NET_ICMP_DIO    = 71; // ICMP DIO message
-	NET_ICMP_DIS    = 72; // ICMP DIS message
-	NET_ICMP_ACK    = 73; // ICMP ACK message
+	LAYER_NET_SEND_BUFFER = 71; // get message from buffer
 	
-	NET_DATA        = 74; // normal data message
+	NET_ICMP_DIO    	  = 72;	// ICMP DIO message
+	NET_ICMP_DIS    	  = 73;	// ICMP DIS message
+	NET_ICMP_ACK    	  = 74;	// ICMP ACK message
 	
-	NET_ICMP_REQUEST_ACK = 75; // ICMP sending ACK request
+	NET_DATA        	  = 75; // normal data message
+	
+	NET_ICMP_REQUEST_ACK  = 76; // ICMP sending ACK request
 	
 	// event
 	LAYER_APP		 = 90; // kind
+	
 	APP_WORKING_FLAG = 91; // data from another node 
 	APP_SENSING_FLAG = 92; // data from sensor
 	APP_ENVIRON_FLAG = 93; // data from enviroment
 }
 
 packet Raw{
-    int typeRadioLayer;
-    int len = 0;
+    int note; // control message 
+
     bool bitError;
     int radioSendId;
     int radioRecvId;
 }
 
-packet Frame extends Raw{
-	int typeMacLayer;
+packet FrameRDC{
+	int note;  // control message
+}
+
+packet FrameMAC{
+    int note;  // control message
+
 	int senderMacAddress;
 	int recverMacAddress;
+
 	int sequenceNumber;
 }
 
-packet IpPacket extends Frame{
-    int typeNetLayer;
+packet IpPacket{
+    int note; 	// control message
+	int type;	// type message
+
     int senderIpAddress;
     int recverIpAddress;
+
     bool isRequestAck;
 }
 
-packet Data extends IpPacket {
+packet Data extends IpPacket{
 	string value;
 }
 
-packet DIO extends IpPacket {
+packet DIO  extends IpPacket{
 	int dodagID;
 	int version;
 	unsigned long rank;
 	double secondCriteria;
 }
 
-packet DIS extends IpPacket {
+packet DIS  extends IpPacket{
 	int convergence;
 }
 
-packet ACK extends IpPacket {
+packet ACK extends IpPacket{
 	double energy;
 }

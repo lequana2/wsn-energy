@@ -181,19 +181,25 @@ depend:
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/app.h \
 	apps/client/client.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/app.h \
-	apps/server/server.h
+	apps/server/server.h \
+	packet/packet_len.h \
+	packet/packet_m.h
 $O/core/battery/battery.o: core/battery/battery.cc \
 	core/battery/battery.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	core/mac/mac.h \
 	core/mac/nullmac/nullMAC.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	apps/app.h \
@@ -201,6 +207,7 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
@@ -209,10 +216,12 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/battery/battery.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/radio/radio.o: core/radio/radio.cc \
 	core/battery/battery.h \
 	core/radio/radio.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
@@ -222,6 +231,7 @@ $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	core/radio/cc2420/cc2420-const.h \
 	core/radio/cc2420/cc2420.h \
 	core/radio/radio.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
@@ -230,29 +240,36 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	core/battery/battery.h \
 	core/radio/nullradio/nullRadio.h \
 	core/radio/radio.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h \
 	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/rdc/rdc.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
 	core/rdc/nullrdc/nullRDC.h \
 	core/rdc/rdc.h \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/packet/packet_m.o: packet/packet_m.cc \
+	packet/packet_len.h \
 	packet/packet_m.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/battery/battery.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h
 $O/util/transmission/transmission.o: util/transmission/transmission.cc \
 	core/radio/radio.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/transmission/transmission.h
 $O/util/world/world.o: util/world/world.cc \
 	core/radio/radio.h \
+	packet/packet_len.h \
 	packet/packet_m.h \
 	util/transmission/transmission.h \
 	util/world/world.h

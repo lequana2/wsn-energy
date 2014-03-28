@@ -27,7 +27,7 @@
 #endif
 
 #ifndef DATA_RATE
-#define DATA_RATE 250000  // 250 kbps
+#define DATA_RATE 250000.0  // 250 kbps
 #endif
 
 #define SLEEPING        0 // do nothing

@@ -18,6 +18,10 @@
 
 #include <math.h>
 
+#ifndef ANNOTATE
+#define ANNOTATE 1
+#endif
+
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -48,7 +52,7 @@ void World::arrangeNodes()
 {
   int col = -1; // carry out
   int row = 0;
-//  int step = 0;
+  int step = 0;
   int x, y;
 
   for (int i = 0; i < numberClient; i++)
@@ -74,6 +78,19 @@ void World::arrangeNodes()
         break; /* server at center */
 
       case 1: /* pyramid */
+        if ( col >= step)
+        {
+          col = 0;
+          row++;
+          step++;
+        }
+        else
+        {
+          col++;
+        }
+        // Partition
+        x = (int) (col * 25 + (getParentModule()->par("width").doubleValue() - 25 * step)/2);
+        y = (int) (row * 30 + 20);
         break; /* pyramid */
     }
 
@@ -139,6 +156,8 @@ void World::checkConnection(RadioDriver *radio)
  */
 int World::deployConnection(RadioDriver *x, RadioDriver *y)
 {
+  // WSN calculate and register distance
+
   if (calculateDistance(x, y) > x->trRange)
     return 0;
   if (x->getId() == y->getId())
@@ -160,7 +179,7 @@ int World::deployConnection(RadioDriver *x, RadioDriver *y)
   outGate->connectTo(inGate);
 
   //hidden connection
-  outGate->setDisplayString("ls=,0");
+//  outGate->setDisplayString("ls=,0");
 
   return 1;
 }
@@ -246,9 +265,12 @@ void World::registerTransmission(Transmission *tranmission)
     }
   }
 
-  oss.seekp(0);
-  oss << sender->trRange << endl;
-  (&sender->getParentModule()->getDisplayString())->setTagArg("r", 0, oss.str().c_str());
+  if (ANNOTATE)
+  {
+    oss.seekp(0);
+    oss << sender->trRange << endl;
+    (&sender->getParentModule()->getDisplayString())->setTagArg("r", 0, oss.str().c_str());
+  }
 }
 
 bool World::isFeasibleTransmission(Transmission* transmission)
