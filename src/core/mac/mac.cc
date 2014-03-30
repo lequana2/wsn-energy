@@ -65,15 +65,14 @@ void MACdriver::handleMessage(cMessage *msg)
           ipPacket->setKind(LAYER_MAC);
           ipPacket->setNote(LAYER_NET_SEND_OK);
           send(ipPacket, gate("upperOut"));
-
-//          if (((IpPacket*) msg)->getIsRequestAck())
-//          {
-//            msg->setKind(LAYER_MAC);
-//            ((IpPacket*) msg)->setTypeNetLayer(NET_DATA);
-//            send(msg, gate("upperOut"));
-//          }
         }
           break; /* callback after sending */
+
+        case LAYER_RDC_SEND_NOT_OK: /* callback if not able to send*/
+        {
+          deferPacket(frameMac);
+        }
+          break;
 
         case LAYER_RDC_RECV_ACK:
           if (DEBUG)

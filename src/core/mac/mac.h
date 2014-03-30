@@ -28,11 +28,13 @@ class MACdriver : public cSimpleModule
     virtual void handleMessage(cMessage*);
     virtual void finish();
 
+    /* accept output from upperlayer*/
     virtual void sendPacket(FrameMAC*) = 0;
-    virtual void receivePacket(FrameMAC*) = 0;
+    /* scheduling for not successful transmitting*/
+    virtual void deferPacket(FrameMAC*) = 0;
 
-//    virtual void on() = 0;
-//    virtual void off() = 0;
+    /* accept input from lowerlayer*/
+    virtual void receivePacket(FrameMAC*) = 0;
 };
 
 } /* namespace wsn_energy */

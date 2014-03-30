@@ -57,6 +57,7 @@ OBJS = \
     $O/apps/server/server.o \
     $O/core/battery/battery.o \
     $O/core/mac/mac.o \
+    $O/core/mac/csma/csma.o \
     $O/core/mac/nullmac/nullMAC.o \
     $O/core/net/ipv6/ipv6.o \
     $O/core/net/rpl/rpl.o \
@@ -193,6 +194,11 @@ $O/core/battery/battery.o: core/battery/battery.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/mac/mac.o: core/mac/mac.cc \
+	core/mac/mac.h \
+	packet/packet_len.h \
+	packet/packet_m.h
+$O/core/mac/csma/csma.o: core/mac/csma/csma.cc \
+	core/mac/csma/csma.h \
 	core/mac/mac.h \
 	packet/packet_len.h \
 	packet/packet_m.h

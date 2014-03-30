@@ -31,18 +31,20 @@ class RDCdriver : public cSimpleModule
     virtual void handleMessage(cMessage*);
     virtual void finish();
 
-    virtual void deferPacket(FrameRDC*) = 0;
-
+    /* transmit demand */
     virtual void sendPacket(FrameRDC*) = 0;
 
+    /* call-back */
     virtual void sendSuccess(FrameRDC*) = 0;
     virtual void sendFailure() = 0;
 
+    /* listen demand */
+    virtual void on();
+    virtual void off();
+
+    /* consider new-coming */
     virtual void receiveSuccess(FrameMAC*) = 0;
     virtual void receiveFailure() = 0;
-
-    virtual void on() = 0;
-    virtual void off() = 0;
 };
 
 } /* namespace wsn_energy */

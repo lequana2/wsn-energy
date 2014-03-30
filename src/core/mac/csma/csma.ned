@@ -13,39 +13,22 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRDC.h"
-#include "packet_m.h"
+package wsn_energy.core.mac.csma;
 
-#ifndef  DEBUG
-#define DEBUG 1
-#endif
+import wsn_energy.core.mac.iMAC;
 
-namespace wsn_energy {
-
-Define_Module(nullRDC);
-
-void nullRDC::sendPacket(FrameRDC* frame)
+//
+// TODO auto-generated type
+//
+simple csma like iMAC
 {
-}
+    parameters:
+        @class("csma");
 
-void nullRDC::sendSuccess(FrameRDC* frame)
-{
-  on();
-  return;
-}
+    gates:
+        input upperIn;
+        output upperOut;
 
-void nullRDC::sendFailure()
-{
-  return;
+        input lowerIn;
+        output lowerOut;
 }
-
-void nullRDC::receiveSuccess(FrameMAC* frame)
-{
-}
-
-void nullRDC::receiveFailure()
-{
-  return;
-}
-
-} /* namespace wsn_energy */

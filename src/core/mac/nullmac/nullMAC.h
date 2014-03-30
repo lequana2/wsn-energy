@@ -23,11 +23,9 @@ namespace wsn_energy {
 class nullMAC : public MACdriver
 {
   protected:
+    virtual void deferPacket(FrameMAC*);
     virtual void sendPacket(FrameMAC*);
     virtual void receivePacket(FrameMAC*);
-
-//    virtual void on();
-//    virtual void off();
 };
 
 } /* namespace wsn_energy */

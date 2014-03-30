@@ -55,15 +55,16 @@ enum COMMAND_AND_RESULT
 	LAYER_RDC                	= 30; // kind
 	
 	LAYER_RDC_SEND				= 31; // sending a message
-	LAYER_RDC_SEND_OK			= 32; // alreadt sent a message
+	LAYER_RDC_SEND_OK			= 32; // already sent a message
+	LAYER_RDC_SEND_NOT_OK		= 33; // failed to send a message
 	
-	LAYER_RDC_WAIT_ACK			= 33; // waiting for an ACK
+	LAYER_RDC_WAIT_ACK			= 34; // waiting for an ACK
 	
-	LAYER_RDC_LISTEN_ON			= 34; // turn receiver on
-	LAYER_RDC_LISTEN_OFF		= 35; // turn receiver off
+	LAYER_RDC_LISTEN_ON			= 35; // turn receiver on
+	LAYER_RDC_LISTEN_OFF		= 36; // turn receiver off
 	
-	LAYER_RDC_RECV_OK			= 36; // receiving a okay message
-	LAYER_RDC_RECV_ACK			= 37; // receiving an ACK
+	LAYER_RDC_RECV_OK			= 37; // receiving a okay message
+	LAYER_RDC_RECV_ACK			= 38; // receiving an ACK
 	
 	// mac
 	LAYER_MAC 		    = 50; // kind

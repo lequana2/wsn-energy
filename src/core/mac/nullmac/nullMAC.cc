@@ -20,6 +20,10 @@ namespace wsn_energy {
 
 Define_Module(nullMAC);
 
+void nullMAC::deferPacket(FrameMAC* frameMac)
+{
+}
+
 void nullMAC::sendPacket(FrameMAC* frameMAC)
 {
 }

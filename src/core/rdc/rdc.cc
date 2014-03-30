@@ -29,17 +29,6 @@ void RDCdriver::handleMessage(cMessage *msg)
   {
     case LAYER_RDC: /* control message */
     {
-//      FrameRDC* frame = check_and_cast<FrameRDC*>(msg);
-//      // WSN ACK
-//      switch (frame->getCommandRdcLayer())
-//      {
-//        case LAYER_RDC_WAIT_ACK:
-//          msg->setKind(LAYER_RDC);
-//          // NO ACK
-//          ev << "No ACK" << endl;
-//          isWaitingACK = false;
-//          break;
-//      }
     }
       break; /* control message */
 
@@ -63,19 +52,34 @@ void RDCdriver::handleMessage(cMessage *msg)
       switch (frameRdc->getNote())
       {
         case LAYER_RADIO_SEND_OK: /* callback after sending */
-//          raw->setKind(LAYER_RDC);
-//          ((Frame*) raw)->setTypeMacLayer(LAYER_RDC_SEND_OK);
-//          send(raw, gate("upperOut"));
           break; /* callback after sending */
 
-        case LAYER_RADIO_CCA_NOT_VALID: /* Packet CCA is not valid */
-          break; /* Packet CCA is not valid */
-
         case LAYER_RADIO_PACKET_OVERSIZE: /* Packet is oversized */
+          // WSN Internal error, no need to resend
           break; /* Packet is oversized */
 
+        case LAYER_RADIO_CCA_NOT_VALID: /* Packet CCA is not valid */
+        {
+          FrameMAC* frameMac = new FrameMAC;
+
+          frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          frameMac->setKind(LAYER_RDC);
+          frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
+
+          send(frameMac, gate("upperOut"));
+        }
+          break; /* Packet CCA is not valid */
+
         case LAYER_RADIO_NOT_FREE: /* Radio is busy */
-//          deferPacket(raw);
+        {
+          FrameMAC* frameMac = new FrameMAC;
+
+          frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          frameMac->setKind(LAYER_RDC);
+          frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
+
+          send(frameMac, gate("upperOut"));
+        }
           break; /* Radio is busy */
 
         case LAYER_RADIO_RECV_OK: /* Radio received a packet */
@@ -86,7 +90,6 @@ void RDCdriver::handleMessage(cMessage *msg)
           frameMac->setKind(LAYER_RDC);
           frameMac->setNote(LAYER_RDC_RECV_OK);
 
-//          receiveSuccess(frame);
           send(frameMac, gate("upperOut"));
         }
           break; /* Radio received a packet */
@@ -102,6 +105,24 @@ void RDCdriver::handleMessage(cMessage *msg)
 void RDCdriver::finish()
 {
   cancelAndDelete(waitACK);
+}
+
+void nullRDC::on()
+{
+  FrameRDC *frame = new FrameRDC;
+  frame->setKind(LAYER_RDC);
+  frame->setNote(LAYER_RDC_LISTEN_ON);
+
+  send(frame, gate("lowerOut"));
+}
+
+void nullRDC::off()
+{
+  FrameRDC *frame = new FrameRDC;
+  frame->setKind(LAYER_RDC);
+  frame->setNote(LAYER_RDC_LISTEN_OFF);
+
+  send(frame, gate("lowerOut"));
 }
 
 } /* namespace wsn_energy */

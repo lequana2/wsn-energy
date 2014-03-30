@@ -13,39 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRDC.h"
-#include "packet_m.h"
+#ifndef CSMA_H_
+#define CSMA_H_
 
-#ifndef  DEBUG
-#define DEBUG 1
-#endif
+#include "mac.h"
 
 namespace wsn_energy {
 
-Define_Module(nullRDC);
-
-void nullRDC::sendPacket(FrameRDC* frame)
+class csma : public MACdriver
 {
-}
-
-void nullRDC::sendSuccess(FrameRDC* frame)
-{
-  on();
-  return;
-}
-
-void nullRDC::sendFailure()
-{
-  return;
-}
-
-void nullRDC::receiveSuccess(FrameMAC* frame)
-{
-}
-
-void nullRDC::receiveFailure()
-{
-  return;
-}
+  protected:
+    virtual void deferPacket(FrameMAC*);
+    virtual void sendPacket(FrameMAC*);
+    virtual void receivePacket(FrameMAC*);
+};
 
 } /* namespace wsn_energy */
+
+#endif /* CMSA_H_ */

@@ -13,39 +13,27 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRDC.h"
+#include "csma.h"
 #include "packet_m.h"
 
-#ifndef  DEBUG
-#define DEBUG 1
-#endif
+#define MAXIMUM_TRANSMISSION 3
 
 namespace wsn_energy {
 
-Define_Module(nullRDC);
+Define_Module(csma);
 
-void nullRDC::sendPacket(FrameRDC* frame)
+void csma::deferPacket(FrameMAC* frameMAC)
 {
 }
 
-void nullRDC::sendSuccess(FrameRDC* frame)
-{
-  on();
-  return;
-}
-
-void nullRDC::sendFailure()
-{
-  return;
-}
-
-void nullRDC::receiveSuccess(FrameMAC* frame)
+void csma::sendPacket(FrameMAC* frameMAC)
 {
 }
 
-void nullRDC::receiveFailure()
+void csma::receivePacket(FrameMAC* frame)
 {
-  return;
+  frame->setKind(LAYER_MAC);
+  send(frame, gate("upperOut"));
 }
 
 } /* namespace wsn_energy */
