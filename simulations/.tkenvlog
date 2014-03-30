@@ -114,3 +114,1550 @@ Tcl error: modinsp.cc#237: (cDatarateChannel)WSN.server.out 2 to 7.out 2 to 7: O
 "createGraphicalModWindow .ptr0x83eea30-2 "607x337+495+282:normal""
 
 
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0098 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0098 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84145f8-2.c ptr0x80a0828 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84145f8-2.c ptr0x80a0828 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0848 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f638-2.c ptr0x80a0848 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7520-2.c ptr0x80a0828 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7520-2.c ptr0x80a0828 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7520-2.c ptr0x80a0828 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0828 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x80a0ae0 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x80a0ae0 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x80a0ae0 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x841ab18 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x841ab18 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x841ab18 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x841ab18 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x80a0ae0 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0ae0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x84d7550-2.c ptr0x80a0ae0 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f668-2.c ptr0x80a09f0 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0890 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f390-2.c ptr0x80a0890 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x809fc30 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x841bd60-2.c ptr0x809fc30 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a01c8 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f628-2.c ptr0x80a01c8 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x8445f40-2.c ptr0x80a09f0 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x8445f40-2.c ptr0x80a09f0 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x8445f40-2.c ptr0x80a09f0 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a09f0 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x842b198 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x8445f40-2.c ptr0x842b198 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0b90 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0b90 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x8435b20 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x8435b20 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0b90 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0b90 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0b90 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x80a0b90 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x8435b20 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x8435b20 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: tkenv.cc#1919: ptr0x80a0b90 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a0890 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f390-2.c ptr0x80a0890 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x80a00c8 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x845df40-2.c ptr0x80a00c8 1"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#621: bad window path name ""
+    while executing
+"winfo toplevel [focus]"
+    invoked from within
+"if [catch {
+       opp_displaystring $dispstr parse tags $submodptr 1
+
+       # scale (x,y)
+       if {$scaling != ""} {
+           set x [expr $scali..."
+    (procedure "graphicalModuleWindow:drawSubmodule" line 20)
+    invoked from within
+"graphicalModuleWindow:drawSubmodule .ptr0x8458738-2.c ptr0x90a2620 162 50 {client[2]} {r=50
+y;p=162
+ge,50
+
+ge;i=misc/node,blue;is=m} {6} 0"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#756: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x9075530 1"
+
+
+Tcl error: modinsp.cc#756: ptr0x809f950 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x809f950 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x809f950 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x809f950 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x9075530 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x809f950 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x809f950 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x809f950 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x809f950 1"
+
+
+Tcl error: tkenv.cc#1919: ptr0x9075530 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $mod1ptr"
+    (procedure "doAnimateGroup" line 41)
+    invoked from within
+"doAnimateGroup $jobgroup($stage)"
+    (procedure "doConcurrentAnimations" line 32)
+    invoked from within
+"doConcurrentAnimations $tkenv(animjobs)"
+    (procedure "performAnimations" line 4)
+    invoked from within
+"performAnimations"
+
+
+Tcl error: modinsp.cc#756: ptr0x809f950 not found
+    while executing
+"error "$tag not found""
+    (procedure "graphicalModuleWindow:getSubmodCoords" line 4)
+    invoked from within
+"graphicalModuleWindow:getSubmodCoords $c $modptr"
+    (procedure "graphicalModuleWindow:drawNextEventMarker" line 2)
+    invoked from within
+"graphicalModuleWindow:drawNextEventMarker .ptr0x809f608-2.c ptr0x809f950 1"
+
+

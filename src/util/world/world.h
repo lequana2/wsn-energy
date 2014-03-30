@@ -16,6 +16,15 @@
 #ifndef ENVIROMENT_H_
 #define ENVIROMENT_H_
 
+#ifndef COLORIZE
+#define COLORIZE 1
+#define OFF_COLOR      "black"
+#define IDLE_COLOR     "gray"
+#define TRANSMIT_COLOR "blue"
+#define LISTEN_COLOR   "yellow"
+#define RECEIVE_COLOR  "orange"
+#endif
+
 #include <omnetpp.h>
 
 #include "transmission.h"
@@ -24,34 +33,31 @@ namespace wsn_energy {
 
 class World : public cSimpleModule
 {
-  public:
-    int numberClient;
-    std::ostringstream oss;
-//    std::list<std::list> distanceStart;
-
-// WSN search through list and register
-    void registerHost(RadioDriver*);
-
-    void registerTransmission(Transmission*);
-    bool isFeasibleTransmission(Transmission*);
-    void stopTransmission(Transmission*);
-    bool senseBusyTransmission(Transmission*);
-
-    double calculateDistance(RadioDriver*, RadioDriver*);
-    double calculateDistance(int, int, int, int);
-
-    std::list<Transmission*> onAir;
-
   private:
     void arrangeNodes(); // Arrange nodes in positions
     void connectNodes(); // Connect adjacent nodes
+
+    void checkConnection(RadioDriver*);
+    int deployConnection(RadioDriver*, RadioDriver*);
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-    void checkConnection(RadioDriver*);
-    int deployConnection(RadioDriver*, RadioDriver*);
+  public:
+    int numberClient;
+    std::ostringstream oss;
+    std::list<Transmission*> onAir;
+
+    void changeStatus(RadioDriver*); // change color of sensor in term of status
+
+    void registerTransmission(Transmission*);    // register a transmission in world
+    bool isFeasibleTransmission(Transmission*);  // check whether a transmission feasible or not
+    void stopTransmission(Transmission*);         // unregister a transmission from world
+    bool senseBusyTransmission(Transmission*);   // perform CCA
+
+    double calculateDistance(RadioDriver*, RadioDriver*); // calculate distance between 2 sensors
+    double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate
 };
 
 } /* namespace wsn_energy */

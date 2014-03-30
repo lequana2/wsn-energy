@@ -78,7 +78,7 @@ void World::arrangeNodes()
         break; /* server at center */
 
       case 1: /* pyramid */
-        if ( col >= step)
+        if (col >= step)
         {
           col = 0;
           row++;
@@ -89,7 +89,7 @@ void World::arrangeNodes()
           col++;
         }
         // Partition
-        x = (int) (col * 25 + (getParentModule()->par("width").doubleValue() - 25 * step)/2);
+        x = (int) (col * 25 + (getParentModule()->par("width").doubleValue() - 25 * step) / 2);
         y = (int) (row * 30 + 20);
         break; /* pyramid */
     }
@@ -156,8 +156,6 @@ void World::checkConnection(RadioDriver *radio)
  */
 int World::deployConnection(RadioDriver *x, RadioDriver *y)
 {
-  // WSN calculate and register distance
-
   if (calculateDistance(x, y) > x->trRange)
     return 0;
   if (x->getId() == y->getId())
@@ -207,6 +205,33 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
   return sqrt(x + y);
 }
 
+void World::changeStatus(RadioDriver *mote)
+{
+  switch (mote->status)
+  {
+    case IDLE:
+      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, IDLE_COLOR);
+      break;
+
+    case LISTENING:
+      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
+      break;
+
+    case RECEIVING:
+      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVE_COLOR);
+      break;
+
+    case TRANSMITTING:
+      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
+      break;
+
+    default:
+      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
+      break;
+  }
+
+}
+
 void World::registerTransmission(Transmission *tranmission)
 {
   if (DEBUG)
@@ -220,11 +245,12 @@ void World::registerTransmission(Transmission *tranmission)
   {
     case TRANSMITTING:
     case RECEIVING:
-    case SLEEPING:
+    case IDLE:
       tranmission->corrupt();
       break;
     case LISTENING:
       recver->status = RECEIVING;
+      changeStatus(recver);
       break;
   }
 

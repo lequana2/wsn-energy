@@ -30,10 +30,11 @@
 #define DATA_RATE 250000.0  // 250 kbps
 #endif
 
-#define SLEEPING        0 // do nothing
-#define TRANSMITTING    1 // transmitting something
-#define LISTENING       2 // listening to nothing
-#define RECEIVING       3 // listening to something
+#define OFF             0 // power down
+#define IDLE            1 // do nothing
+#define TRANSMITTING    2 // transmitting something
+#define LISTENING       3 // listening to nothing
+#define RECEIVING       4 // listening to something
 
 #include <omnetpp.h>
 
@@ -51,8 +52,8 @@ class RadioDriver : public cSimpleModule
     // Functioning
     virtual void transmit_on(Raw *raw);
     virtual void transmit_off();
-    virtual void listen_off();
-    virtual void listen_on();
+    virtual void listen();
+    virtual void sleep();
 
     // CCA
     virtual bool isClearChannel() = 0;

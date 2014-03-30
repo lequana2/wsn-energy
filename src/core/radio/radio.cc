@@ -16,7 +16,7 @@ void RadioDriver::initialize()
   this->coRange = par("coRange");
   this->broadcastMessage = NULL;
 
-  listen_on();
+  listen();
 }
 
 void RadioDriver::handleMessage(cMessage* msg)
@@ -83,12 +83,11 @@ void RadioDriver::handleMessage(cMessage* msg)
 
             switch (this->status)
             {
-              case SLEEPING:
+              case IDLE:
                 scheduleAt(simTime() + SWITCH_MODE_DELAY_SLEEP_TO_TRANS, raw);
                 break;
 
               case LISTENING:
-                listen_off();
                 scheduleAt(simTime() + SWITCH_MODE_DELAY_LISTEN_TO_TRANS, raw);
                 break;
 
@@ -96,7 +95,6 @@ void RadioDriver::handleMessage(cMessage* msg)
                 scheduleAt(simTime(), raw);
                 break;
             }
-            this->status = TRANSMITTING;
           }
           break; /* switch to transmit */
 
@@ -120,12 +118,11 @@ void RadioDriver::handleMessage(cMessage* msg)
 
             switch (this->status)
             {
-              case SLEEPING:
+              case IDLE:
                 scheduleAt(simTime() + SWITCH_MODE_DELAY_SLEEP_TO_LISTEN, raw);
                 break;
 
               case LISTENING:
-                listen_off();
                 scheduleAt(simTime(), raw);
                 break;
 
@@ -133,12 +130,27 @@ void RadioDriver::handleMessage(cMessage* msg)
                 scheduleAt(simTime() + SWITCH_MODE_DELAY_TRANS_TO_LISTEN, raw);
                 break;
             }
-            this->status = LISTENING;
           }
           break; /* switch to listen */
 
         case LAYER_RADIO_SWITCH_SLEEP:
-          this->status = SLEEPING;
+          // check radio duty
+          if (this->status == TRANSMITTING || this->status == RECEIVING)
+          {
+            /* Feedback to RDC*/
+            FrameRDC *frame = new FrameRDC;
+
+            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+            frame->setKind(LAYER_RDC);
+            frame->setNote(LAYER_RADIO_NOT_FREE);
+
+            send(frame, gate("upperOut"));
+          }
+          // feasible
+          else
+          {
+            sleep();
+          }
           break; /* switch to sleep */
 
         case LAYER_RADIO_BEGIN_TRANSMIT:
@@ -156,15 +168,17 @@ void RadioDriver::handleMessage(cMessage* msg)
           frame->setNote(LAYER_RADIO_SEND_OK);
 
           send(frame, gate("upperOut"));
+
+          listen();
         }
           break; /* end transmitting*/
 
         case LAYER_RADIO_BEGIN_LISTEN:
-          listen_on();
+          listen();
           break; /* begin listening */
 
         case LAYER_RADIO_END_LISTENING:
-          listen_off();
+          sleep();
           break; /* end listening */
 
         case LAYER_RADIO_RECV_OK: {
@@ -176,11 +190,15 @@ void RadioDriver::handleMessage(cMessage* msg)
           frame->setNote(LAYER_RADIO_RECV_OK);
 
           send(frame, gate("upperOut"));
+
+          // WSN sendACK
+          listen();
         }
           break; /* receie a OK message */
 
         case LAYER_RADIO_RECV_CORRUPT:
-          /* Dismiss message */
+          /* Dismiss message and sleep */
+          sleep();
           break; /* receie a corrupt message */
       }
     }
@@ -224,7 +242,7 @@ void RadioDriver::handleMessage(cMessage* msg)
               break; /* radio is on duty */
 
             case LISTENING:
-            case SLEEPING: /* Ignite transmitting */
+            case IDLE: /* Ignite transmitting */
             {
               Raw* raw = new Raw;
 
@@ -274,7 +292,8 @@ void RadioDriver::transmit_on(Raw *raw)
 
   scheduleAt(simTime() + finishTime, broadcastMessage);
 
-  // turn off listening and transmitting
+  this->status = TRANSMITTING;
+  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT, getTxPower());
 }
 
@@ -325,29 +344,33 @@ void RadioDriver::transmit_off()
     ((World*) simulation.getModuleByPath("world"))->stopTransmission(completeTranmission);
   }
 
-  this->status = SLEEPING;
+  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
 }
 
 /*
  *   Turn on receiving
  */
-void RadioDriver::listen_on()
+void RadioDriver::listen()
 {
   if (DEBUG)
     ev << "Recv on" << endl;
   this->status = LISTENING;
+
+  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN, getRxPower());
 }
 
 /*
  *   Turn off receiving
  */
-void RadioDriver::listen_off()
+void RadioDriver::sleep()
 {
   if (DEBUG)
     ev << "Recv off" << endl;
-  this->status = SLEEPING;
+  this->status = IDLE;
+
+  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
 }
 
