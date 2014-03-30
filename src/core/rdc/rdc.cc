@@ -91,8 +91,8 @@ void RDCdriver::handleMessage(cMessage *msg)
         }
           break; /* Radio received a packet */
 
-        case LAYER_RADIO_RECV_CORRUPT:
-          break;
+        case LAYER_RADIO_RECV_CORRUPT: /* Radio received an incomplete message */
+          break; /* Radio received an incomplete message */
       }
     }
       break; /* message from radio layer */

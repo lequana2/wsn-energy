@@ -70,7 +70,9 @@ EXECUTE_ON_STARTUP(
     e->insert(LAYER_MAC_ERR, "LAYER_MAC_ERR");
     e->insert(LAYER_MAC_RECV_OK, "LAYER_MAC_RECV_OK");
     e->insert(LAYER_NET, "LAYER_NET");
-    e->insert(LAYER_NET_SEND_BUFFER, "LAYER_NET_SEND_BUFFER");
+    e->insert(LAYER_NET_CHECK_BUFFER, "LAYER_NET_CHECK_BUFFER");
+    e->insert(LAYER_NET_SEND_OK, "LAYER_NET_SEND_OK");
+    e->insert(LAYER_NET_SEND_FAIL, "LAYER_NET_SEND_FAIL");
     e->insert(NET_ICMP_DIO, "NET_ICMP_DIO");
     e->insert(NET_ICMP_DIS, "NET_ICMP_DIS");
     e->insert(NET_ICMP_ACK, "NET_ICMP_ACK");
@@ -87,7 +89,6 @@ Register_Class(Raw);
 Raw::Raw(const char *name, int kind) : cPacket(name,kind)
 {
     this->note_var = 0;
-    this->bitError_var = 0;
     this->radioSendId_var = 0;
     this->radioRecvId_var = 0;
 }
@@ -112,7 +113,6 @@ Raw& Raw::operator=(const Raw& other)
 void Raw::copy(const Raw& other)
 {
     this->note_var = other.note_var;
-    this->bitError_var = other.bitError_var;
     this->radioSendId_var = other.radioSendId_var;
     this->radioRecvId_var = other.radioRecvId_var;
 }
@@ -121,7 +121,6 @@ void Raw::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->note_var);
-    doPacking(b,this->bitError_var);
     doPacking(b,this->radioSendId_var);
     doPacking(b,this->radioRecvId_var);
 }
@@ -130,7 +129,6 @@ void Raw::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->note_var);
-    doUnpacking(b,this->bitError_var);
     doUnpacking(b,this->radioSendId_var);
     doUnpacking(b,this->radioRecvId_var);
 }
@@ -143,16 +141,6 @@ int Raw::getNote() const
 void Raw::setNote(int note)
 {
     this->note_var = note;
-}
-
-bool Raw::getBitError() const
-{
-    return bitError_var;
-}
-
-void Raw::setBitError(bool bitError)
-{
-    this->bitError_var = bitError;
 }
 
 int Raw::getRadioSendId() const
@@ -222,7 +210,7 @@ const char *RawDescriptor::getProperty(const char *propertyname) const
 int RawDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
 unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -237,9 +225,8 @@ unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RawDescriptor::getFieldName(void *object, int field) const
@@ -252,11 +239,10 @@ const char *RawDescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "note",
-        "bitError",
         "radioSendId",
         "radioRecvId",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
 int RawDescriptor::findField(void *object, const char *fieldName) const
@@ -264,9 +250,8 @@ int RawDescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
-    if (fieldName[0]=='b' && strcmp(fieldName, "bitError")==0) return base+1;
-    if (fieldName[0]=='r' && strcmp(fieldName, "radioSendId")==0) return base+2;
-    if (fieldName[0]=='r' && strcmp(fieldName, "radioRecvId")==0) return base+3;
+    if (fieldName[0]=='r' && strcmp(fieldName, "radioSendId")==0) return base+1;
+    if (fieldName[0]=='r' && strcmp(fieldName, "radioRecvId")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -280,11 +265,10 @@ const char *RawDescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "bool",
         "int",
         "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *RawDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -325,9 +309,8 @@ std::string RawDescriptor::getFieldAsString(void *object, int field, int i) cons
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getNote());
-        case 1: return bool2string(pp->getBitError());
-        case 2: return long2string(pp->getRadioSendId());
-        case 3: return long2string(pp->getRadioRecvId());
+        case 1: return long2string(pp->getRadioSendId());
+        case 2: return long2string(pp->getRadioRecvId());
         default: return "";
     }
 }
@@ -343,9 +326,8 @@ bool RawDescriptor::setFieldAsString(void *object, int field, int i, const char 
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
         case 0: pp->setNote(string2long(value)); return true;
-        case 1: pp->setBitError(string2bool(value)); return true;
-        case 2: pp->setRadioSendId(string2long(value)); return true;
-        case 3: pp->setRadioRecvId(string2long(value)); return true;
+        case 1: pp->setRadioSendId(string2long(value)); return true;
+        case 2: pp->setRadioRecvId(string2long(value)); return true;
         default: return false;
     }
 }
@@ -362,9 +344,8 @@ const char *RawDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
-        NULL,
     };
-    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const

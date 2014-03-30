@@ -53,6 +53,15 @@ void Client::initialize()
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
 //    scheduleAt(simTime() + 3, event->dup());
 
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
+//    scheduleAt(simTime() + 1, event->dup());
+//
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
+//    scheduleAt(simTime() + 2, event->dup());
+//
+//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
+//    scheduleAt(simTime() + 3, event->dup());
+
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[26]")->getId())
 //    scheduleAt(simTime() + 30, event);
 }

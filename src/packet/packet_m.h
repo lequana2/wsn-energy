@@ -83,18 +83,21 @@ namespace wsn_energy {
  * 	
  * 	LAYER_NET       	  = 70;	
  * 	
- * 	LAYER_NET_SEND_BUFFER = 71; 
+ * 	LAYER_NET_CHECK_BUFFER = 71; 
  * 	
- * 	NET_ICMP_DIO    	  = 72;	
- * 	NET_ICMP_DIS    	  = 73;	
- * 	NET_ICMP_ACK    	  = 74;	
+ * 	LAYER_NET_SEND_OK	   = 72; 
+ * 	LAYER_NET_SEND_FAIL	   = 73; 
  * 	
- * 	NET_DATA        	  = 75; 
+ * 	NET_ICMP_DIO    	  = 74;	
+ * 	NET_ICMP_DIS    	  = 75;	
+ * 	NET_ICMP_ACK    	  = 76;	
  * 	
- * 	NET_ICMP_REQUEST_ACK  = 76; 
+ * 	NET_DATA        	  = 77; 
+ * 	
+ * 	NET_ICMP_REQUEST_ACK  = 78; 
  * 	
  * 	
- * 	LAYER_APP		 = 90; 
+ * 	LAYER_APP		 = 90; 			
  * 	
  * 	APP_WORKING_FLAG = 91; 
  * 	APP_SENSING_FLAG = 92; 
@@ -137,12 +140,14 @@ enum COMMAND_AND_RESULT {
     LAYER_MAC_ERR = 54,
     LAYER_MAC_RECV_OK = 55,
     LAYER_NET = 70,
-    LAYER_NET_SEND_BUFFER = 71,
-    NET_ICMP_DIO = 72,
-    NET_ICMP_DIS = 73,
-    NET_ICMP_ACK = 74,
-    NET_DATA = 75,
-    NET_ICMP_REQUEST_ACK = 76,
+    LAYER_NET_CHECK_BUFFER = 71,
+    LAYER_NET_SEND_OK = 72,
+    LAYER_NET_SEND_FAIL = 73,
+    NET_ICMP_DIO = 74,
+    NET_ICMP_DIS = 75,
+    NET_ICMP_ACK = 76,
+    NET_DATA = 77,
+    NET_ICMP_REQUEST_ACK = 78,
     LAYER_APP = 90,
     APP_WORKING_FLAG = 91,
     APP_SENSING_FLAG = 92,
@@ -155,7 +160,6 @@ enum COMMAND_AND_RESULT {
  * packet Raw{
  *     int note; 
  * 
- *     bool bitError;
  *     int radioSendId;
  *     int radioRecvId;
  * }
@@ -165,7 +169,6 @@ class Raw : public ::cPacket
 {
   protected:
     int note_var;
-    bool bitError_var;
     int radioSendId_var;
     int radioRecvId_var;
 
@@ -188,8 +191,6 @@ class Raw : public ::cPacket
     // field getter/setter methods
     virtual int getNote() const;
     virtual void setNote(int note);
-    virtual bool getBitError() const;
-    virtual void setBitError(bool bitError);
     virtual int getRadioSendId() const;
     virtual void setRadioSendId(int radioSendId);
     virtual int getRadioRecvId() const;
@@ -242,10 +243,10 @@ inline void doUnpacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimUnpack(b);}
  * packet FrameMAC{
  *     int note;  
  * 
- * 	int senderMacAddress;
- * 	int recverMacAddress;
+ * 	int senderMacAddress; 
+ * 	int recverMacAddress; 
  * 
- * 	int sequenceNumber;
+ * 	int sequenceNumber;   
  * }
  * </pre>
  */
@@ -292,12 +293,13 @@ inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet IpPacket{
  *     int note; 	
+ *     
  * 	int type;	
  * 
- *     int senderIpAddress;
- *     int recverIpAddress;
+ *     int senderIpAddress; 
+ *     int recverIpAddress; 
  * 
- *     bool isRequestAck;
+ *     bool isRequestAck; 
  * }
  * </pre>
  */
@@ -346,7 +348,7 @@ inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Data extends IpPacket{
- * 	string value;
+ * 	string value; 
  * }
  * </pre>
  */
@@ -383,10 +385,10 @@ inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIO  extends IpPacket{
- * 	int dodagID;
- * 	int version;
- * 	unsigned long rank;
- * 	double secondCriteria;
+ * 	int dodagID; 
+ * 	int version; 
+ * 	unsigned long rank;   
+ * 	double secondCriteria; 
  * }
  * </pre>
  */

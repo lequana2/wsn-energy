@@ -29,6 +29,9 @@ class World : public cSimpleModule
     std::ostringstream oss;
 //    std::list<std::list> distanceStart;
 
+// WSN search through list and register
+    void registerHost(RadioDriver*);
+
     void registerTransmission(Transmission*);
     bool isFeasibleTransmission(Transmission*);
     void stopTransmission(Transmission*);

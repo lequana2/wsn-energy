@@ -294,11 +294,12 @@ void RadioDriver::transmit_off()
     else
     {
       // EV << "Corrupted" << endl;
-      recver->getParentModule()->bubble("Corrupted");
+      if (DEBUG)
+        recver->getParentModule()->bubble("Corrupted");
       broadcastMessage->setBitError(false);
       broadcastMessage->setNote(LAYER_RADIO_RECV_CORRUPT);
       // WSN hack !!!
-      broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
+      // broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
 
       ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }

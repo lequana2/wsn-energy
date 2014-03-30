@@ -35,8 +35,8 @@ void nullRDC::deferPacket(FrameRDC* msg)
 void nullRDC::sendPacket(FrameRDC* frame)
 {
   // send data and wait ack
-  if (frame->getByteLength() != ACK_HEADER_FOOTER_LEN)
-  {
+//  if (frame->getByteLength() != ACK_HEADER_FOOTER_LEN)
+//  {
 //    frame->setKind(LAYER_RDC);
 //    frame->setTypeMacLayer(LAYER_RDC_TURN_RADIO_);
 //    send(frame, gate("lowerOut"));
@@ -46,20 +46,20 @@ void nullRDC::sendPacket(FrameRDC* frame)
 //    waitACK->setTypeMacLayer(LAYER_RDC_WAIT_ACK);
 //    scheduleAt(simTime() + WAIT_FOR_ACK, waitACK);
 //    isWaitingACK = true;
-  }
+//  }
   // send ack
-  else
-  {
+//  else
+//  {
 //    msg->setKind(LAYER_RDC);
 //    ((Frame*) msg)->setTypeMacLayer(LAYER_RDC_TURN_RADIO_TRANS);
 //    send(msg, gate("lowerOut"));
-  }
+//  }
 }
 
 void nullRDC::sendSuccess(FrameRDC* frame)
 {
   // Turn on to waiting for ACK
-//  if (((Frame*) msg)->getLen() != ACK_HEADER_FOOTER_LEN)
+  //  if (((Frame*) msg)->getLen() != ACK_HEADER_FOOTER_LEN)
   on();
   return;
 }
@@ -88,19 +88,19 @@ void nullRDC::receiveSuccess(FrameMAC* frame)
   // WSN receive data = send ACK + process to upper layer
 //  else
 //  {
-    // send ACK
-    //    Frame* ack = new Frame;
-    //    ack->setKind(LAYER_RDC);
-    //    ack->setLen(ACK_LEN);
-    //    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
-    //    send(ack, gate("lowerOut"));
+  // send ACK
+  //    Frame* ack = new Frame;
+  //    ack->setKind(LAYER_RDC);
+  //    ack->setLen(ACK_LEN);
+  //    ack->setTypeMacLayer(LAYER_RDC_CHECK_FREE);
+  //    send(ack, gate("lowerOut"));
 //
-    // process to upper layer
+  // process to upper layer
 //    frame->setKind(LAYER_RDC);
 //    frame->setCommandMacLayer(LAYER_RDC_RECV_OK);
 //    send(frame, gate("upperOut"));
 //
-    // turn on to listening
+  // turn on to listening
 //    on();
 //  }
 }

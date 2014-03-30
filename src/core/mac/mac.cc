@@ -16,6 +16,10 @@
 #include <mac.h>
 #include "packet_m.h"
 
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+
 namespace wsn_energy {
 
 void MACdriver::initialize()
@@ -54,20 +58,31 @@ void MACdriver::handleMessage(cMessage *msg)
       switch (frameMac->getNote())
       {
         case LAYER_RDC_SEND_OK: /* callback after sending */
+        {
+          IpPacket* ipPacket = new IpPacket;
+
+          ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+          ipPacket->setKind(LAYER_MAC);
+          ipPacket->setNote(LAYER_NET_SEND_OK);
+          send(ipPacket, gate("upperOut"));
+
 //          if (((IpPacket*) msg)->getIsRequestAck())
 //          {
 //            msg->setKind(LAYER_MAC);
 //            ((IpPacket*) msg)->setTypeNetLayer(NET_DATA);
 //            send(msg, gate("upperOut"));
 //          }
+        }
           break; /* callback after sending */
 
         case LAYER_RDC_RECV_ACK:
-          ev << "No ACK received" << endl;
+          if (DEBUG)
+            ev << "No ACK received" << endl;
           break; /* recv ACK */
 
         case LAYER_RDC_RECV_OK:
-          ev << "RECV (MAC)" << endl;
+          if (DEBUG)
+            ev << "RECV (MAC)" << endl;
           IpPacket* ipPacket = new IpPacket;
 
           ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());

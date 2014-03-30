@@ -76,18 +76,16 @@ void Statistic::pollTotalSensorEnergy()
   int numberClient = wsn->par("numberClient").longValue();
 
   Battery *battery;
-  double totalEnergy = 0;
+  numTotalEnergy = 0;
 
   for (int i = 0; i < numberClient; i++)
   {
     battery = check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery"));
-    totalEnergy += battery->energestRemaining;
+    numTotalEnergy += battery->energestRemaining;
   }
 
-  emit(sigNodeEnergy, totalEnergy - numTotalEnergy);
-  emit(sigTotalEnergy, totalEnergy);
-
-  numTotalEnergy = totalEnergy;
+  emit(sigNodeEnergy, numTotalEnergy);
+  emit(sigTotalEnergy, numTotalEnergy);
 }
 
 void Statistic::incRecvPacket()

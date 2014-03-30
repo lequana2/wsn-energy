@@ -32,18 +32,18 @@ Battery::Battery()
 //WSN ???
 void Battery::update()
 {
-  for (int type = 0; type < ENERGEST_TYPE_MAX; type++)
-  {
-    if (this->capsuleIsActivated[type])
-    {
-
-      // increase total time
-      this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
-
-      // update milestone time
-      this->capsuleStartTime[type] = simTime().dbl();
-    }
-  }
+//  for (int type = 0; type < ENERGEST_TYPE_MAX; type++)
+//  {
+//    if (this->capsuleIsActivated[type])
+//    {
+//
+//      // increase total time
+//      this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
+//
+//      // update milestone time
+//      this->capsuleStartTime[type] = simTime().dbl();
+//    }
+//  }
 }
 
 void Battery::energestOn(int type, double power)

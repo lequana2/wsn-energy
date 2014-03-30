@@ -179,7 +179,7 @@ int World::deployConnection(RadioDriver *x, RadioDriver *y)
   outGate->connectTo(inGate);
 
   //hidden connection
-//  outGate->setDisplayString("ls=,0");
+  outGate->setDisplayString("ls=,0");
 
   return 1;
 }

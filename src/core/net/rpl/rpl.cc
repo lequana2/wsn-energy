@@ -21,7 +21,7 @@
 #include "battery.h"
 
 #ifndef ANNOTATE
-#define ANNOTATE 1
+#define ANNOTATE 0
 #endif
 
 #ifndef DEBUG

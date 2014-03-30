@@ -79,18 +79,21 @@ enum COMMAND_AND_RESULT
 	// net
 	LAYER_NET       	  = 70;	// kind
 	
-	LAYER_NET_SEND_BUFFER = 71; // get message from buffer
+	LAYER_NET_CHECK_BUFFER = 71; // check message on buffer
 	
-	NET_ICMP_DIO    	  = 72;	// ICMP DIO message
-	NET_ICMP_DIS    	  = 73;	// ICMP DIS message
-	NET_ICMP_ACK    	  = 74;	// ICMP ACK message
+	LAYER_NET_SEND_OK	   = 72; // successfully sent a message on buffer
+	LAYER_NET_SEND_FAIL	   = 73; // failurely sent a message on buffer
 	
-	NET_DATA        	  = 75; // normal data message
+	NET_ICMP_DIO    	  = 74;	// ICMP DIO message
+	NET_ICMP_DIS    	  = 75;	// ICMP DIS message
+	NET_ICMP_ACK    	  = 76;	// ICMP ACK message
 	
-	NET_ICMP_REQUEST_ACK  = 76; // ICMP sending ACK request
+	NET_DATA        	  = 77; // normal data message
+	
+	NET_ICMP_REQUEST_ACK  = 78; // ICMP sending ACK request
 	
 	// event
-	LAYER_APP		 = 90; // kind
+	LAYER_APP		 = 90; 			// kind
 	
 	APP_WORKING_FLAG = 91; // data from another node 
 	APP_SENSING_FLAG = 92; // data from sensor
@@ -100,7 +103,6 @@ enum COMMAND_AND_RESULT
 packet Raw{
     int note; // control message 
 
-    bool bitError;
     int radioSendId;
     int radioRecvId;
 }
@@ -112,31 +114,32 @@ packet FrameRDC{
 packet FrameMAC{
     int note;  // control message
 
-	int senderMacAddress;
-	int recverMacAddress;
+	int senderMacAddress; // sender MAC address
+	int recverMacAddress; // recver MAC address
 
-	int sequenceNumber;
+	int sequenceNumber;   // sequence number
 }
 
 packet IpPacket{
     int note; 	// control message
-	int type;	// type message
+    
+	int type;	// type message (DIO, DIS, Data)
 
-    int senderIpAddress;
-    int recverIpAddress;
+    int senderIpAddress; // sender IP address
+    int recverIpAddress; // recver IP address
 
-    bool isRequestAck;
+    bool isRequestAck; // is request ACK ?
 }
 
 packet Data extends IpPacket{
-	string value;
+	string value; // data to be sent to server
 }
 
 packet DIO  extends IpPacket{
-	int dodagID;
-	int version;
-	unsigned long rank;
-	double secondCriteria;
+	int dodagID; // DODAGID
+	int version; // version
+	unsigned long rank;   // rank 
+	double secondCriteria; // energy-history
 }
 
 packet DIS  extends IpPacket{

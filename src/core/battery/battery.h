@@ -10,8 +10,8 @@
 #ifndef BATTERY_H_
 #define BATTERY_H_
 
-#define OPERATION_POWER     1000 // mAh
-#define OPERATION_VOLTAGE      3 // Voltage
+#define OPERATION_POWER     1000.0 // mAh
+#define OPERATION_VOLTAGE      3.0 // Voltage
 
 enum ENERGEST_TYPE
 {

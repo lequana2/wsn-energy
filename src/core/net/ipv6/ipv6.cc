@@ -51,6 +51,15 @@ void IPv6::handleMessage(cMessage *msg)
       this->rpl->sendDIS(5);
       break; /*Solicit information*/
 
+    case LAYER_NET: /* Control message */
+    {
+      if (this->buffer.size() == 1) // In-turn
+      {
+        send(this->buffer.front(), gate("lowerOut"));
+      }
+    }
+      break; /* Control message */
+
     case LAYER_APP: /* message from Application layer */
     {
       ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
@@ -60,7 +69,8 @@ void IPv6::handleMessage(cMessage *msg)
       {
         // choosing preferfed parent
         char channelParent[20];
-        sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+        sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
+            (simulation.getModule(des->neighborID))->getParentModule()->getId());
         getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
         IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
@@ -84,6 +94,14 @@ void IPv6::handleMessage(cMessage *msg)
 
       switch (ipPacket->getType())
       {
+        case LAYER_NET_SEND_OK: /* ending transmitting phase */
+        case LAYER_NET_SEND_FAIL: /* ending transmitting phase */
+          this->buffer.pop_front();
+          ipPacket->setKind(LAYER_NET);
+          ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
+          scheduleAt(simTime(), ipPacket);
+          break; /* ending transmitting phase */
+
         case NET_ICMP_DIO: /* receiving DIO */
           this->rpl->receiveDIO((DIO*) ipPacket);
           break; /* receiving DIO */
@@ -118,8 +136,7 @@ void IPv6::handleMessage(cMessage *msg)
           // Fowarding a data
           else
           {
-            if (ipPacket->getRecverIpAddress() != 0
-                && ipPacket->getRecverIpAddress() != this->getParentModule()->getId())
+            if (ipPacket->getRecverIpAddress() != 0 && ipPacket->getRecverIpAddress() != this->getId())
             {
               // wrong IP address in unicast, drop message
               if (DEBUG)
@@ -144,7 +161,8 @@ void IPv6::handleMessage(cMessage *msg)
               {
                 // choosing preferfed parent
                 char channelParent[20];
-                sprintf(channelParent, "out %d to %d", getParentModule()->getId(), des->neighborID);
+                sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
+                    (simulation.getModule(des->neighborID))->getParentModule()->getId());
                 getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
 
                 IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
@@ -173,25 +191,25 @@ void IPv6::finish()
 void IPv6::broadcast(IpPacket *ipPacket)
 {
   ipPacket->setKind(LAYER_NET);
+  ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
   ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(0);
 
-  send(ipPacket, gate("lowerOut"));
-
   // WSN insert to buffer
   this->buffer.push_back(ipPacket);
+  scheduleAt(simTime(), ipPacket);
 }
 
-void IPv6::unicast(IpPacket *ipPacket, int recverID)
+void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
 {
   ipPacket->setKind(LAYER_NET);
+  ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
   ipPacket->setSenderIpAddress(this->getId());
-  ipPacket->setRecverIpAddress(recverID);
-
-  send(ipPacket, gate("lowerOut"));
+  ipPacket->setRecverIpAddress(recverIpAddress);
 
   // WSN insert to buffer
   this->buffer.push_back(ipPacket);
+  scheduleAt(simTime(), ipPacket);
 }
 
 } /* namespace wsn_energy */
