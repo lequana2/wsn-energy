@@ -73,7 +73,7 @@ EXECUTE_ON_STARTUP(
     e->insert(LAYER_NET, "LAYER_NET");
     e->insert(LAYER_NET_CHECK_BUFFER, "LAYER_NET_CHECK_BUFFER");
     e->insert(LAYER_NET_SEND_OK, "LAYER_NET_SEND_OK");
-    e->insert(LAYER_NET_SEND_FAIL, "LAYER_NET_SEND_FAIL");
+    e->insert(LAYER_NET_SEND_NOT_OK, "LAYER_NET_SEND_NOT_OK");
     e->insert(NET_ICMP_DIO, "NET_ICMP_DIO");
     e->insert(NET_ICMP_DIS, "NET_ICMP_DIS");
     e->insert(NET_ICMP_ACK, "NET_ICMP_ACK");
@@ -604,6 +604,7 @@ Register_Class(FrameMAC);
 FrameMAC::FrameMAC(const char *name, int kind) : cPacket(name,kind)
 {
     this->note_var = 0;
+    this->numberTransmission_var = 0;
     this->senderMacAddress_var = 0;
     this->recverMacAddress_var = 0;
     this->sequenceNumber_var = 0;
@@ -629,6 +630,7 @@ FrameMAC& FrameMAC::operator=(const FrameMAC& other)
 void FrameMAC::copy(const FrameMAC& other)
 {
     this->note_var = other.note_var;
+    this->numberTransmission_var = other.numberTransmission_var;
     this->senderMacAddress_var = other.senderMacAddress_var;
     this->recverMacAddress_var = other.recverMacAddress_var;
     this->sequenceNumber_var = other.sequenceNumber_var;
@@ -638,6 +640,7 @@ void FrameMAC::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->note_var);
+    doPacking(b,this->numberTransmission_var);
     doPacking(b,this->senderMacAddress_var);
     doPacking(b,this->recverMacAddress_var);
     doPacking(b,this->sequenceNumber_var);
@@ -647,6 +650,7 @@ void FrameMAC::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->note_var);
+    doUnpacking(b,this->numberTransmission_var);
     doUnpacking(b,this->senderMacAddress_var);
     doUnpacking(b,this->recverMacAddress_var);
     doUnpacking(b,this->sequenceNumber_var);
@@ -660,6 +664,16 @@ int FrameMAC::getNote() const
 void FrameMAC::setNote(int note)
 {
     this->note_var = note;
+}
+
+int FrameMAC::getNumberTransmission() const
+{
+    return numberTransmission_var;
+}
+
+void FrameMAC::setNumberTransmission(int numberTransmission)
+{
+    this->numberTransmission_var = numberTransmission;
 }
 
 int FrameMAC::getSenderMacAddress() const
@@ -739,7 +753,7 @@ const char *FrameMACDescriptor::getProperty(const char *propertyname) const
 int FrameMACDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
+    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
 }
 
 unsigned int FrameMACDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -755,8 +769,9 @@ unsigned int FrameMACDescriptor::getFieldTypeFlags(void *object, int field) cons
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *FrameMACDescriptor::getFieldName(void *object, int field) const
@@ -769,11 +784,12 @@ const char *FrameMACDescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "note",
+        "numberTransmission",
         "senderMacAddress",
         "recverMacAddress",
         "sequenceNumber",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldNames[field] : NULL;
 }
 
 int FrameMACDescriptor::findField(void *object, const char *fieldName) const
@@ -781,9 +797,10 @@ int FrameMACDescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "senderMacAddress")==0) return base+1;
-    if (fieldName[0]=='r' && strcmp(fieldName, "recverMacAddress")==0) return base+2;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceNumber")==0) return base+3;
+    if (fieldName[0]=='n' && strcmp(fieldName, "numberTransmission")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderMacAddress")==0) return base+2;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recverMacAddress")==0) return base+3;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceNumber")==0) return base+4;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -800,8 +817,9 @@ const char *FrameMACDescriptor::getFieldTypeString(void *object, int field) cons
         "int",
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *FrameMACDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -842,9 +860,10 @@ std::string FrameMACDescriptor::getFieldAsString(void *object, int field, int i)
     FrameMAC *pp = (FrameMAC *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getNote());
-        case 1: return long2string(pp->getSenderMacAddress());
-        case 2: return long2string(pp->getRecverMacAddress());
-        case 3: return long2string(pp->getSequenceNumber());
+        case 1: return long2string(pp->getNumberTransmission());
+        case 2: return long2string(pp->getSenderMacAddress());
+        case 3: return long2string(pp->getRecverMacAddress());
+        case 4: return long2string(pp->getSequenceNumber());
         default: return "";
     }
 }
@@ -860,9 +879,10 @@ bool FrameMACDescriptor::setFieldAsString(void *object, int field, int i, const 
     FrameMAC *pp = (FrameMAC *)object; (void)pp;
     switch (field) {
         case 0: pp->setNote(string2long(value)); return true;
-        case 1: pp->setSenderMacAddress(string2long(value)); return true;
-        case 2: pp->setRecverMacAddress(string2long(value)); return true;
-        case 3: pp->setSequenceNumber(string2long(value)); return true;
+        case 1: pp->setNumberTransmission(string2long(value)); return true;
+        case 2: pp->setSenderMacAddress(string2long(value)); return true;
+        case 3: pp->setRecverMacAddress(string2long(value)); return true;
+        case 4: pp->setSequenceNumber(string2long(value)); return true;
         default: return false;
     }
 }
@@ -880,8 +900,9 @@ const char *FrameMACDescriptor::getFieldStructName(void *object, int field) cons
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameMACDescriptor::getFieldStructPointer(void *object, int field, int i) const

@@ -42,8 +42,11 @@ void RadioDriver::handleMessage(cMessage* msg)
 
             /* Feedback to RDC */
             FrameRDC *frame = new FrameRDC;
+
+            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_PACKET_OVERSIZE);
+
             send(frame, gate("upperOut"));
           }
 
@@ -52,8 +55,11 @@ void RadioDriver::handleMessage(cMessage* msg)
           {
             /* Feedback to RDC */
             FrameRDC *frame = new FrameRDC;
+
+            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_CCA_NOT_VALID);
+
             send(frame, gate("upperOut"));
           }
 
@@ -62,8 +68,11 @@ void RadioDriver::handleMessage(cMessage* msg)
           {
             /* Feedback to RDC*/
             FrameRDC *frame = new FrameRDC;
+
+            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_NOT_FREE);
+
             send(frame, gate("upperOut"));
           }
 
@@ -97,8 +106,11 @@ void RadioDriver::handleMessage(cMessage* msg)
           {
             /* Feedback to RDC*/
             FrameRDC *frame = new FrameRDC;
+
+            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_NOT_FREE);
+
             send(frame, gate("upperOut"));
           }
           // feasible
@@ -139,6 +151,7 @@ void RadioDriver::handleMessage(cMessage* msg)
           /* Feedback */
           FrameRDC *frame = new FrameRDC;
 
+          frame = check_and_cast<FrameRDC*>(raw->decapsulate());
           frame->setKind(LAYER_RADIO);
           frame->setNote(LAYER_RADIO_SEND_OK);
 
@@ -202,9 +215,8 @@ void RadioDriver::handleMessage(cMessage* msg)
           switch (this->status)
           {
             case RECEIVING:
-            case TRANSMITTING: { /* Feedback */
-              FrameRDC* frame = new FrameRDC;
-
+            case TRANSMITTING: /* Feedback */
+            {
               frame->setKind(LAYER_RADIO);
               frame->setNote(LAYER_RADIO_NOT_FREE);
               send(frame, gate("upperOut"));
@@ -212,7 +224,8 @@ void RadioDriver::handleMessage(cMessage* msg)
               break; /* radio is on duty */
 
             case LISTENING:
-            case SLEEPING: { /* Ignite transmitting */
+            case SLEEPING: /* Ignite transmitting */
+            {
               Raw* raw = new Raw;
 
               raw->encapsulate(frame);

@@ -37,17 +37,19 @@ void MACdriver::handleMessage(cMessage *msg)
     {
       FrameMAC *frame = new FrameMAC;
 
+      // Omnet attribute
       frame->setKind(LAYER_MAC);
       frame->encapsulate((IpPacket*) msg);
       frame->addByteLength(MAC_HEADER_FOOTER_LEN);
 
-      // WSN MAC address
+      // MAC address
       frame->setSenderMacAddress(this->getId());
       frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
 
-      ev << "Frame length: " << frame->getByteLength() << endl;
+      if (DEBUG)
+        ev << "Frame length: " << frame->getByteLength() << endl;
 
-      send(frame, gate("lowerOut"));
+      sendPacket(frame);
     }
       break; /* message from NET layer */
 
@@ -69,19 +71,18 @@ void MACdriver::handleMessage(cMessage *msg)
           break; /* callback after sending */
 
         case LAYER_RDC_SEND_NOT_OK: /* callback if not able to send*/
-        {
           deferPacket(frameMac);
-        }
           break;
 
         case LAYER_RDC_RECV_ACK:
           if (DEBUG)
-            ev << "No ACK received" << endl;
+            ev << "ACK received" << endl;
           break; /* recv ACK */
 
         case LAYER_RDC_RECV_OK:
           if (DEBUG)
             ev << "RECV (MAC)" << endl;
+
           IpPacket* ipPacket = new IpPacket;
 
           ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());

@@ -107,7 +107,7 @@ void RDCdriver::finish()
   cancelAndDelete(waitACK);
 }
 
-void nullRDC::on()
+void RDCdriver::on()
 {
   FrameRDC *frame = new FrameRDC;
   frame->setKind(LAYER_RDC);
@@ -116,7 +116,7 @@ void nullRDC::on()
   send(frame, gate("lowerOut"));
 }
 
-void nullRDC::off()
+void RDCdriver::off()
 {
   FrameRDC *frame = new FrameRDC;
   frame->setKind(LAYER_RDC);

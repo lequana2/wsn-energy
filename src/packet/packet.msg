@@ -78,12 +78,12 @@ enum COMMAND_AND_RESULT
 	LAYER_MAC_RECV_OK	= 55; // receiving an okay message
 
 	// net
-	LAYER_NET       	  = 70;	// kind
+	LAYER_NET       	   = 70;	// kind
 	
 	LAYER_NET_CHECK_BUFFER = 71; // check message on buffer
 	
 	LAYER_NET_SEND_OK	   = 72; // successfully sent a message on buffer
-	LAYER_NET_SEND_FAIL	   = 73; // failurely sent a message on buffer
+	LAYER_NET_SEND_NOT_OK  = 73; // failurely sent a message on buffer
 	
 	NET_ICMP_DIO    	  = 74;	// ICMP DIO message
 	NET_ICMP_DIS    	  = 75;	// ICMP DIS message
@@ -114,6 +114,8 @@ packet FrameRDC{
 
 packet FrameMAC{
     int note;  // control message
+
+	int numberTransmission = 0; // meta-data of number transmission
 
 	int senderMacAddress; // sender MAC address
 	int recverMacAddress; // recver MAC address

@@ -21,7 +21,15 @@
 #include "battery.h"
 
 #ifndef ANNOTATE
-#define ANNOTATE 0
+#define ANNOTATE 1
+#endif
+
+#ifndef ANNOTATE_PARENT
+#define ANNOTATE_PARENT 1
+#endif
+
+#ifndef ANNOTATE_SIBLINGS
+#define ANNOTATE_SIBLINGS 0
 #endif
 
 #ifndef DEBUG
@@ -119,7 +127,7 @@ void RPL::receiveDIO(DIO* dio)
       this->rplDag.parentList.push_back(neighbor);
 
       // draw new connection
-      if (ANNOTATE)
+      if (ANNOTATE_PARENT)
       {
         char channelParent[20];
         sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
@@ -147,7 +155,7 @@ void RPL::receiveDIO(DIO* dio)
         this->rplDag.parentList.push_back(neighbor);
 
         // draw new connection
-        if (ANNOTATE)
+        if (ANNOTATE_PARENT)
         {
           char channelParent[20];
           sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
@@ -170,7 +178,7 @@ void RPL::receiveDIO(DIO* dio)
         this->rplDag.parentList.push_back(neighbor);
 
         // draw new connection
-        if (ANNOTATE)
+        if (ANNOTATE_SIBLINGS)
         {
           char channelParent[20];
           sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),

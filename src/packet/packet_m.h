@@ -82,12 +82,12 @@ namespace wsn_energy {
  * 	LAYER_MAC_RECV_OK	= 55; 
  * 
  * 	
- * 	LAYER_NET       	  = 70;	
+ * 	LAYER_NET       	   = 70;	
  * 	
  * 	LAYER_NET_CHECK_BUFFER = 71; 
  * 	
  * 	LAYER_NET_SEND_OK	   = 72; 
- * 	LAYER_NET_SEND_FAIL	   = 73; 
+ * 	LAYER_NET_SEND_NOT_OK  = 73; 
  * 	
  * 	NET_ICMP_DIO    	  = 74;	
  * 	NET_ICMP_DIS    	  = 75;	
@@ -144,7 +144,7 @@ enum COMMAND_AND_RESULT {
     LAYER_NET = 70,
     LAYER_NET_CHECK_BUFFER = 71,
     LAYER_NET_SEND_OK = 72,
-    LAYER_NET_SEND_FAIL = 73,
+    LAYER_NET_SEND_NOT_OK = 73,
     NET_ICMP_DIO = 74,
     NET_ICMP_DIS = 75,
     NET_ICMP_ACK = 76,
@@ -245,6 +245,8 @@ inline void doUnpacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimUnpack(b);}
  * packet FrameMAC{
  *     int note;  
  * 
+ * 	int numberTransmission = 0; 
+ * 
  * 	int senderMacAddress; 
  * 	int recverMacAddress; 
  * 
@@ -256,6 +258,7 @@ class FrameMAC : public ::cPacket
 {
   protected:
     int note_var;
+    int numberTransmission_var;
     int senderMacAddress_var;
     int recverMacAddress_var;
     int sequenceNumber_var;
@@ -279,6 +282,8 @@ class FrameMAC : public ::cPacket
     // field getter/setter methods
     virtual int getNote() const;
     virtual void setNote(int note);
+    virtual int getNumberTransmission() const;
+    virtual void setNumberTransmission(int numberTransmission);
     virtual int getSenderMacAddress() const;
     virtual void setSenderMacAddress(int senderMacAddress);
     virtual int getRecverMacAddress() const;

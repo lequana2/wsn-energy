@@ -22,10 +22,19 @@ Define_Module(nullMAC);
 
 void nullMAC::deferPacket(FrameMAC* frameMac)
 {
+  // WSN dismiss + announce failure duty
+  IpPacket* ipPacket = new IpPacket;
+
+  ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+  ipPacket->setKind(LAYER_MAC);
+  ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
+  send(ipPacket, gate("upperOut"));
+  return;
 }
 
 void nullMAC::sendPacket(FrameMAC* frameMAC)
 {
+  send(frameMAC, gate("lowerOut"));
 }
 
 void nullMAC::receivePacket(FrameMAC* frame)

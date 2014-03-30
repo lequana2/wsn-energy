@@ -95,7 +95,7 @@ void IPv6::handleMessage(cMessage *msg)
       switch (ipPacket->getType())
       {
         case LAYER_NET_SEND_OK: /* ending transmitting phase */
-        case LAYER_NET_SEND_FAIL: /* ending transmitting phase */
+        case LAYER_NET_SEND_NOT_OK: /* ending transmitting phase */
           this->buffer.pop_front();
           ipPacket->setKind(LAYER_NET);
           ipPacket->setNote(LAYER_NET_CHECK_BUFFER);

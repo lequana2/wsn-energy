@@ -3,13 +3,14 @@
  */
 
 #ifndef SWITCH_MODE_DELAY
-#define SWITCH_MODE_DELAY                  0        // second
-#define SWITCH_MODE_DELAY_SLEEP_TO_TRANS   0.000002 // second
-#define SWITCH_MODE_DELAY_SLEEP_TO_LISTEN  0.000002 // second
-#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  0.000002 // second
-#define SWITCH_MODE_DELAY_TRANS_TO_SLEEP   0.000002 // second
-#define SWITCH_MODE_DELAY_LISTEN_TO_SLEEP  0.000002 // second
-#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000002 // second
+#define SWITCH_MODE_DELAY                  0           // second
+#define SYMBOL                             0.000016    // second
+#define SWITCH_MODE_DELAY_SLEEP_TO_TRANS   12 * SYMBOL // symbol
+#define SWITCH_MODE_DELAY_SLEEP_TO_LISTEN  12 * SYMBOL // symbol
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  12 * SYMBOL // symbol
+#define SWITCH_MODE_DELAY_TRANS_TO_SLEEP   12 * SYMBOL // symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_SLEEP  12 * SYMBOL // symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  12 * SYMBOL // symbol
 #endif
 
 #ifndef DATA_RATE
