@@ -47,7 +47,7 @@ void csma::sendPacket(FrameMAC* frameMAC)
 
   int sendTime, backoff_transmission, backoff_exponent;
 
-  sendTime = 16; // 1 symbol
+  sendTime = 16; // 1 symbol per check
 
   backoff_exponent = frameMAC->getNumberTransmission();
 

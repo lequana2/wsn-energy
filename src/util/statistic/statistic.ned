@@ -21,23 +21,32 @@ package wsn_energy.util.statistic;
 simple Statistic
 {
     parameters:
-        @signal[node_energy](type="double");
-        @statistic[node_energy](title="Node energy"; source="node_energy"; record=vector);
+        @signal[sensorEnergy](type="double");
+        @statistic[sensorEnergy](title="Node energy"; source="sensorEnergy"; record=vector);
 
- 		@signal[total_sensor_energy](type="double");
+        @signal[totalEnergy](type="double");
         @statistic[totalEnergy](title="Total energy"; source="total_sensor_energy"; record=last);
 
-        @signal[recv_packet](type="int");
-        @statistic[numRecvPacket](title="Number of received packets"; source="recv_packet"; record=last);
+        @signal[totalDelay](type="double");
+        @statistic[totalDelay](title="Total delay: "; source="totalDelay"; record=last);
 
-        @signal[lost_packet](type="int");
-        @statistic[numLostPacket](title="Number of lost packets"; source="lost_packet"; record=last);
+        @signal[appSend](type="int");
+        @signal[appSecv](type="int");
+        @signal[netSend](type="int");
+        @signal[netRecv](type="int");
+        @signal[macSend](type="int");
+        @signal[macRecv](type="int");
+        @signal[radioSend](type="int");
+        @signal[radioRecv](type="int");
 
-        @signal[sens_data](type="int");
-        @statistic[sensData](title="Number of sens data"; source="sens_data"; record=last);
-
-        @signal[recv_data](type="int");
-        @statistic[recvData](title="Number of received data"; source="recv_data"; record=last);
+        @statistic[appSend](title="Number of app layer send: "; record=last);
+        @statistic[appRecv](title="Number of app layer recv: "; record=last);
+        @statistic[netSend](title="Number of net layer send: "; record=last);
+        @statistic[netRecv](title="Number of net layer recv: "; record=last);
+        @statistic[macSend](title="Number of mac layer send: "; record=last);
+        @statistic[macRecv](title="Number of mac layer recv: "; record=last);
+        @statistic[radioSend](title="Number of radio layer send: "; record=last);
+        @statistic[radioRecv](title="Number of radio layer recv: "; record=last);
 
         @display("p=-10,40;i=block/table2");
 }

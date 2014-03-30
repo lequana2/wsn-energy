@@ -62,7 +62,7 @@ void IPv6::handleMessage(cMessage *msg)
 
     case LAYER_APP: /* message from Application layer */
     {
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
+//WSN      ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
 
       RPL_neighbor *des = this->rpl->getPrefferedParent();
       if (des != NULL)
@@ -151,7 +151,7 @@ void IPv6::handleMessage(cMessage *msg)
             if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
             {
               this->getParentModule()->bubble(((Data*) ipPacket)->getValue());
-              ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
+//             WSN ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
               // WSN send to application layer
             }
             else

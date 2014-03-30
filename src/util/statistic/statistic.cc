@@ -25,33 +25,36 @@ namespace wsn_energy {
 
 Define_Module(Statistic);
 
-Statistic::Statistic()
+void Statistic::initialize()
 {
   polling = new cMessage();
 
-  numRecvPacket = 0;
-  numLostPacket = 0;
-  numSensData = 0;
-  numRecvData = 0;
+  // Initialize statistics number
   numTotalEnergy = 0;
+  numTotalDelay = 0;
+  numAppSend = 0;
+  numAppRecv = 0;
+  numNetSend = 0;
+  numNetRecv = 0;
+  numMacSend = 0;
+  numMacRecv = 0;
+  numRadioSend = 0;
+  numRadioRecv = 0;
 
-  sigNodeEnergy = registerSignal("node_energy");
-  sigTotalEnergy = registerSignal("total_sensor_energy");
+  // register signal
+  sigSensorEnergy = registerSignal("sensorEnergy");
+  sigTotalEnergy = registerSignal("totalEnergy");
+  sigTotalDelay = registerSignal("totalDelay");
+  sigAppSend = registerSignal("appSend");
+  sigAppRecv = registerSignal("appRecv");
+  sigNetSend = registerSignal("netSend");
+  sigNetRecv = registerSignal("netRecv");
+  sigMacSend = registerSignal("macSend");
+  sigMacRecv = registerSignal("macRecv");
+  sigRadioSend = registerSignal("radioSend");
+  sigRadioRecv = registerSignal("radioRecv");
 
-  sigRecvPacket = registerSignal("recv_packet");
-  sigLostPacket = registerSignal("lost_packet");
-  sigSensData = registerSignal("sens_data");
-  sigRecvData = registerSignal("recv_data");
-}
-
-Statistic::~Statistic()
-{
-  cancelAndDelete(polling);
-}
-
-void Statistic::initialize()
-{
-  /* Record total sensor energy for first time */
+  // Record total sensor energy for first time
   pollTotalSensorEnergy();
   if (getParentModule()->par("isPolling").doubleValue())
     scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
@@ -69,60 +72,82 @@ void Statistic::handleMessage(cMessage *msg)
   }
 }
 
-void Statistic::pollTotalSensorEnergy()
+void Statistic::finish()
 {
-  /* Calculate total sensor energy */
+  // Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();
 
-  Battery *battery;
+  for (int i = 0; i < numberClient; i++)
+  {
+    numSensorEnergy =
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
+    emit(sigSensorEnergy, numSensorEnergy);
+  }
+
+  emit(sigTotalEnergy, numTotalEnergy);
+
+  cancelAndDelete(polling);
+}
+
+void Statistic::pollTotalSensorEnergy()
+{
+  cModule *wsn = getModuleByPath("WSN");
+  int numberClient = wsn->par("numberClient").longValue();
+
   numTotalEnergy = 0;
 
   for (int i = 0; i < numberClient; i++)
-  {
-    battery = check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery"));
-    numTotalEnergy += battery->energestRemaining;
-  }
+    numTotalEnergy +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
 
-  emit(sigNodeEnergy, numTotalEnergy);
   emit(sigTotalEnergy, numTotalEnergy);
 }
 
-void Statistic::incRecvPacket()
+void Statistic::packetRateTracking(int type)
 {
   Enter_Method_Silent
-  ("incRecvPacket");
-  numRecvPacket++;
-  emit(sigRecvPacket, numRecvPacket);
+  ("packetRateTracking");
+  switch (type)
+  {
+    case APP_SEND:
+      numAppSend++;
+      emit(sigAppSend, numAppSend);
+      break;
+    case APP_RECV:
+      numAppRecv++;
+      emit(sigAppRecv, numAppRecv);
+      break;
+    case NET_SEND:
+      numNetSend++;
+      emit(sigNetSend, numNetSend);
+      break;
+    case NET_RECV:
+      numNetRecv++;
+      emit(sigNetRecv, numNetRecv);
+      break;
+    case MAC_SEND:
+      numMacSend++;
+      emit(sigMacSend, numMacSend);
+      break;
+    case MAC_RECV:
+      numMacRecv++;
+      emit(sigMacRecv, numMacRecv);
+      break;
+    case RADIO_SEND:
+      numRadioSend++;
+      emit(sigRadioSend, numRadioSend);
+      break;
+    case RADIO_RECV:
+      numRadioRecv++;
+      emit(sigRadioRecv, numRadioRecv);
+      break;
+  }
 }
 
-void Statistic::incLostPacket()
+void Statistic::increaseTotalDelay(double delayTime)
 {
-  Enter_Method_Silent
-  ("incLostPacket");
-  numLostPacket++;
-  emit(sigLostPacket, numLostPacket);
+  numTotalDelay += delayTime;
+  emit(sigTotalDelay, numTotalDelay);
 }
-
-void Statistic::incSensData()
-{
-  Enter_Method_Silent
-  ("incSensData");
-  numSensData++;
-  emit(sigSensData, numSensData);
-}
-
-void Statistic::incRecvData()
-{
-  Enter_Method_Silent
-  ("incRecvData");
-  numRecvData++;
-  emit(sigRecvData, numRecvData);
-}
-
-void Statistic::finish()
-{
-//  recRemainingEnergy();
-}
-
 }

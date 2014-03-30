@@ -18,6 +18,18 @@
 
 #include <omnetpp.h>
 
+#ifndef DEF
+#define DEF 1
+#define APP_SEND 0
+#define APP_RECV 1
+#define NET_SEND 2
+#define NET_RECV 3
+#define MAC_SEND 4
+#define MAC_RECV 5
+#define RADIO_SEND 6
+#define RADIO_RECV 7
+#endif
+
 namespace wsn_energy {
 
 /**
@@ -28,47 +40,44 @@ class Statistic : public cSimpleModule
   private:
     cMessage *polling; // Timer for polling total sensor energy
 
-    double numTotalEnergy; // Energy remaining in whole network
-    int numRecvPacket; // Number of successfully received packets
-    int numLostPacket; // Number of lost packets
-    int numSensData; // Number of data sending by client
-    int numRecvData; // Number of data recving by server
+    double numSensorEnergy; // Energy for each distributed node
+    simsignal_t sigSensorEnergy;
 
-    simsignal_t sigNodeEnergy;
+    double numTotalEnergy;  // Energy remaining in whole network
     simsignal_t sigTotalEnergy;
 
-    simsignal_t sigRecvPacket;
-    simsignal_t sigLostPacket;
-    simsignal_t sigSensData;
-    simsignal_t sigRecvData;
+    double numTotalDelay; // Total delayTime
+    simsignal_t sigTotalDelay;
 
-    /**
-     * Record remaining energy of sensor nodes
-     */
-    void recRemainingEnergy();
+    int numRadioSend; // Number of radio message to send
+    int numRadioRecv; // Number of failed radio sending
+    simsignal_t sigRadioSend;
+    simsignal_t sigRadioRecv;
+
+    int numMacSend; // Number of frame to send
+    int numMacRecv; // Number of failed frame sending
+    simsignal_t sigMacSend;
+    simsignal_t sigMacRecv;
+
+    int numNetSend; // Number of IpPacket to send
+    int numNetRecv; // Number of failed IpPacket sending
+    simsignal_t sigNetSend;
+    simsignal_t sigNetRecv;
+
+    int numAppSend; // Number of data sending by client
+    int numAppRecv; // Number of recv recving by server
+    simsignal_t sigAppSend;
+    simsignal_t sigAppRecv;
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    void finish();
 
   public:
-    Statistic();
-    ~Statistic();
-
-    /* Calculate total energy and emit it */
     void pollTotalSensorEnergy();
-
-    /* Increase number of successfully received packets (payload frames) */
-    void incRecvPacket();
-    /* Increase number of lost packets (payload frames) */
-    void incLostPacket();
-
-    /* Increase number of data send by mote (payload frames) */
-    void incSensData();
-    /* Increase number of data recv by server (payload frames) */
-    void incRecvData();
-
-    void finish();
+    void packetRateTracking(int type);
+    void increaseTotalDelay(double delayTime);
 };
 }
 #endif

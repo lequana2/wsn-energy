@@ -302,7 +302,7 @@ void RadioDriver::transmit_off()
       broadcastMessage->setBitError(true);
       broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
 
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
+//WSN      ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
     }
     else
     {
@@ -314,7 +314,7 @@ void RadioDriver::transmit_off()
       // WSN hack !!!
       // broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
 
-      ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
+//WSN      ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
 
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
