@@ -175,9 +175,11 @@ void RadioDriver::handleMessage(cMessage* msg)
 
         case LAYER_RADIO_BEGIN_LISTEN:
           listen();
+          delete msg;
           break; /* begin listening */
 
         case LAYER_RADIO_END_LISTENING:
+          delete msg;
           break; /* end listening */
 
         case LAYER_RADIO_RECV_OK: {
@@ -211,9 +213,7 @@ void RadioDriver::handleMessage(cMessage* msg)
       switch (frame->getNote())
       {
         case LAYER_RDC_LISTEN_ON: {
-          // WSN leak
           Raw* raw = new Raw;
-
           raw->setKind(LAYER_RADIO);
           raw->setNote(LAYER_RADIO_SWITCH_LISTEN);
 
@@ -222,9 +222,7 @@ void RadioDriver::handleMessage(cMessage* msg)
           break; /* turn on listening */
 
         case LAYER_RDC_LISTEN_OFF: {
-          // WSN leak
           Raw* raw = new Raw;
-
           raw->setKind(LAYER_RADIO);
           raw->setNote(LAYER_RADIO_SWITCH_SLEEP);
 

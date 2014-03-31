@@ -16,8 +16,10 @@
 #include "csma.h"
 #include "packet_m.h"
 
-#define MAXIMUM_TRANSMISSION     3 // 3 tries per packet
-#define MAXIMUM_BACKOFF_EXPONENT 3 // maxium backoff exponent
+#define BACKOFF_PERIOD                0.00032 // second
+#define MAC_MIN_BE                    3 // min backoff exponent
+#define MAC_MAX_BE                    5 // max backoff exponent
+#define MAXIMUM_BACKOFF_TRANSMISSION  3 // 3 tries per packet
 
 namespace wsn_energy {
 
@@ -26,7 +28,7 @@ Define_Module(csma);
 void csma::deferPacket(FrameMAC* frameMAC)
 {
   // WSN dismiss + announce failure duty
-  if (frameMAC->getNumberTransmission() > MAXIMUM_TRANSMISSION)
+  if (frameMAC->getNumberTransmission() > MAXIMUM_BACKOFF_TRANSMISSION)
   {
     IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
     ipPacket->setKind(LAYER_MAC);
@@ -36,24 +38,16 @@ void csma::deferPacket(FrameMAC* frameMAC)
   }
   else
   {
-    int sendTime, backoff_transmission, backoff_exponent;
+    double backoff;
+    int backoff_transmission, backoff_exponent;
 
-    sendTime = 16; // 1 symbol per check
-
-    backoff_exponent = frameMAC->getNumberTransmission();
-
-    // Truncate the exponent if needed
-    if (backoff_exponent > MAXIMUM_BACKOFF_EXPONENT)
-      backoff_exponent = MAXIMUM_BACKOFF_EXPONENT;
+    backoff_exponent = MAC_MIN_BE + frameMAC->getNumberTransmission();
+    if (backoff_exponent > MAC_MAX_BE)
+      backoff_exponent = MAC_MAX_BE;
 
     backoff_transmission = 1 << backoff_exponent;
 
-    // Pick a time for next transmission, within the interval
-    // [time, time + 2^backoff_exponent * time]
-    sendTime = sendTime + (rand() % (backoff_transmission * sendTime));
-
-    // Convert from nanosecond to second
-    double backoff = sendTime / 1000000000.0;
+    backoff = (rand() % backoff_transmission) * BACKOFF_PERIOD;
 
     ev << "Random " << backoff << endl;
 

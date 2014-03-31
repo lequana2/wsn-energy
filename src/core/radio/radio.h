@@ -18,7 +18,7 @@
 
 #ifndef SWITCH_MODE_DELAY
 #define SWITCH_MODE_DELAY                  0              // second
-#define SYMBOL                             0.000000016    // second
+#define SYMBOL                             0.000016       // second (4/250 millis)
 #define SWITCH_MODE_DELAY_IDLE_TO_TRANS    SYMBOL*12      // symbol
 #define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   SYMBOL*12      // symbol
 #define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  SYMBOL*12      // symbol
