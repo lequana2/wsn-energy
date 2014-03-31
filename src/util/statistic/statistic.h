@@ -76,8 +76,8 @@ class Statistic : public cSimpleModule
 
   public:
     void pollTotalSensorEnergy();
-    void packetRateTracking(int type);
-    void increaseTotalDelay(double delayTime);
+    void packetRateTracking(int);
+    void packetDelayTracking(double);
 };
 }
 #endif

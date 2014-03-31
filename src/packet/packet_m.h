@@ -89,13 +89,13 @@ namespace wsn_energy {
  * 	LAYER_NET_SEND_OK	   = 72; 
  * 	LAYER_NET_SEND_NOT_OK  = 73; 
  * 	
- * 	NET_ICMP_DIO    	  = 74;	
- * 	NET_ICMP_DIS    	  = 75;	
- * 	NET_ICMP_ACK    	  = 76;	
+ * 	LAYER_NET_RECV_OK	   = 74; 
  * 	
- * 	NET_DATA        	  = 77; 
+ * 	NET_ICMP_DIO    	  = 75;	
+ * 	NET_ICMP_DIS    	  = 76;	
+ * 	NET_ICMP_ACK    	  = 77;	
  * 	
- * 	NET_ICMP_REQUEST_ACK  = 78; 
+ * 	NET_DATA        	  = 78; 
  * 	
  * 	
  * 	LAYER_APP		 = 90; 			
@@ -145,11 +145,11 @@ enum COMMAND_AND_RESULT {
     LAYER_NET_CHECK_BUFFER = 71,
     LAYER_NET_SEND_OK = 72,
     LAYER_NET_SEND_NOT_OK = 73,
-    NET_ICMP_DIO = 74,
-    NET_ICMP_DIS = 75,
-    NET_ICMP_ACK = 76,
-    NET_DATA = 77,
-    NET_ICMP_REQUEST_ACK = 78,
+    LAYER_NET_RECV_OK = 74,
+    NET_ICMP_DIO = 75,
+    NET_ICMP_DIS = 76,
+    NET_ICMP_ACK = 77,
+    NET_DATA = 78,
     LAYER_APP = 90,
     APP_WORKING_FLAG = 91,
     APP_SENSING_FLAG = 92,
@@ -306,6 +306,9 @@ inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
  *     int senderIpAddress; 
  *     int recverIpAddress; 
  * 
+ * 	int sourceIpAddress; 
+ * 	int sinkIpAddress;   
+ * 
  *     bool isRequestAck; 
  * }
  * </pre>
@@ -317,6 +320,8 @@ class IpPacket : public ::cPacket
     int type_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
+    int sourceIpAddress_var;
+    int sinkIpAddress_var;
     bool isRequestAck_var;
 
   private:
@@ -344,6 +349,10 @@ class IpPacket : public ::cPacket
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;
     virtual void setRecverIpAddress(int recverIpAddress);
+    virtual int getSourceIpAddress() const;
+    virtual void setSourceIpAddress(int sourceIpAddress);
+    virtual int getSinkIpAddress() const;
+    virtual void setSinkIpAddress(int sinkIpAddress);
     virtual bool getIsRequestAck() const;
     virtual void setIsRequestAck(bool isRequestAck);
 };
@@ -356,6 +365,7 @@ inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet Data extends IpPacket{
  * 	string value; 
+ * 	double time;  
  * }
  * </pre>
  */
@@ -363,6 +373,7 @@ class Data : public ::wsn_energy::IpPacket
 {
   protected:
     opp_string value_var;
+    double time_var;
 
   private:
     void copy(const Data& other);
@@ -383,6 +394,8 @@ class Data : public ::wsn_energy::IpPacket
     // field getter/setter methods
     virtual const char * getValue() const;
     virtual void setValue(const char * value);
+    virtual double getTime() const;
+    virtual void setTime(double time);
 };
 
 inline void doPacking(cCommBuffer *b, Data& obj) {obj.parsimPack(b);}
@@ -395,7 +408,8 @@ inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
  * 	int dodagID; 
  * 	int version; 
  * 	unsigned long rank;   
- * 	double secondCriteria; 
+ * 	
+ * 	double selfEnergy; 
  * }
  * </pre>
  */
@@ -405,7 +419,7 @@ class DIO : public ::wsn_energy::IpPacket
     int dodagID_var;
     int version_var;
     unsigned long rank_var;
-    double secondCriteria_var;
+    double selfEnergy_var;
 
   private:
     void copy(const DIO& other);
@@ -430,8 +444,8 @@ class DIO : public ::wsn_energy::IpPacket
     virtual void setVersion(int version);
     virtual unsigned long getRank() const;
     virtual void setRank(unsigned long rank);
-    virtual double getSecondCriteria() const;
-    virtual void setSecondCriteria(double secondCriteria);
+    virtual double getSelfEnergy() const;
+    virtual void setSelfEnergy(double selfEnergy);
 };
 
 inline void doPacking(cCommBuffer *b, DIO& obj) {obj.parsimPack(b);}

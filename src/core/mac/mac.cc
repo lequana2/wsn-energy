@@ -55,39 +55,38 @@ void MACdriver::handleMessage(cMessage *msg)
 
     case LAYER_RDC: /* message from MAC layer */
     {
-      FrameMAC *frameMac = check_and_cast<FrameMAC*>(msg);
+      FrameMAC *frameMAC = check_and_cast<FrameMAC*>(msg);
 
-      switch (frameMac->getNote())
+      switch (frameMAC->getNote())
       {
         case LAYER_RDC_SEND_OK: /* callback after sending */
         {
-          IpPacket* ipPacket = new IpPacket;
-
-          ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+          IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
           ipPacket->setKind(LAYER_MAC);
           ipPacket->setNote(LAYER_NET_SEND_OK);
+
           send(ipPacket, gate("upperOut"));
         }
           break; /* callback after sending */
 
         case LAYER_RDC_SEND_NOT_OK: /* callback if not able to send*/
-          deferPacket(frameMac);
-          break;
+        {
+          deferPacket(frameMAC);
+        }
+          break; /* callback if not able to send*/
 
         case LAYER_RDC_RECV_ACK:
           if (DEBUG)
             ev << "ACK received" << endl;
           break; /* recv ACK */
 
-        case LAYER_RDC_RECV_OK:
+        case LAYER_RDC_RECV_OK: /* okay message */
           if (DEBUG)
             ev << "RECV (MAC)" << endl;
 
-          IpPacket* ipPacket = new IpPacket;
-
-          ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+          IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
           ipPacket->setKind(LAYER_MAC);
-          ipPacket->setNote(LAYER_MAC_RECV_OK);
+          ipPacket->setNote(LAYER_NET_RECV_OK);
 
           send(ipPacket, gate("upperOut"));
           break; /* okay message */

@@ -90,7 +90,7 @@ void World::arrangeNodes()
         }
         // Partition
         x = (int) (col * 25 + (getParentModule()->par("width").doubleValue() - 25 * step) / 2);
-        y = (int) (row * 30 + 20);
+        y = (int) (row * 30 + 17);
         break; /* pyramid */
     }
 

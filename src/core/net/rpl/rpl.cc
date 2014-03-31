@@ -19,6 +19,7 @@
 
 #include "ipv6.h"
 #include "battery.h"
+#include "hopEnergy.h"
 
 #ifndef ANNOTATE
 #define ANNOTATE 1
@@ -49,13 +50,17 @@ void RPL::rpl_init()
   this->rplDag.version = 0;
   this->rplDag.joined = false;
   this->rplDag.rank = RANK_INFINITY;
+  this->rplDag.preferredParent = NULL;
+
+  // choosing objective function
+  this->rplDag.of = new hopEnergy;
 }
 
 void RPL::rpl_set_root()
 {
   this->rplDag.version++;
   this->rplDag.joined = true;
-  this->rplDag.rank = 0;
+  this->rplDag.rank = 1;
 }
 
 void RPL::sendDIO()
@@ -68,9 +73,10 @@ void RPL::sendDIO()
   icmp->setByteLength(DIO_LEN);
   icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
-  icmp->setSecondCriteria(((Battery*) this->net->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
 
-  net->broadcast(icmp);
+  icmp->setSelfEnergy(((Battery*) this->net->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
+
+  net->multicast(icmp);
 }
 
 void RPL::sendDIS(int convergence)
@@ -84,7 +90,7 @@ void RPL::sendDIS(int convergence)
   icmp->setByteLength(DIS_LEN);
   icmp->setConvergence(convergence);
 
-  net->broadcast(icmp);
+  net->multicast(icmp);
 }
 
 void RPL::receiveDIO(DIO* dio)
@@ -96,35 +102,54 @@ void RPL::receiveDIO(DIO* dio)
   RPL_neighbor *neighbor = new RPL_neighbor();
   neighbor->neighborID = dio->getSenderIpAddress();
   neighbor->neighborRank = dio->getRank();
-  neighbor->secondCriteria = dio->getSecondCriteria();
+  neighbor->nodeQuality.energy = dio->getSelfEnergy();
 
-  // incoming neighbor message
-  std::list<RPL_neighbor*>::iterator candidate = this->rplDag.parentList.begin();
-  for (; candidate != this->rplDag.parentList.end(); candidate++)
+  if (!this->rplDag.joined)
   {
-    // Update own neighbor
-    if (neighbor->neighborID == (*candidate)->neighborID)
-    {
-      (*candidate)->neighborRank = neighbor->neighborRank;
-      (*candidate)->secondCriteria = neighbor->secondCriteria;
-    }
-  }
+    this->rplDag.parentList.push_back(neighbor);
 
-  // Consider neighbor version
-  if (this->rplDag.version < dio->getVersion())
-  {
-    // Update self information
     this->rplDag.version = dio->getVersion();
     this->rplDag.joined = true;
-    /* WSN hop count */
-    this->rplDag.rank = dio->getRank() + 1;
+    this->rplDag.rank = this->rplDag.of->calculateRank(neighbor);
 
-    // New neighbor
-    if (candidate == this->rplDag.parentList.end())
+    this->rplDag.parentList.push_back(neighbor);
+    this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+
+    // draw new connection
+    if (ANNOTATE_PARENT)
     {
-      ev << "New neighbor" << endl;
-      // Update new neighbor
-      this->rplDag.parentList.push_back(neighbor);
+      char channelParent[20];
+      sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+          (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
+      EV << "new version: " << channelParent << endl;
+      net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+    }
+
+    this->sendDIO();
+  }
+  else
+  {
+    // Consider neighbor version
+    if (this->rplDag.version < dio->getVersion())
+    {
+      // Update self information
+      this->rplDag.version = dio->getVersion();
+      this->rplDag.joined = true;
+      this->rplDag.rank = this->rplDag.of->calculateRank(neighbor);
+
+      this->rplDag.parentList.clear();
+      this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+
+      // remove annotate
+      if (ANNOTATE)
+        for (std::list<RPL_neighbor*>::iterator oldParent = this->rplDag.parentList.begin();
+            oldParent != this->rplDag.parentList.end(); oldParent++)
+        {
+          char channelParent[20];
+          sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+              (simulation.getModule((*oldParent)->neighborID))->getParentModule()->getId());
+          net->getParentModule()->gate(channelParent)->setDisplayString("ls=,0");
+        }
 
       // draw new connection
       if (ANNOTATE_PARENT)
@@ -139,67 +164,102 @@ void RPL::receiveDIO(DIO* dio)
       // Different
       this->sendDIO();
     }
-  }
 
-  // obsolete/maintenace DIO
-  else if (this->rplDag.version >= dio->getVersion())
-  {
-    // new parent
-    if (this->rplDag.rank > dio->getRank())
+    // obsolete/maintenace DIO
+    else if (this->rplDag.version >= dio->getVersion())
     {
-      // New neighbor
-      if (candidate == this->rplDag.parentList.end())
-      {
-        ev << "new neighbor" << endl;
-        // Update new neighbor
-        this->rplDag.parentList.push_back(neighbor);
+      bool isNewParent = false;
 
-        // draw new connection
-        if (ANNOTATE_PARENT)
+      // Consider parent
+      std::list<RPL_neighbor*>::iterator oldParent = this->rplDag.parentList.begin();
+      for (; oldParent != this->rplDag.parentList.end(); oldParent++)
+      {
+        if ((*oldParent)->neighborID == neighbor->neighborID)
         {
-          char channelParent[20];
-          sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
-              (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
-          EV << "update: " << channelParent << endl;
-          net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+          isNewParent = true;
+          break;
         }
       }
-      // Update parent
-      this->sendDIO();
-    }
-    // new sibling
-    else if (this->rplDag.rank == dio->getRank())
-    {
-      // New neighbor
-      if (candidate == this->rplDag.parentList.end())
-      {
-        ev << "new neighbor" << endl;
-        // Update new neighbor
-        this->rplDag.parentList.push_back(neighbor);
 
-        // draw new connection
-        if (ANNOTATE_SIBLINGS)
+      if (isNewParent)
+      {
+        // better rank
+        if (this->rplDag.rank > dio->getRank())
         {
-          char channelParent[20];
-          sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
-              (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
-          EV << channelParent << endl;
-          net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
+          ev << "new neighbor" << endl;
+          // Update new neighbor
+          this->rplDag.parentList.push_back(neighbor);
+
+          // draw new connection
+          if (ANNOTATE_PARENT)
+          {
+            char channelParent[20];
+            sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+                (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
+            EV << "update: " << channelParent << endl;
+            net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
+          }
+
+          // Update preferred parent
+          this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+
+          // Update parent
+          this->sendDIO();
+        }
+        // same rank
+        else if (this->rplDag.rank == dio->getRank())
+        {
+//          // New neighbor
+//          if (candidate == this->rplDag.parentList.end())
+//          {
+//            ev << "new neighbor" << endl;
+//            // WSN Update new neighbor
+//            // this->rplDag.parentList.push_back(neighbor);
+//
+//            if (ANNOTATE_SIBLINGS)
+//            {
+//              char channelParent[20];
+//              sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+//                  (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
+//              EV << channelParent << endl;
+//              net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
+//            }
+//          }
+//          // Update sibling
+        }
+        // WSN not better rank
+        else
+        {
+          // Discard DIO
         }
       }
-      // Update sibling
-    }
-    else
-      // Discard DIO
-      return;
-  }
+      // Old parent
+      else
+      {
+        if ((*oldParent)->neighborRank < neighbor->neighborRank)
+        {
+          // better -> update
+          (*oldParent)->neighborRank = neighbor->neighborRank;
+          (*oldParent)->neighborRank = neighbor->nodeQuality.energy;
 
-  // Bubble current rank
-  if (ANNOTATE)
-  {
-    char rank[10];
-    sprintf(rank, "Rank %d", (int) this->rplDag.rank);
-    net->getParentModule()->bubble(rank);
+          // Update preferred parent
+          this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+        }
+        else
+        {
+          // WSN not better
+        }
+        return;
+      }
+    }
+
+    // Bubble current rank
+    if (ANNOTATE)
+    {
+      char rank[10];
+      sprintf(rank, "Rank %d", (int) this->rplDag.rank);
+      net->getParentModule()->bubble(rank);
+    }
   }
 }
 
@@ -208,74 +268,18 @@ void RPL::receiveDIS(DIS* msg)
   if (DEBUG)
     EV << "Received DIS " << endl;
 
-  // currently in DAG, then broadcast DIS
+// currently in DAG, then broadcast DIS
   if (this->rplDag.joined)
   {
     this->sendDIO();
   }
-  // already
+// already
   else
   {
-    //WSN broadcast DIS toward root
-    //    int convergence = ((DIS*) msg)->getConvergence();
-    //    if (convergence > 0)
-    //      this->sendDIS(convergence - 1);
+//WSN broadcast DIS toward root
+//    int convergence = ((DIS*) msg)->getConvergence();
+//    if (convergence > 0)
+//      this->sendDIS(convergence - 1);
   }
-}
-
-RPL_neighbor* RPL::getPrefferedParent()
-{
-  if (this->rplDag.parentList.size() == 0)
-    return NULL;
-
-  // Collect parent + sibling node
-  std::list<RPL_neighbor*> goodParent;
-  for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
-      iterator != this->rplDag.parentList.end(); iterator++)
-  {
-    if ((*iterator)->neighborRank <= this->rplDag.rank)
-      goodParent.push_back(*iterator);
-  }
-
-  // Search thru parent list + get best energy
-  RPL_neighbor *prefferedParent = goodParent.front();
-  for (std::list<RPL_neighbor*>::iterator iterator = goodParent.begin(); iterator != goodParent.end(); iterator++)
-  {
-    if ((*iterator)->neighborRank < prefferedParent->neighborRank)
-      prefferedParent = *iterator;
-    else if ((*iterator)->neighborRank == prefferedParent->neighborRank
-        && (*iterator)->secondCriteria > prefferedParent->secondCriteria)
-      prefferedParent = *iterator;
-  }
-
-  return prefferedParent;
-}
-
-void RPL::updateParent(ACK *ack)
-{
-  // int parentID = ack->getRadioSendId();
-
-  // WSN search thru list + update
-  if (this->rplDag.parentList.size() == 0)
-    return;
-
-  std::list<RPL_neighbor*> goodParent;
-  for (std::list<RPL_neighbor*>::iterator iterator = this->rplDag.parentList.begin();
-      iterator != this->rplDag.parentList.end(); iterator++)
-  {
-    //    if ((*iterator)->neighborID == parentID)
-    {
-      ev << "Update second criteria: " << (*iterator)->secondCriteria << "/" << ack->getEnergy();
-
-      (*iterator)->secondCriteria = ack->getEnergy();
-
-      ev << "/" << (*iterator)->secondCriteria << endl;
-      delete ack;
-      return;
-    }
-  }
-
-  delete ack;
-  ev << "ACK from no where " << endl;
 }
 }/* namespace wsn_energy */

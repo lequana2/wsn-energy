@@ -22,13 +22,13 @@ simple Statistic
 {
     parameters:
         @signal[sensorEnergy](type="double");
-        @statistic[sensorEnergy](title="Node energy"; source="sensorEnergy"; record=vector);
+        @statistic[sensorEnergy](title="Node energy"; record=vector);
 
         @signal[totalEnergy](type="double");
-        @statistic[totalEnergy](title="Total energy"; source="total_sensor_energy"; record=last);
+        @statistic[totalEnergy](title="Total energy"; record=last);
 
         @signal[totalDelay](type="double");
-        @statistic[totalDelay](title="Total delay: "; source="totalDelay"; record=last);
+        @statistic[totalDelay](title="Total delay: "; record=last);
 
         @signal[appSend](type="int");
         @signal[appSecv](type="int");

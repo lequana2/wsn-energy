@@ -47,22 +47,33 @@ void RDCdriver::handleMessage(cMessage *msg)
     case LAYER_RADIO: /* message from radio layer */
     {
       FrameRDC* frameRdc = check_and_cast<FrameRDC*>(msg);
-      frameRdc->setKind(LAYER_RDC);
 
       switch (frameRdc->getNote())
       {
         case LAYER_RADIO_SEND_OK: /* callback after sending */
+        {
+          FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          frameMac->setKind(LAYER_RDC);
+          frameMac->setNote(LAYER_RDC_SEND_OK);
+
+          send(frameMac, gate("upperOut"));
+        }
           break; /* callback after sending */
 
         case LAYER_RADIO_PACKET_OVERSIZE: /* Packet is oversized */
           // WSN Internal error, no need to resend
+        {
+          FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          frameMac->setKind(LAYER_RDC);
+          frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
+
+          send(frameMac, gate("upperOut"));
+        }
           break; /* Packet is oversized */
 
         case LAYER_RADIO_CCA_NOT_VALID: /* Packet CCA is not valid */
         {
-          FrameMAC* frameMac = new FrameMAC;
-
-          frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
           frameMac->setKind(LAYER_RDC);
           frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
 
@@ -72,9 +83,7 @@ void RDCdriver::handleMessage(cMessage *msg)
 
         case LAYER_RADIO_NOT_FREE: /* Radio is busy */
         {
-          FrameMAC* frameMac = new FrameMAC;
-
-          frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
           frameMac->setKind(LAYER_RDC);
           frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
 
@@ -84,9 +93,7 @@ void RDCdriver::handleMessage(cMessage *msg)
 
         case LAYER_RADIO_RECV_OK: /* Radio received a packet */
         {
-          FrameMAC* frameMac = new FrameMAC;
-
-          frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
+          FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
           frameMac->setKind(LAYER_RDC);
           frameMac->setNote(LAYER_RDC_RECV_OK);
 

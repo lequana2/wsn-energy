@@ -25,6 +25,9 @@ namespace wsn_energy {
  */
 class Client : public App
 {
+  private:
+    virtual void newData();
+
   public:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

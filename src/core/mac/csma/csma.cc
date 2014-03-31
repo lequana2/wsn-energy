@@ -28,51 +28,52 @@ void csma::deferPacket(FrameMAC* frameMAC)
   // WSN dismiss + announce failure duty
   if (frameMAC->getNumberTransmission() > MAXIMUM_TRANSMISSION)
   {
-    IpPacket* ipPacket = new IpPacket;
-
-    ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
+    IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
     ipPacket->setKind(LAYER_MAC);
     ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
+
     send(ipPacket, gate("upperOut"));
   }
   else
   {
-    sendPacket(frameMAC);
+    int sendTime, backoff_transmission, backoff_exponent;
+
+    sendTime = 16; // 1 symbol per check
+
+    backoff_exponent = frameMAC->getNumberTransmission();
+
+    // Truncate the exponent if needed
+    if (backoff_exponent > MAXIMUM_BACKOFF_EXPONENT)
+      backoff_exponent = MAXIMUM_BACKOFF_EXPONENT;
+
+    backoff_transmission = 1 << backoff_exponent;
+
+    // Pick a time for next transmission, within the interval
+    // [time, time + 2^backoff_exponent * time]
+    sendTime = sendTime + (rand() % (backoff_transmission * sendTime));
+
+    // Convert from nanosecond to second
+    double backoff = sendTime / 1000000000.0;
+
+    ev << "Random " << backoff << endl;
+
+    sendDelayed(frameMAC, backoff, gate("lowerOut"));
+
+    frameMAC->setNumberTransmission(frameMAC->getNumberTransmission() + 1);
   }
 }
 
 void csma::sendPacket(FrameMAC* frameMAC)
 {
-  frameMAC->setNumberTransmission(frameMAC->getNumberTransmission() + 1);
+  frameMAC->setNumberTransmission(0);
 
-  int sendTime, backoff_transmission, backoff_exponent;
-
-  sendTime = 16; // 1 symbol per check
-
-  backoff_exponent = frameMAC->getNumberTransmission();
-
-  // Truncate the exponent if needed
-  if (backoff_exponent > MAXIMUM_BACKOFF_EXPONENT)
-    backoff_exponent = MAXIMUM_BACKOFF_EXPONENT;
-
-  backoff_transmission = 1 << backoff_exponent;
-
-  // Pick a time for next transmission, within the interval
-  // [time, time + 2^backoff_exponent * time]
-  sendTime = sendTime + (rand() % (backoff_transmission * sendTime));
-
-  // Convert from nanosecond to second
-  double backoff = sendTime / 1000000.0;
-
-  ev << "Random " << backoff << endl;
-
-  sendDelayed(frameMAC, simTime() + backoff, gate("lowerOut"));
+  deferPacket(frameMAC);
 }
 
-void csma::receivePacket(FrameMAC* frame)
+void csma::receivePacket(FrameMAC* frameMAC)
 {
-  frame->setKind(LAYER_MAC);
-  send(frame, gate("upperOut"));
+  frameMAC->setKind(LAYER_MAC);
+  send(frameMAC, gate("upperOut"));
 }
 
 } /* namespace wsn_energy */

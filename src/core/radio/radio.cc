@@ -41,39 +41,39 @@ void RadioDriver::handleMessage(cMessage* msg)
               ev << "Packet is too large" << endl;
 
             /* Feedback to RDC */
-            FrameRDC *frame = new FrameRDC;
-
-            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_PACKET_OVERSIZE);
 
             send(frame, gate("upperOut"));
+
+            delete raw;
           }
 
           // perform CCA
           else if (!isClearChannel())
           {
             /* Feedback to RDC */
-            FrameRDC *frame = new FrameRDC;
-
-            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_CCA_NOT_VALID);
 
             send(frame, gate("upperOut"));
+
+            delete raw;
           }
 
           // check radio duty
           else if (this->status == RECEIVING || this->status == TRANSMITTING)
           {
             /* Feedback to RDC*/
-            FrameRDC *frame = new FrameRDC;
-
-            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_NOT_FREE);
 
             send(frame, gate("upperOut"));
+
+            delete raw;
           }
 
           // feasible
@@ -84,7 +84,7 @@ void RadioDriver::handleMessage(cMessage* msg)
             switch (this->status)
             {
               case IDLE:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_SLEEP_TO_TRANS, raw);
+                scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_TRANS, raw);
                 break;
 
               case LISTENING:
@@ -103,13 +103,13 @@ void RadioDriver::handleMessage(cMessage* msg)
           if (this->status == TRANSMITTING)
           {
             /* Feedback to RDC*/
-            FrameRDC *frame = new FrameRDC;
-
-            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_NOT_FREE);
 
             send(frame, gate("upperOut"));
+
+            delete raw;
           }
           // feasible
           else
@@ -119,7 +119,7 @@ void RadioDriver::handleMessage(cMessage* msg)
             switch (this->status)
             {
               case IDLE:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_SLEEP_TO_LISTEN, raw);
+                scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_LISTEN, raw);
                 break;
 
               case LISTENING:
@@ -138,13 +138,13 @@ void RadioDriver::handleMessage(cMessage* msg)
           if (this->status == TRANSMITTING || this->status == RECEIVING)
           {
             /* Feedback to RDC*/
-            FrameRDC *frame = new FrameRDC;
-
-            frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
             frame->setKind(LAYER_RDC);
             frame->setNote(LAYER_RADIO_NOT_FREE);
 
             send(frame, gate("upperOut"));
+
+            delete raw;
           }
           // feasible
           else
@@ -161,15 +161,15 @@ void RadioDriver::handleMessage(cMessage* msg)
           transmit_off();
 
           /* Feedback */
-          FrameRDC *frame = new FrameRDC;
-
-          frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+          FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
           frame->setKind(LAYER_RADIO);
           frame->setNote(LAYER_RADIO_SEND_OK);
 
           send(frame, gate("upperOut"));
 
           listen();
+
+          delete raw;
         }
           break; /* end transmitting*/
 
@@ -178,14 +178,11 @@ void RadioDriver::handleMessage(cMessage* msg)
           break; /* begin listening */
 
         case LAYER_RADIO_END_LISTENING:
-          sleep();
           break; /* end listening */
 
         case LAYER_RADIO_RECV_OK: {
           /* Decapsulate */
-          FrameRDC *frame = new FrameRDC;
-
-          frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+          FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
           frame->setKind(LAYER_RADIO);
           frame->setNote(LAYER_RADIO_RECV_OK);
 
@@ -193,12 +190,14 @@ void RadioDriver::handleMessage(cMessage* msg)
 
           // WSN sendACK
           listen();
+
+          delete raw;
         }
           break; /* receie a OK message */
 
         case LAYER_RADIO_RECV_CORRUPT:
-          /* Dismiss message and sleep */
-          sleep();
+          /* WSN Dismiss message and sleep */
+          listen();
           break; /* receie a corrupt message */
       }
     }
@@ -212,6 +211,7 @@ void RadioDriver::handleMessage(cMessage* msg)
       switch (frame->getNote())
       {
         case LAYER_RDC_LISTEN_ON: {
+          // WSN leak
           Raw* raw = new Raw;
 
           raw->setKind(LAYER_RADIO);
@@ -222,10 +222,13 @@ void RadioDriver::handleMessage(cMessage* msg)
           break; /* turn on listening */
 
         case LAYER_RDC_LISTEN_OFF: {
+          // WSN leak
           Raw* raw = new Raw;
 
           raw->setKind(LAYER_RADIO);
           raw->setNote(LAYER_RADIO_SWITCH_SLEEP);
+
+          scheduleAt(simTime(), raw);
         }
           break; /* turn off listening */
 
@@ -283,11 +286,10 @@ void RadioDriver::transmit_on(Raw *raw)
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
     RadioDriver *recver = (RadioDriver*) simulation.getModule(neighbor.at(i));
-    // register transmission
     ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  double finishTime = broadcastMessage->getByteLength() / DATA_RATE;
+  double finishTime = broadcastMessage->getByteLength() * 8 / DATA_RATE;
   broadcastMessage->setNote(LAYER_RADIO_END_TRANSMIT);
 
   scheduleAt(simTime() + finishTime, broadcastMessage);
@@ -320,8 +322,6 @@ void RadioDriver::transmit_off()
       // EV << "Received" << endl;
       broadcastMessage->setBitError(true);
       broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
-
-//WSN      ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvPacket();
     }
     else
     {
@@ -332,8 +332,6 @@ void RadioDriver::transmit_off()
       broadcastMessage->setNote(LAYER_RADIO_RECV_CORRUPT);
       // WSN hack !!!
       // broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
-
-//WSN      ((Statistic*) simulation.getModuleByPath("statistic"))->incLostPacket();
     }
 
     broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());

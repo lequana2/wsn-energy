@@ -29,23 +29,6 @@ Battery::Battery()
   this->energestRemaining = OPERATION_POWER * OPERATION_VOLTAGE;
 }
 
-//WSN ???
-void Battery::update()
-{
-//  for (int type = 0; type < ENERGEST_TYPE_MAX; type++)
-//  {
-//    if (this->capsuleIsActivated[type])
-//    {
-//
-//      // increase total time
-//      this->capsuleTotalTime[type] += simTime().dbl() - this->capsuleStartTime[type];
-//
-//      // update milestone time
-//      this->capsuleStartTime[type] = simTime().dbl();
-//    }
-//  }
-}
-
 void Battery::energestOn(int type, double power)
 {
   this->capsuleStartTime[type] = simTime().dbl();
@@ -60,7 +43,8 @@ void Battery::energestOff(int type)
     double consumeTime = simTime().dbl() - this->capsuleStartTime[type];
 
     // consume energy
-    this->energestRemaining -= consumeTime * power[type];
+    // calculate in term off hour not second
+    this->energestRemaining -= consumeTime * power[type] / 3600.0;
 
     // increase total time
     this->capsuleTotalTime[type] += consumeTime;

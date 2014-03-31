@@ -23,31 +23,57 @@
 
 namespace wsn_energy {
 
+/* forward declaration */
 class IPv6;
-// forward declaration
+class ObjectiveFunction;
+
+class NodeQuality
+{
+  public:
+    double hopCount;
+    double energy;
+};
+
+class LinkQuality
+{
+  public:
+    double etx;
+};
 
 class RPL_neighbor
 {
   public:
     int neighborID;
     unsigned long neighborRank;
-    double secondCriteria;
+
+    NodeQuality nodeQuality;
+    LinkQuality linkQuality;
 };
 
 class RPL_dag
 {
   public:
-    int version;
-    unsigned long rank;
     bool joined;
+    int dodagID;
+    int version;
+    // Self rank
+    unsigned long rank;
+
+    // upward route
+    RPL_neighbor *preferredParent;
+
+    // neighbor information
     std::list<RPL_neighbor*> parentList;
+    std::list<RPL_neighbor*> siblingList;
+
+    // Objective Function
+    ObjectiveFunction *of;
 };
 
 class RPL
 {
   private:
     IPv6 *net;
-//    std::list<RPL_neighbor*> neighborList;
 
   public:
     RPL_dag rplDag;
@@ -62,10 +88,6 @@ class RPL
 
     void receiveDIO(DIO*);
     void receiveDIS(DIS*);
-
-    RPL_neighbor* getPrefferedParent();
-
-    void updateParent(ACK *ack);
 };
 
 } /* namespace wsn_energy */

@@ -85,13 +85,13 @@ enum COMMAND_AND_RESULT
 	LAYER_NET_SEND_OK	   = 72; // successfully sent a message on buffer
 	LAYER_NET_SEND_NOT_OK  = 73; // failurely sent a message on buffer
 	
-	NET_ICMP_DIO    	  = 74;	// ICMP DIO message
-	NET_ICMP_DIS    	  = 75;	// ICMP DIS message
-	NET_ICMP_ACK    	  = 76;	// ICMP ACK message
+	LAYER_NET_RECV_OK	   = 74; // incoming message
 	
-	NET_DATA        	  = 77; // normal data message
+	NET_ICMP_DIO    	  = 75;	// ICMP DIO message
+	NET_ICMP_DIS    	  = 76;	// ICMP DIS message
+	NET_ICMP_ACK    	  = 77;	// ICMP ACK message
 	
-	NET_ICMP_REQUEST_ACK  = 78; // ICMP sending ACK request
+	NET_DATA        	  = 78; // normal data message
 	
 	// event
 	LAYER_APP		 = 90; 			// kind
@@ -131,18 +131,23 @@ packet IpPacket{
     int senderIpAddress; // sender IP address
     int recverIpAddress; // recver IP address
 
+	int sourceIpAddress; // sensor IP address
+	int sinkIpAddress;   // base station IP address
+
     bool isRequestAck; // is request ACK ?
 }
 
 packet Data extends IpPacket{
 	string value; // data to be sent to server
+	double time;  // timestamp to be sent
 }
 
 packet DIO  extends IpPacket{
 	int dodagID; // DODAGID
 	int version; // version
 	unsigned long rank;   // rank 
-	double secondCriteria; // energy-history
+	
+	double selfEnergy; // energy-history
 }
 
 packet DIS  extends IpPacket{

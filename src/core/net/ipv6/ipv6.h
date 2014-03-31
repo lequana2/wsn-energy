@@ -32,7 +32,7 @@ class IPv6 : public cSimpleModule
     // Buffer message to send
     std::list<IpPacket*> buffer;
 
-    void broadcast(IpPacket*);
+    void multicast(IpPacket*);
     void unicast(IpPacket*, int);
 
   protected:

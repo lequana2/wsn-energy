@@ -26,6 +26,10 @@
 #define DEBUG 1
 #endif
 
+#ifndef ANNOTATE
+#define ANNOTATE 1
+#endif
+
 namespace wsn_energy {
 
 Define_Module(IPv6);
@@ -53,35 +57,43 @@ void IPv6::handleMessage(cMessage *msg)
 
     case LAYER_NET: /* Control message */
     {
-      if (this->buffer.size() == 1) // In-turn
+      switch (check_and_cast<IpPacket*>(msg)->getNote())
       {
-        send(this->buffer.front(), gate("lowerOut"));
+        case LAYER_NET_CHECK_BUFFER:
+          ev << "Queue size " << this->buffer.size() << endl;
+          if (this->buffer.size() == 1) // In-turn
+            send(this->buffer.front(), gate("lowerOut"));
+          break;
       }
     }
       break; /* Control message */
 
     case LAYER_APP: /* message from Application layer */
     {
-//WSN      ((Statistic*) simulation.getModuleByPath("statistic"))->incSensData();
-
-      RPL_neighbor *des = this->rpl->getPrefferedParent();
-      if (des != NULL)
+      // Still have parent
+      if (this->rpl->rplDag.preferredParent != NULL)
       {
-        // choosing preferfed parent
-        char channelParent[20];
-        sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
-            (simulation.getModule(des->neighborID))->getParentModule()->getId());
-        getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+        if (ANNOTATE)
+        {
+          char channelParent[20];
+          sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
+              (simulation.getModule(this->rpl->rplDag.preferredParent->neighborID))->getParentModule()->getId());
+          getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
+        }
 
-        IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
-        broadcastMessage->setType(NET_DATA);
-        broadcastMessage->setIsRequestAck(false);
+        IpPacket *dataMessage = new IpPacket;
 
-        unicast(broadcastMessage, des->neighborID);
+        dataMessage->encapsulate(check_and_cast<IpPacket*>(msg));
+
+        dataMessage->setType(NET_DATA);
+        dataMessage->setSourceIpAddress(this->getId());
+        dataMessage->setSinkIpAddress(simulation.getModuleByPath("server.net")->getId());
+
+        unicast(dataMessage, this->rpl->rplDag.preferredParent->neighborID);
       }
+      // WSN Trigger repair
       else
       {
-        // WSN dismiss message ?
       }
     }
       break; /* message from Application layer */
@@ -90,93 +102,89 @@ void IPv6::handleMessage(cMessage *msg)
     {
       IpPacket* ipPacket = check_and_cast<IpPacket*>(msg);
 
-      ev << "RECV " << ipPacket->getType() << endl;
+      ev << "Net-layer, mac type: " << ipPacket->getType() << endl;
 
-      switch (ipPacket->getType())
+      switch (ipPacket->getNote())
       {
         case LAYER_NET_SEND_OK: /* ending transmitting phase */
-        case LAYER_NET_SEND_NOT_OK: /* ending transmitting phase */
+          if (DEBUG)
+            ev << "Success NET trans" << endl;
           this->buffer.pop_front();
           ipPacket->setKind(LAYER_NET);
           ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
           scheduleAt(simTime(), ipPacket);
           break; /* ending transmitting phase */
 
-        case NET_ICMP_DIO: /* receiving DIO */
-          this->rpl->receiveDIO((DIO*) ipPacket);
-          break; /* receiving DIO */
-
-        case NET_ICMP_DIS: /* receiving DIS */
-          this->rpl->receiveDIS((DIS*) ipPacket);
-          break; /* receiving DIS */
-
-        case NET_ICMP_ACK: /* WSN update parent list */
+        case LAYER_NET_SEND_NOT_OK: /* ending transmitting phase */
           if (DEBUG)
-            ev << "Receive Net ACK" << endl;
-          this->rpl->updateParent((ACK*) msg);
-          break; /* WSN update parent list */
+            ev << "Failure NET trans" << endl;
+          this->buffer.pop_front();
+          ipPacket->setKind(LAYER_NET);
+          ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
+          scheduleAt(simTime(), ipPacket);
+          break; /* ending transmitting phase */
 
-        case NET_DATA: /* forward data */
-          // Requesting an ACK from itself
-          if (DEBUG)
-            ev << "ACK " << ipPacket->getSenderIpAddress() << "/" << this->getParentModule()->getId() << endl;
-
-          // message from it lower self + request sending an ACK
-          if (ipPacket->getSenderIpAddress() == this->getParentModule()->getId() && ipPacket->getIsRequestAck())
+        case LAYER_NET_RECV_OK: {
+          switch (ipPacket->getType())
           {
-            if (DEBUG)
-              ev << "Net ignite ACK" << endl;
+            case NET_ICMP_DIO:
+              /* receiving DIO */
+              this->rpl->receiveDIO((DIO*) ipPacket);
+              break; /* receiving DIO */
 
-            ACK *ack = new ACK;
-            ack->setType(NET_ICMP_ACK);
-            ack->setIsRequestAck(false);
-            ack->setEnergy(((Battery*) this->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
-            unicast(ack, ipPacket->getRecverIpAddress());
-          }
-          // Fowarding a data
-          else
-          {
-            if (ipPacket->getRecverIpAddress() != 0 && ipPacket->getRecverIpAddress() != this->getId())
-            {
-              // wrong IP address in unicast, drop message
+            case NET_ICMP_DIS:
+              /* receiving DIS */
+              this->rpl->receiveDIS((DIS*) ipPacket);
+              break; /* receiving DIS */
+
+            case NET_DATA:
+              /* forward data */
               if (DEBUG)
-                ev << "Wrong IP message" << endl;
-              delete ipPacket;
-              return;
-            }
+                ev << "Get Data packet" << endl;
 
-            ev << "Forward Data" << endl;
-
-            // Root
-            if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
-            {
-              this->getParentModule()->bubble(((Data*) ipPacket)->getValue());
-//             WSN ((Statistic*) simulation.getModuleByPath("statistic"))->incRecvData();
-              // WSN send to application layer
-            }
-            else
-            {
-              RPL_neighbor *des = this->rpl->getPrefferedParent();
-              if (des != NULL)
+              if (ipPacket->getRecverIpAddress() != 0 && ipPacket->getRecverIpAddress() != this->getId())
               {
-                // choosing preferfed parent
-                char channelParent[20];
-                sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
-                    (simulation.getModule(des->neighborID))->getParentModule()->getId());
-                getParentModule()->gate(channelParent)->setDisplayString("ls=yellow,1");
+                // wrong IP address in unicast, drop message
+                if (DEBUG)
+                  ev << "Wrong IP message" << endl;
 
-                IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
-                broadcastMessage->setType(NET_DATA);
-                broadcastMessage->setIsRequestAck(true);
+                delete ipPacket;
 
-                unicast(broadcastMessage, des->neighborID);
+                return;
               }
+
+              // Coming to destination
+              if (this->getId() == ipPacket->getSinkIpAddress())
+              {
+                ev << "received" << endl;
+                send(check_and_cast<Data*>(ipPacket->decapsulate()), gate("upperOut"));
+              }
+              // Forwarding data
               else
               {
+                if (this->rpl->rplDag.preferredParent != NULL)
+                {
+                  if (ANNOTATE)
+                  {
+                    char channelParent[20];
+                    sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
+                        (simulation.getModule(this->rpl->rplDag.preferredParent->neighborID))->getParentModule()->getId());
+                    getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
+                  }
+
+                  IpPacket* broadcastMessage = check_and_cast<IpPacket*>(msg);
+                  broadcastMessage->setType(NET_DATA);
+                  broadcastMessage->setIsRequestAck(true);
+
+                  unicast(broadcastMessage, this->rpl->rplDag.preferredParent->neighborID);
+                }
+                else
+                {
+                }
               }
-            }
+              break; /* forward data */
           }
-          break; /* forward data */
+        }
       }
     }
       break; /* message from MAC layer */
@@ -188,14 +196,13 @@ void IPv6::finish()
   this->buffer.clear();
 }
 
-void IPv6::broadcast(IpPacket *ipPacket)
+void IPv6::multicast(IpPacket *ipPacket)
 {
   ipPacket->setKind(LAYER_NET);
   ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
   ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(0);
 
-  // WSN insert to buffer
   this->buffer.push_back(ipPacket);
   scheduleAt(simTime(), ipPacket);
 }
@@ -207,7 +214,6 @@ void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
   ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(recverIpAddress);
 
-  // WSN insert to buffer
   this->buffer.push_back(ipPacket);
   scheduleAt(simTime(), ipPacket);
 }

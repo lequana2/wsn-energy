@@ -10,8 +10,9 @@
 #ifndef BATTERY_H_
 #define BATTERY_H_
 
-#define OPERATION_POWER     1000.0 // mAh
-#define OPERATION_VOLTAGE      3.0 // Voltage
+// Power unit = Watts (mWh)
+#define OPERATION_POWER          1000.0 // mAh
+#define OPERATION_VOLTAGE           1.5 // Voltage
 
 enum ENERGEST_TYPE
 {

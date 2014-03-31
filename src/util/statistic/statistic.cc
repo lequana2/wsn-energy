@@ -82,6 +82,7 @@ void Statistic::finish()
   {
     numSensorEnergy =
         (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
+
     emit(sigSensorEnergy, numSensorEnergy);
   }
 
@@ -95,7 +96,7 @@ void Statistic::pollTotalSensorEnergy()
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();
 
-  numTotalEnergy = 0;
+  numTotalEnergy = 0.0;
 
   for (int i = 0; i < numberClient; i++)
     numTotalEnergy +=
@@ -145,7 +146,7 @@ void Statistic::packetRateTracking(int type)
   }
 }
 
-void Statistic::increaseTotalDelay(double delayTime)
+void Statistic::packetDelayTracking(double delayTime)
 {
   numTotalDelay += delayTime;
   emit(sigTotalDelay, numTotalDelay);

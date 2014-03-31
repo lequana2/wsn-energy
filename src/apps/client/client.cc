@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 
+#include "statistic.h"
 #include "client.h"
 #include "packet_m.h"
 
@@ -28,21 +29,10 @@ void Client::initialize()
 
   // WSN Client scheme
   cMessage *event = new cMessage;
-//  event->setKind(RPL_SOLICIT);
-//  event->setKind(RPL_CONSTRUCT);
   event->setKind(APP_SENSING_FLAG);
 
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[4]")->getId())
-//    send(event, gate("appOut"));
-
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[35]")->getId())
-//    scheduleAt(simTime() + 20, event);
-//
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[45]")->getId())
-//    scheduleAt(simTime() + 30, event);
-
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[35]")->getId())
-//    scheduleAt(simTime() + 30, event);
+  /* Contiki test scheme */
+//  newData();
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
 //    scheduleAt(simTime() + 1, event->dup());
@@ -61,29 +51,42 @@ void Client::initialize()
 //
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
 //    scheduleAt(simTime() + 3, event->dup());
-
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[26]")->getId())
-//    scheduleAt(simTime() + 30, event);
 }
 
 void Client::handleMessage(cMessage *msg)
 {
-//  if (msg->getKind() == RPL_SOLICIT || msg->getKind() == RPL_CONSTRUCT)
-//  {
-//    send(msg, gate("lowerOut"));
-//  }
   if (msg->getKind() == APP_SENSING_FLAG)
   {
     Data *data = new Data;
     data->setKind(LAYER_APP);
-    std::string value = "Hello";
-    data->setValue("Hello from");
+
+    data->setValue("Hello");
+    data->setTime(simTime().dbl());
     send(data, gate("lowerOut"));
+
+    newData();
+
+    /* End to end statistics */
+    ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
   }
 }
 
 void Client::finish()
 {
+}
+
+void Client::newData()
+{
+  int randomness = 2;   // second
+  int sendInterval = 4; // second
+
+  int time = sendInterval + ((rand() % (2 * randomness)) - randomness);
+
+  cMessage *event = new cMessage;
+  event->setKind(APP_SENSING_FLAG);
+
+  if(simTime().dbl() == 0) time++;
+  scheduleAt(simTime() + time, event);
 }
 
 }

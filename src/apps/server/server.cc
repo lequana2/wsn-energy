@@ -14,6 +14,8 @@
 //
 
 #include "server.h"
+
+#include "statistic.h"
 #include "packet_m.h"
 
 namespace wsn_energy {
@@ -31,7 +33,21 @@ void Server::initialize()
 
 void Server::handleMessage(cMessage *msg)
 {
-  send(msg, gate("lowerOut"));
+  switch (msg->getKind())
+  {
+    case RPL_CONSTRUCT:
+      send(msg, gate("lowerOut"));
+      break;
+
+    case LAYER_APP:
+      Data* data = check_and_cast<Data*>(msg);
+      this->getParentModule()->bubble(data->getValue());
+
+      /* End to end statistics */
+      ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);
+      ((Statistic*) simulation.getModuleByPath("statistic"))->packetDelayTracking(simTime().dbl() - data->getTime());
+      break;
+  }
 }
 
 void Server::finish()
