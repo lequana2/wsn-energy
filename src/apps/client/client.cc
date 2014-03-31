@@ -33,6 +33,7 @@ void Client::initialize()
 
   /* Contiki test scheme */
 //  newData();
+//  scheduleAt(simTime() + 3600, event->dup());
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
 //    scheduleAt(simTime() + 1, event->dup());
@@ -80,12 +81,13 @@ void Client::newData()
   int randomness = 2;   // second
   int sendInterval = 4; // second
 
-  int time = sendInterval + ((rand() % (2 * randomness)) - randomness);
+  int time = sendInterval + ((rand() % randomness));
 
   cMessage *event = new cMessage;
   event->setKind(APP_SENSING_FLAG);
 
-  if(simTime().dbl() == 0) time++;
+  if (simTime().dbl() == 0)
+    time++;
   scheduleAt(simTime() + time, event);
 }
 

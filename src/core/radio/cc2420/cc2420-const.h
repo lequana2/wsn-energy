@@ -11,8 +11,8 @@
 #define TXPOWER_MIN      -90.0  // dBm
 
 #define TXPOWER_CURRENT 17.4 // mA
-
 #define RXPOWER_CURRENT 18.8 // mA
+#define IDPOWER_CURRENT  1.8 // mA
 
 #define SUPPLY_VOLTAGE   1.8 // V
 

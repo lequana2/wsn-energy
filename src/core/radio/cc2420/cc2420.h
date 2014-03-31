@@ -28,6 +28,7 @@ class cc2420 : public RadioDriver
 
     virtual double getTxPower();
     virtual double getRxPower();
+    virtual double getIdPower();
 };
 
 } /* namespace wsn_energy */

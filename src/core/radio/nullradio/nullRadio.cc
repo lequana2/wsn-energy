@@ -42,4 +42,8 @@ double nullRadio::getRxPower()
   return 1;
 }
 
+double nullRadio::getIdPower(){
+  return 1;
+}
+
 } /* namespace wsn_energy */

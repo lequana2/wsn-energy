@@ -42,5 +42,10 @@ double cc2420::getRxPower()
   return RXPOWER_CURRENT * SUPPLY_VOLTAGE;
 }
 
+double cc2420::getIdPower()
+{
+  return IDPOWER_CURRENT * SUPPLY_VOLTAGE;
+}
+
 }
 /* namespace wsn_energy */

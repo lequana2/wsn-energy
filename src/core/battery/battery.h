@@ -16,7 +16,12 @@
 
 enum ENERGEST_TYPE
 {
-  ENERGEST_TYPE_CPU, ENERGEST_TYPE_TRANSMIT, ENERGEST_TYPE_LISTEN, ENERGEST_TYPE_SENSORS, ENERGEST_TYPE_MAX,
+  ENERGEST_TYPE_CPU,
+  ENERGEST_TYPE_TRANSMIT,
+  ENERGEST_TYPE_LISTEN,
+  ENERGEST_TYPE_IDLE,
+  ENERGEST_TYPE_SENSORS,
+  ENERGEST_TYPE_MAX,
 };
 
 #include <omnetpp.h>
@@ -35,7 +40,7 @@ class Battery : public cSimpleModule
     void energestOff(int);
     void update();
 
-  private:
+//  private:
     double capsuleTotalTime[ENERGEST_TYPE_MAX];
     double capsuleStartTime[ENERGEST_TYPE_MAX];
     double power[ENERGEST_TYPE_MAX];

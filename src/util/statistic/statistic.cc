@@ -83,8 +83,21 @@ void Statistic::finish()
     numSensorEnergy =
         (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
 
+    // % duty cycling
+    numNetSend +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
+    numMacSend +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
+    numRadioSend +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
+
     emit(sigSensorEnergy, numSensorEnergy);
   }
+
+  // DEBUG
+  emit(sigNetSend, numNetSend);
+  emit(sigMacSend, numMacSend);
+  emit(sigRadioSend, numRadioSend);
 
   emit(sigTotalEnergy, numTotalEnergy);
 
@@ -99,8 +112,11 @@ void Statistic::pollTotalSensorEnergy()
   numTotalEnergy = 0.0;
 
   for (int i = 0; i < numberClient; i++)
+  {
+    (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->update();
     numTotalEnergy +=
         (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
+  }
 
   emit(sigTotalEnergy, numTotalEnergy);
 }

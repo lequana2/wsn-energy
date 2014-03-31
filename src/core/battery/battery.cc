@@ -29,9 +29,21 @@ Battery::Battery()
   this->energestRemaining = OPERATION_POWER * OPERATION_VOLTAGE;
 }
 
+void Battery::update()
+{
+  for (int i = 0; i < ENERGEST_TYPE_MAX; i++)
+  {
+    bool resume = this->capsuleIsActivated[i];
+    energestOff(i);
+    if (resume)
+      energestOn(i, this->power[i]);
+  }
+}
+
 void Battery::energestOn(int type, double power)
 {
   this->capsuleStartTime[type] = simTime().dbl();
+  ev << "Start time " << this->capsuleStartTime << endl;
   this->capsuleIsActivated[type] = true;
   this->power[type] = power;
 }
@@ -41,16 +53,15 @@ void Battery::energestOff(int type)
   if (this->capsuleIsActivated[type])
   {
     double consumeTime = simTime().dbl() - this->capsuleStartTime[type];
-
-    // consume energy
-    // calculate in term off hour not second
-    this->energestRemaining -= consumeTime * power[type] / 3600.0;
-
+    ev << "consume Time " << consumeTime << "-type-" << type << endl;
     // increase total time
     this->capsuleTotalTime[type] += consumeTime;
 
     // turn off capsule
     this->capsuleIsActivated[type] = false;
+
+    // consume energy, in term off hour not second
+    this->energestRemaining -= consumeTime * power[type] / 3600.0;
   }
   else
   {

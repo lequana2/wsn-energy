@@ -62,6 +62,7 @@ class RadioDriver : public cSimpleModule
     // power
     virtual double getTxPower() = 0;
     virtual double getRxPower() = 0;
+    virtual double getIdPower() = 0;
 
     Raw *broadcastMessage; // buffer message
 

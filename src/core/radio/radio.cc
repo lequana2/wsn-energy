@@ -294,6 +294,7 @@ void RadioDriver::transmit_on(Raw *raw)
 
   this->status = TRANSMITTING;
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_IDLE);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT, getTxPower());
 }
 
@@ -342,6 +343,7 @@ void RadioDriver::transmit_off()
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_IDLE, getIdPower());
 }
 
 /*
@@ -354,6 +356,7 @@ void RadioDriver::listen()
   this->status = LISTENING;
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_IDLE);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN, getRxPower());
 }
 
@@ -368,6 +371,7 @@ void RadioDriver::sleep()
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
+  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_IDLE, getIdPower());
 }
 
 }  // namespace wsn_energy

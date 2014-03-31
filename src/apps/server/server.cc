@@ -28,7 +28,7 @@ void Server::initialize()
 
   cMessage *msg = new cMessage;
   msg->setKind(RPL_CONSTRUCT);
-  scheduleAt(simTime(), msg);
+//  scheduleAt(simTime(), msg);
 }
 
 void Server::handleMessage(cMessage *msg)
