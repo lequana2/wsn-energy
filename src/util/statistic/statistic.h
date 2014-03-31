@@ -40,6 +40,9 @@ class Statistic : public cSimpleModule
   private:
     cMessage *polling; // Timer for polling total sensor energy
 
+    double numNetworkEnergy; // Energy of all network
+    simsignal_t sigNetworkEnergy;
+
     double numSensorEnergy; // Energy for each distributed node
     simsignal_t sigSensorEnergy;
 
@@ -68,6 +71,14 @@ class Statistic : public cSimpleModule
     int numAppRecv; // Number of recv recving by server
     simsignal_t sigAppSend;
     simsignal_t sigAppRecv;
+
+    double timeTrans;
+    double timeListen;
+    double timeIdle;
+
+    simsignal_t sigTimeTrans;
+    simsignal_t sigTimeListen;
+    simsignal_t sigTimeIdle;
 
   protected:
     virtual void initialize();

@@ -30,6 +30,7 @@ void Statistic::initialize()
   polling = new cMessage();
 
   // Initialize statistics number
+  numNetworkEnergy = 0;
   numTotalEnergy = 0;
   numTotalDelay = 0;
   numAppSend = 0;
@@ -40,8 +41,12 @@ void Statistic::initialize()
   numMacRecv = 0;
   numRadioSend = 0;
   numRadioRecv = 0;
+  timeIdle = 0;
+  timeListen = 0;
+  timeTrans = 0;
 
   // register signal
+  sigNetworkEnergy = registerSignal("networkEnergy");
   sigSensorEnergy = registerSignal("sensorEnergy");
   sigTotalEnergy = registerSignal("totalEnergy");
   sigTotalDelay = registerSignal("totalDelay");
@@ -53,6 +58,9 @@ void Statistic::initialize()
   sigMacRecv = registerSignal("macRecv");
   sigRadioSend = registerSignal("radioSend");
   sigRadioRecv = registerSignal("radioRecv");
+  sigTimeIdle = registerSignal("timeIdle");
+  sigTimeListen = registerSignal("timeListen");
+  sigTimeTrans = registerSignal("timeTrans");
 
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
@@ -83,21 +91,22 @@ void Statistic::finish()
     numSensorEnergy =
         (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
 
-    // % duty cycling
-    numNetSend +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
-    numMacSend +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
-    numRadioSend +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
+    numTotalEnergy += numSensorEnergy;
 
+    // % duty cycling
+    timeTrans +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
+    timeListen +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
+    timeIdle +=
+        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
     emit(sigSensorEnergy, numSensorEnergy);
   }
 
   // DEBUG
-  emit(sigNetSend, numNetSend);
-  emit(sigMacSend, numMacSend);
-  emit(sigRadioSend, numRadioSend);
+  emit(sigTimeIdle, timeIdle);
+  emit(sigTimeTrans, timeTrans);
+  emit(sigTimeListen, timeListen);
 
   emit(sigTotalEnergy, numTotalEnergy);
 
@@ -109,16 +118,16 @@ void Statistic::pollTotalSensorEnergy()
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();
 
-  numTotalEnergy = 0.0;
+  numNetworkEnergy = 0.0;
 
   for (int i = 0; i < numberClient; i++)
   {
     (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->update();
-    numTotalEnergy +=
+    numNetworkEnergy +=
         (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
   }
 
-  emit(sigTotalEnergy, numTotalEnergy);
+  emit(sigNetworkEnergy, numNetworkEnergy);
 }
 
 void Statistic::packetRateTracking(int type)
