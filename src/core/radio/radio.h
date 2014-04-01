@@ -37,42 +37,48 @@
 #define LISTENING       3 // listening to nothing
 #define RECEIVING       4 // listening to something
 
-#include <omnetpp.h>
-
-#include "packet_m.h"
+#include "module.h"
 
 namespace wsn_energy {
 
-class RadioDriver : public cSimpleModule
+class RadioDriver : public myModule
 {
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
+  private:
+    Raw *broadcastMessage; // buffer message
 
-    // Functioning
-    virtual void transmit_on(Raw *raw);
-    virtual void transmit_off();
-    virtual void listen();
-    virtual void sleep();
+    // Switch oscilator mode
+    void switchOscilatorMode(int mode);
 
-    // CCA
-    virtual bool isClearChannel() = 0;
+    // Self functioning
+    void transmit_on(Raw*);
+    void transmit_off();
+    void listen();
+    void sleep();
 
     // power
     virtual double getTxPower() = 0;
     virtual double getRxPower() = 0;
     virtual double getIdPower() = 0;
 
-    Raw *broadcastMessage; // buffer message
+    // CCA
+    virtual bool isClearChannel() = 0;
+
+  protected:
+    void initialize();
+    void handleMessage(cMessage*);
+    void finish();
+
+    // processing
+    void processSelfMessage(cPacket*);
+    void processUpperLayerMessage(cPacket*);
+    void processLowerLayerMessage(cPacket*);
 
   public:
-    int status; // sleep, transmitting, listening, receiving
-
+    int status;  // sleep, transmitting, listening, receiving
     int trRange; // simulated transmission range
     int coRange; // simulated collission range
 
-    std::vector<int> neighbor; // simulated neighbor list, for world util
+    std::vector<int> neighbor; // WSN simulated neighbor list, for world util. Is this necessary ???
 };
 
 } /* namespace wsn_energy */

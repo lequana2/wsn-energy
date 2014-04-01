@@ -20,7 +20,7 @@
 #include "app.h"
 #include "ipv6.h"
 #include "rpl.h"
-#include "battery.h"
+#include "energest.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -158,6 +158,8 @@ void IPv6::handleMessage(cMessage *msg)
               {
                 ev << "received" << endl;
                 send(check_and_cast<Data*>(ipPacket->decapsulate()), gate("upperOut"));
+
+                delete ipPacket;
               }
               // Forwarding data
               else

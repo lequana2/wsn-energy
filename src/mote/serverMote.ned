@@ -20,7 +20,7 @@ import wsn_energy.core.net.iNet;
 import wsn_energy.core.mac.iMAC;
 import wsn_energy.core.rdc.iRDC;
 import wsn_energy.core.radio.iRadio;
-import wsn_energy.core.battery.Battery;
+import wsn_energy.core.energest.Energest;
 
 //
 // TODO auto-generated type
@@ -34,11 +34,11 @@ module ServerMote
         string rdcType;
         string radioType;
 
-        int axisX 	@unit(m);
-        int axisY 	@unit(m);
+        int axisX @unit(m);
+        int axisY @unit(m);
         int trRange @unit(m);
         int coRange @unit(m);
-        
+
         @display("p=$axisX,$axisY;i=abstract/db;is=m");
 
     submodules:
@@ -51,7 +51,7 @@ module ServerMote
                 trRange = trRange;
                 coRange = coRange;
         }
-        battery: Battery;
+        energest: Energest;
     connections allowunconnected:
         app.lowerOut --> net.upperIn;
         app.lowerIn <-- net.upperOut;

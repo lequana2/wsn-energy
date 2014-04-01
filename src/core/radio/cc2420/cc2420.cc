@@ -17,7 +17,7 @@
 
 #include "world.h"
 #include "statistic.h"
-#include "battery.h"
+#include "energest.h"
 
 #ifndef  DEBUG
 #define  DEBUG 1

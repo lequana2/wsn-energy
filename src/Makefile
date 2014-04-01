@@ -20,7 +20,7 @@ INCLUDE_PATH = \
     -Iapps/client \
     -Iapps/server \
     -Icore \
-    -Icore/battery \
+    -Icore/energest \
     -Icore/mac \
     -Icore/mac/csma \
     -Icore/mac/nullmac \
@@ -56,7 +56,8 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 OBJS = \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
-    $O/core/battery/battery.o \
+    $O/core/module.o \
+    $O/core/energest/energest.o \
     $O/core/mac/mac.o \
     $O/core/mac/csma/csma.o \
     $O/core/mac/nullmac/nullMAC.o \
@@ -153,7 +154,7 @@ clean:
 	$(Q)-rm -f apps/client/*_m.cc apps/client/*_m.h
 	$(Q)-rm -f apps/server/*_m.cc apps/server/*_m.h
 	$(Q)-rm -f core/*_m.cc core/*_m.h
-	$(Q)-rm -f core/battery/*_m.cc core/battery/*_m.h
+	$(Q)-rm -f core/energest/*_m.cc core/energest/*_m.h
 	$(Q)-rm -f core/mac/*_m.cc core/mac/*_m.h
 	$(Q)-rm -f core/mac/csma/*_m.cc core/mac/csma/*_m.h
 	$(Q)-rm -f core/mac/nullmac/*_m.cc core/mac/nullmac/*_m.h
@@ -179,7 +180,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/battery/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/energest/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
@@ -194,8 +195,12 @@ $O/apps/server/server.o: apps/server/server.cc \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h
-$O/core/battery/battery.o: core/battery/battery.cc \
-	core/battery/battery.h \
+$O/core/module.o: core/module.cc \
+	core/module.h \
+	packet/packet_len.h \
+	packet/packet_m.h
+$O/core/energest/energest.o: core/energest/energest.cc \
+	core/energest/energest.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/mac/mac.o: core/mac/mac.cc \
@@ -214,7 +219,8 @@ $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	apps/app.h \
-	core/battery/battery.h \
+	core/energest/energest.h \
+	core/module.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
@@ -224,7 +230,7 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
-	core/battery/battery.h \
+	core/energest/energest.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
@@ -238,7 +244,8 @@ $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/radio/radio.o: core/radio/radio.cc \
-	core/battery/battery.h \
+	core/energest/energest.h \
+	core/module.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
@@ -246,7 +253,8 @@ $O/core/radio/radio.o: core/radio/radio.cc \
 	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
-	core/battery/battery.h \
+	core/energest/energest.h \
+	core/module.h \
 	core/radio/cc2420/cc2420-const.h \
 	core/radio/cc2420/cc2420.h \
 	core/radio/radio.h \
@@ -256,7 +264,8 @@ $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
-	core/battery/battery.h \
+	core/energest/energest.h \
+	core/module.h \
 	core/radio/nullradio/nullRadio.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
@@ -277,16 +286,18 @@ $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
-	core/battery/battery.h \
+	core/energest/energest.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h
 $O/util/transmission/transmission.o: util/transmission/transmission.cc \
+	core/module.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/transmission/transmission.h
 $O/util/world/world.o: util/world/world.cc \
+	core/module.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \

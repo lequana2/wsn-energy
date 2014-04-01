@@ -2,7 +2,7 @@
 
 #include "world.h"
 #include "statistic.h"
-#include "battery.h"
+#include "energest.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -16,258 +16,271 @@ void RadioDriver::initialize()
   this->coRange = par("coRange");
   this->broadcastMessage = NULL;
 
+  // Turn on
   listen();
 }
 
 void RadioDriver::handleMessage(cMessage* msg)
 {
-  switch (msg->getKind())
+  myModule::handleMessage(msg);
+
+  if (msg->arrivedOn("radioIn"))
   {
-    case LAYER_RADIO: /* control message */
-    {
-      Raw *raw = check_and_cast<Raw*>(msg);
-
-      switch (raw->getNote())
-      {
-        case LAYER_RADIO_SWITCH_TRANSMIT:
-          // show packet length (bytes)
-          if (DEBUG)
-            ev << "Radio length " << raw->getByteLength() << endl;
-
-          // WSN check packet length (127 + 6 bytes)
-          if (raw->getByteLength() > PACKET_802154 + PHY_HEADER)
-          {
-            if (DEBUG)
-              ev << "Packet is too large" << endl;
-
-            /* Feedback to RDC */
-            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-            frame->setKind(LAYER_RDC);
-            frame->setNote(LAYER_RADIO_PACKET_OVERSIZE);
-
-            send(frame, gate("upperOut"));
-
-            delete raw;
-          }
-
-          // perform CCA
-          else if (!isClearChannel())
-          {
-            /* Feedback to RDC */
-            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-            frame->setKind(LAYER_RDC);
-            frame->setNote(LAYER_RADIO_CCA_NOT_VALID);
-
-            send(frame, gate("upperOut"));
-
-            delete raw;
-          }
-
-          // check radio duty
-          else if (this->status == RECEIVING || this->status == TRANSMITTING)
-          {
-            /* Feedback to RDC*/
-            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-            frame->setKind(LAYER_RDC);
-            frame->setNote(LAYER_RADIO_NOT_FREE);
-
-            send(frame, gate("upperOut"));
-
-            delete raw;
-          }
-
-          // feasible
-          else
-          {
-            raw->setNote(LAYER_RADIO_BEGIN_TRANSMIT);
-
-            switch (this->status)
-            {
-              case IDLE:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_TRANS, raw);
-                break;
-
-              case LISTENING:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_LISTEN_TO_TRANS, raw);
-                break;
-
-              case TRANSMITTING:
-                scheduleAt(simTime(), raw);
-                break;
-            }
-          }
-          break; /* switch to transmit */
-
-        case LAYER_RADIO_SWITCH_LISTEN:
-          // check radio duty
-          if (this->status == TRANSMITTING)
-          {
-            /* Feedback to RDC*/
-            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-            frame->setKind(LAYER_RDC);
-            frame->setNote(LAYER_RADIO_NOT_FREE);
-
-            send(frame, gate("upperOut"));
-
-            delete raw;
-          }
-          // feasible
-          else
-          {
-            raw->setNote(LAYER_RADIO_BEGIN_LISTEN);
-
-            switch (this->status)
-            {
-              case IDLE:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_LISTEN, raw);
-                break;
-
-              case LISTENING:
-                scheduleAt(simTime(), raw);
-                break;
-
-              case TRANSMITTING:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_TRANS_TO_LISTEN, raw);
-                break;
-            }
-          }
-          break; /* switch to listen */
-
-        case LAYER_RADIO_SWITCH_SLEEP:
-          // check radio duty
-          if (this->status == TRANSMITTING || this->status == RECEIVING)
-          {
-            /* Feedback to RDC*/
-            FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-            frame->setKind(LAYER_RDC);
-            frame->setNote(LAYER_RADIO_NOT_FREE);
-
-            send(frame, gate("upperOut"));
-
-            delete raw;
-          }
-          // feasible
-          else
-          {
-            sleep();
-          }
-          break; /* switch to sleep */
-
-        case LAYER_RADIO_BEGIN_TRANSMIT:
-          transmit_on(raw);
-          break; /* begin transmit */
-
-        case LAYER_RADIO_END_TRANSMIT: {
-          transmit_off();
-
-          /* Feedback */
-          FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-          frame->setKind(LAYER_RADIO);
-          frame->setNote(LAYER_RADIO_SEND_OK);
-
-          send(frame, gate("upperOut"));
-
-          listen();
-
-          delete raw;
-        }
-          break; /* end transmitting*/
-
-        case LAYER_RADIO_BEGIN_LISTEN:
-          listen();
-          delete msg;
-          break; /* begin listening */
-
-        case LAYER_RADIO_END_LISTENING:
-          delete msg;
-          break; /* end listening */
-
-        case LAYER_RADIO_RECV_OK: {
-          /* Decapsulate */
-          FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-          frame->setKind(LAYER_RADIO);
-          frame->setNote(LAYER_RADIO_RECV_OK);
-
-          send(frame, gate("upperOut"));
-
-          // WSN sendACK
-          listen();
-
-          delete raw;
-        }
-          break; /* receie a OK message */
-
-        case LAYER_RADIO_RECV_CORRUPT:
-          /* WSN Dismiss message and sleep */
-          listen();
-          break; /* receie a corrupt message */
-      }
-    }
-      break; /* control message */
-
-    case LAYER_RDC:
-      /* message from MAC layer */
-    {
-      FrameRDC *frame = check_and_cast<FrameRDC*>(msg);
-
-      switch (frame->getNote())
-      {
-        case LAYER_RDC_LISTEN_ON: {
-          Raw* raw = new Raw;
-          raw->setKind(LAYER_RADIO);
-          raw->setNote(LAYER_RADIO_SWITCH_LISTEN);
-
-          scheduleAt(simTime(), raw);
-        }
-          break; /* turn on listening */
-
-        case LAYER_RDC_LISTEN_OFF: {
-          Raw* raw = new Raw;
-          raw->setKind(LAYER_RADIO);
-          raw->setNote(LAYER_RADIO_SWITCH_SLEEP);
-
-          scheduleAt(simTime(), raw);
-        }
-          break; /* turn off listening */
-
-        case LAYER_RDC_SEND:
-          switch (this->status)
-          {
-            case RECEIVING:
-            case TRANSMITTING: /* Feedback */
-            {
-              frame->setKind(LAYER_RADIO);
-              frame->setNote(LAYER_RADIO_NOT_FREE);
-              send(frame, gate("upperOut"));
-            }
-              break; /* radio is on duty */
-
-            case LISTENING:
-            case IDLE: /* Ignite transmitting */
-            {
-              Raw* raw = new Raw;
-
-              raw->encapsulate(frame);
-              raw->setKind(LAYER_RADIO);
-              raw->setNote(LAYER_RADIO_SWITCH_TRANSMIT);
-              raw->addByteLength(PHY_HEADER);
-
-              scheduleAt(simTime(), raw);
-            }
-              break; /* radio is free to operate */
-          } /* checking radio status */
-
-          break; /* sending a MAC message*/
-      }
-    }
-      break; /* message from MAC layer */
-  } /* Consider message layer*/
+    if (DEBUG)
+      ev << this->getFullName() << " received message from outside world" << endl;
+  }
 }
 
 void RadioDriver::finish()
 {
   this->neighbor.clear();
   this->broadcastMessage = NULL;
+}
+
+void RadioDriver::processSelfMessage(cPacket* packet)
+{
+  /* control message */
+  Raw *raw = check_and_cast<Raw*>(packet);
+
+  switch (raw->getNote())
+  {
+    case LAYER_RADIO_SWITCH_TRANSMIT:
+      // show packet length (bytes)
+      if (DEBUG)
+        ev << "Radio length " << raw->getByteLength() << endl;
+
+      // WSN check packet length (127 + 6 bytes)
+      if (raw->getByteLength() > PACKET_802154 + PHY_HEADER)
+      {
+        if (DEBUG)
+          ev << "Packet is too large" << endl;
+
+        /* Feedback to RDC */
+        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+        frame->setKind(LAYER_RDC);
+        frame->setNote(LAYER_RADIO_PACKET_OVERSIZE);
+
+        send(frame, gate("upperOut"));
+
+        delete raw;
+      }
+
+      // perform CCA
+      else if (!isClearChannel())
+      {
+        /* Feedback to RDC */
+        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+        frame->setKind(LAYER_RDC);
+        frame->setNote(LAYER_RADIO_CCA_NOT_VALID);
+
+        send(frame, gate("upperOut"));
+
+        delete raw;
+      }
+
+      // check radio duty
+      else if (this->status == RECEIVING || this->status == TRANSMITTING)
+      {
+        /* Feedback to RDC*/
+        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+        frame->setKind(LAYER_RDC);
+        frame->setNote(LAYER_RADIO_NOT_FREE);
+
+        send(frame, gate("upperOut"));
+
+        delete raw;
+      }
+
+      // feasible
+      else
+      {
+        raw->setNote(LAYER_RADIO_BEGIN_TRANSMIT);
+
+        switch (this->status)
+        {
+          case IDLE:
+            scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_TRANS, raw);
+            break;
+
+          case LISTENING:
+            scheduleAt(simTime() + SWITCH_MODE_DELAY_LISTEN_TO_TRANS, raw);
+            break;
+
+          case TRANSMITTING:
+            scheduleAt(simTime(), raw);
+            break;
+        }
+      }
+      break; /* switch to transmit */
+
+    case LAYER_RADIO_SWITCH_LISTEN:
+      // check radio duty
+      if (this->status == TRANSMITTING)
+      {
+        /* Feedback to RDC*/
+        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+        frame->setKind(LAYER_RDC);
+        frame->setNote(LAYER_RADIO_NOT_FREE);
+
+        send(frame, gate("upperOut"));
+
+        delete raw;
+      }
+      // feasible
+      else
+      {
+        raw->setNote(LAYER_RADIO_BEGIN_LISTEN);
+
+        switch (this->status)
+        {
+          case IDLE:
+            scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_LISTEN, raw);
+            break;
+
+          case LISTENING:
+            scheduleAt(simTime(), raw);
+            break;
+
+          case TRANSMITTING:
+            scheduleAt(simTime() + SWITCH_MODE_DELAY_TRANS_TO_LISTEN, raw);
+            break;
+        }
+      }
+      break; /* switch to listen */
+
+    case LAYER_RADIO_SWITCH_SLEEP:
+      // check radio duty
+      if (this->status == TRANSMITTING || this->status == RECEIVING)
+      {
+        /* Feedback to RDC*/
+        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+        frame->setKind(LAYER_RDC);
+        frame->setNote(LAYER_RADIO_NOT_FREE);
+
+        send(frame, gate("upperOut"));
+
+        delete raw;
+      }
+      // feasible
+      else
+      {
+        sleep();
+      }
+      break; /* switch to sleep */
+
+    case LAYER_RADIO_BEGIN_TRANSMIT:
+      transmit_on(raw);
+      break; /* begin transmit */
+
+    case LAYER_RADIO_END_TRANSMIT: {
+      transmit_off();
+
+      /* Feedback */
+      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+      frame->setKind(LAYER_RADIO);
+      frame->setNote(LAYER_RADIO_SEND_OK);
+
+      send(frame, gate("upperOut"));
+
+      listen();
+
+      delete raw;
+    }
+      break; /* end transmitting*/
+
+    case LAYER_RADIO_BEGIN_LISTEN:
+      listen();
+      delete packet;
+      break; /* begin listening */
+
+    case LAYER_RADIO_END_LISTENING:
+      delete packet;
+      break; /* end listening */
+
+    case LAYER_RADIO_RECV_OK: {
+      /* Decapsulate */
+      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+      frame->setKind(LAYER_RADIO);
+      frame->setNote(LAYER_RADIO_RECV_OK);
+
+      send(frame, gate("upperOut"));
+
+      // WSN sendACK
+      listen();
+
+      delete raw;
+    }
+      break; /* receie a OK message */
+
+    case LAYER_RADIO_RECV_CORRUPT:
+      /* WSN Dismiss message and sleep */
+      listen();
+      break; /* receie a corrupt message */
+  }
+  /* control message */
+}
+
+void RadioDriver::processUpperLayerMessage(cPacket* packet)
+{
+  /* message from MAC layer */
+  FrameRDC *frame = check_and_cast<FrameRDC*>(packet);
+
+  switch (frame->getNote())
+  {
+    case LAYER_RDC_LISTEN_ON: {
+      Raw* raw = new Raw;
+      raw->setKind(LAYER_RADIO);
+      raw->setNote(LAYER_RADIO_SWITCH_LISTEN);
+
+      scheduleAt(simTime(), raw);
+    }
+      break; /* turn on listening */
+
+    case LAYER_RDC_LISTEN_OFF: {
+      Raw* raw = new Raw;
+      raw->setKind(LAYER_RADIO);
+      raw->setNote(LAYER_RADIO_SWITCH_SLEEP);
+
+      scheduleAt(simTime(), raw);
+    }
+      break; /* turn off listening */
+
+    case LAYER_RDC_SEND:
+      switch (this->status)
+      {
+        case RECEIVING:
+        case TRANSMITTING: /* Feedback */
+        {
+          frame->setKind(LAYER_RADIO);
+          frame->setNote(LAYER_RADIO_NOT_FREE);
+          send(frame, gate("upperOut"));
+        }
+          break; /* radio is on duty */
+
+        case LISTENING:
+        case IDLE: /* Ignite transmitting */
+        {
+          Raw* raw = new Raw;
+
+          raw->encapsulate(frame);
+          raw->setKind(LAYER_RADIO);
+          raw->setNote(LAYER_RADIO_SWITCH_TRANSMIT);
+          raw->addByteLength(PHY_HEADER);
+
+          scheduleAt(simTime(), raw);
+        }
+          break; /* radio is free to operate */
+      } /* checking radio status */
+
+      break; /* sending a MAC message*/
+  }
+  /* message from MAC layer */
+}
+
+void RadioDriver::processLowerLayerMessage(cPacket* packet)
+{
+  /* It is the lowest layer */
+  return;
 }
 
 /*
@@ -294,9 +307,10 @@ void RadioDriver::transmit_on(Raw *raw)
 
   this->status = TRANSMITTING;
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_IDLE);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_TRANSMIT, getTxPower());
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
+      getTxPower());
 }
 
 /*
@@ -343,9 +357,10 @@ void RadioDriver::transmit_off()
   }
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_IDLE, getIdPower());
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
+      getIdPower());
 }
 
 /*
@@ -358,9 +373,10 @@ void RadioDriver::listen()
   this->status = LISTENING;
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_IDLE);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_LISTEN, getRxPower());
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_LISTEN,
+      getRxPower());
 }
 
 /*
@@ -373,9 +389,17 @@ void RadioDriver::sleep()
   this->status = IDLE;
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_TRANSMIT);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOff(ENERGEST_TYPE_LISTEN);
-  ((Battery*) getParentModule()->getModuleByPath(".battery"))->energestOn(ENERGEST_TYPE_IDLE, getIdPower());
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
+      getIdPower());
+}
+
+/*
+ * Switch oscilator mode
+ */
+void RadioDriver::switchOscilatorMode(int type)
+{
 }
 
 }  // namespace wsn_energy

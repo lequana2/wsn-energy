@@ -18,7 +18,7 @@
 #include <algorithm>
 
 #include "ipv6.h"
-#include "battery.h"
+#include "energest.h"
 #include "hopEnergy.h"
 
 #ifndef ANNOTATE
@@ -74,7 +74,8 @@ void RPL::sendDIO()
   icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
 
-  icmp->setSelfEnergy(((Battery*) this->net->getParentModule()->getModuleByPath(".battery"))->energestRemaining);
+  icmp->setSelfEnergy(
+      (check_and_cast<Energest*>(this->net->getParentModule()->getModuleByPath(".energest")))->energestRemaining);
 
   net->multicast(icmp);
 }

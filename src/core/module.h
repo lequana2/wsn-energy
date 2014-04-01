@@ -13,11 +13,29 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package wsn_energy.core.battery;
+#ifndef __WSN_ENERGY_TEST_H_
+#define __WSN_ENERGY_TEST_H_
 
-//
-// TODO auto-generated type
-//
-simple Battery
+#include <omnetpp.h>
+#include <packet_m.h>
+
+namespace wsn_energy {
+
+class myModule : public cSimpleModule
 {
-}
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+
+    virtual void processSelfMessage(cPacket*) = 0;
+    virtual void processUpperLayerMessage(cPacket*) = 0;
+    virtual void processLowerLayerMessage(cPacket*) = 0;
+
+    void sendMessageToUpper(cPacket*);
+    void sendMessageToLower(cPacket*);
+};
+
+} //namespace
+
+#endif

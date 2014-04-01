@@ -66,6 +66,8 @@ void MACdriver::handleMessage(cMessage *msg)
           ipPacket->setNote(LAYER_NET_SEND_OK);
 
           send(ipPacket, gate("upperOut"));
+
+          delete frameMAC;
         }
           break; /* callback after sending */
 
@@ -89,6 +91,8 @@ void MACdriver::handleMessage(cMessage *msg)
           ipPacket->setNote(LAYER_NET_RECV_OK);
 
           send(ipPacket, gate("upperOut"));
+
+          delete frameMAC;
           break; /* okay message */
       }
     }

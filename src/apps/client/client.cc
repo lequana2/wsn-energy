@@ -32,7 +32,7 @@ void Client::initialize()
   event->setKind(APP_SENSING_FLAG);
 
   /* Contiki test scheme */
-  newData();
+//  newData();
 //  scheduleAt(simTime() + 3600, event->dup());
 
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())

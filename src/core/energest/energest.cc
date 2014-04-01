@@ -7,7 +7,7 @@
  *  Functioning:
  */
 
-#include <battery.h>
+#include <energest.h>
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -15,9 +15,9 @@
 
 namespace wsn_energy {
 
-Define_Module(Battery);
+Define_Module(Energest);
 
-Battery::Battery()
+void Energest::initialize()
 {
   for (int i = 0; i < ENERGEST_TYPE_MAX; i++)
   {
@@ -29,27 +29,22 @@ Battery::Battery()
   this->energestRemaining = OPERATION_POWER * OPERATION_VOLTAGE;
 }
 
-void Battery::update()
+void Energest::handleMessage(cMessage *msg)
 {
-  for (int i = 0; i < ENERGEST_TYPE_MAX; i++)
-  {
-    bool resume = this->capsuleIsActivated[i];
-
-    energestOff(i);
-
-    if (resume)
-      energestOn(i, this->power[i]);
-  }
 }
 
-void Battery::energestOn(int type, double power)
+void Energest::finish()
+{
+}
+
+void Energest::energestOn(int type, double power)
 {
   this->capsuleStartTime[type] = simTime().dbl();
   this->capsuleIsActivated[type] = true;
   this->power[type] = power;
 }
 
-void Battery::energestOff(int type)
+void Energest::energestOff(int type)
 {
   if (this->capsuleIsActivated[type])
   {
@@ -64,6 +59,19 @@ void Battery::energestOff(int type)
 
     // consume energy, in term off hour not second
     this->energestRemaining -= consumeTime * power[type] / 3600.0;
+  }
+}
+
+void Energest::update()
+{
+  for (int i = 0; i < ENERGEST_TYPE_MAX; i++)
+  {
+    bool resume = this->capsuleIsActivated[i];
+
+    energestOff(i);
+
+    if (resume)
+      energestOn(i, this->power[i]);
   }
 }
 } /* namespace wsn_energy */

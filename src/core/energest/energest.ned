@@ -13,37 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRadio.h"
+package wsn_energy.core.energest;
 
-#include "world.h"
-#include "statistic.h"
-#include "energest.h"
-
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-namespace wsn_energy {
-
-Define_Module(nullRadio);
-
-bool nullRadio::isClearChannel()
+//
+// TODO auto-generated type
+//
+simple Energest
 {
-  return true;
+    gates:
+        input command @directIn;
 }
-
-double nullRadio::getTxPower()
-{
-  return 1;
-}
-
-double nullRadio::getRxPower()
-{
-  return 1;
-}
-
-double nullRadio::getIdPower(){
-  return 1;
-}
-
-} /* namespace wsn_energy */

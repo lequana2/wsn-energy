@@ -57,6 +57,8 @@ void RDCdriver::handleMessage(cMessage *msg)
           frameMac->setNote(LAYER_RDC_SEND_OK);
 
           send(frameMac, gate("upperOut"));
+
+          delete frameRdc;
         }
           break; /* callback after sending */
 
@@ -68,6 +70,8 @@ void RDCdriver::handleMessage(cMessage *msg)
           frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
 
           send(frameMac, gate("upperOut"));
+
+          delete frameRdc;
         }
           break; /* Packet is oversized */
 
@@ -78,6 +82,8 @@ void RDCdriver::handleMessage(cMessage *msg)
           frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
 
           send(frameMac, gate("upperOut"));
+
+          delete frameRdc;
         }
           break; /* Packet CCA is not valid */
 
@@ -88,6 +94,8 @@ void RDCdriver::handleMessage(cMessage *msg)
           frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
 
           send(frameMac, gate("upperOut"));
+
+          delete frameRdc;
         }
           break; /* Radio is busy */
 
@@ -98,6 +106,8 @@ void RDCdriver::handleMessage(cMessage *msg)
           frameMac->setNote(LAYER_RDC_RECV_OK);
 
           send(frameMac, gate("upperOut"));
+
+          delete frameRdc;
         }
           break; /* Radio received a packet */
 

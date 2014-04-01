@@ -14,7 +14,7 @@
 // 
 
 #include "statistic.h"
-#include "battery.h"
+#include "energest.h"
 
 #include <iostream>
 #include <fstream>
@@ -89,26 +89,27 @@ void Statistic::finish()
   for (int i = 0; i < numberClient; i++)
   {
     numSensorEnergy =
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
+        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->energestRemaining;
 
     numTotalEnergy += numSensorEnergy;
 
     // % duty cycling
     timeTrans +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
+        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
     timeListen +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
+        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
     timeIdle +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
+        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
     emit(sigSensorEnergy, numSensorEnergy);
   }
 
-  // DEBUG
   emit(sigTimeIdle, timeIdle);
   emit(sigTimeTrans, timeTrans);
   emit(sigTimeListen, timeListen);
-
   emit(sigTotalEnergy, numTotalEnergy);
+
+  // WSN DEBUG
+  emit(sigNetSend, timeIdle + timeTrans + timeListen);
 
   cancelAndDelete(polling);
 }
@@ -122,9 +123,9 @@ void Statistic::pollTotalSensorEnergy()
 
   for (int i = 0; i < numberClient; i++)
   {
-    (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->update();
+    (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->update();
     numNetworkEnergy +=
-        (check_and_cast<Battery*>(wsn->getSubmodule("client", i)->getSubmodule("battery")))->energestRemaining;
+        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->energestRemaining;
   }
 
   emit(sigNetworkEnergy, numNetworkEnergy);
@@ -173,6 +174,8 @@ void Statistic::packetRateTracking(int type)
 
 void Statistic::packetDelayTracking(double delayTime)
 {
+  Enter_Method_Silent
+  ("packetDelayTracking");
   numTotalDelay += delayTime;
   emit(sigTotalDelay, numTotalDelay);
 }
