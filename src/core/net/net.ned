@@ -20,6 +20,9 @@ package wsn_energy.core.net;
 //
 moduleinterface iNet
 {
+    parameters:
+        @display("i=block/browser");
+
     gates:
         input upperIn;
         output upperOut;

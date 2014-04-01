@@ -20,6 +20,7 @@ package wsn_energy.core.energest;
 //
 simple Energest
 {
+    @display("i=block/timer");
     gates:
         input command @directIn;
 }

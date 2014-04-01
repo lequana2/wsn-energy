@@ -21,12 +21,14 @@ package wsn_energy.core.radio;
 moduleinterface iRadio
 {
     parameters:
+        @display("i=block/mac");
+
         int trRange @unit(m);
         int coRange @unit(m);
-        
+
     gates:
         input upperIn;
         output upperOut;
-        
-        input radioIn@directin;
+
+        input radioIn @directin;
 }

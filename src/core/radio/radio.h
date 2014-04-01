@@ -16,35 +16,42 @@
 #ifndef RADIO_H_
 #define RADIO_H_
 
-#ifndef SWITCH_MODE_DELAY
+#include "myModule.h"
+
+#ifndef HARDWARE
+#define HARDWARE                           1
 #define SWITCH_MODE_DELAY                  0              // second
-#define SYMBOL                             0.000016       // second (4/250 millis)
-#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    SYMBOL*12      // symbol
-#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   SYMBOL*12      // symbol
-#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  SYMBOL*12      // symbol
-#define SWITCH_MODE_DELAY_TRANS_TO_IDLE    SYMBOL*0       // symbol
-#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  SYMBOL*12      // symbol
-#define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   SYMBOL*0       // symbol
+#define SYMBOL                             0.000016       // 1 symbol = 4/250 millisecond
+#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    SYMBOL*12      // 12 symbol
+#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   SYMBOL*12      // 12 symbol
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  SYMBOL*24      // 24 symbol
+#define SWITCH_MODE_DELAY_TRANS_TO_IDLE    SYMBOL*0       // 0 symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  SYMBOL*24      // 24 symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   SYMBOL*0       // 0 symbol
+#define DATA_RATE                          250000.0       // bit per second
 #endif
 
-#ifndef DATA_RATE
-#define DATA_RATE 250000.0  // bps
+#ifndef COLORIZE
+#define COLORIZE 1
+#define OFF_COLOR      "black"
+#define IDLE_COLOR     "gray"
+#define TRANSMIT_COLOR "blue"
+#define LISTEN_COLOR   "yellow"
+#define RECEIVE_COLOR  "orange"
 #endif
 
-#define OFF             0 // power down
+#define POWER_DOWN      0 // power down
 #define IDLE            1 // do nothing
 #define TRANSMITTING    2 // transmitting something
 #define LISTENING       3 // listening to nothing
 #define RECEIVING       4 // listening to something
-
-#include "module.h"
 
 namespace wsn_energy {
 
 class RadioDriver : public myModule
 {
   private:
-    Raw *broadcastMessage; // buffer message
+    Raw *bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
 
     // Switch oscilator mode
     void switchOscilatorMode(int mode);
@@ -53,6 +60,7 @@ class RadioDriver : public myModule
     void transmit_on(Raw*);
     void transmit_off();
     void listen();
+    void receive(Raw*);
     void sleep();
 
     // power
@@ -61,7 +69,7 @@ class RadioDriver : public myModule
     virtual double getIdPower() = 0;
 
     // CCA
-    virtual bool isClearChannel() = 0;
+    virtual void performCCA() = 0;
 
   protected:
     void initialize();
@@ -75,8 +83,8 @@ class RadioDriver : public myModule
 
   public:
     int status;  // sleep, transmitting, listening, receiving
-    int trRange; // simulated transmission range
-    int coRange; // simulated collission range
+    int trRange; // simulated transmission range according to TXPOWER
+    int coRange; // simulated collission range according to RXPOWER
 
     std::vector<int> neighbor; // WSN simulated neighbor list, for world util. Is this necessary ???
 };

@@ -1,14 +1,13 @@
 /*
- * energest.h
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
  *
- *  Created on: Mar 5, 2014
- *      Author: quan
- *  
- *  Functioning:
+ *  functioning: Capsulating operation time of each mode
  */
 
-#ifndef BATTERY_H_
-#define BATTERY_H_
+#ifndef ENERGEST_H_
+#define ENERGEST_H_
 
 #include <omnetpp.h>
 #include <packet_m.h>

@@ -17,7 +17,6 @@
 
 #include "world.h"
 #include "statistic.h"
-#include "app.h"
 #include "ipv6.h"
 #include "rpl.h"
 #include "energest.h"

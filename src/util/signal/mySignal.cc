@@ -13,17 +13,49 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef APP_H_
-#define APP_H_
-
-#include <omnetpp.h>
+#include "mySignal.h"
 
 namespace wsn_energy {
 
-class App : public cSimpleModule
+mySignal::mySignal()
 {
-};
+  this->incompleted = false;
+  this->interferred = false;
+  this->success = true;
+}
+
+mySignal::mySignal(int radioSenderID, int radioRecverID)
+{
+  mySignal();
+  this->radioSenderID = radioSenderID;
+  this->radioRecverID = radioRecverID;
+}
+
+void mySignal::setInterferred()
+{
+  this->interferred = true;
+  this->success = false;
+}
+
+void mySignal::setIncompleted()
+{
+  this->incompleted = true;
+  this->success = false;
+}
+
+bool mySignal::isInterferred()
+{
+  return this->interferred;
+}
+
+bool mySignal::isIncomplete()
+{
+  return this->incompleted;
+}
+
+bool mySignal::isSuccess()
+{
+  return this->success;
+}
 
 } /* namespace wsn_energy */
-
-#endif /* APP_H_ */

@@ -27,14 +27,14 @@ namespace wsn_energy {
 
 Define_Module(cc2420);
 
-bool cc2420::isClearChannel()
+void cc2420::performCCA()
 {
-  return ((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new Transmission(this, NULL));
+//  return ((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new mySignal(this, NULL));
 }
 
 double cc2420::getTxPower()
 {
-  return TXPOWER_CURRENT * SUPPLY_VOLTAGE;
+  return TXPOWER_CURRENT_MAX * SUPPLY_VOLTAGE;
 }
 
 double cc2420::getRxPower()

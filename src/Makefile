@@ -37,8 +37,8 @@ INCLUDE_PATH = \
     -Imote \
     -Ipacket \
     -Iutil \
+    -Iutil/signal \
     -Iutil/statistic \
-    -Iutil/transmission \
     -Iutil/world
 
 # Additional object and library files to link with
@@ -56,7 +56,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 OBJS = \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
-    $O/core/module.o \
+    $O/core/myModule.o \
     $O/core/energest/energest.o \
     $O/core/mac/mac.o \
     $O/core/mac/csma/csma.o \
@@ -69,8 +69,8 @@ OBJS = \
     $O/core/radio/nullradio/nullRadio.o \
     $O/core/rdc/rdc.o \
     $O/core/rdc/nullrdc/nullRDC.o \
+    $O/util/signal/mySignal.o \
     $O/util/statistic/statistic.o \
-    $O/util/transmission/transmission.o \
     $O/util/world/world.o \
     $O/packet/packet_m.o
 
@@ -171,8 +171,8 @@ clean:
 	$(Q)-rm -f mote/*_m.cc mote/*_m.h
 	$(Q)-rm -f packet/*_m.cc packet/*_m.h
 	$(Q)-rm -f util/*_m.cc util/*_m.h
+	$(Q)-rm -f util/signal/*_m.cc util/signal/*_m.h
 	$(Q)-rm -f util/statistic/*_m.cc util/statistic/*_m.h
-	$(Q)-rm -f util/transmission/*_m.cc util/transmission/*_m.h
 	$(Q)-rm -f util/world/*_m.cc util/world/*_m.h
 
 cleanall: clean
@@ -180,23 +180,15 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/energest/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/statistic/*.cc util/transmission/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/energest/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc mote/*.cc packet/*.cc util/*.cc util/signal/*.cc util/statistic/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
-	apps/app.h \
-	apps/client/client.h \
-	packet/packet_len.h \
-	packet/packet_m.h \
-	util/statistic/statistic.h
+	apps/client/client.h
 $O/apps/server/server.o: apps/server/server.cc \
-	apps/app.h \
-	apps/server/server.h \
-	packet/packet_len.h \
-	packet/packet_m.h \
-	util/statistic/statistic.h
-$O/core/module.o: core/module.cc \
-	core/module.h \
+	apps/server/server.h
+$O/core/myModule.o: core/myModule.cc \
+	core/myModule.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/energest/energest.o: core/energest/energest.cc \
@@ -218,16 +210,15 @@ $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
-	apps/app.h \
 	core/energest/energest.h \
-	core/module.h \
+	core/myModule.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
+	util/signal/mySignal.h \
 	util/statistic/statistic.h \
-	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/energest/energest.h \
@@ -245,33 +236,32 @@ $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
 	packet/packet_m.h
 $O/core/radio/radio.o: core/radio/radio.cc \
 	core/energest/energest.h \
-	core/module.h \
+	core/myModule.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
+	util/signal/mySignal.h \
 	util/statistic/statistic.h \
-	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	core/energest/energest.h \
-	core/module.h \
-	core/radio/cc2420/cc2420-const.h \
+	core/myModule.h \
 	core/radio/cc2420/cc2420.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
+	util/signal/mySignal.h \
 	util/statistic/statistic.h \
-	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	core/energest/energest.h \
-	core/module.h \
+	core/myModule.h \
 	core/radio/nullradio/nullRadio.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
+	util/signal/mySignal.h \
 	util/statistic/statistic.h \
-	util/transmission/transmission.h \
 	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/rdc/rdc.h \
@@ -285,22 +275,18 @@ $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
 $O/packet/packet_m.o: packet/packet_m.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
+$O/util/signal/mySignal.o: util/signal/mySignal.cc \
+	util/signal/mySignal.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/energest/energest.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h
-$O/util/transmission/transmission.o: util/transmission/transmission.cc \
-	core/module.h \
-	core/radio/radio.h \
-	packet/packet_len.h \
-	packet/packet_m.h \
-	util/transmission/transmission.h
 $O/util/world/world.o: util/world/world.cc \
-	core/module.h \
+	core/myModule.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
-	util/transmission/transmission.h \
+	util/signal/mySignal.h \
 	util/world/world.h
 

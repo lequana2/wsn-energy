@@ -20,6 +20,9 @@ package wsn_energy.core.mac;
 //
 moduleinterface iMAC
 {
+    parameters:
+        @display("i=block/layer");
+
     gates:
         input upperIn;
         output upperOut;

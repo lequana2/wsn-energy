@@ -14,7 +14,7 @@ void RadioDriver::initialize()
 {
   this->trRange = par("trRange");
   this->coRange = par("coRange");
-  this->broadcastMessage = NULL;
+  this->bufferTXFIFO = NULL;
 
   // Turn on
   listen();
@@ -22,19 +22,24 @@ void RadioDriver::initialize()
 
 void RadioDriver::handleMessage(cMessage* msg)
 {
+  // stop working
+  if(this->status == POWER_DOWN)
+    return;
+
   myModule::handleMessage(msg);
 
   if (msg->arrivedOn("radioIn"))
   {
     if (DEBUG)
       ev << this->getFullName() << " received message from outside world" << endl;
+    this->receive(check_and_cast<Raw*>(msg));
   }
 }
 
 void RadioDriver::finish()
 {
   this->neighbor.clear();
-  this->broadcastMessage = NULL;
+  this->bufferTXFIFO = NULL;
 }
 
 void RadioDriver::processSelfMessage(cPacket* packet)
@@ -66,7 +71,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       }
 
       // perform CCA
-      else if (!isClearChannel())
+      else if (true)
       {
         /* Feedback to RDC */
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
@@ -196,26 +201,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
     case LAYER_RADIO_END_LISTENING:
       delete packet;
       break; /* end listening */
-
-    case LAYER_RADIO_RECV_OK: {
-      /* Decapsulate */
-      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-      frame->setKind(LAYER_RADIO);
-      frame->setNote(LAYER_RADIO_RECV_OK);
-
-      send(frame, gate("upperOut"));
-
-      // WSN sendACK
-      listen();
-
-      delete raw;
-    }
-      break; /* receie a OK message */
-
-    case LAYER_RADIO_RECV_CORRUPT:
-      /* WSN Dismiss message and sleep */
-      listen();
-      break; /* receie a corrupt message */
   }
   /* control message */
 }
@@ -291,19 +276,19 @@ void RadioDriver::transmit_on(Raw *raw)
   if (DEBUG)
     ev << "Start transmitting" << endl;
 
-  broadcastMessage = raw;
+  bufferTXFIFO = raw;
 
   // register transmission to world
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
     RadioDriver *recver = (RadioDriver*) simulation.getModule(neighbor.at(i));
-    ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
+//    WSN ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
   }
 
-  double finishTime = broadcastMessage->getByteLength() * 8 / DATA_RATE;
-  broadcastMessage->setNote(LAYER_RADIO_END_TRANSMIT);
+  double finishTime = bufferTXFIFO->getByteLength() * 8 / DATA_RATE;
+  bufferTXFIFO->setNote(LAYER_RADIO_END_TRANSMIT);
 
-  scheduleAt(simTime() + finishTime, broadcastMessage);
+  scheduleAt(simTime() + finishTime, bufferTXFIFO);
 
   this->status = TRANSMITTING;
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
@@ -322,38 +307,38 @@ void RadioDriver::transmit_off()
     ev << "End transmitting" << endl;
 
   //  Color here
-  broadcastMessage->setRadioSendId(this->getParentModule()->getId());
+  bufferTXFIFO->setRadioSendId(this->getParentModule()->getId());
 
   for (unsigned int i = 0; i < neighbor.size(); i++)
   {
     RadioDriver* recver = (RadioDriver*) simulation.getModule(neighbor.at(i));
 
-    Transmission *completeTranmission = new Transmission(this, recver);
+// WSN   Transmission *completeTranmission = new Transmission(this, recver);
 
     // check feasible
-    if (((World*) simulation.getModuleByPath("world"))->isFeasibleTransmission(completeTranmission))
+    if (((World*) simulation.getModuleByPath("world"))->isFeasibleTransmission(NULL))
     {
       // EV << "Received" << endl;
-      broadcastMessage->setBitError(true);
-      broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
+      bufferTXFIFO->setBitError(true);
+      bufferTXFIFO->setNote(LAYER_RADIO_RECV_OK);
     }
     else
     {
       // EV << "Corrupted" << endl;
       if (DEBUG)
         recver->getParentModule()->bubble("Corrupted");
-      broadcastMessage->setBitError(false);
-      broadcastMessage->setNote(LAYER_RADIO_RECV_CORRUPT);
+      bufferTXFIFO->setBitError(false);
+      bufferTXFIFO->setNote(LAYER_RADIO_RECV_CORRUPT);
       // WSN hack !!!
       // broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
     }
 
-    broadcastMessage->setRadioRecvId(recver->getParentModule()->getId());
+    bufferTXFIFO->setRadioRecvId(recver->getParentModule()->getId());
     cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
-    sendDirect(broadcastMessage->dup(), gate);
+    sendDirect(bufferTXFIFO->dup(), gate);
 
     // Turn receiving mote off
-    ((World*) simulation.getModuleByPath("world"))->stopTransmission(completeTranmission);
+    ((World*) simulation.getModuleByPath("world"))->stopTransmission(NULL);
   }
 
   ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
@@ -380,7 +365,36 @@ void RadioDriver::listen()
 }
 
 /*
- *   Turn off receiving
+ *   Callback after receiving
+ */
+void RadioDriver::receive(Raw* raw)
+{
+  switch (raw->getNote())
+  {
+    case LAYER_RADIO_RECV_OK: {
+      /* Decapsulate */
+      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+      frame->setKind(LAYER_RADIO);
+      frame->setNote(LAYER_RADIO_RECV_OK);
+
+      send(frame, gate("upperOut"));
+
+      // WSN sendACK
+      listen();
+
+      delete raw;
+    }
+      break; /* receie a OK message */
+
+    case LAYER_RADIO_RECV_CORRUPT:
+      /* WSN Dismiss message and sleep */
+      listen();
+      break; /* receie a corrupt message */
+  }
+}
+
+/*
+ *   Idle
  */
 void RadioDriver::sleep()
 {

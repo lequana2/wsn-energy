@@ -15,39 +15,36 @@
 
 #include "server.h"
 
-#include "statistic.h"
-#include "packet_m.h"
-
 namespace wsn_energy {
 
 Define_Module(Server);
 
 void Server::initialize()
 {
-  App::initialize();
-
-  cMessage *msg = new cMessage;
-  msg->setKind(RPL_CONSTRUCT);
-  scheduleAt(simTime(), msg);
+//  App::initialize();
+//
+//  cMessage *msg = new cMessage;
+//  msg->setKind(RPL_CONSTRUCT);
+//  scheduleAt(simTime(), msg);
 }
 
 void Server::handleMessage(cMessage *msg)
 {
-  switch (msg->getKind())
-  {
-    case RPL_CONSTRUCT:
-      send(msg, gate("lowerOut"));
-      break;
-
-    case LAYER_APP:
-      Data* data = check_and_cast<Data*>(msg);
-      this->getParentModule()->bubble(data->getValue());
-
-      /* End to end statistics */
-      ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);
-      ((Statistic*) simulation.getModuleByPath("statistic"))->packetDelayTracking(simTime().dbl() - data->getTime());
-      break;
-  }
+//  switch (msg->getKind())
+//  {
+//    case RPL_CONSTRUCT:
+//      send(msg, gate("lowerOut"));
+//      break;
+//
+//    case LAYER_APP:
+//      Data* data = check_and_cast<Data*>(msg);
+//      this->getParentModule()->bubble(data->getValue());
+//
+//      /* End to end statistics */
+//      ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);
+//      ((Statistic*) simulation.getModuleByPath("statistic"))->packetDelayTracking(simTime().dbl() - data->getTime());
+//      break;
+//  }
 }
 
 void Server::finish()

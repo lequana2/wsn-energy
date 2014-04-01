@@ -27,9 +27,9 @@ namespace wsn_energy {
 
 Define_Module(nullRadio);
 
-bool nullRadio::isClearChannel()
+void nullRadio::performCCA()
 {
-  return true;
+  return;
 }
 
 double nullRadio::getTxPower()

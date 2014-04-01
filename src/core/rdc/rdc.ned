@@ -20,6 +20,9 @@ package wsn_energy.core.rdc;
 //
 moduleinterface iRDC
 {
+    parameters:
+        @display("i=block/network");
+
     gates:
         input upperIn;
         output upperOut;

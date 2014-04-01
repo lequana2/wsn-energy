@@ -13,11 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <stdio.h>
-
-#include "statistic.h"
 #include "client.h"
-#include "packet_m.h"
 
 namespace wsn_energy {
 
@@ -25,16 +21,13 @@ Define_Module(Client);
 
 void Client::initialize()
 {
-  App::initialize();
-
   // WSN Client scheme
-  cMessage *event = new cMessage;
-  event->setKind(APP_SENSING_FLAG);
+//  cMessage *event = new cMessage;
+//  event->setKind(APP_SENSING_FLAG);
 
   /* Contiki test scheme */
 //  newData();
 //  scheduleAt(simTime() + 3600, event->dup());
-
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
 //    scheduleAt(simTime() + 1, event->dup());
 //
@@ -43,7 +36,6 @@ void Client::initialize()
 //
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[79]")->getId())
 //    scheduleAt(simTime() + 3, event->dup());
-
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
 //    scheduleAt(simTime() + 1, event->dup());
 //
@@ -56,20 +48,20 @@ void Client::initialize()
 
 void Client::handleMessage(cMessage *msg)
 {
-  if (msg->getKind() == APP_SENSING_FLAG)
-  {
-    Data *data = new Data;
-    data->setKind(LAYER_APP);
-
-    data->setValue("Hello");
-    data->setTime(simTime().dbl());
-    send(data, gate("lowerOut"));
-
-    newData();
-
-    /* End to end statistics */
-    ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
-  }
+//  if (msg->getKind() == APP_SENSING_FLAG)
+//  {
+//    Data *data = new Data;
+//    data->setKind(LAYER_APP);
+//
+//    data->setValue("Hello");
+//    data->setTime(simTime().dbl());
+//    send(data, gate("lowerOut"));
+//
+//    newData();
+//
+//    /* End to end statistics */
+//    ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
+//  }
 }
 
 void Client::finish()
@@ -78,17 +70,17 @@ void Client::finish()
 
 void Client::newData()
 {
-  int randomness = 2;   // second
-  int sendInterval = 4; // second
-
-  int time = sendInterval + ((rand() % randomness));
-
-  cMessage *event = new cMessage;
-  event->setKind(APP_SENSING_FLAG);
-
-  if (simTime().dbl() == 0)
-    time++;
-  scheduleAt(simTime() + time, event);
+//  int randomness = 2;   // second
+//  int sendInterval = 4; // second
+//
+//  int time = sendInterval + ((rand() % randomness));
+//
+//  cMessage *event = new cMessage;
+//  event->setKind(APP_SENSING_FLAG);
+//
+//  if (simTime().dbl() == 0)
+//    time++;
+//  scheduleAt(simTime() + time, event);
 }
 
 }

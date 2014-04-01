@@ -20,6 +20,9 @@ package wsn_energy.apps;
 //
 moduleinterface iApp
 {
+    parameters:
+        @display("i=block/app2");
+
     gates:
         input lowerIn;
         output lowerOut;

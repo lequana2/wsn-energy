@@ -23,7 +23,7 @@ namespace wsn_energy {
 class nullRadio : public RadioDriver
 {
   protected:
-    virtual bool isClearChannel();
+    virtual void performCCA();
 
     virtual double getTxPower();
     virtual double getRxPower();
