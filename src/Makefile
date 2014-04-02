@@ -198,16 +198,19 @@ $O/core/energest/energest.o: core/energest/energest.cc \
 	core/energest/energest.h
 $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
+	core/myModule.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/mac/csma/csma.o: core/mac/csma/csma.cc \
 	core/mac/csma/csma.h \
 	core/mac/mac.h \
+	core/myModule.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	core/mac/mac.h \
 	core/mac/nullmac/nullMAC.h \
+	core/myModule.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
@@ -223,6 +226,7 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	util/world/world.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/energest/energest.h \
+	core/myModule.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
@@ -265,10 +269,12 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	util/statistic/statistic.h \
 	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
+	core/myModule.h \
 	core/rdc/rdc.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
+	core/myModule.h \
 	core/rdc/nullrdc/nullRDC.h \
 	core/rdc/rdc.h \
 	packet/packet_len.h \

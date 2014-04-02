@@ -16,14 +16,14 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-  cMessage *msg = new cMessage;
-  msg->setKind(RPL_CONSTRUCT);
+  IpPacket *msg = new IpPacket;
+  msg->setNote(RPL_CONSTRUCT);
   scheduleAt(simTime(), msg);
 }
 
 void Server::handleMessage(cMessage *msg)
 {
-  switch (msg->getKind())
+  switch (check_and_cast<IpPacket*>(msg)->getNote())
   {
     case RPL_CONSTRUCT:
       send(msg, gate("lowerOut"));

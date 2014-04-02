@@ -54,7 +54,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       if (DEBUG)
         ev << "Radio length " << raw->getByteLength() << endl;
 
-      // WSN check packet length (127 + 6 bytes)
+      // check packet length (127 + 6 bytes)
       if (raw->getByteLength() > PACKET_802154 + PHY_HEADER)
       {
         if (DEBUG)
@@ -62,7 +62,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
         /* Feedback to RDC */
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-        frame->setKind(LAYER_RDC);
         frame->setNote(LAYER_RADIO_PACKET_OVERSIZE);
 
         send(frame, gate("upperOut"));
@@ -88,7 +87,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         /* Feedback to RDC*/
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-        frame->setKind(LAYER_RDC);
         frame->setNote(LAYER_RADIO_NOT_FREE);
 
         send(frame, gate("upperOut"));
@@ -124,7 +122,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         /* Feedback to RDC*/
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-        frame->setKind(LAYER_RDC);
         frame->setNote(LAYER_RADIO_NOT_FREE);
 
         send(frame, gate("upperOut"));
@@ -159,7 +156,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         /* Feedback to RDC*/
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-        frame->setKind(LAYER_RDC);
         frame->setNote(LAYER_RADIO_NOT_FREE);
 
         send(frame, gate("upperOut"));
@@ -214,7 +210,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
   {
     case LAYER_RDC_LISTEN_ON: {
       Raw* raw = new Raw;
-      raw->setKind(LAYER_RADIO);
       raw->setNote(LAYER_RADIO_SWITCH_LISTEN);
 
       scheduleAt(simTime(), raw);
@@ -223,7 +218,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
 
     case LAYER_RDC_LISTEN_OFF: {
       Raw* raw = new Raw;
-      raw->setKind(LAYER_RADIO);
       raw->setNote(LAYER_RADIO_SWITCH_SLEEP);
 
       scheduleAt(simTime(), raw);
@@ -235,7 +229,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
       {
         case TRANSMITTING: /* Feedback */
         {
-          frame->setKind(LAYER_RADIO);
           frame->setNote(LAYER_RADIO_NOT_FREE);
           send(frame, gate("upperOut"));
         }
@@ -247,7 +240,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
           Raw* raw = new Raw;
 
           raw->encapsulate(frame);
-          raw->setKind(LAYER_RADIO);
           raw->setNote(LAYER_RADIO_SWITCH_TRANSMIT);
           raw->addByteLength(PHY_HEADER);
 
@@ -283,12 +275,7 @@ void RadioDriver::transmit_on(Raw *raw)
   bufferTXFIFO->setNote(LAYER_RADIO_END_TRANSMIT);
   scheduleAt(simTime() + finishTime, bufferTXFIFO);
 
-//  this->status = TRANSMITTING;
-//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
-//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
-//      getTxPower());
+  switchOscilatorMode(TRANSMITTING);
 }
 
 /*
@@ -301,11 +288,7 @@ void RadioDriver::transmit_off()
 
   ((World*) simulation.getModuleByPath("world"))->releaseHost(this);
 
-//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
-//      getIdPower());
+  switchOscilatorMode(IDLE);
 }
 
 /*
@@ -315,13 +298,7 @@ void RadioDriver::listen()
 {
   if (DEBUG)
     ev << "Recv on" << endl;
-  this->status = LISTENING;
-
-//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_LISTEN,
-      getRxPower());
+  switchOscilatorMode(LISTENING);
 }
 
 /*
@@ -329,12 +306,14 @@ void RadioDriver::listen()
  */
 void RadioDriver::receive(Raw* raw)
 {
+  if (DEBUG)
+    ev << "Received" << endl;
+
   switch (raw->getNote())
   {
     case LAYER_RADIO_RECV_OK: {
       /* Decapsulate */
       FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-      frame->setKind(LAYER_RADIO);
       frame->setNote(LAYER_RADIO_RECV_OK);
 
       send(frame, gate("upperOut"));
@@ -351,6 +330,8 @@ void RadioDriver::receive(Raw* raw)
       listen();
       break; /* receie a corrupt message */
   }
+
+//  switchOscilatorMode(IDLE);
 }
 
 /*
@@ -360,13 +341,9 @@ void RadioDriver::sleep()
 {
   if (DEBUG)
     ev << "Recv off" << endl;
-  this->status = IDLE;
 
-//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
-      getIdPower());
+  ((World*) simulation.getModuleByPath("world"))->stopListening(this);
+  switchOscilatorMode(IDLE);
 }
 
 /*
@@ -374,32 +351,40 @@ void RadioDriver::sleep()
  */
 void RadioDriver::switchOscilatorMode(int type)
 {
-//  void World::changeStatus(RadioDriver *mote)
-//  {
-//    switch (mote->status)
-//    {
-//      case IDLE:
-//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, IDLE_COLOR);
-//        break;
-//
-//      case LISTENING:
-//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
-//        break;
-//
-//      case RECEIVING:
-//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVE_COLOR);
-//        break;
-//
-//      case TRANSMITTING:
-//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
-//        break;
-//
-//      default:
-//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
-//        break;
-//    }
-//
-//  }
+  switch (type)
+  {
+    case IDLE:
+      this->status = IDLE;
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
+          getIdPower());
+      (&getParentModule()->getDisplayString())->setTagArg("i", 1, IDLE_COLOR);
+      break;
+
+    case LISTENING:
+      this->status = LISTENING;
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_LISTEN,
+          getRxPower());
+      (&getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
+      break;
+
+    case TRANSMITTING:
+      this->status = TRANSMITTING;
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
+          getTxPower());
+      (&getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
+      break;
+
+    case POWER_DOWN:
+      this->status = POWER_DOWN;
+      (&getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
+      break;
+  }
 }
 
 }  // namespace wsn_energy

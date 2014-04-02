@@ -1,17 +1,10 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
+ *
+ *  functioning: refer to mac.h
+ */
 
 #include <mac.h>
 #include "packet_m.h"
@@ -22,86 +15,67 @@
 
 namespace wsn_energy {
 
-void MACdriver::initialize()
+void MACdriver::processSelfMessage(cPacket* packet)
 {
 }
 
-void MACdriver::handleMessage(cMessage *msg)
+void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
-  switch (msg->getKind())
+  FrameMAC *frame = new FrameMAC;
+
+  // Omnet attribute
+  frame->encapsulate((IpPacket*) packet);
+  frame->addByteLength(MAC_HEADER_FOOTER_LEN);
+
+  // MAC address
+  frame->setSenderMacAddress(this->getId());
+  frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+
+  sendPacket(frame);
+
+  if (DEBUG)
+    ev << "Frame length: " << frame->getByteLength() << endl;
+}
+
+void MACdriver::processLowerLayerMessage(cPacket* packet)
+{
+  FrameMAC *frameMAC = check_and_cast<FrameMAC*>(packet);
+
+  switch (frameMAC->getNote())
   {
-    case LAYER_MAC: /* control message */
-      break; /* control message */
-
-    case LAYER_NET: /* message from NET layer */
+    case LAYER_RDC_SEND_OK: /* callback after sending */
     {
-      FrameMAC *frame = new FrameMAC;
+      IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
+      ipPacket->setNote(LAYER_NET_SEND_OK);
 
-      // Omnet attribute
-      frame->setKind(LAYER_MAC);
-      frame->encapsulate((IpPacket*) msg);
-      frame->addByteLength(MAC_HEADER_FOOTER_LEN);
+      send(ipPacket, gate("upperOut"));
 
-      // MAC address
-      frame->setSenderMacAddress(this->getId());
-      frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+      delete frameMAC;
+    }
+      break; /* callback after sending */
 
+    case LAYER_RDC_SEND_NOT_OK: /* callback if not able to send*/
+    {
+      deferPacket(frameMAC);
+    }
+      break; /* callback if not able to send*/
+
+    case LAYER_RDC_RECV_ACK:
       if (DEBUG)
-        ev << "Frame length: " << frame->getByteLength() << endl;
+        ev << "ACK received" << endl;
+      break; /* recv ACK */
 
-      sendPacket(frame);
-    }
-      break; /* message from NET layer */
+    case LAYER_RDC_RECV_OK: /* okay message */
+      if (DEBUG)
+        ev << "RECV (MAC)" << endl;
 
-    case LAYER_RDC: /* message from MAC layer */
-    {
-      FrameMAC *frameMAC = check_and_cast<FrameMAC*>(msg);
+      IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
+      ipPacket->setNote(LAYER_NET_RECV_OK);
 
-      switch (frameMAC->getNote())
-      {
-        case LAYER_RDC_SEND_OK: /* callback after sending */
-        {
-          IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
-          ipPacket->setKind(LAYER_MAC);
-          ipPacket->setNote(LAYER_NET_SEND_OK);
+      send(ipPacket, gate("upperOut"));
 
-          send(ipPacket, gate("upperOut"));
-
-          delete frameMAC;
-        }
-          break; /* callback after sending */
-
-        case LAYER_RDC_SEND_NOT_OK: /* callback if not able to send*/
-        {
-          deferPacket(frameMAC);
-        }
-          break; /* callback if not able to send*/
-
-        case LAYER_RDC_RECV_ACK:
-          if (DEBUG)
-            ev << "ACK received" << endl;
-          break; /* recv ACK */
-
-        case LAYER_RDC_RECV_OK: /* okay message */
-          if (DEBUG)
-            ev << "RECV (MAC)" << endl;
-
-          IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
-          ipPacket->setKind(LAYER_MAC);
-          ipPacket->setNote(LAYER_NET_RECV_OK);
-
-          send(ipPacket, gate("upperOut"));
-
-          delete frameMAC;
-          break; /* okay message */
-      }
-    }
-      break; /* message from MAC layer */
+      delete frameMAC;
+      break; /* okay message */
   }
 }
-
-void MACdriver::finish()
-{
-}
-
 } /* namespace wsn_energy */

@@ -57,6 +57,7 @@ class World : public cSimpleModule
 
     void registerHost(RadioDriver*, Raw*);    // register transmitting mote
     void releaseHost(RadioDriver*);           // unregister transmitting mote
+    void stopListening(RadioDriver*);  // recver mote stop listening
 
     bool senseFreeChannel(RadioDriver*);      // check if radio is free
 

@@ -295,7 +295,7 @@ void World::releaseHost(RadioDriver* mote)
         raw->setBitError(true);  // error
       // send message
       (check_and_cast<RadioDriver*>(simulation.getModule(senderID)))->sendDirect(raw,
-          simulation.getModule((*it)->radioRecverID)->gate("radioIn"));
+      simulation.getModule((*it)->radioRecverID)->gate("radioIn"));
 
       // remove signal
       signals.remove((*it--));
@@ -314,6 +314,20 @@ void World::releaseHost(RadioDriver* mote)
 }
 
 /*
+ * a mote stop listening
+ */
+void World::stopListening(RadioDriver* mote)
+{
+  // Receiver ID
+  int recverID = mote->getId();
+
+  // consider incomplete signal
+  for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
+    if ((*it)->radioRecverID == recverID)
+      (*it)->setIncompleted();
+}
+
+/*
  * register on-air signal
  */
 void World::considerSignal(mySignal* signal)
@@ -323,6 +337,10 @@ void World::considerSignal(mySignal* signal)
 
   // increase incoming signal
   (check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal++;
+
+  // Incomplete message
+  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->status != LISTENING)
+    signal->setIncompleted();
 
   // consider interfere signal at receiver
   if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal > 1)

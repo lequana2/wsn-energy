@@ -36,8 +36,7 @@
 #define OFF_COLOR      "black"
 #define IDLE_COLOR     "gray"
 #define TRANSMIT_COLOR "blue"
-#define LISTEN_COLOR   "yellow"
-#define RECEIVE_COLOR  "orange"
+#define LISTEN_COLOR   "orange"
 #endif
 
 #define POWER_DOWN      0 // power down

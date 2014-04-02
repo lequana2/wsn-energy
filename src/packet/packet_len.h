@@ -1,10 +1,9 @@
 /*
- * packet_len.h
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
  *
- *  Created on: Mar 27, 2014
- *      Author: quan
- *  
- *  Functioning:
+ *  functioning: Packet length of 802.15.4 Zigbee standard
  */
 
 #ifndef PACKET_LEN_H_
@@ -18,6 +17,5 @@
 
 #define  DIO_LEN                 24   // ICMPv6 RPL DODAG INFORMATION OBJECT
 #define  DIS_LEN                 10   // ICMPv6 RPL DODAG INFORMATION SOLICITATION
-#define  DATA                     1   // 1 bytes ????
 
 #endif /* PACKET_LEN_H_ */

@@ -16,21 +16,20 @@
 #ifndef MACDRIVER_H_
 #define MACDRIVER_H_
 
-#include <omnetpp.h>
-#include "packet_m.h"
+#include "myModule.h"
 
 namespace wsn_energy {
 
-class MACdriver : public cSimpleModule
+class MACdriver : public myModule
 {
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
+    virtual void processSelfMessage(cPacket*);
+    virtual void processUpperLayerMessage(cPacket*);
+    virtual void processLowerLayerMessage(cPacket*);
 
     /* accept output from upperlayer*/
     virtual void sendPacket(FrameMAC*) = 0;
-    /* scheduling for not successful transmitting*/
+    /* backoff transmitting*/
     virtual void deferPacket(FrameMAC*) = 0;
 
     /* accept input from lowerlayer*/

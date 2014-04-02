@@ -31,8 +31,6 @@ enum COMMAND_AND_RESULT
 	RPL_SOLICIT   = 4; // request DIS
 
 	// radio
- 	LAYER_RADIO     			= 10; // kind
- 	
  	LAYER_RADIO_SWITCH_TRANSMIT	= 11; // switch to transmit mode
  	LAYER_RADIO_SWITCH_LISTEN	= 12; // switch to listening mode
  	LAYER_RADIO_SWITCH_SLEEP    = 13; // switch to sleep mode
@@ -52,8 +50,6 @@ enum COMMAND_AND_RESULT
 	LAYER_RADIO_RECV_CORRUPT	= 23; // packet is corrupt
 	
 	// rdc
-	LAYER_RDC                	= 30; // kind
-	
 	LAYER_RDC_SEND				= 31; // sending a message
 	LAYER_RDC_SEND_OK			= 32; // already sent a message
 	LAYER_RDC_SEND_NOT_OK		= 33; // failed to send a message
@@ -67,8 +63,6 @@ enum COMMAND_AND_RESULT
 	LAYER_RDC_RECV_ACK			= 38; // receiving an ACK
 	
 	// mac
-	LAYER_MAC 		    = 50; // kind
-	
 	LAYER_MAC_SEND_OK	= 51; // transmitting + receiving ACK
 	LAYER_MAC_NO_ACK  	= 52; // transmitting + no ACK
 	
@@ -78,8 +72,6 @@ enum COMMAND_AND_RESULT
 	LAYER_MAC_RECV_OK	= 55; // receiving an okay message
 
 	// net
-	LAYER_NET       	   = 70;	// kind
-	
 	LAYER_NET_CHECK_BUFFER = 71; // check message on buffer
 	
 	LAYER_NET_SEND_OK	   = 72; // successfully sent a message on buffer

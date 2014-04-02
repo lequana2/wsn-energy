@@ -35,8 +35,6 @@ namespace wsn_energy {
  * 	RPL_SOLICIT   = 4; 
  * 
  * 	
- *  	LAYER_RADIO     			= 10; 
- *  	
  *  	LAYER_RADIO_SWITCH_TRANSMIT	= 11; 
  *  	LAYER_RADIO_SWITCH_LISTEN	= 12; 
  *  	LAYER_RADIO_SWITCH_SLEEP    = 13; 
@@ -56,8 +54,6 @@ namespace wsn_energy {
  * 	LAYER_RADIO_RECV_CORRUPT	= 23; 
  * 	
  * 	
- * 	LAYER_RDC                	= 30; 
- * 	
  * 	LAYER_RDC_SEND				= 31; 
  * 	LAYER_RDC_SEND_OK			= 32; 
  * 	LAYER_RDC_SEND_NOT_OK		= 33; 
@@ -71,8 +67,6 @@ namespace wsn_energy {
  * 	LAYER_RDC_RECV_ACK			= 38; 
  * 	
  * 	
- * 	LAYER_MAC 		    = 50; 
- * 	
  * 	LAYER_MAC_SEND_OK	= 51; 
  * 	LAYER_MAC_NO_ACK  	= 52; 
  * 	
@@ -81,8 +75,6 @@ namespace wsn_energy {
  * 
  * 	LAYER_MAC_RECV_OK	= 55; 
  * 
- * 	
- * 	LAYER_NET       	   = 70;	
  * 	
  * 	LAYER_NET_CHECK_BUFFER = 71; 
  * 	
@@ -112,7 +104,6 @@ enum COMMAND_AND_RESULT {
     OUT_OF_ENERGY = 2,
     RPL_CONSTRUCT = 3,
     RPL_SOLICIT = 4,
-    LAYER_RADIO = 10,
     LAYER_RADIO_SWITCH_TRANSMIT = 11,
     LAYER_RADIO_SWITCH_LISTEN = 12,
     LAYER_RADIO_SWITCH_SLEEP = 13,
@@ -126,7 +117,6 @@ enum COMMAND_AND_RESULT {
     LAYER_RADIO_SEND_OK = 21,
     LAYER_RADIO_RECV_OK = 22,
     LAYER_RADIO_RECV_CORRUPT = 23,
-    LAYER_RDC = 30,
     LAYER_RDC_SEND = 31,
     LAYER_RDC_SEND_OK = 32,
     LAYER_RDC_SEND_NOT_OK = 33,
@@ -135,13 +125,11 @@ enum COMMAND_AND_RESULT {
     LAYER_RDC_LISTEN_OFF = 36,
     LAYER_RDC_RECV_OK = 37,
     LAYER_RDC_RECV_ACK = 38,
-    LAYER_MAC = 50,
     LAYER_MAC_SEND_OK = 51,
     LAYER_MAC_NO_ACK = 52,
     LAYER_MAC_DEFER = 53,
     LAYER_MAC_ERR = 54,
     LAYER_MAC_RECV_OK = 55,
-    LAYER_NET = 70,
     LAYER_NET_CHECK_BUFFER = 71,
     LAYER_NET_SEND_OK = 72,
     LAYER_NET_SEND_NOT_OK = 73,
