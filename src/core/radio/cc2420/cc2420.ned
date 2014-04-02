@@ -24,7 +24,8 @@ simple cc2420 like iRadio
 {
     parameters:
         @class("cc2420");
-        
+        @display("i=block/mac");
+
         int trRange @unit(m);
         int coRange @unit(m);
 

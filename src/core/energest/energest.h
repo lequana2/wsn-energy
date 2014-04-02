@@ -10,7 +10,6 @@
 #define ENERGEST_H_
 
 #include <omnetpp.h>
-#include <packet_m.h>
 
 // Power unit = Watts (mWh)
 #define OPERATION_POWER          1000.0 // mAh

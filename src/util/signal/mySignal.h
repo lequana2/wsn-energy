@@ -1,5 +1,9 @@
 /*
- * @author
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
+ *
+ *  functioning: Managing signal between 2 motes
  */
 
 #ifndef SIGNAL_H_

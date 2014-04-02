@@ -102,7 +102,8 @@ enum COMMAND_AND_RESULT
 }
 
 packet Raw{
-    int note; // control message 
+	bool error; // is error message
+    int note;   // control message 
 
     int radioSendId;
     int radioRecvId;

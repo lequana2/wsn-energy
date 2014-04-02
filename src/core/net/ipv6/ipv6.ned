@@ -22,6 +22,9 @@ import wsn_energy.core.net.iNet;
 //
 simple IPv6 like iNet
 {
+    parameters:
+        @display("i=block/browser");
+
     gates:
         input upperIn;
         output upperOut;

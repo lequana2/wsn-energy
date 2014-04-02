@@ -24,6 +24,7 @@ simple Server like iApp
 {
     parameters:
         @class("Server");
+        @display("i=block/app2");
 
     gates:
         input lowerIn;

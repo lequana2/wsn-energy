@@ -1,17 +1,10 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
+ *
+ *  functioning: refer to world.h
+ */
 
 #include "world.h"
 #include "radio.h"
@@ -23,7 +16,7 @@
 #endif
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 namespace wsn_energy {
@@ -35,7 +28,7 @@ void World::initialize()
   this->numberClient = par("numberClient");
 
   // Arrange nodes into positions
-  arrangeNodes();
+  arrangeMotes();
 
   // Create connections
   connectNodes();
@@ -48,15 +41,19 @@ void World::handleMessage(cMessage *msg)
 void World::finish()
 {
   this->oss.clear();
-
-  cArray host("Host list");
-  cArray signal("registered signal");
+  for (std::list<Host*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+  {
+    (*it)->moteIDWithinTransmissionRange.clear();
+    (*it)->moteIDWithinCollisionRange.clear();
+  }
+  this->hosts.clear();
+  this->signals.clear();
 }
 
 /*
  * Arrange position of nodes in network.
  */
-void World::arrangeNodes()
+void World::arrangeMotes()
 {
   int col = -1; // carry out
   int row = 0;
@@ -126,69 +123,227 @@ void World::connectNodes()
 {
   // Connect server to other(s)
   RadioDriver *server = (RadioDriver*) simulation.getModuleByPath("server.radio");
-//  this->checkConnection(server);
+  this->deployConnection(server);
 
   // Connect client(s) to other(s)
   for (int i = 0; i < numberClient; i++)
   {
     char modulePath[20];
     sprintf(modulePath, "client[%d].radio", i);
-//    this->checkConnection((RadioDriver*) simulation.getModuleByPath(modulePath));
+    this->deployConnection((RadioDriver*) simulation.getModuleByPath(modulePath));
   }
 }
 
 /*
- * Create connection from node to others
+ * deploy all valid connection for a given radio
  */
-//void World::checkConnection(RadioDriver *radio)
-//{
-//  // Check with server
-//  RadioDriver *server = (RadioDriver*) simulation.getModuleByPath("server.radio");
-//  if (deployConnection(radio, server))
-//    radio->neighbor.push_back(server->getParentModule()->getModuleByPath(".radio")->getId());
-//
-//  // Check with client(s)
-//  for (int i = 0; i < numberClient; i++)
-//  {
-//    char modulePath[20];
-//    sprintf(modulePath, "client[%d].radio", i);
-//    RadioDriver *client = (RadioDriver*) simulation.getModuleByPath(modulePath);
-//
-//    if (deployConnection(radio, client))
-//      radio->neighbor.push_back(client->getParentModule()->getModuleByPath(".radio")->getId());
-//  }
-//}
-//
-///*
-// * Check and create connection
-// */
-//int World::deployConnection(RadioDriver *x, RadioDriver *y)
-//{
-//  if (calculateDistance(x, y) > x->trRange)
-//    return 0;
-//  if (x->getId() == y->getId())
-//    return 0;
-//
-//  // set up connection
-//  char setOutConnectionName[20];
-//  char setInConnectionName[20];
-//
-//  cGate *outGate;
-//  cGate *inGate;
-//
-//  sprintf(setOutConnectionName, "out %d to %d", x->getParentModule()->getId(), y->getParentModule()->getId());
-//  sprintf(setInConnectionName, "in %d to %d", x->getParentModule()->getId(), y->getParentModule()->getId());
-//
-//  outGate = x->getParentModule()->addGate(setOutConnectionName, cGate::OUTPUT);
-//  inGate = y->getParentModule()->addGate(setInConnectionName, cGate::INPUT);
-//
-//  outGate->connectTo(inGate);
-//
-//  //hidden connection
-//  outGate->setDisplayString("ls=,0");
-//
-//  return 1;
-//}
+void World::deployConnection(RadioDriver* mote)
+{
+  Host *host = new Host;
+  host->moteID = mote->getId();
+
+  // Check with base station
+  RadioDriver *bs = (RadioDriver*) simulation.getModuleByPath("server.radio");
+  switch (this->validateConnection(mote, bs))
+  {
+    case WITHIN_TRANS:
+      host->moteIDWithinTransmissionRange.push_front(bs->getId());
+      break;
+
+    case WITHIN_COLLI:
+      host->moteIDWithinCollisionRange.push_front(bs->getId());
+      break;
+  }
+
+  // Check with other mote
+  for (int i = 0; i < numberClient; i++)
+  {
+    char modulePath[20];
+    sprintf(modulePath, "client[%d].radio", i);
+    RadioDriver *otherMote = (RadioDriver*) simulation.getModuleByPath(modulePath);
+
+    if (mote->getId() == otherMote->getId())
+      continue;
+
+    switch (this->validateConnection(mote, otherMote))
+    {
+      case WITHIN_TRANS:
+        host->moteIDWithinTransmissionRange.push_front(otherMote->getId());
+        break;
+
+      case WITHIN_COLLI:
+        host->moteIDWithinCollisionRange.push_front(otherMote->getId());
+        break;
+    }
+  }
+
+  this->hosts.push_back(host);
+}
+
+/*
+ * check validation between 2 radio
+ */
+int World::validateConnection(RadioDriver* host, RadioDriver* client)
+{
+  int distance = calculateDistance(host, client);
+
+  if (distance > host->coRange)
+    return NO_CONNECTION;
+
+  if (distance > host->trRange)
+    return WITHIN_COLLI;
+
+  // set up connection
+  char setOutConnectionName[20];
+  char setInConnectionName[20];
+
+  cGate *outGate;
+  cGate *inGate;
+
+  sprintf(setOutConnectionName, "out %d to %d", host->getParentModule()->getId(), client->getParentModule()->getId());
+  sprintf(setInConnectionName, "in %d to %d", host->getParentModule()->getId(), client->getParentModule()->getId());
+
+  outGate = host->getParentModule()->addGate(setOutConnectionName, cGate::OUTPUT);
+  inGate = client->getParentModule()->addGate(setInConnectionName, cGate::INPUT);
+
+  outGate->connectTo(inGate);
+
+  //hidden connection
+  outGate->setDisplayString("ls=,0");
+
+  return WITHIN_TRANS;
+}
+
+/*
+ * register transmitting mote
+ */
+void World::registerHost(RadioDriver* mote, Raw* onAir)
+{
+  if (DEBUG)
+    ev << "Register host " << mote->getId() << endl;
+
+  // Search host by id
+  int senderID = mote->getId();
+  Host *host;
+
+  for (std::list<Host*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+  {
+    if ((*it)->moteID == senderID)
+      host = *it;
+  }
+
+  if (host == NULL)
+  {
+    if (DEBUG)
+      ev << "Unknown host" << endl;
+    return;
+  }
+
+  host->onAir = onAir;
+
+  // insert all in-transmission-range signal
+  for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
+      it != host->moteIDWithinTransmissionRange.end(); it++)
+  {
+    mySignal *signal = new mySignal(mote->getId(), (*it));
+    considerSignal(signal);
+
+    this->signals.push_front(signal);
+  }
+
+  // consider all only-in-collision-range signal
+  for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
+      it != host->moteIDWithinCollisionRange.end(); it++)
+  {
+    // only increase incoming signal
+    mySignal *signal = new mySignal(mote->getId(), (*it));
+    considerSignal(signal);
+  }
+}
+
+/*
+ * unregister transmitting mote
+ */
+void World::releaseHost(RadioDriver* mote)
+{
+  // Search host by id
+  int senderID = mote->getId();
+  Host *host;
+
+  for (std::list<Host*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+  {
+    if ((*it)->moteID == senderID)
+      host = *it;
+  }
+
+  if (host == NULL)
+  {
+    if (DEBUG)
+      ev << "Unknown host" << endl;
+    return;
+  }
+
+  // remove all signal
+  for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
+    if ((*it)->radioSenderID == senderID)
+    {
+      // check success
+      Raw* raw = host->onAir->dup();
+      if ((*it)->isSuccess())
+        raw->setBitError(false); // no error
+      else
+        raw->setBitError(true);  // error
+      // send message
+      (check_and_cast<RadioDriver*>(simulation.getModule(senderID)))->sendDirect(raw,
+          simulation.getModule((*it)->radioRecverID)->gate("radioIn"));
+
+      // remove signal
+      signals.remove((*it--));
+    }
+  cancelAndDelete(host->onAir);
+
+  // decrease count of in-transmission-range signal
+  for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
+      it != host->moteIDWithinTransmissionRange.end(); it++)
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+
+  // decrease count of only-in-collision-range signal
+  for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
+      it != host->moteIDWithinCollisionRange.end(); it++)
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+}
+
+/*
+ * register on-air signal
+ */
+void World::considerSignal(mySignal* signal)
+{
+  // Receiver ID
+  int recverID = signal->radioRecverID;
+
+  // increase incoming signal
+  (check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal++;
+
+  // consider interfere signal at receiver
+  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal > 1)
+  {
+    // in  this signal
+    signal->setInterferred();
+
+    // in other signal
+    for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
+      if ((*it)->radioRecverID == recverID)
+        (*it)->setInterferred();
+  }
+}
+
+/*
+ * check if radio is free
+ */
+bool World::senseFreeChannel(RadioDriver* radio)
+{
+  return (radio->incomingSignal == 0);
+}
 
 /*
  * Calculate distance util
@@ -211,162 +366,6 @@ double World::calculateDistance(int x1, int y1, int x2, int y2)
   int x = (x1 - x2) * (x1 - x2);
   int y = (y1 - y2) * (y1 - y2);
   return sqrt(x + y);
-}
-
-void World::changeStatus(RadioDriver *mote)
-{
-  switch (mote->status)
-  {
-    case IDLE:
-      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, IDLE_COLOR);
-      break;
-
-    case LISTENING:
-      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
-      break;
-
-    case RECEIVING:
-      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVE_COLOR);
-      break;
-
-    case TRANSMITTING:
-      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
-      break;
-
-    default:
-      (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
-      break;
-  }
-
-}
-
-void World::registerTransmission(mySignal *transmission)
-{
-//  if (DEBUG)
-//    ev << "On air transmision: " << this->onAir.size() << endl;
-
-  RadioDriver* sender = NULL; //tranmission->getSender();
-  RadioDriver* recver = NULL; //tranmission->getRecver();
-
-  // check receiver turned on
-  switch (recver->status)
-  {
-    case TRANSMITTING:
-    case RECEIVING:
-    case IDLE:
-//      tranmission->corrupt();
-      break;
-    case LISTENING:
-      recver->status = RECEIVING;
-      changeStatus(recver);
-      break;
-  }
-
-//  this->onAir.push_back(tranmission);
-//
-//  if (this->onAir.size() == 1)
-//    return;
-
-//  check collision with activated tranmission
-//  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
-//      otherTranmission++)
-//  {
-//    RadioDriver *otherSender = (*otherTranmission)->getSender();
-//
-//    // check is same source
-//    if (otherSender == sender)
-//      ;
-//    // check interference
-//    else
-//    {
-//      RadioDriver *otherRecver = (*otherTranmission)->getRecver();
-//
-//      // at this transmission
-//      if (tranmission->isCorrupted())
-//        ;
-//      else if (calculateDistance((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"),
-//          (RadioDriver*) recver->getParentModule()->getModuleByPath(".radio"))
-//          < ((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
-//        tranmission->corrupt();
-//
-//      // at other transmission
-//      if ((*otherTranmission)->isCorrupted())
-//        ;
-//      else if (calculateDistance((RadioDriver*) sender->getParentModule()->getModuleByPath(".radio"),
-//          (RadioDriver*) otherRecver->getParentModule()->getModuleByPath(".radio"))
-//          < ((RadioDriver*) sender->getParentModule()->getModuleByPath(".radio"))->coRange)
-//        (*otherTranmission)->corrupt();
-//    }
-//  }
-
-  if (ANNOTATE)
-  {
-    oss.seekp(0);
-    oss << sender->trRange << endl;
-    (&sender->getParentModule()->getDisplayString())->setTagArg("r", 0, oss.str().c_str());
-  }
-}
-
-bool World::isFeasibleTransmission(mySignal* transmission)
-{
-  RadioDriver* sender = NULL; //transmission->getSender();
-  RadioDriver* recver = NULL; //transmission->getRecver();
-
-//  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
-//      otherTranmission++)
-//  {
-//    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver()
-//        && !(*otherTranmission)->isCorrupted())
-//      return true;
-//  }
-
-  return false;
-}
-
-void World::stopTransmission(mySignal* transmission)
-{
-//  RadioDriver* sender = transmission->getSender();
-//  RadioDriver* recver = transmission->getRecver();
-//
-//  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
-//      otherTranmission++)
-//  {
-//    if (sender == (*otherTranmission)->getSender() && recver == (*otherTranmission)->getRecver())
-//    {
-//      recver->status = LISTENING;
-//      this->onAir.remove(*otherTranmission);
-//      (*otherTranmission) = NULL;
-//
-//      (&sender->getParentModule()->getDisplayString())->setTagArg("r", 0, "0");
-//
-//      return;
-//    }
-//  }
-
-  if (DEBUG)
-    ev << "Missing transmission" << endl;
-}
-
-bool World::senseBusyTransmission(mySignal *transmission)
-{
-//  RadioDriver* sender = transmission->getSender();
-//
-//  for (std::list<Transmission*>::iterator otherTranmission = this->onAir.begin(); otherTranmission != this->onAir.end();
-//      otherTranmission++)
-//  {
-//    RadioDriver *otherSender = (*otherTranmission)->getSender();
-//
-//    if (calculateDistance((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"),
-//        (RadioDriver*) sender->getParentModule()->getModuleByPath(".radio"))
-//        < ((RadioDriver*) otherSender->getParentModule()->getModuleByPath(".radio"))->coRange)
-//
-//      return false;
-//  }
-
-  if (DEBUG)
-    ev << "Clear channel" << endl;
-
-  return true;
 }
 
 } /* namespace wsn_energy */

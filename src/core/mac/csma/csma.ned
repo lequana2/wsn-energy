@@ -24,6 +24,7 @@ simple csma like iMAC
 {
     parameters:
         @class("csma");
+        @display("i=block/layer");
 
     gates:
         input upperIn;

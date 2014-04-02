@@ -24,7 +24,8 @@ simple nullRDC like iRDC
 {
     parameters:
         @class("nullRDC");
-        
+        @display("i=block/network");
+
     gates:
         input upperIn;
         output upperOut;

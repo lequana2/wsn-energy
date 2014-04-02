@@ -24,8 +24,7 @@ simple Client like iApp
 {
     parameters:
         @class("Client");
-
-        volatile double sendInterval @unit(s) = default(exponential(1s));
+        @display("i=block/app2");
 
     gates:
         input lowerIn;

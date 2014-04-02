@@ -21,6 +21,8 @@
 /*
  * Specification for CC2420
  */
+#ifndef CC2420
+#define CC2420
 #define FREQUENCY          2400.0  // MHz
 #define TXPOWER_LEVEL_MAX    31.0  // level max
 #define TXPOWER_LEVEL_MIN     0.0  // level min
@@ -31,6 +33,7 @@
 #define IDPOWER_CURRENT       1.8  // mA
 #define SUPPLY_VOLTAGE        1.8  // V
 #define SLPOWER
+#endif
 
 namespace wsn_energy {
 

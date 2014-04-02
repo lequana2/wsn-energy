@@ -12,9 +12,11 @@ namespace wsn_energy {
 
 void RadioDriver::initialize()
 {
+  this->bufferTXFIFO = NULL;
   this->trRange = par("trRange");
   this->coRange = par("coRange");
-  this->bufferTXFIFO = NULL;
+  this->status = IDLE;
+  this->incomingSignal = 0;
 
   // Turn on
   listen();
@@ -23,7 +25,7 @@ void RadioDriver::initialize()
 void RadioDriver::handleMessage(cMessage* msg)
 {
   // stop working
-  if(this->status == POWER_DOWN)
+  if (this->status == POWER_DOWN)
     return;
 
   myModule::handleMessage(msg);
@@ -38,8 +40,6 @@ void RadioDriver::handleMessage(cMessage* msg)
 
 void RadioDriver::finish()
 {
-  this->neighbor.clear();
-  this->bufferTXFIFO = NULL;
 }
 
 void RadioDriver::processSelfMessage(cPacket* packet)
@@ -71,20 +71,20 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       }
 
       // perform CCA
-      else if (true)
-      {
-        /* Feedback to RDC */
-        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-        frame->setKind(LAYER_RDC);
-        frame->setNote(LAYER_RADIO_CCA_NOT_VALID);
+//      else if (false)
+//      {
+//        /* Feedback to RDC */
+//        FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+//        frame->setKind(LAYER_RDC);
+//        frame->setNote(LAYER_RADIO_CCA_NOT_VALID);
+//
+//        send(frame, gate("upperOut"));
+//
+//        delete raw;
+//      }
 
-        send(frame, gate("upperOut"));
-
-        delete raw;
-      }
-
-      // check radio duty
-      else if (this->status == RECEIVING || this->status == TRANSMITTING)
+// check radio duty
+      else if (this->status == TRANSMITTING)
       {
         /* Feedback to RDC*/
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
@@ -155,7 +155,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
     case LAYER_RADIO_SWITCH_SLEEP:
       // check radio duty
-      if (this->status == TRANSMITTING || this->status == RECEIVING)
+      if (this->status == TRANSMITTING)
       {
         /* Feedback to RDC*/
         FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
@@ -181,15 +181,15 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       transmit_off();
 
       /* Feedback */
-      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-      frame->setKind(LAYER_RADIO);
-      frame->setNote(LAYER_RADIO_SEND_OK);
-
-      send(frame, gate("upperOut"));
-
-      listen();
-
-      delete raw;
+//      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+//      frame->setKind(LAYER_RADIO);
+//      frame->setNote(LAYER_RADIO_SEND_OK);
+//
+//      send(frame, gate("upperOut"));
+//
+//      listen();
+//
+//      delete raw;
     }
       break; /* end transmitting*/
 
@@ -233,7 +233,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
     case LAYER_RDC_SEND:
       switch (this->status)
       {
-        case RECEIVING:
         case TRANSMITTING: /* Feedback */
         {
           frame->setKind(LAYER_RADIO);
@@ -278,24 +277,18 @@ void RadioDriver::transmit_on(Raw *raw)
 
   bufferTXFIFO = raw;
 
-  // register transmission to world
-  for (unsigned int i = 0; i < neighbor.size(); i++)
-  {
-    RadioDriver *recver = (RadioDriver*) simulation.getModule(neighbor.at(i));
-//    WSN ((World*) simulation.getModuleByPath("world"))->registerTransmission(new Transmission(this, recver));
-  }
+  ((World*) simulation.getModuleByPath("world"))->registerHost(this, bufferTXFIFO);
 
   double finishTime = bufferTXFIFO->getByteLength() * 8 / DATA_RATE;
   bufferTXFIFO->setNote(LAYER_RADIO_END_TRANSMIT);
-
   scheduleAt(simTime() + finishTime, bufferTXFIFO);
 
-  this->status = TRANSMITTING;
-  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
-      getTxPower());
+//  this->status = TRANSMITTING;
+//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
+//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
+//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
+//      getTxPower());
 }
 
 /*
@@ -306,46 +299,13 @@ void RadioDriver::transmit_off()
   if (DEBUG)
     ev << "End transmitting" << endl;
 
-  //  Color here
-  bufferTXFIFO->setRadioSendId(this->getParentModule()->getId());
+  ((World*) simulation.getModuleByPath("world"))->releaseHost(this);
 
-  for (unsigned int i = 0; i < neighbor.size(); i++)
-  {
-    RadioDriver* recver = (RadioDriver*) simulation.getModule(neighbor.at(i));
-
-// WSN   Transmission *completeTranmission = new Transmission(this, recver);
-
-    // check feasible
-    if (((World*) simulation.getModuleByPath("world"))->isFeasibleTransmission(NULL))
-    {
-      // EV << "Received" << endl;
-      bufferTXFIFO->setBitError(true);
-      bufferTXFIFO->setNote(LAYER_RADIO_RECV_OK);
-    }
-    else
-    {
-      // EV << "Corrupted" << endl;
-      if (DEBUG)
-        recver->getParentModule()->bubble("Corrupted");
-      bufferTXFIFO->setBitError(false);
-      bufferTXFIFO->setNote(LAYER_RADIO_RECV_CORRUPT);
-      // WSN hack !!!
-      // broadcastMessage->setNote(LAYER_RADIO_RECV_OK);
-    }
-
-    bufferTXFIFO->setRadioRecvId(recver->getParentModule()->getId());
-    cGate* gate = simulation.getModule(neighbor.at(i))->gate("radioIn");
-    sendDirect(bufferTXFIFO->dup(), gate);
-
-    // Turn receiving mote off
-    ((World*) simulation.getModuleByPath("world"))->stopTransmission(NULL);
-  }
-
-  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
-      getIdPower());
+//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
+//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+//  (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
+//      getIdPower());
 }
 
 /*
@@ -357,7 +317,7 @@ void RadioDriver::listen()
     ev << "Recv on" << endl;
   this->status = LISTENING;
 
-  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
+//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
   (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
   (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_LISTEN,
@@ -402,7 +362,7 @@ void RadioDriver::sleep()
     ev << "Recv off" << endl;
   this->status = IDLE;
 
-  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
+//  ((World*) simulation.getModuleByPath("world"))->changeStatus(this);
   (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
   (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
   (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
@@ -414,6 +374,32 @@ void RadioDriver::sleep()
  */
 void RadioDriver::switchOscilatorMode(int type)
 {
+//  void World::changeStatus(RadioDriver *mote)
+//  {
+//    switch (mote->status)
+//    {
+//      case IDLE:
+//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, IDLE_COLOR);
+//        break;
+//
+//      case LISTENING:
+//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
+//        break;
+//
+//      case RECEIVING:
+//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVE_COLOR);
+//        break;
+//
+//      case TRANSMITTING:
+//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
+//        break;
+//
+//      default:
+//        (&mote->getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
+//        break;
+//    }
+//
+//  }
 }
 
 }  // namespace wsn_energy

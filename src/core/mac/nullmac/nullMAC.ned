@@ -23,7 +23,8 @@ import wsn_energy.core.mac.iMAC;
 simple nullMAC like iMAC
 {
     parameters:
-        @class("nullMAC");
+        @class("nullMAC");   
+        @display("i=block/layer");
         
     gates:
         input upperIn;

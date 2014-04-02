@@ -44,7 +44,6 @@
 #define IDLE            1 // do nothing
 #define TRANSMITTING    2 // transmitting something
 #define LISTENING       3 // listening to nothing
-#define RECEIVING       4 // listening to something
 
 namespace wsn_energy {
 
@@ -86,7 +85,7 @@ class RadioDriver : public myModule
     int trRange; // simulated transmission range according to TXPOWER
     int coRange; // simulated collission range according to RXPOWER
 
-    std::vector<int> neighbor; // WSN simulated neighbor list, for world util. Is this necessary ???
+    int incomingSignal; // number of incoming signal
 };
 
 } /* namespace wsn_energy */

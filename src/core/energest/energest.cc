@@ -1,10 +1,9 @@
 /*
- * battery.cpp
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
  *
- *  Created on: Mar 5, 2014
- *      Author: quan
- *  
- *  Functioning:
+ *  functioning: refer to energest.h
  */
 
 #include <energest.h>
@@ -50,9 +49,11 @@ void Energest::energestOff(int type)
   {
     double consumeTime = simTime().dbl() - this->capsuleStartTime[type];
 
+    if (DEBUG)
+      ev << "Diff " << type << " :" << consumeTime << endl;
+
     // increase total time
     this->capsuleTotalTime[type] += consumeTime;
-    ev << "Diff " << type << " :" << this->capsuleTotalTime[type] << endl;
 
     // turn off capsule
     this->capsuleIsActivated[type] = false;

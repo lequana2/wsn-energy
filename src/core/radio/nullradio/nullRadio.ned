@@ -24,6 +24,7 @@ simple nullRadio like iRadio
 {
     parameters:
         @class("nullRadio");
+        @display("i=block/mac");
 
         int trRange @unit(m);
         int coRange @unit(m);

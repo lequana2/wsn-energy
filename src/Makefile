@@ -186,15 +186,16 @@ depend:
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/client/client.h
 $O/apps/server/server.o: apps/server/server.cc \
-	apps/server/server.h
+	apps/server/server.h \
+	packet/packet_len.h \
+	packet/packet_m.h \
+	util/statistic/statistic.h
 $O/core/myModule.o: core/myModule.cc \
 	core/myModule.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/energest/energest.o: core/energest/energest.cc \
-	core/energest/energest.h \
-	packet/packet_len.h \
-	packet/packet_m.h
+	core/energest/energest.h
 $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
 	packet/packet_len.h \
@@ -279,8 +280,6 @@ $O/util/signal/mySignal.o: util/signal/mySignal.cc \
 	util/signal/mySignal.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/energest/energest.h \
-	packet/packet_len.h \
-	packet/packet_m.h \
 	util/statistic/statistic.h
 $O/util/world/world.o: util/world/world.cc \
 	core/myModule.h \

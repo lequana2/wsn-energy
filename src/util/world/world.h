@@ -1,17 +1,10 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
+ *
+ *  functioning: Managing position, signal
+ */
 
 #ifndef ENVIROMENT_H_
 #define ENVIROMENT_H_
@@ -19,19 +12,38 @@
 #include <omnetpp.h>
 #include "mySignal.h"
 #include "radio.h"
+#include "packet_m.h"
+
+#ifndef CONNECTION_STATUS
+#define CONNECTION_STATUS
+#define NO_CONNECTION 0 // out of range
+#define WITHIN_TRANS  1 // within transmission range
+#define WITHIN_COLLI  2 // within collision range
+#endif
 
 namespace wsn_energy {
+
+class Host
+{
+  public:
+    int moteID;
+    Raw* onAir;
+    std::list<int> moteIDWithinTransmissionRange;
+    std::list<int> moteIDWithinCollisionRange;
+};
 
 class World : public cSimpleModule
 {
   private:
     int numberClient;
 
-    void arrangeNodes(); // Arrange nodes in positions
+    void arrangeMotes(); // Arrange nodes in positions
     void connectNodes(); // Connect adjacent nodes
 
-//    void checkConnection(RadioDriver*); // WSN to be removed: ??? do
-//    int deployConnection(RadioDriver*, RadioDriver*); // WSN to be removed:
+    void deployConnection(RadioDriver*);                // deploy all valid connection for a given radio
+    int validateConnection(RadioDriver*, RadioDriver*); // check validation between 2 radio
+
+    void considerSignal(mySignal*);     // register on-air signal
 
   protected:
     void initialize();
@@ -39,18 +51,16 @@ class World : public cSimpleModule
     void finish();
 
   public:
-    std::ostringstream oss;
-    cArray host;
-    cArray signal;
+    std::ostringstream oss;     // string buffer
+    std::list<Host*> hosts;   // array of host list (Host)
+    std::list<mySignal*> signals; // array of on-air signal (mySignal)
 
-    void changeStatus(RadioDriver*); // WSN to be removed: change color of sensor in term of status
+    void registerHost(RadioDriver*, Raw*);    // register transmitting mote
+    void releaseHost(RadioDriver*);           // unregister transmitting mote
 
-    void registerTransmission(mySignal*);    // WSN to be removed: register a transmission in world
-    bool isFeasibleTransmission(mySignal*);  // WSN to be removed: check whether a transmission feasible or not
-    void stopTransmission(mySignal*);         // WSN to be removed: unregister a transmission from world
-    bool senseBusyTransmission(mySignal*);   // WSN to be removed: perform CCA
+    bool senseFreeChannel(RadioDriver*);      // check if radio is free
 
-    double calculateDistance(RadioDriver*, RadioDriver*); // calculate distance between 2 sensors
+    double calculateDistance(RadioDriver*, RadioDriver*);  // calculate distance between 2 motes
     double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate
 };
 

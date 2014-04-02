@@ -47,7 +47,7 @@ void csma::deferPacket(FrameMAC* frameMAC)
 
     backoff_transmission = 1 << backoff_exponent;
 
-    backoff = (rand() % backoff_transmission) * BACKOFF_PERIOD;
+    backoff = (intrand(backoff_transmission)) * BACKOFF_PERIOD;
 
     ev << "Random " << backoff << endl;
 
