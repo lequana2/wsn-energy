@@ -29,6 +29,7 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
+  isWaiting = false;
 }
 
 void IPv6::finish()
@@ -42,10 +43,20 @@ void IPv6::processSelfMessage(cPacket* packet)
   /* Control message */
   switch (check_and_cast<IpPacket*>(packet)->getNote())
   {
-    case LAYER_NET_CHECK_BUFFER:
-      ev << "Queue size " << this->buffer.size() << endl;
-      if (this->buffer.size() == 1) // In-turn
-        send(this->buffer.front(), gate("lowerOut"));
+    case LAYER_NET_CHECK_BUFFER: {
+      if (DEBUG)
+        ev << "Queue size " << this->buffer.size() << endl;
+      if (this->buffer.size() == 0)
+      {
+        isWaiting = true;
+      }
+      else if (!isWaiting) // In-turn
+      {
+        sendMessageToLower(this->buffer.front());
+        isWaiting = true;
+      }
+      delete packet;
+    }
       break;
   }
   /* Control message */
@@ -53,8 +64,8 @@ void IPv6::processSelfMessage(cPacket* packet)
 
 void IPv6::processUpperLayerMessage(cPacket* packet)
 {
-  if(DEBUG)
-    ev << "Shit" << endl;
+  if (DEBUG)
+    ev << "Command from app" << endl;
 
   switch (check_and_cast<IpPacket*>(packet)->getNote())
   {
@@ -111,20 +122,34 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
   switch (ipPacket->getNote())
   {
-    case LAYER_NET_SEND_OK: /* ending transmitting phase */
+    case LAYER_MAC_SEND_OK: /* ending transmitting phase, success */
+    {
       if (DEBUG)
         ev << "Success NET trans" << endl;
+
+//      cancelAndDelete(this->buffer.front());
       this->buffer.pop_front();
-      ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
-      scheduleAt(simTime(), ipPacket);
+      isWaiting = false;
+
+      IpPacket *check = new IpPacket;
+      check->setNote(LAYER_NET_CHECK_BUFFER);
+      scheduleAt(simTime(), check);
+    }
       break; /* ending transmitting phase */
 
-    case LAYER_NET_SEND_NOT_OK: /* ending transmitting phase */
+    case LAYER_MAC_SEND_ERR: /* WSN ending transmitting phase, failure */
+    {
       if (DEBUG)
         ev << "Failure NET trans" << endl;
+
+//      cancelAndDelete(this->buffer.front());
       this->buffer.pop_front();
-      ipPacket->setNote(LAYER_NET_CHECK_BUFFER);
-      scheduleAt(simTime(), ipPacket);
+      isWaiting = false;
+
+      IpPacket *check = new IpPacket;
+      check->setNote(LAYER_NET_CHECK_BUFFER);
+      scheduleAt(simTime(), check);
+    }
       break; /* ending transmitting phase */
 
     case LAYER_NET_RECV_OK: {
@@ -159,7 +184,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           // Coming to destination
           if (this->getId() == ipPacket->getSinkIpAddress())
           {
-            ev << "received" << endl;
+            ev << "Base station" << endl;
             send(check_and_cast<Data*>(ipPacket->decapsulate()), gate("upperOut"));
 
             delete ipPacket;
@@ -200,7 +225,9 @@ void IPv6::multicast(IpPacket *ipPacket)
 
   this->buffer.push_back(ipPacket);
 
-  scheduleAt(simTime(), ipPacket);
+  IpPacket *check = new IpPacket;
+  check->setNote(LAYER_NET_CHECK_BUFFER);
+  scheduleAt(simTime(), check);
 }
 
 void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
@@ -211,7 +238,9 @@ void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
 
   this->buffer.push_back(ipPacket);
 
-  scheduleAt(simTime(), ipPacket);
+  IpPacket *check = new IpPacket;
+  check->setNote(LAYER_NET_CHECK_BUFFER);
+  scheduleAt(simTime(), check);
 }
 
 } /* namespace wsn_energy */

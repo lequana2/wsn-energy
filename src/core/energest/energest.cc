@@ -7,6 +7,7 @@
  */
 
 #include <energest.h>
+#include <radio.h>
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -60,6 +61,10 @@ void Energest::energestOff(int type)
 
     // consume energy, in term off hour not second
     this->energestRemaining -= consumeTime * power[type] / 3600.0;
+
+    // residual energy
+    if(this->energestRemaining < 0)
+      ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
   }
 }
 

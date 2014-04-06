@@ -26,6 +26,8 @@ void nullMAC::deferPacket()
     buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 
     /* request to perform CCA */
+    FrameMAC *requestCCA = new FrameMAC;
+    requestCCA->setNote(CHANNEL_CCA_REQUEST);
     scheduleAt(simTime(), requestCCA);
   }
 }

@@ -188,7 +188,8 @@ $O/apps/client/client.o: apps/client/client.cc \
 	core/myModule.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
-	packet/packet_m.h
+	packet/packet_m.h \
+	util/statistic/statistic.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
 	core/myModule.h \
@@ -200,7 +201,11 @@ $O/core/myModule.o: core/myModule.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/energest/energest.o: core/energest/energest.cc \
-	core/energest/energest.h
+	core/energest/energest.h \
+	core/myModule.h \
+	core/radio/radio.h \
+	packet/packet_len.h \
+	packet/packet_m.h
 $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
 	core/myModule.h \

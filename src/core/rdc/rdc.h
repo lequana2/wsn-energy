@@ -19,6 +19,9 @@ class RDCdriver : public myModule
   protected:
     FrameRDC *buffer;
 
+    void initialize();
+    void finish();
+
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
     virtual void processLowerLayerMessage(cPacket*);

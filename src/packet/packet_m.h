@@ -62,8 +62,10 @@ namespace wsn_energy {
  * 
  * 	
  * 	LAYER_RDC_SEND				= 30; 
+ * 	
+ * 	
  * 	LAYER_RDC_SEND_OK			= 31; 
- * 	LAYER_RDC_SEND_NOT_OK		= 32; 
+ * 	LAYER_RDC_SEND_ERR   		= 32; 
  * 
  * 	
  * 	LAYER_RDC_LISTEN_ON			= 33; 
@@ -75,10 +77,10 @@ namespace wsn_energy {
  * 
  * 	
  * 	LAYER_MAC_DEFER		= 50; 
- * 	LAYER_MAC_ERR		= 51; 
  * 	
  * 	
- * 	LAYER_MAC_SEND_OK	= 52; 
+ * 	LAYER_MAC_SEND_OK	= 51; 
+ * 	LAYER_MAC_SEND_ERR	= 52; 
  * 	LAYER_MAC_NO_ACK  	= 53; 
  * 
  * 	
@@ -131,14 +133,14 @@ enum COMMAND_AND_RESULT {
     LAYER_RADIO_RECV_NOT_OK = 23,
     LAYER_RDC_SEND = 30,
     LAYER_RDC_SEND_OK = 31,
-    LAYER_RDC_SEND_NOT_OK = 32,
+    LAYER_RDC_SEND_ERR = 32,
     LAYER_RDC_LISTEN_ON = 33,
     LAYER_RDC_LISTEN_OFF = 34,
     LAYER_RDC_RECV_OK = 35,
     LAYER_RDC_RECV_ACK = 36,
     LAYER_MAC_DEFER = 50,
-    LAYER_MAC_ERR = 51,
-    LAYER_MAC_SEND_OK = 52,
+    LAYER_MAC_SEND_OK = 51,
+    LAYER_MAC_SEND_ERR = 52,
     LAYER_MAC_NO_ACK = 53,
     LAYER_MAC_RECV_OK = 54,
     LAYER_MAC_RECV_NOT_OK = 55,

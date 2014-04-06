@@ -37,6 +37,7 @@ network WSN
         int width   @unit(m);
         int height  @unit(m);
 
+		int scheme;
         int isPolling;
         double polling;
         

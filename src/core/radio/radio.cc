@@ -75,7 +75,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
     case LAYER_RADIO_SWITCH_TRANSMIT:
       /* show packet length (bytes) */
-      bufferTXFIFO->addByteLength(PHY_HEADER);
       if (DEBUG)
         ev << "Radio length " << bufferTXFIFO->getByteLength() << endl;
 
@@ -196,14 +195,12 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
         case LISTENING: /* Ignite transmitting */
         case IDLE: /* Ignite transmitting */
         {
-          // clean buffer
-          delete (bufferTXFIFO->decapsulate());
-
+          delete bufferTXFIFO->decapsulate();
           bufferTXFIFO->encapsulate(packet);
-          bufferTXFIFO->setNote(LAYER_RADIO_SWITCH_TRANSMIT);
-          bufferTXFIFO->addByteLength(PHY_HEADER);
+          bufferTXFIFO->setByteLength(PHY_HEADER + packet->getByteLength());
 
-          scheduleAt(simTime(), bufferTXFIFO);
+          command->setNote(LAYER_RADIO_SWITCH_TRANSMIT);
+          scheduleAt(simTime(), command);
         }
           break; /* Ignite transmitting */
       }
@@ -250,8 +247,8 @@ void RadioDriver::transmit_begin()
 
   // calculate finish time
   double finishTime = bufferTXFIFO->getByteLength() * 8 / DATA_RATE;
-  bufferTXFIFO->setNote(LAYER_RADIO_END_TRANSMIT);
-  scheduleAt(simTime() + finishTime, bufferTXFIFO);
+  command->setNote(LAYER_RADIO_END_TRANSMIT);
+  scheduleAt(simTime() + finishTime, command);
 }
 
 /*
@@ -263,8 +260,6 @@ void RadioDriver::transmit_end()
     ev << "End transmitting" << endl;
 
   ((World*) simulation.getModuleByPath("world"))->releaseHost(this);
-
-  switchOscilatorMode(IDLE);
 }
 
 /*
@@ -286,21 +281,23 @@ void RadioDriver::received(Raw* raw)
   if (DEBUG)
     ev << "Received !!!" << endl;
 
-  switch (raw->getNote())
+  /* receie a complete message */
+  if (!raw->getError())
   {
-    case LAYER_RADIO_RECV_OK: {
-      /* Decapsulate */
-      FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-      frame->setNote(LAYER_RADIO_RECV_OK);
-      delete raw;
+    FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+    frame->setNote(LAYER_RADIO_RECV_OK);
+    sendMessageToUpper(frame);
 
-      sendMessageToUpper(frame);
-    }
-      break; /* receie a OK message */
+    delete raw;
+  }
+  /* receie a corrupt message */
+  else
+  {
+    FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
+    frame->setNote(LAYER_RADIO_RECV_NOT_OK);
+    sendMessageToUpper(frame);
 
-    case LAYER_RADIO_RECV_NOT_OK:
-      /* Dismiss message */
-      break; /* receie a corrupt message */
+    delete raw;
   }
 }
 
@@ -343,8 +340,8 @@ void RadioDriver::switchOscilatorMode(int type)
 
     case TRANSMITTING:
       this->status = TRANSMITTING;
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
       (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
+      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
       (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
           getTxPower());
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
@@ -356,5 +353,4 @@ void RadioDriver::switchOscilatorMode(int type)
       break;
   }
 }
-
 }  // namespace wsn_energy

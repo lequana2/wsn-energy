@@ -153,6 +153,9 @@ void World::deployConnection(RadioDriver* mote)
     case WITHIN_COLLI:
       host->moteIDWithinCollisionRange.push_front(bs->getId());
       break;
+
+    case NO_CONNECTION:
+      break;
   }
 
   // Check with other mote
@@ -174,6 +177,9 @@ void World::deployConnection(RadioDriver* mote)
       case WITHIN_COLLI:
         host->moteIDWithinCollisionRange.push_front(otherMote->getId());
         break;
+
+      case NO_CONNECTION:
+        break;
     }
   }
 
@@ -187,7 +193,7 @@ int World::validateConnection(RadioDriver* host, RadioDriver* client)
 {
   int distance = calculateDistance(host, client);
 
-  if (distance > host->coRange)
+  if (distance > host->coRange || host->getId() == client->getId())
     return NO_CONNECTION;
 
   if (distance > host->trRange)
@@ -239,7 +245,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
     return;
   }
 
-  host->onAir = onAir;
+  host->onAir = onAir->dup();
 
   // insert all in-transmission-range signal
   for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
@@ -300,7 +306,7 @@ void World::releaseHost(RadioDriver* mote)
       // remove signal
       signals.remove((*it--));
     }
-  cancelAndDelete(host->onAir);
+  delete host->onAir;
 
   // decrease count of in-transmission-range signal
   for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();

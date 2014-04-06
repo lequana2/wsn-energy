@@ -24,7 +24,6 @@ class MACdriver : public myModule
 {
   protected:
     FrameMAC *buffer;
-    FrameMAC *requestCCA;
 
     void initialize();
     void finish();

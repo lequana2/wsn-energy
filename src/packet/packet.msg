@@ -58,8 +58,10 @@ enum COMMAND_AND_RESULT{
 
 	// rdc command (to radio)
 	LAYER_RDC_SEND				= 30; // sending a message
+	
+	// feedback from radio
 	LAYER_RDC_SEND_OK			= 31; // already sent a message
-	LAYER_RDC_SEND_NOT_OK		= 32; // failed to send a message
+	LAYER_RDC_SEND_ERR   		= 32; // failed to send a message
 
 	// rdc transmitting result (to radio)
 	LAYER_RDC_LISTEN_ON			= 33; // turn receiver on
@@ -71,10 +73,10 @@ enum COMMAND_AND_RESULT{
 
 	// mac control (self)
 	LAYER_MAC_DEFER		= 50; // radio is busy
-	LAYER_MAC_ERR		= 51; // internal error (???)
 	
 	// mac transmitting result (to net)
-	LAYER_MAC_SEND_OK	= 52; // transmitting + receiving ACK
+	LAYER_MAC_SEND_OK	= 51; // transmitting + receiving ACK
+	LAYER_MAC_SEND_ERR	= 52; // internal error
 	LAYER_MAC_NO_ACK  	= 53; // transmitting + no ACK
 
 	// mac receiving result (to net)

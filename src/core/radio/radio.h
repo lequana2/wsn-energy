@@ -52,9 +52,6 @@ class RadioDriver : public myModule
     Raw *command;      // self-command
     Raw *bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
 
-    // Switch oscilator mode
-    void switchOscilatorMode(int mode);
-
     // Self functioning
     void transmit_begin();
     void transmit_end();
@@ -86,6 +83,8 @@ class RadioDriver : public myModule
     int coRange; // simulated collission range according to RXPOWER
 
     int incomingSignal; // number of incoming signal
+
+    void switchOscilatorMode(int mode);     // Switch oscilator mode, public for battery
 };
 
 } /* namespace wsn_energy */

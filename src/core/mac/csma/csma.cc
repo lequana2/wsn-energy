@@ -23,7 +23,7 @@ void csma::deferPacket()
   // dismiss + announce failure duty
   if (buffer->getNumberTransmission() > MAXIMUM_BACKOFF_TRANSMISSION)
   {
-    IpPacket* ipPacket = check_and_cast<IpPacket*>(buffer->decapsulate());
+    IpPacket* ipPacket = new IpPacket;
     ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
     sendMessageToUpper(ipPacket);
   }
@@ -39,13 +39,15 @@ void csma::deferPacket()
 
     backoff_transmission = 1 << backoff_exponent;
 
-    backoff = (intrand(backoff_transmission)) * BACKOFF_PERIOD;
+    backoff = (rand()%(backoff_transmission)) * BACKOFF_PERIOD;
 
     ev << "Random " << backoff << endl;
 
     buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 
     /* request to perform CCA */
+    FrameMAC *requestCCA = new FrameMAC;
+    requestCCA->setNote(CHANNEL_CCA_REQUEST);
     scheduleAt(simTime() + backoff, requestCCA);
   }
 }
