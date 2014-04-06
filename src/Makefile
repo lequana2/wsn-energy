@@ -184,9 +184,14 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
-	apps/client/client.h
+	apps/client/client.h \
+	core/myModule.h \
+	core/radio/radio.h \
+	packet/packet_len.h \
+	packet/packet_m.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
+	core/myModule.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h

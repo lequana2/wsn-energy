@@ -23,17 +23,24 @@ namespace wsn_energy {
 class MACdriver : public myModule
 {
   protected:
+    FrameMAC *buffer;
+    FrameMAC *requestCCA;
+
+    void initialize();
+    void finish();
+
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
     virtual void processLowerLayerMessage(cPacket*);
 
-    /* accept output from upperlayer*/
-    virtual void sendPacket(FrameMAC*) = 0;
     /* backoff transmitting*/
-    virtual void deferPacket(FrameMAC*) = 0;
+    virtual void deferPacket() = 0;
+
+    /* accept output from upperlayer*/
+    virtual void sendPacket();
 
     /* accept input from lowerlayer*/
-    virtual void receivePacket(FrameMAC*) = 0;
+    virtual void receivePacket(FrameMAC*);
 };
 
 } /* namespace wsn_energy */

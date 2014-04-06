@@ -15,26 +15,51 @@
 
 namespace wsn_energy {
 
+void MACdriver::initialize()
+{
+  requestCCA = new FrameMAC;
+  requestCCA->setNote(CHANNEL_CCA_REQUEST);
+
+  buffer = new FrameMAC;
+  buffer->setNote(LAYER_MAC_SEND);
+}
+
+void MACdriver::finish()
+{
+//  cancelAndDelete(buffer);
+//  cancelAndDelete(requestCCA);
+}
+
 void MACdriver::processSelfMessage(cPacket* packet)
 {
+  switch (check_and_cast<FrameMAC*>(packet)->getNote())
+  {
+    case CHANNEL_CCA_REQUEST: /* self request CCA */
+      sendMessageToLower(packet);
+      break; /* request CCA */
+  }
 }
 
 void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
-  FrameMAC *frame = new FrameMAC;
+  // WSN free old buffer (delete after using)
+  delete (buffer->decapsulate());
 
   // Omnet attribute
-  frame->encapsulate((IpPacket*) packet);
-  frame->addByteLength(MAC_HEADER_FOOTER_LEN);
+  buffer->encapsulate((IpPacket*) packet);
+  buffer->addByteLength(MAC_HEADER_FOOTER_LEN);
+
+  // meta data
+  buffer->setNumberTransmission(0);
 
   // MAC address
-  frame->setSenderMacAddress(this->getId());
-  frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+  buffer->setSenderMacAddress(this->getId());
+  buffer->setRecverMacAddress(getModuleByPath("server.mac")->getId());
 
-  sendPacket(frame);
+  deferPacket();
 
   if (DEBUG)
-    ev << "Frame length: " << frame->getByteLength() << endl;
+    ev << "Frame length: " << buffer->getByteLength() << endl;
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -43,6 +68,14 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
   switch (frameMAC->getNote())
   {
+    case CHANNEL_CLEAR: /* channel is clear */
+      sendPacket();
+      break; /* channel is clear */
+
+    case CHANNEL_BUSY: /* channel is busy */
+      deferPacket();
+      break; /* channel is busy */
+
     case LAYER_RDC_SEND_OK: /* callback after sending */
     {
       IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
@@ -54,28 +87,31 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
     }
       break; /* callback after sending */
 
-    case LAYER_RDC_SEND_NOT_OK: /* callback if not able to send*/
-    {
-      deferPacket(frameMAC);
-    }
-      break; /* callback if not able to send*/
-
-    case LAYER_RDC_RECV_ACK:
-      if (DEBUG)
-        ev << "ACK received" << endl;
-      break; /* recv ACK */
-
-    case LAYER_RDC_RECV_OK: /* okay message */
-      if (DEBUG)
-        ev << "RECV (MAC)" << endl;
-
-      IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
-      ipPacket->setNote(LAYER_NET_RECV_OK);
-
-      send(ipPacket, gate("upperOut"));
-
-      delete frameMAC;
-      break; /* okay message */
+    case LAYER_RDC_RECV_OK: /* callback upon reception of a frame */
+      receivePacket(frameMAC);
+      break; /* callback upon reception of a frame */
   }
 }
+
+void MACdriver::sendPacket()
+{
+  if (DEBUG)
+    ev << "Start transmitting " << endl;
+
+  sendMessageToLower(buffer);
+}
+
+void MACdriver::receivePacket(FrameMAC* frameMac)
+{
+  if (DEBUG)
+    ev << "RECV (MAC)" << endl;
+
+  IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+  ipPacket->setNote(LAYER_NET_RECV_OK);
+
+  sendMessageToUpper(ipPacket);
+
+  delete frameMac;
+}
+
 } /* namespace wsn_energy */

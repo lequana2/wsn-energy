@@ -7,6 +7,7 @@
  */
 
 #include "client.h"
+#include "radio.h"
 
 namespace wsn_energy {
 
@@ -41,6 +42,10 @@ void Client::initialize()
 
 void Client::handleMessage(cMessage *msg)
 {
+  // stop working
+  if (check_and_cast<RadioDriver*>(this->getParentModule()->getModuleByPath(".radio")) == POWER_DOWN)
+    return;
+
 //  if (msg->getKind() == APP_SENSING_FLAG)
 //  {
 //    Data *data = new Data;

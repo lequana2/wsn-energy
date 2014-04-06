@@ -17,101 +17,98 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
 void RDCdriver::processUpperLayerMessage(cPacket* packet)
 {
-  /* message from MAC layer */
+  // Only encapsulate and forward
   FrameRDC* frame = new FrameRDC;
 
   frame->encapsulate(check_and_cast<FrameMAC*>(packet));
-  frame->setNote(LAYER_RDC_SEND);
 
-  send(frame, gate("lowerOut"));
-  /* message from MAC layer */
+  switch (check_and_cast<FrameMAC*>(packet)->getNote())
+  {
+    case LAYER_MAC_SEND:
+      // WSN need duty cycling trigger here
+      frame->setNote(LAYER_RDC_SEND);
+      sendMessageToLower(frame);
+      break;
+
+    case CHANNEL_CCA_REQUEST:
+      frame->setNote(CHANNEL_CCA_REQUEST);
+      sendMessageToLower(frame);
+      break;
+  }
 }
 
 void RDCdriver::processLowerLayerMessage(cPacket* packet)
 {
-  /* message from radio layer */
+  switch (check_and_cast<FrameRDC*>(packet)->getNote())
   {
-    FrameRDC* frameRdc = check_and_cast<FrameRDC*>(packet);
-
-    switch (frameRdc->getNote())
+    case CHANNEL_CLEAR: /* Channel is clear */
     {
-      case LAYER_RADIO_SEND_OK: /* callback after sending */
-      {
-        FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
-        frameMac->setNote(LAYER_RDC_SEND_OK);
+      FrameMAC* frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+      frameMac->setNote(CHANNEL_CLEAR);
+      sendMessageToUpper(frameMac);
 
-        send(frameMac, gate("upperOut"));
-
-        delete frameRdc;
-      }
-        break; /* callback after sending */
-
-      case LAYER_RADIO_PACKET_OVERSIZE: /* Packet is oversized */
-        // WSN Internal error, no need to resend
-      {
-        FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
-        frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
-
-        send(frameMac, gate("upperOut"));
-
-        delete frameRdc;
-      }
-        break; /* Packet is oversized */
-
-      case LAYER_RADIO_CCA_NOT_VALID: /* Packet CCA is not valid */
-      {
-        FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
-        frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
-
-        send(frameMac, gate("upperOut"));
-
-        delete frameRdc;
-      }
-        break; /* Packet CCA is not valid */
-
-      case LAYER_RADIO_NOT_FREE: /* Radio is busy */
-      {
-        FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
-        frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
-
-        send(frameMac, gate("upperOut"));
-
-        delete frameRdc;
-      }
-        break; /* Radio is busy */
-
-      case LAYER_RADIO_RECV_OK: /* Radio received a packet */
-      {
-        FrameMAC* frameMac = check_and_cast<FrameMAC*>(frameRdc->decapsulate());
-        frameMac->setNote(LAYER_RDC_RECV_OK);
-
-        send(frameMac, gate("upperOut"));
-
-        delete frameRdc;
-      }
-        break; /* Radio received a packet */
-
-      case LAYER_RADIO_RECV_CORRUPT: /* Radio received an incomplete message */
-        break; /* Radio received an incomplete message */
+      delete packet;
     }
+      break; /* Channel is busy */
+
+    case CHANNEL_BUSY: /* Channel is clear */
+    {
+      FrameMAC* frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+      frameMac->setNote(CHANNEL_BUSY);
+      sendMessageToUpper(frameMac);
+
+      delete packet;
+    }
+      break; /* Channel is busy */
+
+    case LAYER_RADIO_PACKET_OVERSIZE: /* Packet is oversized */
+    {
+      // WSN Internal error, no need to resend
+      FrameMAC* frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+      frameMac->setNote(LAYER_RDC_SEND_NOT_OK);
+      sendMessageToUpper(frameMac);
+
+      delete packet;
+    }
+      break; /* Packet is oversized */
+
+    case LAYER_RADIO_SEND_OK: /* callback after sending */
+    {
+      FrameMAC* frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+      frameMac->setNote(LAYER_RDC_SEND_OK);
+      sendMessageToUpper(frameMac);
+
+      delete packet;
+    }
+      break; /* callback after sending */
+
+    case LAYER_RADIO_RECV_OK: /* Radio received a packet */
+    {
+      FrameMAC* frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+      frameMac->setNote(LAYER_RDC_RECV_OK);
+      sendMessageToUpper(frameMac);
+
+      delete packet;
+    }
+      break; /* Radio received a packet */
+
+    case LAYER_RADIO_RECV_NOT_OK: /* Radio received an incomplete message */
+      break; /* Radio received an incomplete message */
   }
-  /* message from radio layer */
 }
 
 void RDCdriver::on()
 {
   FrameRDC *frame = new FrameRDC;
   frame->setNote(LAYER_RDC_LISTEN_ON);
-
-  send(frame, gate("lowerOut"));
+  sendMessageToLower(frame);
 }
 
 void RDCdriver::off()
 {
   FrameRDC *frame = new FrameRDC;
   frame->setNote(LAYER_RDC_LISTEN_OFF);
-
-  send(frame, gate("lowerOut"));
+  sendMessageToLower(frame);
 }
 
 } /* namespace wsn_energy */

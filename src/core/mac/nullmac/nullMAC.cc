@@ -13,25 +13,21 @@ namespace wsn_energy {
 
 Define_Module(nullMAC);
 
-void nullMAC::deferPacket(FrameMAC* frameMac)
+void nullMAC::deferPacket()
 {
-  // WSN dismiss + announce failure duty
-  IpPacket* ipPacket = new IpPacket;
+  if (buffer->getNumberTransmission() > 1)
+  {
+    IpPacket* ipPacket = check_and_cast<IpPacket*>(buffer->decapsulate());
+    ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
+    sendMessageToUpper(ipPacket);
+  }
+  else
+  {
+    buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 
-  ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
-  ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
-  send(ipPacket, gate("upperOut"));
-  return;
-}
-
-void nullMAC::sendPacket(FrameMAC* frameMAC)
-{
-  send(frameMAC, gate("lowerOut"));
-}
-
-void nullMAC::receivePacket(FrameMAC* frame)
-{
-  send(frame, gate("upperOut"));
+    /* request to perform CCA */
+    scheduleAt(simTime(), requestCCA);
+  }
 }
 
 } /* namespace wsn_energy */

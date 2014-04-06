@@ -22,13 +22,8 @@ namespace wsn_energy {
 
 class csma : public MACdriver
 {
-  private:
-    int number_transmission;
-
   protected:
-    virtual void deferPacket(FrameMAC*);
-    virtual void sendPacket(FrameMAC*);
-    virtual void receivePacket(FrameMAC*);
+    virtual void deferPacket();
 };
 
 } /* namespace wsn_energy */

@@ -179,7 +179,6 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
               IpPacket* broadcastMessage = check_and_cast<IpPacket*>(packet);
               broadcastMessage->setType(NET_DATA);
-              broadcastMessage->setIsRequestAck(true);
 
               unicast(broadcastMessage, this->rpl->rplDag.preferredParent->neighborID);
             }

@@ -9,16 +9,18 @@
 #ifndef __WSN_ENERGY_SINK_H
 #define __WSN_ENERGY_SINK_H
 
-#include <omnetpp.h>
+#include <myModule.h>
 
 namespace wsn_energy {
 
-class Server : public cSimpleModule
+class Server : public myModule
 {
   protected:
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+
+    virtual void processSelfMessage(cPacket*);
+    virtual void processUpperLayerMessage(cPacket*);
+    virtual void processLowerLayerMessage(cPacket*);
 };
 
 }

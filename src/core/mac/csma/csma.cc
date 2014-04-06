@@ -18,22 +18,22 @@ namespace wsn_energy {
 
 Define_Module(csma);
 
-void csma::deferPacket(FrameMAC* frameMAC)
+void csma::deferPacket()
 {
   // dismiss + announce failure duty
-  if (frameMAC->getNumberTransmission() > MAXIMUM_BACKOFF_TRANSMISSION)
+  if (buffer->getNumberTransmission() > MAXIMUM_BACKOFF_TRANSMISSION)
   {
-    IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMAC->decapsulate());
+    IpPacket* ipPacket = check_and_cast<IpPacket*>(buffer->decapsulate());
     ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
-
-    send(ipPacket, gate("upperOut"));
+    sendMessageToUpper(ipPacket);
   }
+  // unslotted csma
   else
   {
     double backoff;
     int backoff_transmission, backoff_exponent;
 
-    backoff_exponent = MAC_MIN_BE + frameMAC->getNumberTransmission();
+    backoff_exponent = MAC_MIN_BE + buffer->getNumberTransmission();
     if (backoff_exponent > MAC_MAX_BE)
       backoff_exponent = MAC_MAX_BE;
 
@@ -43,23 +43,11 @@ void csma::deferPacket(FrameMAC* frameMAC)
 
     ev << "Random " << backoff << endl;
 
-    sendDelayed(frameMAC, backoff, gate("lowerOut"));
+    buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 
-    frameMAC->setNumberTransmission(frameMAC->getNumberTransmission() + 1);
+    /* request to perform CCA */
+    scheduleAt(simTime() + backoff, requestCCA);
   }
-}
-
-void csma::sendPacket(FrameMAC* frameMAC)
-{
-  frameMAC->setNumberTransmission(0);
-
-  deferPacket(frameMAC);
-}
-
-void csma::receivePacket(FrameMAC* frameMAC)
-{
-  // WSN decapsule ???
-  send(frameMAC, gate("upperOut"));
 }
 
 } /* namespace wsn_energy */

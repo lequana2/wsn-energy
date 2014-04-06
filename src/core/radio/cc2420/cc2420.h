@@ -40,7 +40,7 @@ namespace wsn_energy {
 class cc2420 : public RadioDriver
 {
   public:
-    virtual void performCCA();
+    virtual double intervalCCA();
 
     virtual double getTxPower();
     virtual double getRxPower();

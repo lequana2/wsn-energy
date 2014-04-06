@@ -22,11 +22,11 @@
 #define HARDWARE                           1
 #define SWITCH_MODE_DELAY                  0              // second
 #define SYMBOL                             0.000016       // 1 symbol = 4/250 millisecond
-#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    SYMBOL*12      // 12 symbol
-#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   SYMBOL*12      // 12 symbol
-#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  SYMBOL*24      // 24 symbol
+#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    SYMBOL*12      // 12 symbols
+#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   SYMBOL*12      // 12 symbols
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  SYMBOL*24      // 24 symbols
 #define SWITCH_MODE_DELAY_TRANS_TO_IDLE    SYMBOL*0       // 0 symbol
-#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  SYMBOL*24      // 24 symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  SYMBOL*24      // 24 symbols
 #define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   SYMBOL*0       // 0 symbol
 #define DATA_RATE                          250000.0       // bit per second
 #endif
@@ -49,16 +49,17 @@ namespace wsn_energy {
 class RadioDriver : public myModule
 {
   private:
+    Raw *command;      // self-command
     Raw *bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
 
     // Switch oscilator mode
     void switchOscilatorMode(int mode);
 
     // Self functioning
-    void transmit_on(Raw*);
-    void transmit_off();
+    void transmit_begin();
+    void transmit_end();
     void listen();
-    void receive(Raw*);
+    void received(Raw*);
     void sleep();
 
     // power
@@ -66,8 +67,8 @@ class RadioDriver : public myModule
     virtual double getRxPower() = 0;
     virtual double getIdPower() = 0;
 
-    // CCA
-    virtual void performCCA() = 0;
+    // CCA return CCA interval
+    virtual double intervalCCA() = 0;
 
   protected:
     void initialize();

@@ -27,9 +27,9 @@ namespace wsn_energy {
 
 Define_Module(cc2420);
 
-void cc2420::performCCA()
+double cc2420::intervalCCA()
 {
-//  return ((World*) simulation.getModuleByPath("world"))->senseBusyTransmission(new mySignal(this, NULL));
+  return 20 * SYMBOL;     // 20 symbols (12 symbols switch, 8 symbols sample)
 }
 
 double cc2420::getTxPower()

@@ -16,32 +16,35 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-  IpPacket *msg = new IpPacket;
+  Data *msg = new Data;
   msg->setNote(RPL_CONSTRUCT);
   scheduleAt(simTime(), msg);
 }
 
-void Server::handleMessage(cMessage *msg)
+void Server::processSelfMessage(cPacket* packet)
 {
-  switch (check_and_cast<IpPacket*>(msg)->getNote())
+  switch (check_and_cast<Data*>(packet)->getNote())
   {
     case RPL_CONSTRUCT:
-      send(msg, gate("lowerOut"));
-      break;
-
-    case LAYER_APP:
-      Data* data = check_and_cast<Data*>(msg);
-      this->getParentModule()->bubble(data->getValue());
-
-      // End to end statistics
-      ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);
-      ((Statistic*) simulation.getModuleByPath("statistic"))->packetDelayTracking(simTime().dbl() - data->getTime());
+      sendMessageToLower(packet);
       break;
   }
 }
 
-void Server::finish()
+void Server::processUpperLayerMessage(cPacket* packet)
 {
+  // this is highest layer
+  return;
+}
+
+void Server::processLowerLayerMessage(cPacket* packet)
+{
+  Data* data = check_and_cast<Data*>(packet);
+  this->getParentModule()->bubble(data->getValue());
+
+  // End to end statistics
+  ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);
+  ((Statistic*) simulation.getModuleByPath("statistic"))->packetDelayTracking(simTime().dbl() - data->getTime());
 }
 
 }

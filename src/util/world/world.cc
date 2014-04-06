@@ -356,14 +356,6 @@ void World::considerSignal(mySignal* signal)
 }
 
 /*
- * check if radio is free
- */
-bool World::senseFreeChannel(RadioDriver* radio)
-{
-  return (radio->incomingSignal == 0);
-}
-
-/*
  * Calculate distance util
  */
 double World::calculateDistance(RadioDriver *a, RadioDriver *b)

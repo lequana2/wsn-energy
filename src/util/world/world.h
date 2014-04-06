@@ -59,8 +59,6 @@ class World : public cSimpleModule
     void releaseHost(RadioDriver*);           // unregister transmitting mote
     void stopListening(RadioDriver*);  // recver mote stop listening
 
-    bool senseFreeChannel(RadioDriver*);      // check if radio is free
-
     double calculateDistance(RadioDriver*, RadioDriver*);  // calculate distance between 2 motes
     double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate
 };

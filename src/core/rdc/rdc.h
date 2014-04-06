@@ -17,6 +17,8 @@ namespace wsn_energy {
 class RDCdriver : public myModule
 {
   protected:
+    FrameRDC *buffer;
+
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
     virtual void processLowerLayerMessage(cPacket*);
