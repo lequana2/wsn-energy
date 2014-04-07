@@ -169,7 +169,7 @@ void RPL::receiveDIO(DIO* dio)
     // obsolete/maintenace DIO
     else if (this->rplDag.version >= dio->getVersion())
     {
-      bool isNewParent = false;
+      bool isNewParent = true;
 
       // Consider parent
       std::list<RPL_neighbor*>::iterator oldParent = this->rplDag.parentList.begin();
@@ -177,7 +177,7 @@ void RPL::receiveDIO(DIO* dio)
       {
         if ((*oldParent)->neighborID == neighbor->neighborID)
         {
-          isNewParent = true;
+          isNewParent = false;
           break;
         }
       }
@@ -207,7 +207,7 @@ void RPL::receiveDIO(DIO* dio)
           // Update parent
           this->sendDIO();
         }
-        // same rank
+        // WSN siblings, same rank
         else if (this->rplDag.rank == dio->getRank())
         {
 //          // New neighbor

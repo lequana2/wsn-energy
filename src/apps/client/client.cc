@@ -71,7 +71,7 @@ void Client::newData()
   int sendInterval = 4; // second
   int randomness = 20;   // second
 
-  double time = sendInterval + ((rand() % randomness) / 10.0);
+  double time = sendInterval + ((rand() % randomness) / 1000.0);
 
   cMessage *event = new cMessage;
   event->setKind(APP_SENSING_FLAG);

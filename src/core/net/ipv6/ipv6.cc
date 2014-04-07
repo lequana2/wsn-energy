@@ -46,9 +46,9 @@ void IPv6::processSelfMessage(cPacket* packet)
     case LAYER_NET_CHECK_BUFFER: {
       if (DEBUG)
         ev << "Queue size " << this->buffer.size() << endl;
-      if (this->buffer.size() == 0)
+      if (this->buffer.size() == 0) // empty
       {
-        isWaiting = true;
+        isWaiting = false;
       }
       else if (!isWaiting) // In-turn
       {
@@ -127,7 +127,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
       if (DEBUG)
         ev << "Success NET trans" << endl;
 
-//      cancelAndDelete(this->buffer.front());
+//      delete this->buffer.front();
       this->buffer.pop_front();
       isWaiting = false;
 
@@ -142,7 +142,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
       if (DEBUG)
         ev << "Failure NET trans" << endl;
 
-//      cancelAndDelete(this->buffer.front());
+//      delete this->buffer.front();
       this->buffer.pop_front();
       isWaiting = false;
 

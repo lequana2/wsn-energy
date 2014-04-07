@@ -82,6 +82,9 @@ void Statistic::handleMessage(cMessage *msg)
 
 void Statistic::finish()
 {
+  // poll last time
+  pollTotalSensorEnergy();
+
   // Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();

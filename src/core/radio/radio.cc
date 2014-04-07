@@ -282,7 +282,8 @@ void RadioDriver::received(Raw* raw)
     ev << "Received !!!" << endl;
 
   /* receie a complete message */
-  if (!raw->getError())
+//  if (!raw->getError())
+  if (true)
   {
     FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
     frame->setNote(LAYER_RADIO_RECV_OK);
