@@ -94,7 +94,7 @@ void RPL::sendDIS(int convergence)
   net->multicast(icmp);
 }
 
-void RPL::receiveDIO(DIO* dio)
+void RPL::processDIO(DIO* dio)
 {
   if (DEBUG)
     ev << "Received DIO " << endl;
@@ -214,7 +214,7 @@ void RPL::receiveDIO(DIO* dio)
 //          if (candidate == this->rplDag.parentList.end())
 //          {
 //            ev << "new neighbor" << endl;
-//            // WSN Update new neighbor
+//            // Update new neighbor
 //            // this->rplDag.parentList.push_back(neighbor);
 //
 //            if (ANNOTATE_SIBLINGS)
@@ -264,7 +264,7 @@ void RPL::receiveDIO(DIO* dio)
   }
 }
 
-void RPL::receiveDIS(DIS* msg)
+void RPL::processDIS(DIS* msg)
 {
   if (DEBUG)
     EV << "Received DIS " << endl;

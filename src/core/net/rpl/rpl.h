@@ -86,8 +86,8 @@ class RPL
     void sendDIO();
     void sendDIS(int);
 
-    void receiveDIO(DIO*);
-    void receiveDIS(DIS*);
+    void processDIO(DIO*);
+    void processDIS(DIS*);
 };
 
 } /* namespace wsn_energy */

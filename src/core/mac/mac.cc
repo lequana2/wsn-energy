@@ -17,13 +17,11 @@ namespace wsn_energy {
 
 void MACdriver::initialize()
 {
-  buffer = new FrameMAC;
-  buffer->setNote(LAYER_MAC_SEND);
 }
 
 void MACdriver::finish()
 {
-  cancelAndDelete(buffer);
+//  cancelAndDelete(buffer);
 }
 
 void MACdriver::processSelfMessage(cPacket* packet)
@@ -38,12 +36,14 @@ void MACdriver::processSelfMessage(cPacket* packet)
 
 void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
-  // free old buffer
-  delete buffer->decapsulate();
+  // WSN free old buffer (?)
+  buffer = new FrameMAC;
+  buffer->setKind(DATA);
+  buffer->setNote(LAYER_MAC_SEND);
+  buffer->setByteLength(MAC_HEADER_FOOTER_LEN);
 
   // Omnet attribute
   buffer->encapsulate((IpPacket*) packet);
-  buffer->setByteLength(packet->getByteLength() + MAC_HEADER_FOOTER_LEN);
 
   // meta data
   buffer->setNumberTransmission(0);
@@ -95,6 +95,10 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
     case LAYER_RDC_RECV_OK: /* callback upon reception of a frame */
       receivePacket(check_and_cast<FrameMAC*>(packet));
       break; /* callback upon reception of a frame */
+
+    default:
+      ev << "Missing resolution" << endl;
+      break;
   }
 }
 
@@ -103,7 +107,7 @@ void MACdriver::sendPacket()
   if (DEBUG)
     ev << "SEND (MAC)" << endl;
 
-  sendMessageToLower(buffer->dup());
+  sendMessageToLower(buffer);
 }
 
 void MACdriver::receivePacket(FrameMAC* frameMac)

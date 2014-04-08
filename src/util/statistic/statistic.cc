@@ -15,7 +15,7 @@
 
 #include "statistic.h"
 #include "energest.h"
-
+#include "ipv6.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -88,7 +88,7 @@ void Statistic::finish()
   // Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();
-
+int shit = 0;
   for (int i = 0; i < numberClient; i++)
   {
     numSensorEnergy =
@@ -104,6 +104,8 @@ void Statistic::finish()
     timeIdle +=
         (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
     emit(sigSensorEnergy, numSensorEnergy);
+
+    shit += (check_and_cast<IPv6*>(wsn->getSubmodule("client", i)->getSubmodule("net")))->buffer.size();
   }
 
   emit(sigTimeIdle, timeIdle);
@@ -112,6 +114,7 @@ void Statistic::finish()
   emit(sigTotalEnergy, numTotalEnergy);
 
   // WSN DEBUG
+  emit(sigNetRecv, shit);
   emit(sigNetSend, timeIdle + timeTrans + timeListen);
 
   cancelAndDelete(polling);

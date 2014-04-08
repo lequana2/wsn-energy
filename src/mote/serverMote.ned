@@ -16,6 +16,7 @@
 package wsn_energy.mote;
 
 import wsn_energy.apps.iApp;
+import wsn_energy.core.transport.iTransport;
 import wsn_energy.core.net.iNet;
 import wsn_energy.core.mac.iMAC;
 import wsn_energy.core.rdc.iRDC;
@@ -29,6 +30,7 @@ module ServerMote
 {
     parameters:
         string appType;
+        string traType;
         string netType;
         string macType;
         string rdcType;
@@ -43,6 +45,7 @@ module ServerMote
 
     submodules:
         app: <appType> like iApp;
+        tra: <traType> like iTransport;
         net: <netType> like iNet;
         mac: <macType> like iMAC;
         rdc: <rdcType> like iRDC;
@@ -53,8 +56,11 @@ module ServerMote
         }
         energest: Energest;
     connections allowunconnected:
-        app.lowerOut --> net.upperIn;
-        app.lowerIn <-- net.upperOut;
+        app.lowerOut --> tra.upperIn;
+        app.lowerIn <-- tra.upperOut;
+
+        tra.lowerOut --> net.upperIn;
+        tra.lowerIn <-- net.upperOut;
 
         net.lowerOut --> mac.upperIn;
         net.lowerIn <-- mac.upperOut;

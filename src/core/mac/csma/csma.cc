@@ -26,6 +26,9 @@ void csma::deferPacket()
     IpPacket* ipPacket = new IpPacket;
     ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
     sendMessageToUpper(ipPacket);
+
+    // clear buffer
+    delete buffer;
   }
   // unslotted csma
   else
@@ -39,7 +42,9 @@ void csma::deferPacket()
 
     backoff_transmission = 1 << backoff_exponent;
 
-    backoff = (rand()%(backoff_transmission)) * BACKOFF_PERIOD;
+    // WSN for test
+    backoff = (rand() % (backoff_transmission)) * BACKOFF_PERIOD;
+//    backoff = (intuniform(0, backoff_transmission)) * BACKOFF_PERIOD;
 
     ev << "Random " << backoff << endl;
 

@@ -105,6 +105,10 @@ enum COMMAND_AND_RESULT{
 	CHANNEL_CCA_REQUEST = 100;
 	CHANNEL_CLEAR   	= 101;
 	CHANNEL_BUSY    	= 102;
+	
+	// command or data
+	COMMAND             = 115;
+	DATA				= 114;
 }
 
 enum IP_PACKET_TYPE
@@ -115,6 +119,10 @@ enum IP_PACKET_TYPE
 	NET_ICMP_ACK    	  = 2;	// ICMP ACK message
 	NET_DATA        	  = 3; // normal data message
 };
+
+packet Command{
+	int note;
+}
 
 packet Raw{
 	bool error; // is error message
@@ -145,22 +153,16 @@ packet IpPacket{
     
 	int type;	// type message (DIO, DIS, Data)
 
+	bool isBroadcast;
+
     int senderIpAddress; // sender IP address
     int recverIpAddress; // recver IP address
-
-	int sourceIpAddress; // sensor node IP address
-	int sinkIpAddress;   // base station IP address
-}
-
-packet Data extends IpPacket{
-	double time;  // meta-data: timestamp upon sending
-	
-	string value; // data to be sent to server
 }
 
 packet DIO  extends IpPacket{
 	int dodagID; // DODAGID
 	int version; // version
+	
 	unsigned long rank;   // rank 
 	
 	double selfEnergy; // energy-history
@@ -170,6 +172,16 @@ packet DIS  extends IpPacket{
 	int convergence;
 }
 
-packet ACK extends IpPacket{
-	double energy;
+packet UdpPacket{
+    int note; 	// control message
+    
+    int sourceIpAddress; // sensor node IP address
+	int sinkIpAddress;   // base station IP address
+}
+
+packet Data{
+    int note; 	// control message
+     
+    double time;  // meta-data: timestamp upon sending
+	string value; // data to be sent to server
 }

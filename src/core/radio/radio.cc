@@ -13,7 +13,6 @@ namespace wsn_energy {
 void RadioDriver::initialize()
 {
   this->command = new Raw;
-  this->bufferTXFIFO = new Raw;
 
   this->trRange = par("trRange");
   this->coRange = par("coRange");
@@ -28,7 +27,10 @@ void RadioDriver::handleMessage(cMessage* msg)
 {
   // stop working
   if (this->status == POWER_DOWN)
+  {
+    delete msg;
     return;
+  }
 
   myModule::handleMessage(msg);
 
@@ -43,7 +45,7 @@ void RadioDriver::handleMessage(cMessage* msg)
 void RadioDriver::finish()
 {
   cancelAndDelete(command);
-  cancelAndDelete(bufferTXFIFO);
+//  cancelAndDelete(bufferTXFIFO);
 }
 
 void RadioDriver::processSelfMessage(cPacket* packet)
@@ -153,6 +155,9 @@ void RadioDriver::processSelfMessage(cPacket* packet)
     case LAYER_RADIO_END_TRANSMIT: {
       transmit_end();
 
+      // clear buffer
+      delete this->bufferTXFIFO;
+
       // WSN after sending, switch to listen
       listen();
 
@@ -195,9 +200,9 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
         case LISTENING: /* Ignite transmitting */
         case IDLE: /* Ignite transmitting */
         {
-          delete bufferTXFIFO->decapsulate();
-          bufferTXFIFO->encapsulate(packet);
-          bufferTXFIFO->setByteLength(PHY_HEADER + packet->getByteLength());
+          this->bufferTXFIFO = new Raw;
+          this->bufferTXFIFO->setByteLength(PHY_HEADER);
+          this->bufferTXFIFO->encapsulate(packet);
 
           command->setNote(LAYER_RADIO_SWITCH_TRANSMIT);
           scheduleAt(simTime(), command);
@@ -281,7 +286,7 @@ void RadioDriver::received(Raw* raw)
   if (DEBUG)
     ev << "Received !!!" << endl;
 
-  /* receie a complete message */
+  /* WSN hack receive a complete message */
 //  if (!raw->getError())
   if (true)
   {

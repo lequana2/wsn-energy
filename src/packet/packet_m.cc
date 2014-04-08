@@ -78,6 +78,8 @@ EXECUTE_ON_STARTUP(
     e->insert(CHANNEL_CCA_REQUEST, "CHANNEL_CCA_REQUEST");
     e->insert(CHANNEL_CLEAR, "CHANNEL_CLEAR");
     e->insert(CHANNEL_BUSY, "CHANNEL_BUSY");
+    e->insert(COMMAND, "COMMAND");
+    e->insert(DATA, "DATA");
 );
 
 EXECUTE_ON_STARTUP(
@@ -88,6 +90,242 @@ EXECUTE_ON_STARTUP(
     e->insert(NET_ICMP_ACK, "NET_ICMP_ACK");
     e->insert(NET_DATA, "NET_DATA");
 );
+
+Register_Class(Command);
+
+Command::Command(const char *name, int kind) : cPacket(name,kind)
+{
+    this->note_var = 0;
+}
+
+Command::Command(const Command& other) : cPacket(other)
+{
+    copy(other);
+}
+
+Command::~Command()
+{
+}
+
+Command& Command::operator=(const Command& other)
+{
+    if (this==&other) return *this;
+    cPacket::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Command::copy(const Command& other)
+{
+    this->note_var = other.note_var;
+}
+
+void Command::parsimPack(cCommBuffer *b)
+{
+    cPacket::parsimPack(b);
+    doPacking(b,this->note_var);
+}
+
+void Command::parsimUnpack(cCommBuffer *b)
+{
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->note_var);
+}
+
+int Command::getNote() const
+{
+    return note_var;
+}
+
+void Command::setNote(int note)
+{
+    this->note_var = note;
+}
+
+class CommandDescriptor : public cClassDescriptor
+{
+  public:
+    CommandDescriptor();
+    virtual ~CommandDescriptor();
+
+    virtual bool doesSupport(cObject *obj) const;
+    virtual const char *getProperty(const char *propertyname) const;
+    virtual int getFieldCount(void *object) const;
+    virtual const char *getFieldName(void *object, int field) const;
+    virtual int findField(void *object, const char *fieldName) const;
+    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
+    virtual const char *getFieldTypeString(void *object, int field) const;
+    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
+    virtual int getArraySize(void *object, int field) const;
+
+    virtual std::string getFieldAsString(void *object, int field, int i) const;
+    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
+
+    virtual const char *getFieldStructName(void *object, int field) const;
+    virtual void *getFieldStructPointer(void *object, int field, int i) const;
+};
+
+Register_ClassDescriptor(CommandDescriptor);
+
+CommandDescriptor::CommandDescriptor() : cClassDescriptor("wsn_energy::Command", "cPacket")
+{
+}
+
+CommandDescriptor::~CommandDescriptor()
+{
+}
+
+bool CommandDescriptor::doesSupport(cObject *obj) const
+{
+    return dynamic_cast<Command *>(obj)!=NULL;
+}
+
+const char *CommandDescriptor::getProperty(const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : NULL;
+}
+
+int CommandDescriptor::getFieldCount(void *object) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+}
+
+unsigned int CommandDescriptor::getFieldTypeFlags(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeFlags(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+}
+
+const char *CommandDescriptor::getFieldName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldNames[] = {
+        "note",
+    };
+    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+}
+
+int CommandDescriptor::findField(void *object, const char *fieldName) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    return basedesc ? basedesc->findField(object, fieldName) : -1;
+}
+
+const char *CommandDescriptor::getFieldTypeString(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeString(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldTypeStrings[] = {
+        "int",
+    };
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+}
+
+const char *CommandDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldProperty(object, field, propertyname);
+        field -= basedesc->getFieldCount(object);
+    }
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+int CommandDescriptor::getArraySize(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getArraySize(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    Command *pp = (Command *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+std::string CommandDescriptor::getFieldAsString(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldAsString(object,field,i);
+        field -= basedesc->getFieldCount(object);
+    }
+    Command *pp = (Command *)object; (void)pp;
+    switch (field) {
+        case 0: return long2string(pp->getNote());
+        default: return "";
+    }
+}
+
+bool CommandDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->setFieldAsString(object,field,i,value);
+        field -= basedesc->getFieldCount(object);
+    }
+    Command *pp = (Command *)object; (void)pp;
+    switch (field) {
+        case 0: pp->setNote(string2long(value)); return true;
+        default: return false;
+    }
+}
+
+const char *CommandDescriptor::getFieldStructName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldStructNames[] = {
+        NULL,
+    };
+    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+}
+
+void *CommandDescriptor::getFieldStructPointer(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructPointer(object, field, i);
+        field -= basedesc->getFieldCount(object);
+    }
+    Command *pp = (Command *)object; (void)pp;
+    switch (field) {
+        default: return NULL;
+    }
+}
 
 Register_Class(Raw);
 
@@ -950,10 +1188,9 @@ IpPacket::IpPacket(const char *name, int kind) : cPacket(name,kind)
 {
     this->note_var = 0;
     this->type_var = 0;
+    this->isBroadcast_var = 0;
     this->senderIpAddress_var = 0;
     this->recverIpAddress_var = 0;
-    this->sourceIpAddress_var = 0;
-    this->sinkIpAddress_var = 0;
 }
 
 IpPacket::IpPacket(const IpPacket& other) : cPacket(other)
@@ -977,10 +1214,9 @@ void IpPacket::copy(const IpPacket& other)
 {
     this->note_var = other.note_var;
     this->type_var = other.type_var;
+    this->isBroadcast_var = other.isBroadcast_var;
     this->senderIpAddress_var = other.senderIpAddress_var;
     this->recverIpAddress_var = other.recverIpAddress_var;
-    this->sourceIpAddress_var = other.sourceIpAddress_var;
-    this->sinkIpAddress_var = other.sinkIpAddress_var;
 }
 
 void IpPacket::parsimPack(cCommBuffer *b)
@@ -988,10 +1224,9 @@ void IpPacket::parsimPack(cCommBuffer *b)
     cPacket::parsimPack(b);
     doPacking(b,this->note_var);
     doPacking(b,this->type_var);
+    doPacking(b,this->isBroadcast_var);
     doPacking(b,this->senderIpAddress_var);
     doPacking(b,this->recverIpAddress_var);
-    doPacking(b,this->sourceIpAddress_var);
-    doPacking(b,this->sinkIpAddress_var);
 }
 
 void IpPacket::parsimUnpack(cCommBuffer *b)
@@ -999,10 +1234,9 @@ void IpPacket::parsimUnpack(cCommBuffer *b)
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->note_var);
     doUnpacking(b,this->type_var);
+    doUnpacking(b,this->isBroadcast_var);
     doUnpacking(b,this->senderIpAddress_var);
     doUnpacking(b,this->recverIpAddress_var);
-    doUnpacking(b,this->sourceIpAddress_var);
-    doUnpacking(b,this->sinkIpAddress_var);
 }
 
 int IpPacket::getNote() const
@@ -1025,6 +1259,16 @@ void IpPacket::setType(int type)
     this->type_var = type;
 }
 
+bool IpPacket::getIsBroadcast() const
+{
+    return isBroadcast_var;
+}
+
+void IpPacket::setIsBroadcast(bool isBroadcast)
+{
+    this->isBroadcast_var = isBroadcast;
+}
+
 int IpPacket::getSenderIpAddress() const
 {
     return senderIpAddress_var;
@@ -1043,26 +1287,6 @@ int IpPacket::getRecverIpAddress() const
 void IpPacket::setRecverIpAddress(int recverIpAddress)
 {
     this->recverIpAddress_var = recverIpAddress;
-}
-
-int IpPacket::getSourceIpAddress() const
-{
-    return sourceIpAddress_var;
-}
-
-void IpPacket::setSourceIpAddress(int sourceIpAddress)
-{
-    this->sourceIpAddress_var = sourceIpAddress;
-}
-
-int IpPacket::getSinkIpAddress() const
-{
-    return sinkIpAddress_var;
-}
-
-void IpPacket::setSinkIpAddress(int sinkIpAddress)
-{
-    this->sinkIpAddress_var = sinkIpAddress;
 }
 
 class IpPacketDescriptor : public cClassDescriptor
@@ -1112,7 +1336,7 @@ const char *IpPacketDescriptor::getProperty(const char *propertyname) const
 int IpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 6+basedesc->getFieldCount(object) : 6;
+    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
 }
 
 unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -1129,9 +1353,8 @@ unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) cons
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<6) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketDescriptor::getFieldName(void *object, int field) const
@@ -1145,12 +1368,11 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
     static const char *fieldNames[] = {
         "note",
         "type",
+        "isBroadcast",
         "senderIpAddress",
         "recverIpAddress",
-        "sourceIpAddress",
-        "sinkIpAddress",
     };
-    return (field>=0 && field<6) ? fieldNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldNames[field] : NULL;
 }
 
 int IpPacketDescriptor::findField(void *object, const char *fieldName) const
@@ -1159,10 +1381,9 @@ int IpPacketDescriptor::findField(void *object, const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
     if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+1;
-    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+2;
-    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+3;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIpAddress")==0) return base+4;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sinkIpAddress")==0) return base+5;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isBroadcast")==0) return base+2;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+3;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+4;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1177,12 +1398,11 @@ const char *IpPacketDescriptor::getFieldTypeString(void *object, int field) cons
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
-        "int",
-        "int",
+        "bool",
         "int",
         "int",
     };
-    return (field>=0 && field<6) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1224,10 +1444,9 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
     switch (field) {
         case 0: return long2string(pp->getNote());
         case 1: return long2string(pp->getType());
-        case 2: return long2string(pp->getSenderIpAddress());
-        case 3: return long2string(pp->getRecverIpAddress());
-        case 4: return long2string(pp->getSourceIpAddress());
-        case 5: return long2string(pp->getSinkIpAddress());
+        case 2: return bool2string(pp->getIsBroadcast());
+        case 3: return long2string(pp->getSenderIpAddress());
+        case 4: return long2string(pp->getRecverIpAddress());
         default: return "";
     }
 }
@@ -1244,10 +1463,9 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
     switch (field) {
         case 0: pp->setNote(string2long(value)); return true;
         case 1: pp->setType(string2long(value)); return true;
-        case 2: pp->setSenderIpAddress(string2long(value)); return true;
-        case 3: pp->setRecverIpAddress(string2long(value)); return true;
-        case 4: pp->setSourceIpAddress(string2long(value)); return true;
-        case 5: pp->setSinkIpAddress(string2long(value)); return true;
+        case 2: pp->setIsBroadcast(string2bool(value)); return true;
+        case 3: pp->setSenderIpAddress(string2long(value)); return true;
+        case 4: pp->setRecverIpAddress(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1266,9 +1484,8 @@ const char *IpPacketDescriptor::getFieldStructName(void *object, int field) cons
         NULL,
         NULL,
         NULL,
-        NULL,
     };
-    return (field>=0 && field<6) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1280,263 +1497,6 @@ void *IpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) 
         field -= basedesc->getFieldCount(object);
     }
     IpPacket *pp = (IpPacket *)object; (void)pp;
-    switch (field) {
-        default: return NULL;
-    }
-}
-
-Register_Class(Data);
-
-Data::Data(const char *name, int kind) : wsn_energy::IpPacket(name,kind)
-{
-    this->time_var = 0;
-    this->value_var = 0;
-}
-
-Data::Data(const Data& other) : wsn_energy::IpPacket(other)
-{
-    copy(other);
-}
-
-Data::~Data()
-{
-}
-
-Data& Data::operator=(const Data& other)
-{
-    if (this==&other) return *this;
-    wsn_energy::IpPacket::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void Data::copy(const Data& other)
-{
-    this->time_var = other.time_var;
-    this->value_var = other.value_var;
-}
-
-void Data::parsimPack(cCommBuffer *b)
-{
-    wsn_energy::IpPacket::parsimPack(b);
-    doPacking(b,this->time_var);
-    doPacking(b,this->value_var);
-}
-
-void Data::parsimUnpack(cCommBuffer *b)
-{
-    wsn_energy::IpPacket::parsimUnpack(b);
-    doUnpacking(b,this->time_var);
-    doUnpacking(b,this->value_var);
-}
-
-double Data::getTime() const
-{
-    return time_var;
-}
-
-void Data::setTime(double time)
-{
-    this->time_var = time;
-}
-
-const char * Data::getValue() const
-{
-    return value_var.c_str();
-}
-
-void Data::setValue(const char * value)
-{
-    this->value_var = value;
-}
-
-class DataDescriptor : public cClassDescriptor
-{
-  public:
-    DataDescriptor();
-    virtual ~DataDescriptor();
-
-    virtual bool doesSupport(cObject *obj) const;
-    virtual const char *getProperty(const char *propertyname) const;
-    virtual int getFieldCount(void *object) const;
-    virtual const char *getFieldName(void *object, int field) const;
-    virtual int findField(void *object, const char *fieldName) const;
-    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
-    virtual const char *getFieldTypeString(void *object, int field) const;
-    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
-
-    virtual std::string getFieldAsString(void *object, int field, int i) const;
-    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
-
-    virtual const char *getFieldStructName(void *object, int field) const;
-    virtual void *getFieldStructPointer(void *object, int field, int i) const;
-};
-
-Register_ClassDescriptor(DataDescriptor);
-
-DataDescriptor::DataDescriptor() : cClassDescriptor("wsn_energy::Data", "wsn_energy::IpPacket")
-{
-}
-
-DataDescriptor::~DataDescriptor()
-{
-}
-
-bool DataDescriptor::doesSupport(cObject *obj) const
-{
-    return dynamic_cast<Data *>(obj)!=NULL;
-}
-
-const char *DataDescriptor::getProperty(const char *propertyname) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? basedesc->getProperty(propertyname) : NULL;
-}
-
-int DataDescriptor::getFieldCount(void *object) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
-}
-
-unsigned int DataDescriptor::getFieldTypeFlags(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldTypeFlags(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,
-        FD_ISEDITABLE,
-    };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
-}
-
-const char *DataDescriptor::getFieldName(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldName(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static const char *fieldNames[] = {
-        "time",
-        "value",
-    };
-    return (field>=0 && field<2) ? fieldNames[field] : NULL;
-}
-
-int DataDescriptor::findField(void *object, const char *fieldName) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "time")==0) return base+0;
-    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+1;
-    return basedesc ? basedesc->findField(object, fieldName) : -1;
-}
-
-const char *DataDescriptor::getFieldTypeString(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldTypeString(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static const char *fieldTypeStrings[] = {
-        "double",
-        "string",
-    };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
-}
-
-const char *DataDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldProperty(object, field, propertyname);
-        field -= basedesc->getFieldCount(object);
-    }
-    switch (field) {
-        default: return NULL;
-    }
-}
-
-int DataDescriptor::getArraySize(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    Data *pp = (Data *)object; (void)pp;
-    switch (field) {
-        default: return 0;
-    }
-}
-
-std::string DataDescriptor::getFieldAsString(void *object, int field, int i) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldAsString(object,field,i);
-        field -= basedesc->getFieldCount(object);
-    }
-    Data *pp = (Data *)object; (void)pp;
-    switch (field) {
-        case 0: return double2string(pp->getTime());
-        case 1: return oppstring2string(pp->getValue());
-        default: return "";
-    }
-}
-
-bool DataDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->setFieldAsString(object,field,i,value);
-        field -= basedesc->getFieldCount(object);
-    }
-    Data *pp = (Data *)object; (void)pp;
-    switch (field) {
-        case 0: pp->setTime(string2double(value)); return true;
-        case 1: pp->setValue((value)); return true;
-        default: return false;
-    }
-}
-
-const char *DataDescriptor::getFieldStructName(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldStructName(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-    };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
-}
-
-void *DataDescriptor::getFieldStructPointer(void *object, int field, int i) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldStructPointer(object, field, i);
-        field -= basedesc->getFieldCount(object);
-    }
-    Data *pp = (Data *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
@@ -2077,62 +2037,90 @@ void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const
     }
 }
 
-Register_Class(ACK);
+Register_Class(UdpPacket);
 
-ACK::ACK(const char *name, int kind) : wsn_energy::IpPacket(name,kind)
+UdpPacket::UdpPacket(const char *name, int kind) : cPacket(name,kind)
 {
-    this->energy_var = 0;
+    this->note_var = 0;
+    this->sourceIpAddress_var = 0;
+    this->sinkIpAddress_var = 0;
 }
 
-ACK::ACK(const ACK& other) : wsn_energy::IpPacket(other)
+UdpPacket::UdpPacket(const UdpPacket& other) : cPacket(other)
 {
     copy(other);
 }
 
-ACK::~ACK()
+UdpPacket::~UdpPacket()
 {
 }
 
-ACK& ACK::operator=(const ACK& other)
+UdpPacket& UdpPacket::operator=(const UdpPacket& other)
 {
     if (this==&other) return *this;
-    wsn_energy::IpPacket::operator=(other);
+    cPacket::operator=(other);
     copy(other);
     return *this;
 }
 
-void ACK::copy(const ACK& other)
+void UdpPacket::copy(const UdpPacket& other)
 {
-    this->energy_var = other.energy_var;
+    this->note_var = other.note_var;
+    this->sourceIpAddress_var = other.sourceIpAddress_var;
+    this->sinkIpAddress_var = other.sinkIpAddress_var;
 }
 
-void ACK::parsimPack(cCommBuffer *b)
+void UdpPacket::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::IpPacket::parsimPack(b);
-    doPacking(b,this->energy_var);
+    cPacket::parsimPack(b);
+    doPacking(b,this->note_var);
+    doPacking(b,this->sourceIpAddress_var);
+    doPacking(b,this->sinkIpAddress_var);
 }
 
-void ACK::parsimUnpack(cCommBuffer *b)
+void UdpPacket::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::IpPacket::parsimUnpack(b);
-    doUnpacking(b,this->energy_var);
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->note_var);
+    doUnpacking(b,this->sourceIpAddress_var);
+    doUnpacking(b,this->sinkIpAddress_var);
 }
 
-double ACK::getEnergy() const
+int UdpPacket::getNote() const
 {
-    return energy_var;
+    return note_var;
 }
 
-void ACK::setEnergy(double energy)
+void UdpPacket::setNote(int note)
 {
-    this->energy_var = energy;
+    this->note_var = note;
 }
 
-class ACKDescriptor : public cClassDescriptor
+int UdpPacket::getSourceIpAddress() const
+{
+    return sourceIpAddress_var;
+}
+
+void UdpPacket::setSourceIpAddress(int sourceIpAddress)
+{
+    this->sourceIpAddress_var = sourceIpAddress;
+}
+
+int UdpPacket::getSinkIpAddress() const
+{
+    return sinkIpAddress_var;
+}
+
+void UdpPacket::setSinkIpAddress(int sinkIpAddress)
+{
+    this->sinkIpAddress_var = sinkIpAddress;
+}
+
+class UdpPacketDescriptor : public cClassDescriptor
 {
   public:
-    ACKDescriptor();
-    virtual ~ACKDescriptor();
+    UdpPacketDescriptor();
+    virtual ~UdpPacketDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -2151,34 +2139,34 @@ class ACKDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(ACKDescriptor);
+Register_ClassDescriptor(UdpPacketDescriptor);
 
-ACKDescriptor::ACKDescriptor() : cClassDescriptor("wsn_energy::ACK", "wsn_energy::IpPacket")
+UdpPacketDescriptor::UdpPacketDescriptor() : cClassDescriptor("wsn_energy::UdpPacket", "cPacket")
 {
 }
 
-ACKDescriptor::~ACKDescriptor()
+UdpPacketDescriptor::~UdpPacketDescriptor()
 {
 }
 
-bool ACKDescriptor::doesSupport(cObject *obj) const
+bool UdpPacketDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<ACK *>(obj)!=NULL;
+    return dynamic_cast<UdpPacket *>(obj)!=NULL;
 }
 
-const char *ACKDescriptor::getProperty(const char *propertyname) const
+const char *UdpPacketDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int ACKDescriptor::getFieldCount(void *object) const
+int UdpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
-unsigned int ACKDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int UdpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2188,11 +2176,13 @@ unsigned int ACKDescriptor::getFieldTypeFlags(void *object, int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
-const char *ACKDescriptor::getFieldName(void *object, int field) const
+const char *UdpPacketDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2201,20 +2191,24 @@ const char *ACKDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "energy",
+        "note",
+        "sourceIpAddress",
+        "sinkIpAddress",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
-int ACKDescriptor::findField(void *object, const char *fieldName) const
+int UdpPacketDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='e' && strcmp(fieldName, "energy")==0) return base+0;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIpAddress")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sinkIpAddress")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *ACKDescriptor::getFieldTypeString(void *object, int field) const
+const char *UdpPacketDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2223,12 +2217,14 @@ const char *ACKDescriptor::getFieldTypeString(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldTypeStrings[] = {
-        "double",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *ACKDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *UdpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2241,7 +2237,7 @@ const char *ACKDescriptor::getFieldProperty(void *object, int field, const char 
     }
 }
 
-int ACKDescriptor::getArraySize(void *object, int field) const
+int UdpPacketDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2249,13 +2245,13 @@ int ACKDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    ACK *pp = (ACK *)object; (void)pp;
+    UdpPacket *pp = (UdpPacket *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string ACKDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string UdpPacketDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2263,14 +2259,16 @@ std::string ACKDescriptor::getFieldAsString(void *object, int field, int i) cons
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    ACK *pp = (ACK *)object; (void)pp;
+    UdpPacket *pp = (UdpPacket *)object; (void)pp;
     switch (field) {
-        case 0: return double2string(pp->getEnergy());
+        case 0: return long2string(pp->getNote());
+        case 1: return long2string(pp->getSourceIpAddress());
+        case 2: return long2string(pp->getSinkIpAddress());
         default: return "";
     }
 }
 
-bool ACKDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool UdpPacketDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2278,14 +2276,16 @@ bool ACKDescriptor::setFieldAsString(void *object, int field, int i, const char 
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    ACK *pp = (ACK *)object; (void)pp;
+    UdpPacket *pp = (UdpPacket *)object; (void)pp;
     switch (field) {
-        case 0: pp->setEnergy(string2double(value)); return true;
+        case 0: pp->setNote(string2long(value)); return true;
+        case 1: pp->setSourceIpAddress(string2long(value)); return true;
+        case 2: pp->setSinkIpAddress(string2long(value)); return true;
         default: return false;
     }
 }
 
-const char *ACKDescriptor::getFieldStructName(void *object, int field) const
+const char *UdpPacketDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2295,11 +2295,13 @@ const char *ACKDescriptor::getFieldStructName(void *object, int field) const
     }
     static const char *fieldStructNames[] = {
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
-void *ACKDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *UdpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2307,7 +2309,285 @@ void *ACKDescriptor::getFieldStructPointer(void *object, int field, int i) const
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    ACK *pp = (ACK *)object; (void)pp;
+    UdpPacket *pp = (UdpPacket *)object; (void)pp;
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+Register_Class(Data);
+
+Data::Data(const char *name, int kind) : cPacket(name,kind)
+{
+    this->note_var = 0;
+    this->time_var = 0;
+    this->value_var = 0;
+}
+
+Data::Data(const Data& other) : cPacket(other)
+{
+    copy(other);
+}
+
+Data::~Data()
+{
+}
+
+Data& Data::operator=(const Data& other)
+{
+    if (this==&other) return *this;
+    cPacket::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Data::copy(const Data& other)
+{
+    this->note_var = other.note_var;
+    this->time_var = other.time_var;
+    this->value_var = other.value_var;
+}
+
+void Data::parsimPack(cCommBuffer *b)
+{
+    cPacket::parsimPack(b);
+    doPacking(b,this->note_var);
+    doPacking(b,this->time_var);
+    doPacking(b,this->value_var);
+}
+
+void Data::parsimUnpack(cCommBuffer *b)
+{
+    cPacket::parsimUnpack(b);
+    doUnpacking(b,this->note_var);
+    doUnpacking(b,this->time_var);
+    doUnpacking(b,this->value_var);
+}
+
+int Data::getNote() const
+{
+    return note_var;
+}
+
+void Data::setNote(int note)
+{
+    this->note_var = note;
+}
+
+double Data::getTime() const
+{
+    return time_var;
+}
+
+void Data::setTime(double time)
+{
+    this->time_var = time;
+}
+
+const char * Data::getValue() const
+{
+    return value_var.c_str();
+}
+
+void Data::setValue(const char * value)
+{
+    this->value_var = value;
+}
+
+class DataDescriptor : public cClassDescriptor
+{
+  public:
+    DataDescriptor();
+    virtual ~DataDescriptor();
+
+    virtual bool doesSupport(cObject *obj) const;
+    virtual const char *getProperty(const char *propertyname) const;
+    virtual int getFieldCount(void *object) const;
+    virtual const char *getFieldName(void *object, int field) const;
+    virtual int findField(void *object, const char *fieldName) const;
+    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
+    virtual const char *getFieldTypeString(void *object, int field) const;
+    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
+    virtual int getArraySize(void *object, int field) const;
+
+    virtual std::string getFieldAsString(void *object, int field, int i) const;
+    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
+
+    virtual const char *getFieldStructName(void *object, int field) const;
+    virtual void *getFieldStructPointer(void *object, int field, int i) const;
+};
+
+Register_ClassDescriptor(DataDescriptor);
+
+DataDescriptor::DataDescriptor() : cClassDescriptor("wsn_energy::Data", "cPacket")
+{
+}
+
+DataDescriptor::~DataDescriptor()
+{
+}
+
+bool DataDescriptor::doesSupport(cObject *obj) const
+{
+    return dynamic_cast<Data *>(obj)!=NULL;
+}
+
+const char *DataDescriptor::getProperty(const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? basedesc->getProperty(propertyname) : NULL;
+}
+
+int DataDescriptor::getFieldCount(void *object) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+}
+
+unsigned int DataDescriptor::getFieldTypeFlags(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeFlags(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+}
+
+const char *DataDescriptor::getFieldName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldNames[] = {
+        "note",
+        "time",
+        "value",
+    };
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+}
+
+int DataDescriptor::findField(void *object, const char *fieldName) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    if (fieldName[0]=='t' && strcmp(fieldName, "time")==0) return base+1;
+    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+2;
+    return basedesc ? basedesc->findField(object, fieldName) : -1;
+}
+
+const char *DataDescriptor::getFieldTypeString(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldTypeString(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldTypeStrings[] = {
+        "int",
+        "double",
+        "string",
+    };
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+}
+
+const char *DataDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldProperty(object, field, propertyname);
+        field -= basedesc->getFieldCount(object);
+    }
+    switch (field) {
+        default: return NULL;
+    }
+}
+
+int DataDescriptor::getArraySize(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getArraySize(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    Data *pp = (Data *)object; (void)pp;
+    switch (field) {
+        default: return 0;
+    }
+}
+
+std::string DataDescriptor::getFieldAsString(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldAsString(object,field,i);
+        field -= basedesc->getFieldCount(object);
+    }
+    Data *pp = (Data *)object; (void)pp;
+    switch (field) {
+        case 0: return long2string(pp->getNote());
+        case 1: return double2string(pp->getTime());
+        case 2: return oppstring2string(pp->getValue());
+        default: return "";
+    }
+}
+
+bool DataDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->setFieldAsString(object,field,i,value);
+        field -= basedesc->getFieldCount(object);
+    }
+    Data *pp = (Data *)object; (void)pp;
+    switch (field) {
+        case 0: pp->setNote(string2long(value)); return true;
+        case 1: pp->setTime(string2double(value)); return true;
+        case 2: pp->setValue((value)); return true;
+        default: return false;
+    }
+}
+
+const char *DataDescriptor::getFieldStructName(void *object, int field) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructName(object, field);
+        field -= basedesc->getFieldCount(object);
+    }
+    static const char *fieldStructNames[] = {
+        NULL,
+        NULL,
+        NULL,
+    };
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+}
+
+void *DataDescriptor::getFieldStructPointer(void *object, int field, int i) const
+{
+    cClassDescriptor *basedesc = getBaseClassDescriptor();
+    if (basedesc) {
+        if (field < basedesc->getFieldCount(object))
+            return basedesc->getFieldStructPointer(object, field, i);
+        field -= basedesc->getFieldCount(object);
+    }
+    Data *pp = (Data *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }

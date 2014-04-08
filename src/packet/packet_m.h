@@ -109,6 +109,10 @@ namespace wsn_energy {
  * 	CHANNEL_CCA_REQUEST = 100;
  * 	CHANNEL_CLEAR   	= 101;
  * 	CHANNEL_BUSY    	= 102;
+ * 	
+ * 	
+ * 	COMMAND             = 115;
+ * 	DATA				= 114;
  * }
  * </pre>
  */
@@ -154,7 +158,9 @@ enum COMMAND_AND_RESULT {
     APP_ENVIRON_FLAG = 92,
     CHANNEL_CCA_REQUEST = 100,
     CHANNEL_CLEAR = 101,
-    CHANNEL_BUSY = 102
+    CHANNEL_BUSY = 102,
+    COMMAND = 115,
+    DATA = 114
 };
 
 /**
@@ -176,6 +182,43 @@ enum IP_PACKET_TYPE {
     NET_ICMP_ACK = 2,
     NET_DATA = 3
 };
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet Command{
+ * 	int note;
+ * }
+ * </pre>
+ */
+class Command : public ::cPacket
+{
+  protected:
+    int note_var;
+
+  private:
+    void copy(const Command& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const Command&);
+
+  public:
+    Command(const char *name=NULL, int kind=0);
+    Command(const Command& other);
+    virtual ~Command();
+    Command& operator=(const Command& other);
+    virtual Command *dup() const {return new Command(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getNote() const;
+    virtual void setNote(int note);
+};
+
+inline void doPacking(cCommBuffer *b, Command& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Command& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
@@ -329,11 +372,10 @@ inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
  *     
  * 	int type;	
  * 
+ * 	bool isBroadcast;
+ * 
  *     int senderIpAddress; 
  *     int recverIpAddress; 
- * 
- * 	int sourceIpAddress; 
- * 	int sinkIpAddress;   
  * }
  * </pre>
  */
@@ -342,10 +384,9 @@ class IpPacket : public ::cPacket
   protected:
     int note_var;
     int type_var;
+    bool isBroadcast_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
-    int sourceIpAddress_var;
-    int sinkIpAddress_var;
 
   private:
     void copy(const IpPacket& other);
@@ -368,14 +409,12 @@ class IpPacket : public ::cPacket
     virtual void setNote(int note);
     virtual int getType() const;
     virtual void setType(int type);
+    virtual bool getIsBroadcast() const;
+    virtual void setIsBroadcast(bool isBroadcast);
     virtual int getSenderIpAddress() const;
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;
     virtual void setRecverIpAddress(int recverIpAddress);
-    virtual int getSourceIpAddress() const;
-    virtual void setSourceIpAddress(int sourceIpAddress);
-    virtual int getSinkIpAddress() const;
-    virtual void setSinkIpAddress(int sinkIpAddress);
 };
 
 inline void doPacking(cCommBuffer *b, IpPacket& obj) {obj.parsimPack(b);}
@@ -384,51 +423,10 @@ inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet Data extends IpPacket{
- * 	double time;  
- * 	
- * 	string value; 
- * }
- * </pre>
- */
-class Data : public ::wsn_energy::IpPacket
-{
-  protected:
-    double time_var;
-    opp_string value_var;
-
-  private:
-    void copy(const Data& other);
-
-  protected:
-    // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Data&);
-
-  public:
-    Data(const char *name=NULL, int kind=0);
-    Data(const Data& other);
-    virtual ~Data();
-    Data& operator=(const Data& other);
-    virtual Data *dup() const {return new Data(*this);}
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
-
-    // field getter/setter methods
-    virtual double getTime() const;
-    virtual void setTime(double time);
-    virtual const char * getValue() const;
-    virtual void setValue(const char * value);
-};
-
-inline void doPacking(cCommBuffer *b, Data& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
-
-/**
- * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
  * packet DIO  extends IpPacket{
  * 	int dodagID; 
  * 	int version; 
+ * 	
  * 	unsigned long rank;   
  * 	
  * 	double selfEnergy; 
@@ -513,39 +511,94 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet ACK extends IpPacket{
- * 	double energy;
+ * packet UdpPacket{
+ *     int note; 	
+ *     
+ *     int sourceIpAddress; 
+ * 	int sinkIpAddress;   
  * }
  * </pre>
  */
-class ACK : public ::wsn_energy::IpPacket
+class UdpPacket : public ::cPacket
 {
   protected:
-    double energy_var;
+    int note_var;
+    int sourceIpAddress_var;
+    int sinkIpAddress_var;
 
   private:
-    void copy(const ACK& other);
+    void copy(const UdpPacket& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const ACK&);
+    bool operator==(const UdpPacket&);
 
   public:
-    ACK(const char *name=NULL, int kind=0);
-    ACK(const ACK& other);
-    virtual ~ACK();
-    ACK& operator=(const ACK& other);
-    virtual ACK *dup() const {return new ACK(*this);}
+    UdpPacket(const char *name=NULL, int kind=0);
+    UdpPacket(const UdpPacket& other);
+    virtual ~UdpPacket();
+    UdpPacket& operator=(const UdpPacket& other);
+    virtual UdpPacket *dup() const {return new UdpPacket(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual double getEnergy() const;
-    virtual void setEnergy(double energy);
+    virtual int getNote() const;
+    virtual void setNote(int note);
+    virtual int getSourceIpAddress() const;
+    virtual void setSourceIpAddress(int sourceIpAddress);
+    virtual int getSinkIpAddress() const;
+    virtual void setSinkIpAddress(int sinkIpAddress);
 };
 
-inline void doPacking(cCommBuffer *b, ACK& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, ACK& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet Data{
+ *     int note; 	
+ *      
+ *     double time;  
+ * 	string value; 
+ * }
+ * </pre>
+ */
+class Data : public ::cPacket
+{
+  protected:
+    int note_var;
+    double time_var;
+    opp_string value_var;
+
+  private:
+    void copy(const Data& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const Data&);
+
+  public:
+    Data(const char *name=NULL, int kind=0);
+    Data(const Data& other);
+    virtual ~Data();
+    Data& operator=(const Data& other);
+    virtual Data *dup() const {return new Data(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getNote() const;
+    virtual void setNote(int note);
+    virtual double getTime() const;
+    virtual void setTime(double time);
+    virtual const char * getValue() const;
+    virtual void setValue(const char * value);
+};
+
+inline void doPacking(cCommBuffer *b, Data& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Data& obj) {obj.parsimUnpack(b);}
 
 }; // end namespace wsn_energy
 

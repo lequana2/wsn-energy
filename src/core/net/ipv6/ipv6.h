@@ -17,7 +17,7 @@ namespace wsn_energy {
 class IPv6 : public myModule
 {
   private:
-    bool isWaiting;
+    bool needWaiting;
 
   public:
     // RPL

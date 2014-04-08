@@ -13,13 +13,11 @@ namespace wsn_energy {
 
 void RDCdriver::initialize()
 {
-  this->buffer = new FrameRDC;
-  buffer->setNote(LAYER_RDC_SEND);
 }
 
 void RDCdriver::finish()
 {
-  cancelAndDelete(buffer);
+//  cancelAndDelete(buffer);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -42,12 +40,13 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
 
     case LAYER_MAC_SEND: /* forward data */
     {
-      // Clean old buffer
-      delete buffer->decapsulate();
+      // WSN Free old buffer (?)
+      this->buffer = new FrameRDC;
+      buffer->setNote(LAYER_RDC_SEND);
       buffer->encapsulate(packet);
 
       // WSN need duty cycling trigger here
-      sendMessageToLower(buffer->dup());
+      sendMessageToLower(buffer);
     }
       break; /* forward data */
   }

@@ -9,19 +9,27 @@
 #ifndef __WSN_ENERGY_SOURCE_H
 #define __WSN_ENERGY_SOURCE_H
 
-#include <omnetpp.h>
+#define MAX 900
+
+#include <myModule.h>
 
 namespace wsn_energy {
 
-class Client : public cSimpleModule
+class Client : public myModule
 {
   private:
+    int maximumPacket;
     virtual void newData();
 
+  protected:
+    void initialize();
+    void handleMessage(cMessage*);
+    void finish();
+
   public:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void processSelfMessage(cPacket*);
+    virtual void processUpperLayerMessage(cPacket*);
+    virtual void processLowerLayerMessage(cPacket*);
 };
 
 }
