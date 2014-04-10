@@ -57,6 +57,7 @@ void myModule::sendMessageToLower(cPacket* packet)
 void myModule::sendCommand(int commandCode)
 {
   Command *command = new Command;
+  command->setKind(COMMAND);
   command->setNote(commandCode);
   sendMessageToLower(command);
 }
@@ -64,13 +65,15 @@ void myModule::sendCommand(int commandCode)
 void myModule::sendResult(int resultCode)
 {
   Result *result = new Result;
+  result->setKind(RESULT);
   result->setNote(resultCode);
   sendMessageToUpper(result);
 }
 
-void myModule::selfTimer(int countdownSeconds, int commandCode)
+void myModule::selfTimer(double countdownSeconds, int commandCode)
 {
   Command *command = new Command;
+  command->setKind(COMMAND);
   command->setNote(commandCode);
   scheduleAt(simTime() + countdownSeconds, command);
 }

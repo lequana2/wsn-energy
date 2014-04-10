@@ -69,6 +69,7 @@ void RPL::sendDIO()
 
   DIO *icmp = new DIO();
 
+  icmp->setMessageCode(NET_ICMP_RPL);
   icmp->setIcmpCode(NET_ICMP_DIO);
   icmp->setByteLength(DIO_LEN);
   icmp->setVersion(this->rplDag.version);
@@ -87,6 +88,7 @@ void RPL::sendDIS(int hopTTL)
 
   DIS *icmp = new DIS();
 
+  icmp->setMessageCode(NET_ICMP_RPL);
   icmp->setIcmpCode(NET_ICMP_DIO);
   icmp->setByteLength(DIS_LEN);
   icmp->setHopTTL(hopTTL);

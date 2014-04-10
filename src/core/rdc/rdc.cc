@@ -30,10 +30,13 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
     case DATA: /* Data */
     {
       this->buffer = new FrameRDC;
-      buffer->encapsulate(packet);
+      this->buffer->setKind(DATA);
+
+      this->buffer->encapsulate(packet);
 
       // WSN need duty cycling trigger here
       sendMessageToLower(buffer);
+      sendCommand(RDC_SEND);
 
       break;
     } /* Data */

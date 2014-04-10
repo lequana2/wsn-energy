@@ -53,7 +53,7 @@ void Client::initialize()
 
 void Client::handleMessage(cMessage *msg)
 {
-  // sensor stops working
+  /* sensor stops working */
   if (check_and_cast<RadioDriver*>(this->getParentModule()->getModuleByPath(".radio")) == POWER_DOWN)
   {
     delete msg;

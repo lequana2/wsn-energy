@@ -13,9 +13,9 @@ cplusplus {{
 namespace wsn_energy;
 
 enum MESSAGE_KIND{
-	COMMAND = 3; // command to lower
-	RESULT  = 4; // result from lower
-	DATA    = 5; // data to buffer lower/upper
+	COMMAND = 4; // YELLOW command to lower
+	RESULT  = 1; // GREEN result from lower
+	DATA    = 2; // BLUE data to buffer lower/upper
 };
 
 // Environment

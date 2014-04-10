@@ -30,7 +30,7 @@ class myModule : public cSimpleModule
 
     void sendCommand(int);
     void sendResult(int);
-    void selfTimer(int,int);
+    void selfTimer(double,int);
 };
 
 } //namespace

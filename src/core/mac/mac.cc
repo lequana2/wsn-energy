@@ -21,13 +21,13 @@ void MACdriver::processSelfMessage(cPacket* packet)
   {
     case COMMAND: /* Command */
     {
-      switch (check_and_cast<Command*>(packet)->getKind())
+      switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case CHANNEL_CCA_REQUEST: /* self request CCA */
+        case CHANNEL_CCA_REQUEST: /* perform CCA*/
         {
-          sendMessageToLower(packet);
-        }
-          break; /* request CCA */
+          sendCommand(CHANNEL_CCA_REQUEST);
+          break;
+        } /* perform CCA */
 
         default:
           ev << "Unknown command" << endl;
@@ -108,37 +108,25 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_OK: /* callback after sending */
         {
-          Result* result = new Result;
-          result->setKind(RESULT);
-          result->setNote(MAC_SEND_OK);
-          sendMessageToUpper(result);
+          sendResult(MAC_SEND_OK);
           break;
         } /* callback after sending */
 
         case RDC_SEND_NO_ACK: /* callback after sending */
         {
-          Result* result = new Result;
-          result->setKind(RESULT);
-          result->setNote(MAC_SEND_NO_ACK);
-          sendMessageToUpper(result);
+          sendResult(MAC_SEND_NO_ACK);
           break;
         } /* callback after sending */
 
         case RDC_SEND_FATAL: /* callback after sending */
         {
-          Result* result = new Result;
-          result->setKind(RESULT);
-          result->setNote(MAC_SEND_ERROR);
-          sendMessageToUpper(result);
+          sendResult(MAC_SEND_FATAL);
           break;
         } /* callback after sending */
 
         case RDC_SEND_COL: /* callback after sending */
         {
-          Result* result = new Result;
-          result->setKind(RESULT);
-          result->setNote(MAC_SEND_ERROR);
-          sendMessageToUpper(result);
+          sendResult(MAC_SEND_ERROR);
           break;
         } /* callback after sending */
 
@@ -172,6 +160,7 @@ void MACdriver::receivePacket(FrameMAC* frameMac)
 
   IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
   ipPacket->setKind(DATA);
+
   sendMessageToUpper(ipPacket);
 
   delete frameMac;

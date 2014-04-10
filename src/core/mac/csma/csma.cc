@@ -15,7 +15,7 @@
 #define MAX_BACKOFF_TRANSMISSION  3 // 3 tries per packet
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 namespace wsn_energy {
@@ -27,11 +27,7 @@ void csma::deferPacket()
   /* dismiss + announce failure duty */
   if (buffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
-    Result* result = new Result;
-    result->setKind(RESULT);
-    result->setNote(MAC_SEND_ERROR);
-    sendMessageToUpper(result);
-
+    sendResult(MAC_SEND_ERROR);
     delete buffer;     // clear buffer
   }
   /* unslotted csma */
@@ -55,10 +51,7 @@ void csma::deferPacket()
     buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 
     /* request to perform CCA */
-    Command *requestCCA = new Command;
-    requestCCA->setKind(COMMAND);
-    requestCCA->setNote(CHANNEL_CCA_REQUEST);
-    scheduleAt(simTime() + backoff, requestCCA);
+    selfTimer(backoff, CHANNEL_CCA_REQUEST);
   }
 }
 

@@ -227,11 +227,11 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
           }
           break; /* transmitting */
 
-        case PHY_LISTENING:/* turn on listening */
+        case RDC_LISTEN:/* turn on listening */
           selfTimer(0, PHY_SWITCH_LISTEN);
           break; /* turn on listening */
 
-        case PHY_IDLING: /* turn off listening */
+        case RDC_IDLE: /* turn off listening */
           selfTimer(0, PHY_SWITCH_IDLE);
           break; /* turn off listening */
 
