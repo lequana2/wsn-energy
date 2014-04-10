@@ -69,7 +69,7 @@ void RPL::sendDIO()
 
   DIO *icmp = new DIO();
 
-  icmp->setType(NET_ICMP_DIO);
+  icmp->setIcmpCode(NET_ICMP_DIO);
   icmp->setByteLength(DIO_LEN);
   icmp->setVersion(this->rplDag.version);
   icmp->setRank(this->rplDag.rank);
@@ -80,18 +80,43 @@ void RPL::sendDIO()
   net->multicast(icmp);
 }
 
-void RPL::sendDIS(int convergence)
+void RPL::sendDIS(int hopTTL)
 {
   if (DEBUG)
     ev << "Broadcast DIS" << endl;
 
   DIS *icmp = new DIS();
 
-  icmp->setType(NET_ICMP_DIO);
+  icmp->setIcmpCode(NET_ICMP_DIO);
   icmp->setByteLength(DIS_LEN);
-  icmp->setConvergence(convergence);
+  icmp->setHopTTL(hopTTL);
 
   net->multicast(icmp);
+}
+
+void RPL::processICMP(IpPacket *packet)
+{
+  switch (packet->getIcmpCode())
+  {
+    case NET_ICMP_DIO: /* receiving DIO */
+    {
+      this->processDIO(check_and_cast<DIO*>(packet));
+      break;
+    } /* receiving DIO */
+
+    case NET_ICMP_DIS: /* receiving DIS */
+    {
+      this->processDIS(check_and_cast<DIS*>(packet));
+      break;
+    } /* receiving DIS */
+
+    default:
+      if (DEBUG)
+        ev << "Missing resolution" << endl;
+      break;
+  }
+
+  delete packet; // done icmp
 }
 
 void RPL::processDIO(DIO* dio)

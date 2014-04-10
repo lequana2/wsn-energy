@@ -27,6 +27,10 @@ class myModule : public cSimpleModule
 
     void sendMessageToUpper(cPacket*);
     void sendMessageToLower(cPacket*);
+
+    void sendCommand(int);
+    void sendResult(int);
+    void selfTimer(int,int);
 };
 
 } //namespace

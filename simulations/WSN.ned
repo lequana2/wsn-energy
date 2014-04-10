@@ -38,6 +38,8 @@ network WSN
         int height  @unit(m);
 
 		int scheme;
+		int rand;
+		
         int isPolling;
         double polling;
         

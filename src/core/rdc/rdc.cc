@@ -17,7 +17,6 @@ void RDCdriver::initialize()
 
 void RDCdriver::finish()
 {
-//  cancelAndDelete(buffer);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -26,104 +25,108 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
 void RDCdriver::processUpperLayerMessage(cPacket* packet)
 {
-  switch (check_and_cast<FrameMAC*>(packet)->getNote())
+  switch (packet->getKind())
   {
-    case CHANNEL_CCA_REQUEST: /* request CCA */
+    case DATA: /* Data */
     {
-      FrameRDC *requestCCA = new FrameRDC;
-      requestCCA->setNote(CHANNEL_CCA_REQUEST);
-      sendMessageToLower(requestCCA);
-
-      delete packet;
-    } /* request CCA */
-      break;
-
-    case LAYER_MAC_SEND: /* forward data */
-    {
-      // WSN Free old buffer (?)
       this->buffer = new FrameRDC;
-      buffer->setNote(LAYER_RDC_SEND);
       buffer->encapsulate(packet);
 
       // WSN need duty cycling trigger here
       sendMessageToLower(buffer);
-    }
-      break; /* forward data */
+
+      break;
+    } /* Data */
+
+    case COMMAND: /* Command */
+    {
+      switch (check_and_cast<Command*>(packet)->getNote())
+      {
+        case CHANNEL_CCA_REQUEST: /* request CCA */
+        {
+          sendCommand(CHANNEL_CCA_REQUEST);
+          break;
+        } /* request CCA */
+
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+    } /* Command */
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
   }
 }
 
 void RDCdriver::processLowerLayerMessage(cPacket* packet)
 {
-  switch (check_and_cast<FrameRDC*>(packet)->getNote())
+  switch (packet->getKind())
   {
-    case CHANNEL_CLEAR: /* Channel is clear */
+    case DATA: /* Data */
     {
-      FrameMAC* frameMac = new FrameMAC;
-      frameMac->setNote(CHANNEL_CLEAR);
+      FrameMAC *frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+      frameMac->setKind(DATA);
       sendMessageToUpper(frameMac);
 
+      // delete header
       delete packet;
-    }
-      break; /* Channel is busy */
+      break;
+    } /* Data */
 
-    case CHANNEL_BUSY: /* Channel is clear */
+    case RESULT: /* Result */
     {
-      FrameMAC* frameMac = new FrameMAC;
-      frameMac->setNote(CHANNEL_BUSY);
-      sendMessageToUpper(frameMac);
+      switch (check_and_cast<Result*>(packet)->getNote())
+      {
+        case CHANNEL_CLEAR: /* Channel is clear */
+        {
+          sendResult(CHANNEL_CLEAR);
+          break;
+        } /* Channel is busy */
 
-      delete packet;
-    }
-      break; /* Channel is busy */
+        case CHANNEL_BUSY: /* Channel is clear */
+        {
+          sendResult(CHANNEL_BUSY);
+          break;
+        }/* Channel is busy */
 
-    case LAYER_RADIO_PACKET_OVERSIZE: /* Packet is oversized */
-    {
-      // WSN Internal error, no need to resend
-      FrameMAC* frameMac = new FrameMAC;
-      frameMac->setNote(LAYER_RDC_SEND_ERR);
-      sendMessageToUpper(frameMac);
+        case PHY_TX_ERR: /* Internal error */
+        {
+          sendResult(PHY_TX_ERR);
+          break;
+        }/* Internal error */
 
-      delete packet;
-    }
-      break; /* Packet is oversized */
+        case PHY_TX_OK: /* callback after sending */
+        {
+          sendResult(PHY_TX_OK);
+          break;
+        }/* callback after sending */
 
-    case LAYER_RADIO_SEND_OK: /* callback after sending */
-    {
-      FrameMAC* frameMac = new FrameMAC;
-      frameMac->setNote(LAYER_RDC_SEND_OK);
-      sendMessageToUpper(frameMac);
+        default:
+          ev << "Unknown result" << endl;
+          break;
+      }
+      delete packet; // done result
+      break;
+    } /* Result */
 
-      delete packet;
-    }
-      break; /* callback after sending */
-
-    case LAYER_RADIO_RECV_OK: /* Radio received a packet */
-    {
-      FrameMAC* frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
-      frameMac->setNote(LAYER_RDC_RECV_OK);
-      sendMessageToUpper(frameMac);
-
-      delete packet;
-    }
-      break; /* Radio received a packet */
-
-    case LAYER_RADIO_RECV_NOT_OK: /* Radio received an incomplete message */
-      break; /* Radio received an incomplete message */
+    default:
+      ev << "Unknown kind" << endl;
+      break;
   }
 }
 
 void RDCdriver::on()
 {
-  FrameRDC *frame = new FrameRDC;
-  frame->setNote(LAYER_RDC_LISTEN_ON);
-  sendMessageToLower(frame);
+  sendCommand(RDC_LISTEN);
 }
 
 void RDCdriver::off()
 {
-  FrameRDC *frame = new FrameRDC;
-  frame->setNote(LAYER_RDC_LISTEN_OFF);
-  sendMessageToLower(frame);
+  sendCommand(RDC_IDLE);
 }
 
 } /* namespace wsn_energy */

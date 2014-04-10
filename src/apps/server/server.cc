@@ -16,11 +16,7 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-  Data *msg = new Data;
-  msg->setKind(COMMAND);
-  msg->setNote(RPL_CONSTRUCT);
-
-  scheduleAt(simTime(), msg);
+  selfTimer(0, RPL_CONSTRUCT);
 }
 
 void Server::processSelfMessage(cPacket* packet)
@@ -43,7 +39,7 @@ void Server::processLowerLayerMessage(cPacket* packet)
 {
   Data* data = check_and_cast<Data*>(packet);
 
-  this->getParentModule()->bubble(data->getValue());
+  //  this->getParentModule()->bubble(data->getValue());
 
   // End to end statistics
   ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);

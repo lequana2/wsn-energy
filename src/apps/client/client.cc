@@ -16,42 +16,44 @@ Define_Module(Client);
 
 void Client::initialize()
 {
+  this->maximumPacket = 0;
+
   /* Contiki test scheme */
   switch ((int) this->getParentModule()->getParentModule()->par("scheme").doubleValue())
   {
     case 1: /* one event */
     {
-      cPacket *event = new cPacket;
-      event->setKind(APP_SENSING_FLAG);
+      Command *command = new Command;
+      command->setKind(COMMAND);
+      command->setNote(APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        scheduleAt(simTime() + 1, event->dup());
+        selfTimer(1, APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        scheduleAt(simTime() + 2, event->dup());
+        selfTimer(2, APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        scheduleAt(simTime() + 3, event->dup());
-    }
-      break; /* one event */
+        selfTimer(3, APP_SENSING_FLAG);
+
+      break;
+    } /* one event */
 
     case 2: /* ignite periodically */
     {
       newData();
-    }
-      break; /* ignite periodically */
+      break;
+    } /* ignite periodically */
 
     default:
       ev << "Just construct " << endl;
       break;
   }
-
-  this->maximumPacket = 0;
 }
 
 void Client::handleMessage(cMessage *msg)
 {
-  // stop working
+  // sensor stops working
   if (check_and_cast<RadioDriver*>(this->getParentModule()->getModuleByPath(".radio")) == POWER_DOWN)
   {
     delete msg;
@@ -61,32 +63,44 @@ void Client::handleMessage(cMessage *msg)
   myModule::handleMessage(msg);
 }
 
-void Client::finish()
+void Client::processSelfMessage(cPacket* packet)
 {
-}
-
-void Client::processSelfMessage(cPacket* msg)
-{
-  if (msg->getKind() == APP_SENSING_FLAG)
+  switch (packet->getKind())
   {
-    Data *data = new Data;
-
-    data->setKind(DATA);
-    data->setValue("Hello");
-    data->setTime(simTime().dbl());
-    sendMessageToLower(data);
-
-    delete msg;
-
-    /* End to end statistics */
-    ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
-
-    if ((int) this->getParentModule()->getParentModule()->par("scheme").doubleValue() == 2)
+    case COMMAND: /* Command */
     {
-      // control maximum number
-      if (this->maximumPacket++ < MAX)
-        newData();
+      switch (check_and_cast<Command*>(packet)->getNote())
+      {
+        case APP_SENSING_FLAG: /* new data */
+        {
+          Data *data = new Data;
+          data->setKind(DATA);
+          data->setTime(simTime().dbl());
+          data->setValue("Hello");
+
+          sendMessageToLower(data);
+
+          /* End to end statistics */
+          ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
+
+          if ((int) this->getParentModule()->getParentModule()->par("scheme").doubleValue() == 2)
+            if (this->maximumPacket++ < MAX)  // control maximum number
+              newData();
+          break; /* new data */
+        }
+
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+      /* Command */
     }
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
   }
 }
 
@@ -98,24 +112,25 @@ void Client::processUpperLayerMessage(cPacket*)
 
 void Client::processLowerLayerMessage(cPacket*)
 {
-  /* ??? feedback */
   return;
 }
 
 void Client::newData()
 {
   int sendInterval = 4; // second
-  int randomness = 4;   // second
+  int randomness = 4; // second
 
-  // avoid immediately sending
-  double time = sendInterval + (((rand() % randomness) + 1) / 1000.0);
+  // avoid immediately sending + simulate not-synchronized clock
+  double time = 0;
 
-  cPacket *event = new cPacket;
-  event->setKind(APP_SENSING_FLAG);
+  if (getParentModule()->getParentModule()->par("rand").doubleValue() == 0)
+    time = sendInterval + (rand() % (randomness * 1000)) / 1000.0;
+  else if (getParentModule()->getParentModule()->par("rand").doubleValue() == 1)
+    time = sendInterval + intuniform(0, randomness * 1000) / 1000.0;
 
-  this->getParentModule()->bubble("Data");
+//  this->getParentModule()->bubble("Data");
 
-  scheduleAt(simTime() + time, event);
+  selfTimer(time, APP_SENSING_FLAG);
 }
 
 }

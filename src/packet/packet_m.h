@@ -23,164 +23,211 @@ namespace wsn_energy {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum COMMAND_AND_RESULT{
- * 	
- * 	NODE_STARTUP  = 0; 
- * 	
- * 	
- * 	OUT_OF_ENERGY = 1; 
- * 	NODE_DESTRUCT = 2; 
- * 	
- * 	
- * 	RPL_CONSTRUCT = 3; 
- * 	RPL_SOLICIT   = 4; 
- * 
- * 	
- * 	LAYER_RADIO_BEGIN_CCA       = 10; 
- * 	LAYER_RADIO_END_CCA         = 11; 
- * 	
- * 	
- *  	LAYER_RADIO_SWITCH_TRANSMIT	= 12; 
- *  	LAYER_RADIO_SWITCH_LISTEN	= 13; 
- *  	LAYER_RADIO_SWITCH_IDLE     = 14; 
- *  	
- *  	
- *  	LAYER_RADIO_BEGIN_TRANSMIT  = 15; 
- * 	LAYER_RADIO_END_TRANSMIT	= 16; 
- * 
- * 	
- *  	LAYER_RADIO_LISTENING    = 17; 
- *  	LAYER_RADIO_IDLING  	 = 18; 
- *  	
- *  	
- * 	LAYER_RADIO_SEND_OK			    = 19; 
- * 	LAYER_RADIO_PACKET_OVERSIZE     = 21; 
- * 
- * 	
- * 	LAYER_RADIO_RECV_OK			= 22; 
- * 	LAYER_RADIO_RECV_NOT_OK		= 23; 
- * 
- * 	
- * 	LAYER_RDC_SEND				= 30; 
- * 	
- * 	
- * 	LAYER_RDC_SEND_OK			= 31; 
- * 	LAYER_RDC_SEND_ERR   		= 32; 
- * 
- * 	
- * 	LAYER_RDC_LISTEN_ON			= 33; 
- * 	LAYER_RDC_LISTEN_OFF		= 34; 
- * 	
- * 	
- * 	LAYER_RDC_RECV_OK			= 35; 
- * 	LAYER_RDC_RECV_ACK			= 36; 
- * 
- * 	
- * 	LAYER_MAC_DEFER		= 50; 
- * 	
- * 	
- * 	LAYER_MAC_SEND_OK	= 51; 
- * 	LAYER_MAC_SEND_ERR	= 52; 
- * 	LAYER_MAC_NO_ACK  	= 53; 
- * 
- * 	
- * 	LAYER_MAC_RECV_OK	  = 54; 
- * 	LAYER_MAC_RECV_NOT_OK = 55; 
- * 
- * 	
- * 	LAYER_MAC_SEND        = 56; 
- * 
- * 	
- * 	LAYER_NET_CHECK_BUFFER = 70; 
- * 	
- * 	
- * 	LAYER_NET_SEND_OK	   = 71; 
- * 	LAYER_NET_SEND_NOT_OK  = 72; 
- * 	
- * 	
- * 	LAYER_NET_RECV_OK	   = 73; 
- * 	
- * 	
- * 	APP_WORKING_FLAG = 90; 
- * 	APP_SENSING_FLAG = 91; 
- * 	APP_ENVIRON_FLAG = 92; 
- * 	
- * 	
- * 	CHANNEL_CCA_REQUEST = 100;
- * 	CHANNEL_CLEAR   	= 101;
- * 	CHANNEL_BUSY    	= 102;
- * 	
- * 	
- * 	COMMAND             = 115;
- * 	DATA				= 114;
- * }
+ * enum MESSAGE_KIND{
+ * 	COMMAND = 3; 
+ * 	RESULT  = 4; 
+ * 	DATA    = 5; 
+ * };
  * </pre>
  */
-enum COMMAND_AND_RESULT {
-    NODE_STARTUP = 0,
-    OUT_OF_ENERGY = 1,
-    NODE_DESTRUCT = 2,
-    RPL_CONSTRUCT = 3,
-    RPL_SOLICIT = 4,
-    LAYER_RADIO_BEGIN_CCA = 10,
-    LAYER_RADIO_END_CCA = 11,
-    LAYER_RADIO_SWITCH_TRANSMIT = 12,
-    LAYER_RADIO_SWITCH_LISTEN = 13,
-    LAYER_RADIO_SWITCH_IDLE = 14,
-    LAYER_RADIO_BEGIN_TRANSMIT = 15,
-    LAYER_RADIO_END_TRANSMIT = 16,
-    LAYER_RADIO_LISTENING = 17,
-    LAYER_RADIO_IDLING = 18,
-    LAYER_RADIO_SEND_OK = 19,
-    LAYER_RADIO_PACKET_OVERSIZE = 21,
-    LAYER_RADIO_RECV_OK = 22,
-    LAYER_RADIO_RECV_NOT_OK = 23,
-    LAYER_RDC_SEND = 30,
-    LAYER_RDC_SEND_OK = 31,
-    LAYER_RDC_SEND_ERR = 32,
-    LAYER_RDC_LISTEN_ON = 33,
-    LAYER_RDC_LISTEN_OFF = 34,
-    LAYER_RDC_RECV_OK = 35,
-    LAYER_RDC_RECV_ACK = 36,
-    LAYER_MAC_DEFER = 50,
-    LAYER_MAC_SEND_OK = 51,
-    LAYER_MAC_SEND_ERR = 52,
-    LAYER_MAC_NO_ACK = 53,
-    LAYER_MAC_RECV_OK = 54,
-    LAYER_MAC_RECV_NOT_OK = 55,
-    LAYER_MAC_SEND = 56,
-    LAYER_NET_CHECK_BUFFER = 70,
-    LAYER_NET_SEND_OK = 71,
-    LAYER_NET_SEND_NOT_OK = 72,
-    LAYER_NET_RECV_OK = 73,
-    APP_WORKING_FLAG = 90,
-    APP_SENSING_FLAG = 91,
-    APP_ENVIRON_FLAG = 92,
-    CHANNEL_CCA_REQUEST = 100,
-    CHANNEL_CLEAR = 101,
-    CHANNEL_BUSY = 102,
-    COMMAND = 115,
-    DATA = 114
+enum MESSAGE_KIND {
+    COMMAND = 3,
+    RESULT = 4,
+    DATA = 5
 };
 
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum IP_PACKET_TYPE
- * {
- *     
- * 	NET_ICMP_DIO    	  = 0;	
- * 	NET_ICMP_DIS    	  = 1;	
- * 	NET_ICMP_ACK    	  = 2;	
- * 	NET_DATA        	  = 3; 
+ * enum SPECIAL_EVENT{
+ * 	NODE_STARTUP  = 0; 
+ * 	OUT_OF_ENERGY = 1; 
+ * 	NODE_DESTRUCT = 2; 
+ * };
+ * </pre>
+ */
+enum SPECIAL_EVENT {
+    NODE_STARTUP = 0,
+    OUT_OF_ENERGY = 1,
+    NODE_DESTRUCT = 2
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum COMMAND_FROM_APP{
+ * 	APP_WORKING_FLAG = 0; 
+ * 	APP_SENSING_FLAG = 1; 
+ * 	APP_ENVIRON_FLAG = 2; 
+ * 	
+ * 	RPL_CONSTRUCT = 3; 
+ * 	RPL_SOLICIT   = 4; 
+ * };
+ * </pre>
+ */
+enum COMMAND_FROM_APP {
+    APP_WORKING_FLAG = 0,
+    APP_SENSING_FLAG = 1,
+    APP_ENVIRON_FLAG = 2,
+    RPL_CONSTRUCT = 3,
+    RPL_SOLICIT = 4
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum COMMAND_FROM_NET{
+ *     NET_CHECK_BUFFER = 0;
+ * };
+ * </pre>
+ */
+enum COMMAND_FROM_NET {
+    NET_CHECK_BUFFER = 0
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum IP_PACKET_TYPE{
+ * 	NET_DATA        	  = 0;  
+ * 	NET_ICMP_RPL		  = 1;  
+ * 	
+ * 	NET_ICMP_DIO    	  = 2;	
+ * 	NET_ICMP_DIS    	  = 3;	
  * };
  * </pre>
  */
 enum IP_PACKET_TYPE {
-    NET_ICMP_DIO = 0,
-    NET_ICMP_DIS = 1,
-    NET_ICMP_ACK = 2,
-    NET_DATA = 3
+    NET_DATA = 0,
+    NET_ICMP_RPL = 1,
+    NET_ICMP_DIO = 2,
+    NET_ICMP_DIS = 3
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum COMMAND_FROM_MAC{
+ * 	CHANNEL_CCA_REQUEST = 70; 
+ * 	MAC_SEND_BUFFER     = 71; 
+ * };
+ * </pre>
+ */
+enum COMMAND_FROM_MAC {
+    CHANNEL_CCA_REQUEST = 70,
+    MAC_SEND_BUFFER = 71
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum RESULT_FROM_MAC{
+ * 	MAC_SEND_OK		= 0; 
+ * 	MAC_SEND_NO_ACK = 1; 
+ * 	MAC_SEND_FATAL  = 2; 
+ * 	MAC_SEND_ERROR  = 3; 
+ * };
+ * </pre>
+ */
+enum RESULT_FROM_MAC {
+    MAC_SEND_OK = 0,
+    MAC_SEND_NO_ACK = 1,
+    MAC_SEND_FATAL = 2,
+    MAC_SEND_ERROR = 3
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum COMMAND_FROM_RDC{
+ * 	RDC_SEND   = 30; 
+ * 	RDC_LISTEN = 31; 
+ * 	RDC_IDLE   = 32; 
+ * };
+ * </pre>
+ */
+enum COMMAND_FROM_RDC {
+    RDC_SEND = 30,
+    RDC_LISTEN = 31,
+    RDC_IDLE = 32
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum RESULT_FROM_RDC{
+ * 	RDC_SEND_OK     = 0; 
+ * 	RDC_SEND_NO_ACK = 1; 
+ * 	RDC_SEND_FATAL  = 2; 
+ * 	RDC_SEND_COL	= 3; 
+ * };
+ * </pre>
+ */
+enum RESULT_FROM_RDC {
+    RDC_SEND_OK = 0,
+    RDC_SEND_NO_ACK = 1,
+    RDC_SEND_FATAL = 2,
+    RDC_SEND_COL = 3
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum COMMAND_FROM_PHY{
+ * 	PHY_BEGIN_CCA       = 10; 
+ * 	PHY_END_CCA         = 11; 
+ * 	
+ *  	PHY_SWITCH_TRANSMIT	= 12; 
+ *  	PHY_SWITCH_LISTEN	= 13; 
+ *  	PHY_SWITCH_IDLE     = 14; 
+ *  	
+ *  	PHY_BEGIN_TRANSMIT  = 15; 
+ * 	PHY_END_TRANSMIT	= 16; 
+ * 
+ *  	PHY_LISTENING    = 17; 
+ *  	
+ *  	PHY_IDLING  	 = 18; 
+ * };
+ * </pre>
+ */
+enum COMMAND_FROM_PHY {
+    PHY_BEGIN_CCA = 10,
+    PHY_END_CCA = 11,
+    PHY_SWITCH_TRANSMIT = 12,
+    PHY_SWITCH_LISTEN = 13,
+    PHY_SWITCH_IDLE = 14,
+    PHY_BEGIN_TRANSMIT = 15,
+    PHY_END_TRANSMIT = 16,
+    PHY_LISTENING = 17,
+    PHY_IDLING = 18
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum RESULT_FROM_PHY{
+ * 	CHANNEL_CLEAR   	= 10; 
+ * 	CHANNEL_BUSY    	= 11; 
+ * 	
+ * 	PHY_TX_OK		 = 12; 
+ * 	PHY_TX_ERR 		 = 13; 
+ * 	PHY_BUSY		 = 14; 
+ * 	
+ * 	PHY_RECV_OK          = 15; 
+ * 	PHY_RECV_CORRUPTED   = 16; 
+ * 	PHY_RECV_INCOMPLETED = 17; 
+ * };
+ * </pre>
+ */
+enum RESULT_FROM_PHY {
+    CHANNEL_CLEAR = 10,
+    CHANNEL_BUSY = 11,
+    PHY_TX_OK = 12,
+    PHY_TX_ERR = 13,
+    PHY_BUSY = 14,
+    PHY_RECV_OK = 15,
+    PHY_RECV_CORRUPTED = 16,
+    PHY_RECV_INCOMPLETED = 17
 };
 
 /**
@@ -223,13 +270,45 @@ inline void doUnpacking(cCommBuffer *b, Command& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
+ * packet Result{
+ * 	int note;
+ * }
+ * </pre>
+ */
+class Result : public ::cPacket
+{
+  protected:
+    int note_var;
+
+  private:
+    void copy(const Result& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const Result&);
+
+  public:
+    Result(const char *name=NULL, int kind=0);
+    Result(const Result& other);
+    virtual ~Result();
+    Result& operator=(const Result& other);
+    virtual Result *dup() const {return new Result(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getNote() const;
+    virtual void setNote(int note);
+};
+
+inline void doPacking(cCommBuffer *b, Result& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Result& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
  * packet Raw{
  * 	bool error; 
- *     
- *     int note;   
- * 
- *     int radioSendId; 
- *     int radioRecvId;
  * }
  * </pre>
  */
@@ -237,9 +316,6 @@ class Raw : public ::cPacket
 {
   protected:
     bool error_var;
-    int note_var;
-    int radioSendId_var;
-    int radioRecvId_var;
 
   private:
     void copy(const Raw& other);
@@ -260,12 +336,6 @@ class Raw : public ::cPacket
     // field getter/setter methods
     virtual bool getError() const;
     virtual void setError(bool error);
-    virtual int getNote() const;
-    virtual void setNote(int note);
-    virtual int getRadioSendId() const;
-    virtual void setRadioSendId(int radioSendId);
-    virtual int getRadioRecvId() const;
-    virtual void setRadioRecvId(int radioRecvId);
 };
 
 inline void doPacking(cCommBuffer *b, Raw& obj) {obj.parsimPack(b);}
@@ -313,13 +383,10 @@ inline void doUnpacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet FrameMAC{
  *     int numberTransmission = 0; 
- *     	
- *     int note;  
- * 
- * 	int senderMacAddress; 
- * 	int recverMacAddress; 
  * 
  * 	int sequenceNumber;   
+ * 	int senderMacAddress; 
+ * 	int recverMacAddress; 
  * }
  * </pre>
  */
@@ -327,10 +394,9 @@ class FrameMAC : public ::cPacket
 {
   protected:
     int numberTransmission_var;
-    int note_var;
+    int sequenceNumber_var;
     int senderMacAddress_var;
     int recverMacAddress_var;
-    int sequenceNumber_var;
 
   private:
     void copy(const FrameMAC& other);
@@ -351,14 +417,12 @@ class FrameMAC : public ::cPacket
     // field getter/setter methods
     virtual int getNumberTransmission() const;
     virtual void setNumberTransmission(int numberTransmission);
-    virtual int getNote() const;
-    virtual void setNote(int note);
+    virtual int getSequenceNumber() const;
+    virtual void setSequenceNumber(int sequenceNumber);
     virtual int getSenderMacAddress() const;
     virtual void setSenderMacAddress(int senderMacAddress);
     virtual int getRecverMacAddress() const;
     virtual void setRecverMacAddress(int recverMacAddress);
-    virtual int getSequenceNumber() const;
-    virtual void setSequenceNumber(int sequenceNumber);
 };
 
 inline void doPacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimPack(b);}
@@ -368,11 +432,10 @@ inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet IpPacket{
- *     int note; 	
- *     
- * 	int type;	
+ * 	int messageCode;	
+ * 	int icmpCode;       
  * 
- * 	bool isBroadcast;
+ * 	bool isBroadcast;   
  * 
  *     int senderIpAddress; 
  *     int recverIpAddress; 
@@ -382,8 +445,8 @@ inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
 class IpPacket : public ::cPacket
 {
   protected:
-    int note_var;
-    int type_var;
+    int messageCode_var;
+    int icmpCode_var;
     bool isBroadcast_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
@@ -405,10 +468,10 @@ class IpPacket : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getNote() const;
-    virtual void setNote(int note);
-    virtual int getType() const;
-    virtual void setType(int type);
+    virtual int getMessageCode() const;
+    virtual void setMessageCode(int messageCode);
+    virtual int getIcmpCode() const;
+    virtual void setIcmpCode(int icmpCode);
     virtual bool getIsBroadcast() const;
     virtual void setIsBroadcast(bool isBroadcast);
     virtual int getSenderIpAddress() const;
@@ -427,9 +490,9 @@ inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
  * 	int dodagID; 
  * 	int version; 
  * 	
- * 	unsigned long rank;   
+ * 	unsigned long rank; 
  * 	
- * 	double selfEnergy; 
+ * 	double selfEnergy;   
  * }
  * </pre>
  */
@@ -475,14 +538,14 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS  extends IpPacket{
- * 	int convergence;
+ * 	int hopTTL;
  * }
  * </pre>
  */
 class DIS : public ::wsn_energy::IpPacket
 {
   protected:
-    int convergence_var;
+    int hopTTL_var;
 
   private:
     void copy(const DIS& other);
@@ -501,8 +564,8 @@ class DIS : public ::wsn_energy::IpPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getConvergence() const;
-    virtual void setConvergence(int convergence);
+    virtual int getHopTTL() const;
+    virtual void setHopTTL(int hopTTL);
 };
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}
@@ -512,8 +575,6 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet UdpPacket{
- *     int note; 	
- *     
  *     int sourceIpAddress; 
  * 	int sinkIpAddress;   
  * }
@@ -522,7 +583,6 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
 class UdpPacket : public ::cPacket
 {
   protected:
-    int note_var;
     int sourceIpAddress_var;
     int sinkIpAddress_var;
 
@@ -543,8 +603,6 @@ class UdpPacket : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getNote() const;
-    virtual void setNote(int note);
     virtual int getSourceIpAddress() const;
     virtual void setSourceIpAddress(int sourceIpAddress);
     virtual int getSinkIpAddress() const;
@@ -558,9 +616,8 @@ inline void doUnpacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Data{
- *     int note; 	
- *      
  *     double time;  
+ *     
  * 	string value; 
  * }
  * </pre>
@@ -568,7 +625,6 @@ inline void doUnpacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimUnpack(b);}
 class Data : public ::cPacket
 {
   protected:
-    int note_var;
     double time_var;
     opp_string value_var;
 
@@ -589,8 +645,6 @@ class Data : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getNote() const;
-    virtual void setNote(int note);
     virtual double getTime() const;
     virtual void setTime(double time);
     virtual const char * getValue() const;

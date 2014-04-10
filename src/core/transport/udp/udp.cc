@@ -27,30 +27,40 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 {
   switch (packet->getKind())
   {
-    case COMMAND: /* command */
+    case DATA: /* Data */
     {
       UdpPacket *udpPacket = new UdpPacket;
-
-      udpPacket->setKind(COMMAND);
-      udpPacket->setNote(check_and_cast<Data*>(packet)->getNote());
-      sendMessageToLower(udpPacket);
-
-      delete packet;
-    }
-      break; /* command */
-
-    case DATA: /* data */
-    {
-      UdpPacket *udpPacket = new UdpPacket;
-
       udpPacket->setKind(DATA);
-      udpPacket->encapsulate(packet);
       udpPacket->setSourceIpAddress(getParentModule()->getModuleByPath(".net")->getId());
       udpPacket->setSinkIpAddress(simulation.getModuleByPath("server.net")->getId());
 
+      udpPacket->encapsulate(packet);
+
       sendMessageToLower(udpPacket);
-    }
-      break; /* data */
+
+      break;
+    } /* Data */
+
+    case COMMAND: /* Command */
+    {
+      switch (check_and_cast<Command*>(packet)->getNote())
+      {
+        case RPL_CONSTRUCT: {
+          sendCommand(RPL_CONSTRUCT);
+          break;
+        }
+
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+    } /* Command */
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
   }
 }
 

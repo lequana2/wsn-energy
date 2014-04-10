@@ -15,42 +15,52 @@
 
 namespace wsn_energy {
 
-void MACdriver::initialize()
-{
-}
-
-void MACdriver::finish()
-{
-//  cancelAndDelete(buffer);
-}
-
 void MACdriver::processSelfMessage(cPacket* packet)
 {
-  switch (check_and_cast<FrameMAC*>(packet)->getNote())
+  switch (packet->getKind())
   {
-    case CHANNEL_CCA_REQUEST: /* self request CCA */
-      sendMessageToLower(packet);
-      break; /* request CCA */
+    case COMMAND: /* Command */
+    {
+      switch (check_and_cast<Command*>(packet)->getKind())
+      {
+        case CHANNEL_CCA_REQUEST: /* self request CCA */
+        {
+          sendMessageToLower(packet);
+        }
+          break; /* request CCA */
+
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+      /* Command */
+    }
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
   }
 }
 
 void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
-  // WSN free old buffer (?)
+  /* only accept data packet */
+  /* create new buffer */
   buffer = new FrameMAC;
   buffer->setKind(DATA);
-  buffer->setNote(LAYER_MAC_SEND);
   buffer->setByteLength(MAC_HEADER_FOOTER_LEN);
 
-  // Omnet attribute
-  buffer->encapsulate((IpPacket*) packet);
-
-  // meta data
+  /*  meta data */
   buffer->setNumberTransmission(0);
 
-  // MAC address
+  /* WSN MAC address */
   buffer->setSenderMacAddress(this->getId());
-  buffer->setRecverMacAddress(getModuleByPath("server.mac")->getId()); // WSN ???
+  buffer->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+
+  /* encapsulate */
+  buffer->encapsulate((IpPacket*) packet);
 
   deferPacket();
 
@@ -60,44 +70,89 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
 {
-  switch (check_and_cast<FrameMAC*>(packet)->getNote())
+  switch (packet->getKind())
   {
-    case CHANNEL_CLEAR: /* channel is clear */
-      sendPacket();
-      delete packet;
-      break; /* channel is clear */
-
-    case CHANNEL_BUSY: /* channel is busy */
-      deferPacket();
-      delete packet;
-      break; /* channel is busy */
-
-    case LAYER_RDC_SEND_OK: /* callback after sending */
+    case DATA: /* Data */
     {
-      IpPacket* ipPacket = new IpPacket;
-      ipPacket->setNote(LAYER_MAC_SEND_OK);
-      sendMessageToUpper(ipPacket);
+      receivePacket(check_and_cast<FrameMAC*>(packet)); // received message
+      break;
+    } /* Data */
 
-      delete packet;
-    }
-      break; /* callback after sending */
-
-    case LAYER_RDC_SEND_ERR: /* callback after sending */
+    case COMMAND: /* Command */
     {
-      IpPacket* ipPacket = new IpPacket;
-      ipPacket->setNote(LAYER_MAC_SEND_ERR);
-      sendMessageToUpper(ipPacket);
+      switch (check_and_cast<Command*>(packet)->getNote())
+      {
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+    } /* Command */
 
-      delete packet;
-    }
-      break; /* callback after sending */
+    case RESULT: /* Result */
+    {
+      switch (check_and_cast<Result*>(packet)->getNote())
+      {
+        case CHANNEL_CLEAR: /* channel is clear */
+        {
+          sendPacket();
+          break;
+        } /* channel is clear */
 
-    case LAYER_RDC_RECV_OK: /* callback upon reception of a frame */
-      receivePacket(check_and_cast<FrameMAC*>(packet));
-      break; /* callback upon reception of a frame */
+        case CHANNEL_BUSY: /* channel is busy */
+        {
+          deferPacket();
+          break;
+        } /* channel is busy */
+
+        case RDC_SEND_OK: /* callback after sending */
+        {
+          Result* result = new Result;
+          result->setKind(RESULT);
+          result->setNote(MAC_SEND_OK);
+          sendMessageToUpper(result);
+          break;
+        } /* callback after sending */
+
+        case RDC_SEND_NO_ACK: /* callback after sending */
+        {
+          Result* result = new Result;
+          result->setKind(RESULT);
+          result->setNote(MAC_SEND_NO_ACK);
+          sendMessageToUpper(result);
+          break;
+        } /* callback after sending */
+
+        case RDC_SEND_FATAL: /* callback after sending */
+        {
+          Result* result = new Result;
+          result->setKind(RESULT);
+          result->setNote(MAC_SEND_ERROR);
+          sendMessageToUpper(result);
+          break;
+        } /* callback after sending */
+
+        case RDC_SEND_COL: /* callback after sending */
+        {
+          Result* result = new Result;
+          result->setKind(RESULT);
+          result->setNote(MAC_SEND_ERROR);
+          sendMessageToUpper(result);
+          break;
+        } /* callback after sending */
+
+        default:
+          ev << "Missing note" << endl;
+          break;
+      }
+
+      delete packet; // done result
+      break;
+    } /* Result */
 
     default:
-      ev << "Missing resolution" << endl;
+      ev << "Unknown kind" << endl;
       break;
   }
 }
@@ -116,7 +171,7 @@ void MACdriver::receivePacket(FrameMAC* frameMac)
     ev << "RECV (MAC)" << endl;
 
   IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
-  ipPacket->setNote(LAYER_NET_RECV_OK);
+  ipPacket->setKind(DATA);
   sendMessageToUpper(ipPacket);
 
   delete frameMac;

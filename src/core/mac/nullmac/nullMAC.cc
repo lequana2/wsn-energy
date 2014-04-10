@@ -15,18 +15,22 @@ Define_Module(nullMAC);
 
 void nullMAC::deferPacket()
 {
+  /* dismiss + announce failure duty */
   if (buffer->getNumberTransmission() > 1)
   {
-    IpPacket* ipPacket = check_and_cast<IpPacket*>(buffer->decapsulate());
-    ipPacket->setNote(LAYER_NET_SEND_NOT_OK);
-    sendMessageToUpper(ipPacket);
+    Result* result = new Result;
+    result->setKind(RESULT);
+    result->setNote(MAC_SEND_ERROR);
+    sendMessageToUpper(result);
+
+    delete buffer;     // clear buffer
   }
+  /* unslotted csma */
   else
   {
-    buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
-
     /* request to perform CCA */
-    FrameMAC *requestCCA = new FrameMAC;
+    Command *requestCCA = new Command;
+    requestCCA->setKind(COMMAND);
     requestCCA->setNote(CHANNEL_CCA_REQUEST);
     scheduleAt(simTime(), requestCCA);
   }

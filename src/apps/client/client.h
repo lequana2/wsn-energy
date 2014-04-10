@@ -24,7 +24,6 @@ class Client : public myModule
   protected:
     void initialize();
     void handleMessage(cMessage*);
-    void finish();
 
   public:
     virtual void processSelfMessage(cPacket*);

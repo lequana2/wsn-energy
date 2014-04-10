@@ -17,21 +17,17 @@ namespace wsn_energy {
 class IPv6 : public myModule
 {
   private:
-    bool needWaiting;
+    bool isHavingPendingPacket;
 
   public:
-    // RPL
-    RPL *rpl;
+    RPL *rpl; // using RPL as routing protocol
+    std::list<IpPacket*> buffer; // Buffer message to send, public scope for debugging
 
-    // Buffer message to send
-    std::list<IpPacket*> buffer;
-
-    void multicast(IpPacket*);
-    void unicast(IpPacket*, int);
+    void multicast(IpPacket*);      // broadcast
+    void unicast(IpPacket*, int);   // unicast with destination IP address
 
   protected:
     virtual void initialize();
-    virtual void finish();
 
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
