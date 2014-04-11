@@ -334,6 +334,13 @@ void World::stopListening(RadioDriver* mote)
 }
 
 /*
+ * a mote sudden listens
+ */
+void World::suddenListening(RadioDriver *mote){
+// WSN consider all incoming message to note incomplete
+}
+
+/*
  * register on-air signal
  */
 void World::considerSignal(mySignal* signal)

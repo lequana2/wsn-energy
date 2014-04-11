@@ -49,7 +49,6 @@ namespace wsn_energy {
 class RadioDriver : public myModule
 {
   private:
-    Command *command;      // self-command
     Raw     *bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
 
     // Self functioning
@@ -70,7 +69,6 @@ class RadioDriver : public myModule
   protected:
     void initialize();
     void handleMessage(cMessage*);
-    void finish();
 
     // processing
     void processSelfMessage(cPacket*);

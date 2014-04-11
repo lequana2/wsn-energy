@@ -12,7 +12,7 @@
 #define BACKOFF_PERIOD                0.00032 // second, 20 symbols
 #define MAC_MIN_BE                    3 // min backoff exponent
 #define MAC_MAX_BE                    5 // max backoff exponent
-#define MAX_BACKOFF_TRANSMISSION  3 // 3 tries per packet
+#define MAX_BACKOFF_TRANSMISSION      3 // 3 tries per packet
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -36,17 +36,17 @@ void csma::deferPacket()
     double backoff;
     int backoff_transmission, backoff_exponent;
 
-    backoff_exponent = MAC_MIN_BE < buffer->getNumberTransmission() ? MAC_MIN_BE : buffer->getNumberTransmission(); // truncate
+    backoff_exponent = MAC_MAX_BE < buffer->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE : buffer->getNumberTransmission() + MAC_MIN_BE; // truncate
 
     backoff_transmission = 1 << backoff_exponent;
 
     if (getParentModule()->getParentModule()->par("rand").doubleValue() == 0)
       backoff = (rand() % (backoff_transmission)) * BACKOFF_PERIOD;
     else if (getParentModule()->getParentModule()->par("rand").doubleValue() == 1)
-      backoff = (intuniform(0, backoff_transmission)) * BACKOFF_PERIOD;
+      backoff = (intuniform(0,backoff_transmission)) * BACKOFF_PERIOD;
 
     if (DEBUG)
-      ev << "Random " << backoff << endl;
+      ev << "Random " << backoff_exponent << "/" << backoff_transmission << "/" << backoff << endl;
 
     buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 

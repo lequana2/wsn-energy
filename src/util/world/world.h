@@ -57,7 +57,8 @@ class World : public cSimpleModule
 
     void registerHost(RadioDriver*, Raw*);    // register transmitting mote
     void releaseHost(RadioDriver*);           // unregister transmitting mote
-    void stopListening(RadioDriver*);  // recver mote stop listening
+    void stopListening(RadioDriver*);   // recver mote stop listening
+    void suddenListening(RadioDriver*); // recver sudden listen from idle mode
 
     double calculateDistance(RadioDriver*, RadioDriver*);  // calculate distance between 2 motes
     double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate

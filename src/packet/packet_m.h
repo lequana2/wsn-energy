@@ -24,15 +24,15 @@ namespace wsn_energy {
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum MESSAGE_KIND{
- * 	COMMAND = 5; 
- * 	RESULT  = 6; 
+ * 	COMMAND = 4; 
+ * 	RESULT  = 1; 
  * 	DATA    = 2; 
  * };
  * </pre>
  */
 enum MESSAGE_KIND {
-    COMMAND = 5,
-    RESULT = 6,
+    COMMAND = 4,
+    RESULT = 1,
     DATA = 2
 };
 

@@ -124,7 +124,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_COL: /* callback after sending */
+        case RDC_SEND_COL: /* WSN busy radio, callback after sending */
         {
           sendResult(MAC_SEND_ERROR);
           break;

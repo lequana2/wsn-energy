@@ -43,7 +43,7 @@ void IPv6::processSelfMessage(cPacket* packet)
         case NET_CHECK_BUFFER: /* Check is in turn */
         {
           if (DEBUG)
-            ev << "Queue size " << this->buffer.size() << endl;
+            ev << "SEND (NET) remaining: " << this->buffer.size() << endl;
 
           if (this->buffer.size() == 0) // empty
           {
@@ -146,6 +146,9 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
+      if (DEBUG)
+        ev << "RECV (NET)" << endl;
+
       switch (check_and_cast<IpPacket*>(packet)->getMessageCode())
       {
         case NET_DATA: /* forward data */
@@ -191,11 +194,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
           this->buffer.pop_front();
           isHavingPendingPacket = false;
-
-          Command *check = new Command;
-          check->setKind(COMMAND);
-          check->setNote(NET_CHECK_BUFFER);
-          scheduleAt(simTime(), check);
+          selfTimer(0, NET_CHECK_BUFFER);
         }
           break; /* ending transmitting phase */
 
@@ -206,11 +205,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
           this->buffer.pop_front();
           isHavingPendingPacket = false;
-
-          Command *check = new Command;
-          check->setKind(COMMAND);
-          check->setNote(NET_CHECK_BUFFER);
-          scheduleAt(simTime(), check);
+          selfTimer(0, NET_CHECK_BUFFER);
         }
           break; /* ending transmitting phase */
 
@@ -221,11 +216,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
           this->buffer.pop_front();
           isHavingPendingPacket = false;
-
-          Command *check = new Command;
-          check->setKind(COMMAND);
-          check->setNote(NET_CHECK_BUFFER);
-          scheduleAt(simTime(), check);
+          selfTimer(0, NET_CHECK_BUFFER);
         }
           break; /* ending transmitting phase */
 
@@ -236,11 +227,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
           this->buffer.pop_front();
           isHavingPendingPacket = false;
-
-          Command *check = new Command;
-          check->setKind(COMMAND);
-          check->setNote(NET_CHECK_BUFFER);
-          scheduleAt(simTime(), check);
+          selfTimer(0, NET_CHECK_BUFFER);
         }
           break; /* ending transmitting phase */
 
@@ -267,10 +254,7 @@ void IPv6::multicast(IpPacket *ipPacket)
 
   this->buffer.push_back(ipPacket);
 
-  Command *check = new Command;
-  check->setKind(COMMAND);
-  check->setNote(NET_CHECK_BUFFER);
-  scheduleAt(simTime(), check);
+  selfTimer(0, NET_CHECK_BUFFER);
 }
 
 void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
@@ -282,10 +266,7 @@ void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
 
   this->buffer.push_back(ipPacket);
 
-  Command *check = new Command;
-  check->setKind(COMMAND);
-  check->setNote(NET_CHECK_BUFFER);
-  scheduleAt(simTime(), check);
+  selfTimer(0, NET_CHECK_BUFFER);
 }
 
 } /* namespace wsn_energy */

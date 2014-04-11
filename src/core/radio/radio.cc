@@ -12,9 +12,6 @@ namespace wsn_energy {
 
 void RadioDriver::initialize()
 {
-  this->command = new Command;
-  this->command->setKind(COMMAND);
-
   this->trRange = par("trRange");
   this->coRange = par("coRange");
   this->incomingSignal = 0;
@@ -40,11 +37,6 @@ void RadioDriver::handleMessage(cMessage* msg)
       ev << this->getFullName() << " received message from outside world" << endl;
     this->received(check_and_cast<Raw*>(msg));
   }
-}
-
-void RadioDriver::finish()
-{
-  cancelAndDelete(command);
 }
 
 void RadioDriver::processSelfMessage(cPacket* packet)
@@ -74,7 +66,8 @@ void RadioDriver::processSelfMessage(cPacket* packet)
           } /* Channel clear */
           break; /* ending of CCA */
 
-        case PHY_SWITCH_TRANSMIT:
+        case PHY_SWITCH_TRANSMIT: /* switch to transmit */
+        {
           /* show packet length (bytes) */
           if (DEBUG)
             ev << "Radio length " << bufferTXFIFO->getByteLength() << endl;
@@ -91,67 +84,71 @@ void RadioDriver::processSelfMessage(cPacket* packet)
           /* Prepare transmitting */
           else
           {
-            command->setNote(PHY_BEGIN_TRANSMIT);
             switch (this->status)
             {
               case IDLE:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_TRANS, command);
+                selfTimer(SWITCH_MODE_DELAY_IDLE_TO_TRANS, PHY_BEGIN_TRANSMIT);
                 break;
 
               case LISTENING:
-                scheduleAt(simTime() + SWITCH_MODE_DELAY_LISTEN_TO_TRANS, command);
+                selfTimer(SWITCH_MODE_DELAY_LISTEN_TO_TRANS, PHY_BEGIN_TRANSMIT);
                 break;
 
               case TRANSMITTING:
-                scheduleAt(simTime(), command);
+                selfTimer(0, PHY_BEGIN_TRANSMIT);
                 break;
             }
           }
-          break; /* switch to transmit */
+          break;
+        } /* switch to transmit */
 
         case PHY_SWITCH_LISTEN: /* switch to listen */
-          command->setNote(PHY_LISTENING);
+        {
           switch (this->status)
           {
             case IDLE:
-              scheduleAt(simTime() + SWITCH_MODE_DELAY_IDLE_TO_LISTEN, command);
+              selfTimer(SWITCH_MODE_DELAY_IDLE_TO_LISTEN, PHY_LISTENING);
               break;
 
             case TRANSMITTING:
-              scheduleAt(simTime() + SWITCH_MODE_DELAY_TRANS_TO_LISTEN, command);
+              selfTimer(SWITCH_MODE_DELAY_TRANS_TO_LISTEN, PHY_LISTENING);
               break;
 
             case LISTENING:
-              scheduleAt(simTime(), command);
+              selfTimer(0, PHY_LISTENING);
               break;
           }
-          break; /* switch to listen */
+          break;
+        }/* switch to listen */
 
         case PHY_SWITCH_IDLE: /* switch to sleep */
-          command->setNote(PHY_IDLING);
+        {
           switch (this->status)
           {
             case IDLE:
-              scheduleAt(simTime(), command);
+              selfTimer(0, PHY_IDLING);
               break;
 
             case TRANSMITTING:
-              scheduleAt(simTime() + SWITCH_MODE_DELAY_TRANS_TO_IDLE, command);
+              selfTimer(SWITCH_MODE_DELAY_TRANS_TO_IDLE, PHY_IDLING);
               break;
 
             case LISTENING:
-              scheduleAt(simTime() + SWITCH_MODE_DELAY_LISTEN_TO_IDLE, command);
+              selfTimer(SWITCH_MODE_DELAY_LISTEN_TO_IDLE, PHY_IDLING);
               break;
           }
-          break; /* switch to sleep */
+          break;
+        }/* switch to sleep */
 
-        case PHY_BEGIN_TRANSMIT: /* end transmitting */
+        case PHY_BEGIN_TRANSMIT:
+          /* end transmitting */
         {
           transmit_begin();
           break;
         }/* begin transmit */
 
-        case PHY_END_TRANSMIT: /* end transmitting */
+        case PHY_END_TRANSMIT:
+          /* end transmitting */
         {
           transmit_end();
 
@@ -166,13 +163,15 @@ void RadioDriver::processSelfMessage(cPacket* packet)
           break;
         } /* end transmitting*/
 
-        case PHY_LISTENING: /* begin listening*/
+        case PHY_LISTENING:
+          /* begin listening*/
         {
           listen();
           break;
         }/* begin listening */
 
-        case PHY_IDLING: /* idling */
+        case PHY_IDLING:
+          /* idling */
         {
           sleep();
           break;
@@ -183,7 +182,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
           break;
       }
 
-      // delete packet; // reuse command
+      delete packet; // done command
       break;
     } /* Command */
 
@@ -200,6 +199,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
     case DATA: /* Data */
     {
       this->bufferTXFIFO = new Raw;
+      this->bufferTXFIFO->setKind(DATA);
       this->bufferTXFIFO->setByteLength(PHY_HEADER);
 
       this->bufferTXFIFO->encapsulate(packet);
@@ -271,8 +271,8 @@ void RadioDriver::transmit_begin()
 
   // calculate finish time
   double finishTime = bufferTXFIFO->getByteLength() * 8 / DATA_RATE;
-  command->setNote(PHY_END_TRANSMIT);
-  scheduleAt(simTime() + finishTime, command);
+
+  selfTimer(finishTime, PHY_END_TRANSMIT);
 }
 
 /*
@@ -292,7 +292,7 @@ void RadioDriver::transmit_end()
 void RadioDriver::listen()
 {
   if (DEBUG)
-    ev << "Recv on" << endl;
+    ev << "LISTEN (PHY)" << endl;
 
   switchOscilatorMode(LISTENING);
 }
@@ -332,7 +332,7 @@ void RadioDriver::received(Raw* raw)
 void RadioDriver::sleep()
 {
   if (DEBUG)
-    ev << "Recv off" << endl;
+    ev << "IDLE (PHY)" << endl;
 
   ((World*) simulation.getModuleByPath("world"))->stopListening(this);
   switchOscilatorMode(IDLE);

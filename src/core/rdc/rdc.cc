@@ -11,16 +11,13 @@
 
 namespace wsn_energy {
 
-void RDCdriver::initialize()
-{
-}
-
-void RDCdriver::finish()
-{
-}
-
 void RDCdriver::processSelfMessage(cPacket* packet)
 {
+  // WSN
+  // RDC_SEND_OK     = 0; // send + receive ACK (if needed)
+  // RDC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
+  // RDC_SEND_FATAL  = 2; // fatal error, abort message
+  // RDC_SEND_COL    = 3; // collision with PHY
 }
 
 void RDCdriver::processUpperLayerMessage(cPacket* packet)
@@ -98,13 +95,13 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
         case PHY_TX_ERR: /* Internal error */
         {
-          sendResult(PHY_TX_ERR);
+          sendResult(RDC_SEND_FATAL);
           break;
         }/* Internal error */
 
         case PHY_TX_OK: /* callback after sending */
         {
-          sendResult(PHY_TX_OK);
+          sendResult(RDC_SEND_OK);
           break;
         }/* callback after sending */
 

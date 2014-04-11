@@ -126,7 +126,7 @@ void Client::newData()
   if (getParentModule()->getParentModule()->par("rand").doubleValue() == 0)
     time = sendInterval + (rand() % (randomness * 1000)) / 1000.0;
   else if (getParentModule()->getParentModule()->par("rand").doubleValue() == 1)
-    time = sendInterval + intuniform(0, randomness * 1000) / 1000.0;
+    time = sendInterval + intuniform(0, randomness * 1000) / 1000.0 / 1000;
 
 //  this->getParentModule()->bubble("Data");
 

@@ -30,9 +30,9 @@
 #define TXPOWER_MIN         -90.0  // dBm
 #define TXPOWER_CURRENT_MAX  17.4  // mA
 #define RXPOWER_CURRENT      18.8  // mA
-#define IDPOWER_CURRENT       1.8  // mA
+#define IDPOWER_CURRENT       3.3  // mA
 #define SUPPLY_VOLTAGE        1.8  // V
-#define SLPOWER
+#define SLPOWER               0.04 // mA
 #endif
 
 namespace wsn_energy {
