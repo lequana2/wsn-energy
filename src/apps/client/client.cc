@@ -128,7 +128,7 @@ void Client::newData()
   if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
     time = sendInterval + (rand() % (1000)) / 1000.0;
   else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    time = sendInterval + intuniform(0, 900000000*sendInterval) / 900000000000.0;
+    time = sendInterval + intuniform(0, 10000000*sendInterval) / 10000000000.0;
 
 //  this->getParentModule()->bubble("Data");
 

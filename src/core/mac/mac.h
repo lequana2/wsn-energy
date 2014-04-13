@@ -22,7 +22,7 @@ class IpTable
 class MACdriver : public myModule
 {
   protected:
-    std::list<IpTable> ipTable; // mac-ip table
+//    std::list<IpTable> ipTable; // mac-ip table
     bool isHavingPendingPacket;
     FrameMAC *frameBuffer;
 

@@ -58,7 +58,7 @@ void csma::deferPacket()
 
     if (DEBUG)
       ev << "Random " << backoff_exponent << "/" << backoff_transmission << "/" << backoff << endl;
-    std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
+//    std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
 
     frameBuffer->setNumberTransmission(frameBuffer->getNumberTransmission() + 1);
 

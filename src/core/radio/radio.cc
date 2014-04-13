@@ -302,15 +302,15 @@ void RadioDriver::listen()
  */
 void RadioDriver::received(Raw* raw)
 {
-  /* hack receive a complete message */
-//  sendMessageToUpper(raw->decapsulate());
-//  return;
-  /* okay message from begin to end */
-  if (!raw->hasBitError())
+  /* WSN hack receive a complete message */
+
+  if (true)
+//  if (!raw->hasBitError())
   {
     if (DEBUG)
       ev << "Received !!!" << endl;
 
+    /* okay message from begin to end */
     sendMessageToUpper(raw->decapsulate());
   }
   /* WSN receie a corrupt message */

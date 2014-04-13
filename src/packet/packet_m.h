@@ -61,7 +61,6 @@ enum SPECIAL_EVENT {
  * 	APP_ENVIRON_FLAG = 2; 
  * 	
  * 	RPL_CONSTRUCT = 3; 
- * 	RPL_SOLICIT   = 4; 
  * };
  * </pre>
  */
@@ -69,8 +68,7 @@ enum COMMAND_FROM_APP {
     APP_WORKING_FLAG = 0,
     APP_SENSING_FLAG = 1,
     APP_ENVIRON_FLAG = 2,
-    RPL_CONSTRUCT = 3,
-    RPL_SOLICIT = 4
+    RPL_CONSTRUCT = 3
 };
 
 /**
@@ -78,11 +76,13 @@ enum COMMAND_FROM_APP {
  * <pre>
  * enum COMMAND_FROM_NET{
  *     NET_TIMER_DIO          = 1;  
+ *     NET_TIMER_DIS          = 2;  
  * };
  * </pre>
  */
 enum COMMAND_FROM_NET {
-    NET_TIMER_DIO = 1
+    NET_TIMER_DIO = 1,
+    NET_TIMER_DIS = 2
 };
 
 /**
@@ -345,8 +345,7 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet FrameRDC{
- * 	int note;  
- * 	
+ * 	int sequenceNumber;   
  * 	bool isACK; 
  * }
  * </pre>
@@ -354,7 +353,7 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
 class FrameRDC : public ::cPacket
 {
   protected:
-    int note_var;
+    int sequenceNumber_var;
     bool isACK_var;
 
   private:
@@ -374,8 +373,8 @@ class FrameRDC : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getNote() const;
-    virtual void setNote(int note);
+    virtual int getSequenceNumber() const;
+    virtual void setSequenceNumber(int sequenceNumber);
     virtual bool getIsACK() const;
     virtual void setIsACK(bool isACK);
 };
@@ -389,7 +388,6 @@ inline void doUnpacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimUnpack(b);}
  * packet FrameMAC{
  *     int numberTransmission = 0; 
  * 
- * 	int sequenceNumber;   
  * 	int senderMacAddress; 
  * 	int recverMacAddress; 
  * }
@@ -399,7 +397,6 @@ class FrameMAC : public ::cPacket
 {
   protected:
     int numberTransmission_var;
-    int sequenceNumber_var;
     int senderMacAddress_var;
     int recverMacAddress_var;
 
@@ -422,8 +419,6 @@ class FrameMAC : public ::cPacket
     // field getter/setter methods
     virtual int getNumberTransmission() const;
     virtual void setNumberTransmission(int numberTransmission);
-    virtual int getSequenceNumber() const;
-    virtual void setSequenceNumber(int sequenceNumber);
     virtual int getSenderMacAddress() const;
     virtual void setSenderMacAddress(int senderMacAddress);
     virtual int getRecverMacAddress() const;

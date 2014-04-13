@@ -9,10 +9,21 @@
 #ifndef RDCDRIVER_H_
 #define RDCDRIVER_H_
 
+#ifndef WAIT_FOR_ACK_DURATION
+#define WAIT_FOR_ACK_DURATION 0.000864 // 54 symbols
+#endif
+
 #include <myModule.h>
 #include "packet_m.h"
 
 namespace wsn_energy {
+
+class SequenceChecking
+{
+  public:
+    int senderID;
+    int sequence;
+};
 
 class RDCdriver : public myModule
 {
@@ -21,7 +32,11 @@ class RDCdriver : public myModule
 
   protected:
     Command *waitForACK;
+    bool isSendingBroadcast;
     bool isWaitingACK;
+    int sequence;
+
+    std::list<SequenceChecking*> neighbors;
 
     FrameRDC *buffer;
 

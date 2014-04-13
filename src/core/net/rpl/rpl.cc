@@ -33,7 +33,7 @@
 #endif
 
 #ifndef ANNOTATE_PARENT
-#define ANNOTATE_PARENT 0
+#define ANNOTATE_PARENT 1
 #endif
 
 #ifndef ANNOTATE_SIBLINGS
@@ -91,7 +91,7 @@ void RPL::sendDIO()
   net->multicast(icmp);
 }
 
-void RPL::sendDIS(int hopTTL)
+void RPL::sendDIS()
 {
   if (DEBUG)
     ev << "Broadcast DIS" << endl;
@@ -99,7 +99,7 @@ void RPL::sendDIS(int hopTTL)
   DIS *icmp = new DIS();
 
   icmp->setMessageCode(NET_ICMP_RPL);
-  icmp->setIcmpCode(NET_ICMP_DIO);
+  icmp->setIcmpCode(NET_ICMP_DIS);
   icmp->setByteLength(DIS_LEN);
 
   net->multicast(icmp);
@@ -124,7 +124,7 @@ void RPL::newDIOinterval()
   if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
     dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
   else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    dioInterval = dioInterval / 2 + (intuniform(0, 2000000) / 4000000.0) * dioInterval;
+    dioInterval = dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval;
 
   dioDelay = dioInterval / 1000.0;          // convert to sec
 
@@ -155,6 +155,14 @@ void RPL::handleDIOTimer()
       dioCurrent++;
     newDIOinterval();
   }
+}
+
+void RPL::handleDISTimer()
+{
+  if (!this->rplDag.joined)
+    sendDIS();
+  else
+    this->net->selfTimer(1, NET_TIMER_DIS);
 }
 
 void RPL::processICMP(IpPacket *packet)

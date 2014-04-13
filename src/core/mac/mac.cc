@@ -75,9 +75,14 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   /*  meta data */
   frame->setNumberTransmission(0);
 
-  /* WSN MAC address */
+  /* MAC address */
   frame->setSenderMacAddress(this->getId());
-  frame->setRecverMacAddress(getModuleByPath("server.mac")->getId());
+  if (check_and_cast<IpPacket*>(packet)->getRecverIpAddress() == 0)
+    frame->setRecverMacAddress(0);
+  else
+    frame->setRecverMacAddress(
+        simulation.getModule(check_and_cast<IpPacket*>(packet)->getRecverIpAddress())->getParentModule()->getModuleByPath(
+            ".mac")->getId());
 
   /* encapsulate */
   frame->encapsulate((IpPacket*) packet);
@@ -130,7 +135,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* channel is busy */
 
-        case RDC_SEND_OK: /* WSN callback after sending */
+        case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
           this->buffer.pop_front();
           isHavingPendingPacket = false;
@@ -139,7 +144,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_NO_ACK: /* WSN callback after sending */
+        case RDC_SEND_NO_ACK: /* transmitting but no ACK */
         {
           // WSN need considering dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
@@ -151,7 +156,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_FATAL: /* WSN callback after sending */
+        case RDC_SEND_FATAL: /* fatal error, abort message */
         {
           this->buffer.pop_front();
           isHavingPendingPacket = false;
@@ -160,11 +165,11 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_COL: /* WSN busy radio, callback after sending */
+        case RDC_SEND_COL: /* busy radio, just wait for 1 symbol */
         {
           this->buffer.pop_front();
           isHavingPendingPacket = false;
-          selfTimer(0, MAC_CHECK_BUFFER);
+          selfTimer(0.000016, MAC_CHECK_BUFFER);
 
           break;
         } /* callback after sending */

@@ -32,12 +32,12 @@ enum COMMAND_FROM_APP{
 	APP_ENVIRON_FLAG = 2; // data from enviroment
 	
 	RPL_CONSTRUCT = 3; // perform broadcasting DIO
-	RPL_SOLICIT   = 4; // request DIS
 };
 
 // Net layer
 enum COMMAND_FROM_NET{
     NET_TIMER_DIO          = 1;  // handle DIO timer
+    NET_TIMER_DIS          = 2;  // handle DIS timer
 };
 
 // ip packet type
@@ -128,15 +128,13 @@ packet Raw{
 }
 
 packet FrameRDC{
-	int note;  // control message
-	
+	int sequenceNumber;   // sequence number    	
 	bool isACK; // is ACK frame
 }
 
 packet FrameMAC{
     int numberTransmission = 0; // meta-data: number transmission
 
-	int sequenceNumber;   // sequence number    	
 	int senderMacAddress; // sender MAC address
 	int recverMacAddress; // recver MAC address
 }

@@ -45,11 +45,11 @@ void IPv6::processSelfMessage(cPacket* packet)
           break;
         } /* DIO timer*/
 
-          //        case RPL_SOLICIT: /* WSN Solicit DODAG information*/
-          //        {
-          //          this->rpl->sendDIS(5);
-          //          break;
-          //        } /*Solicit information*/
+        case NET_TIMER_DIS: /* Solicit DODAG information*/
+        {
+          this->rpl->handleDISTimer();
+          break;
+        } /*Solicit information*/
 
         default:
           ev << "Unknown command" << endl;
@@ -91,7 +91,10 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
       }
       else
       {
-        // WSN Trigger local/global repair
+        // Trigger local/global repair, 1 symbol ?
+        // WSN something go wrong here, kind of infinite loops
+        selfTimer(0.000016, NET_TIMER_DIS);
+        std::cout << "Repair @ " << simTime().dbl() << endl;
 
         delete packet;
       }
@@ -179,10 +182,12 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Result*>(packet)->getNote())
       {
-        case MAC_SEND_DEAD_NEIGHBOR: /* WSN ending transmitting phase, no ack, purge route */
+        case MAC_SEND_DEAD_NEIGHBOR: /* some neighbor cann't reach in MAC layer */
         {
           if (DEBUG)
             ev << "NET TRANS FAILED" << endl;
+
+          // WSN RPL purge default route
         }
           break; /* ending transmitting phase */
 

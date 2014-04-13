@@ -85,13 +85,15 @@ class RPL
     void rpl_init();
 
     void sendDIO();
-    void sendDIS(int);
+    void sendDIS();
 
     void processICMP(IpPacket*);
 
     void resetDIOTimer();
     void newDIOinterval();
     void handleDIOTimer();
+
+    void handleDISTimer();
 };
 
 } /* namespace wsn_energy */

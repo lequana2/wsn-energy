@@ -93,8 +93,8 @@ void World::arrangeMotes()
           col++;
         }
         // Partition
-        x = (int) (col * 25 + (getParentModule()->par("width").doubleValue() - 25 * step) / 2);
-        y = (int) (row * 30 + 17);
+        x = (int) (col * 40 + (getParentModule()->par("width").doubleValue() - 40 * step) / 2);
+        y = (int) (row * 40 + 17);
         break;
       }/* pyramid */
 
