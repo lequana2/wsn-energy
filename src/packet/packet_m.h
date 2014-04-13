@@ -77,13 +77,11 @@ enum COMMAND_FROM_APP {
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_FROM_NET{
- *     NET_CHECK_BUFFER       = 0;  
  *     NET_TIMER_DIO          = 1;  
  * };
  * </pre>
  */
 enum COMMAND_FROM_NET {
-    NET_CHECK_BUFFER = 0,
     NET_TIMER_DIO = 1
 };
 
@@ -91,19 +89,19 @@ enum COMMAND_FROM_NET {
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum IP_PACKET_TYPE{
- * 	NET_DATA        	  = 0;  
- * 	NET_ICMP_RPL		  = 1;  
+ * 	NET_DATA        	  = 1;  
+ * 	NET_ICMP_RPL		  = 2;  
  * 	
- * 	NET_ICMP_DIO    	  = 2;	
- * 	NET_ICMP_DIS    	  = 3;	
+ * 	NET_ICMP_DIO    	  = 3;	
+ * 	NET_ICMP_DIS    	  = 4;	
  * };
  * </pre>
  */
 enum IP_PACKET_TYPE {
-    NET_DATA = 0,
-    NET_ICMP_RPL = 1,
-    NET_ICMP_DIO = 2,
-    NET_ICMP_DIS = 3
+    NET_DATA = 1,
+    NET_ICMP_RPL = 2,
+    NET_ICMP_DIO = 3,
+    NET_ICMP_DIS = 4
 };
 
 /**
@@ -112,30 +110,31 @@ enum IP_PACKET_TYPE {
  * enum COMMAND_FROM_MAC{
  * 	CHANNEL_CCA_REQUEST = 70; 
  * 	MAC_SEND_BUFFER     = 71; 
+ * 	MAC_CHECK_BUFFER    = 72; 
  * };
  * </pre>
  */
 enum COMMAND_FROM_MAC {
     CHANNEL_CCA_REQUEST = 70,
-    MAC_SEND_BUFFER = 71
+    MAC_SEND_BUFFER = 71,
+    MAC_CHECK_BUFFER = 72
 };
 
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum RESULT_FROM_MAC{
- * 	MAC_SEND_OK		= 0; 
- * 	MAC_SEND_NO_ACK = 1; 
- * 	MAC_SEND_FATAL  = 2; 
- * 	MAC_SEND_ERROR  = 3; 
+ *     MAC_SEND_DEAD_NEIGHBOR = 5;
+ *     
+ * 
+ * 
+ * 
+ * 
  * };
  * </pre>
  */
 enum RESULT_FROM_MAC {
-    MAC_SEND_OK = 0,
-    MAC_SEND_NO_ACK = 1,
-    MAC_SEND_FATAL = 2,
-    MAC_SEND_ERROR = 3
+    MAC_SEND_DEAD_NEIGHBOR = 5
 };
 
 /**
@@ -441,8 +440,6 @@ inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
  * 	int messageCode;	
  * 	int icmpCode;       
  * 
- * 	bool isBroadcast;   
- * 
  *     int senderIpAddress; 
  *     int recverIpAddress; 
  * }
@@ -453,7 +450,6 @@ class IpPacket : public ::cPacket
   protected:
     int messageCode_var;
     int icmpCode_var;
-    bool isBroadcast_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
 
@@ -478,8 +474,6 @@ class IpPacket : public ::cPacket
     virtual void setMessageCode(int messageCode);
     virtual int getIcmpCode() const;
     virtual void setIcmpCode(int icmpCode);
-    virtual bool getIsBroadcast() const;
-    virtual void setIsBroadcast(bool isBroadcast);
     virtual int getSenderIpAddress() const;
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;

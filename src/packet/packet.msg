@@ -37,31 +37,33 @@ enum COMMAND_FROM_APP{
 
 // Net layer
 enum COMMAND_FROM_NET{
-    NET_CHECK_BUFFER       = 0;  // self-check its buffer
     NET_TIMER_DIO          = 1;  // handle DIO timer
 };
 
 // ip packet type
 enum IP_PACKET_TYPE{
-	NET_DATA        	  = 0;  // normal data message
-	NET_ICMP_RPL		  = 1;  // kind of ICMP
+	NET_DATA        	  = 1;  // normal data message
+	NET_ICMP_RPL		  = 2;  // kind of ICMP
 	
-	NET_ICMP_DIO    	  = 2;	// ICMP DIO message
-	NET_ICMP_DIS    	  = 3;	// ICMP DIS message
+	NET_ICMP_DIO    	  = 3;	// ICMP DIO message
+	NET_ICMP_DIS    	  = 4;	// ICMP DIS message
 };
 
 // MAC layer command
 enum COMMAND_FROM_MAC{
 	CHANNEL_CCA_REQUEST = 70; // request CCA
-	MAC_SEND_BUFFER     = 71; // send
+	MAC_SEND_BUFFER     = 71; // send frame
+	MAC_CHECK_BUFFER    = 72; // check buffer
 };
 
 // MAC layer result
 enum RESULT_FROM_MAC{
-	MAC_SEND_OK		= 0; // sent + receive ACK (if needed)
-	MAC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
-	MAC_SEND_FATAL  = 2; // fatal error, abort message
-	MAC_SEND_ERROR  = 3; // exceed total number of transmission, try again later
+    MAC_SEND_DEAD_NEIGHBOR = 5;
+    
+//	MAC_SEND_OK		= 0; // sent + receive ACK (if needed)
+//	MAC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
+//	MAC_SEND_FATAL  = 2; // fatal error, abort message
+//	MAC_SEND_ERROR  = 3; // exceed total number of transmission, try again later
 };
 
 // RDC layer command
@@ -142,8 +144,6 @@ packet FrameMAC{
 packet IpPacket{
 	int messageCode;	// type message (Data, ICMP)
 	int icmpCode;       // ICMP type
-
-	bool isBroadcast;   // is multicasted to all neighbors
 
     int senderIpAddress; // sender IP address
     int recverIpAddress; // recver IP address

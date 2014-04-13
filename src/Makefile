@@ -215,7 +215,8 @@ $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
 	core/myModule.h \
 	packet/packet_len.h \
-	packet/packet_m.h
+	packet/packet_m.h \
+	util/statistic/statistic.h
 $O/core/mac/csma/csma.o: core/mac/csma/csma.cc \
 	core/mac/csma/csma.h \
 	core/mac/mac.h \
@@ -306,9 +307,8 @@ $O/util/signal/mySignal.o: util/signal/mySignal.cc \
 	util/signal/mySignal.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/energest/energest.h \
+	core/mac/mac.h \
 	core/myModule.h \
-	core/net/ipv6/ipv6.h \
-	core/net/rpl/rpl.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h

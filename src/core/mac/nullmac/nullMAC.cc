@@ -16,14 +16,9 @@ Define_Module(nullMAC);
 void nullMAC::deferPacket()
 {
   /* dismiss + announce failure duty */
-  if (buffer->getNumberTransmission() > 1)
+  if (frameBuffer->getNumberTransmission() > 1)
   {
-    Result* result = new Result;
-    result->setKind(RESULT);
-    result->setNote(MAC_SEND_ERROR);
-    sendMessageToUpper(result);
-
-    delete buffer;     // clear buffer
+    delete frameBuffer;     // clear buffer
   }
   /* unslotted csma */
   else

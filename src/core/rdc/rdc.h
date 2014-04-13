@@ -16,6 +16,9 @@ namespace wsn_energy {
 
 class RDCdriver : public myModule
 {
+  private:
+    int counter;
+
   protected:
     Command *waitForACK;
     bool isWaitingACK;

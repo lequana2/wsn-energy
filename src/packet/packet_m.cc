@@ -62,7 +62,6 @@ EXECUTE_ON_STARTUP(
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_FROM_NET");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_FROM_NET"));
-    e->insert(NET_CHECK_BUFFER, "NET_CHECK_BUFFER");
     e->insert(NET_TIMER_DIO, "NET_TIMER_DIO");
 );
 
@@ -80,15 +79,13 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_FROM_MAC"));
     e->insert(CHANNEL_CCA_REQUEST, "CHANNEL_CCA_REQUEST");
     e->insert(MAC_SEND_BUFFER, "MAC_SEND_BUFFER");
+    e->insert(MAC_CHECK_BUFFER, "MAC_CHECK_BUFFER");
 );
 
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::RESULT_FROM_MAC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_FROM_MAC"));
-    e->insert(MAC_SEND_OK, "MAC_SEND_OK");
-    e->insert(MAC_SEND_NO_ACK, "MAC_SEND_NO_ACK");
-    e->insert(MAC_SEND_FATAL, "MAC_SEND_FATAL");
-    e->insert(MAC_SEND_ERROR, "MAC_SEND_ERROR");
+    e->insert(MAC_SEND_DEAD_NEIGHBOR, "MAC_SEND_DEAD_NEIGHBOR");
 );
 
 EXECUTE_ON_STARTUP(
@@ -1376,7 +1373,6 @@ IpPacket::IpPacket(const char *name, int kind) : cPacket(name,kind)
 {
     this->messageCode_var = 0;
     this->icmpCode_var = 0;
-    this->isBroadcast_var = 0;
     this->senderIpAddress_var = 0;
     this->recverIpAddress_var = 0;
 }
@@ -1402,7 +1398,6 @@ void IpPacket::copy(const IpPacket& other)
 {
     this->messageCode_var = other.messageCode_var;
     this->icmpCode_var = other.icmpCode_var;
-    this->isBroadcast_var = other.isBroadcast_var;
     this->senderIpAddress_var = other.senderIpAddress_var;
     this->recverIpAddress_var = other.recverIpAddress_var;
 }
@@ -1412,7 +1407,6 @@ void IpPacket::parsimPack(cCommBuffer *b)
     cPacket::parsimPack(b);
     doPacking(b,this->messageCode_var);
     doPacking(b,this->icmpCode_var);
-    doPacking(b,this->isBroadcast_var);
     doPacking(b,this->senderIpAddress_var);
     doPacking(b,this->recverIpAddress_var);
 }
@@ -1422,7 +1416,6 @@ void IpPacket::parsimUnpack(cCommBuffer *b)
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->messageCode_var);
     doUnpacking(b,this->icmpCode_var);
-    doUnpacking(b,this->isBroadcast_var);
     doUnpacking(b,this->senderIpAddress_var);
     doUnpacking(b,this->recverIpAddress_var);
 }
@@ -1445,16 +1438,6 @@ int IpPacket::getIcmpCode() const
 void IpPacket::setIcmpCode(int icmpCode)
 {
     this->icmpCode_var = icmpCode;
-}
-
-bool IpPacket::getIsBroadcast() const
-{
-    return isBroadcast_var;
-}
-
-void IpPacket::setIsBroadcast(bool isBroadcast)
-{
-    this->isBroadcast_var = isBroadcast;
 }
 
 int IpPacket::getSenderIpAddress() const
@@ -1524,7 +1507,7 @@ const char *IpPacketDescriptor::getProperty(const char *propertyname) const
 int IpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -1540,9 +1523,8 @@ unsigned int IpPacketDescriptor::getFieldTypeFlags(void *object, int field) cons
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketDescriptor::getFieldName(void *object, int field) const
@@ -1556,11 +1538,10 @@ const char *IpPacketDescriptor::getFieldName(void *object, int field) const
     static const char *fieldNames[] = {
         "messageCode",
         "icmpCode",
-        "isBroadcast",
         "senderIpAddress",
         "recverIpAddress",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int IpPacketDescriptor::findField(void *object, const char *fieldName) const
@@ -1569,9 +1550,8 @@ int IpPacketDescriptor::findField(void *object, const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='m' && strcmp(fieldName, "messageCode")==0) return base+0;
     if (fieldName[0]=='i' && strcmp(fieldName, "icmpCode")==0) return base+1;
-    if (fieldName[0]=='i' && strcmp(fieldName, "isBroadcast")==0) return base+2;
-    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+3;
-    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+4;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderIpAddress")==0) return base+2;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recverIpAddress")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1586,11 +1566,10 @@ const char *IpPacketDescriptor::getFieldTypeString(void *object, int field) cons
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
-        "bool",
         "int",
         "int",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1632,9 +1611,8 @@ std::string IpPacketDescriptor::getFieldAsString(void *object, int field, int i)
     switch (field) {
         case 0: return long2string(pp->getMessageCode());
         case 1: return long2string(pp->getIcmpCode());
-        case 2: return bool2string(pp->getIsBroadcast());
-        case 3: return long2string(pp->getSenderIpAddress());
-        case 4: return long2string(pp->getRecverIpAddress());
+        case 2: return long2string(pp->getSenderIpAddress());
+        case 3: return long2string(pp->getRecverIpAddress());
         default: return "";
     }
 }
@@ -1651,9 +1629,8 @@ bool IpPacketDescriptor::setFieldAsString(void *object, int field, int i, const 
     switch (field) {
         case 0: pp->setMessageCode(string2long(value)); return true;
         case 1: pp->setIcmpCode(string2long(value)); return true;
-        case 2: pp->setIsBroadcast(string2bool(value)); return true;
-        case 3: pp->setSenderIpAddress(string2long(value)); return true;
-        case 4: pp->setRecverIpAddress(string2long(value)); return true;
+        case 2: pp->setSenderIpAddress(string2long(value)); return true;
+        case 3: pp->setRecverIpAddress(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1671,9 +1648,8 @@ const char *IpPacketDescriptor::getFieldStructName(void *object, int field) cons
         NULL,
         NULL,
         NULL,
-        NULL,
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const

@@ -29,11 +29,11 @@
 #endif
 
 #ifndef ANNOTATE
-#define ANNOTATE 1
+#define ANNOTATE 0
 #endif
 
 #ifndef ANNOTATE_PARENT
-#define ANNOTATE_PARENT 1
+#define ANNOTATE_PARENT 0
 #endif
 
 #ifndef ANNOTATE_SIBLINGS
@@ -108,7 +108,6 @@ void RPL::sendDIS(int hopTTL)
 void RPL::resetDIOTimer()
 {
   // reset to initial stage
-  dioCounter = 0;
   dioCurrent = RPL_DIO_INTERVAL_MIN;
   newDIOinterval();
 }
@@ -125,14 +124,16 @@ void RPL::newDIOinterval()
   if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
     dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
   else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    dioInterval = dioInterval / 2 + (intuniform(0, 1000) / 1000.0) * dioInterval / 2;
+    dioInterval = dioInterval / 2 + (intuniform(0, 2000000) / 4000000.0) * dioInterval;
 
   dioDelay = dioInterval / 1000.0;          // convert to sec
 
-  std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at " << simTime() << endl;
+  if (DEBUG)
+    std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at "
+        << simTime() << endl;
 
   // WSN simulation break
-  if (simTime() < 28800)
+  if (simTime() + dioDelay < 28800)
     this->net->selfTimer(dioDelay, NET_TIMER_DIO); // self schedule
 }
 
@@ -356,18 +357,14 @@ void RPL::processDIS(DIS* msg)
   if (DEBUG)
     EV << "Received DIS " << endl;
 
-// currently in DAG, then broadcast DIS
+  // currently in DAG, then broadcast DIS
   if (this->rplDag.joined)
   {
     this->resetDIOTimer();
   }
-// already
+  // else dismiss DIS
   else
   {
-//WSN broadcast DIS toward root
-//    int convergence = ((DIS*) msg)->getConvergence();
-//    if (convergence > 0)
-//      this->sendDIS(convergence - 1);
   }
 }
 }/* namespace wsn_energy */

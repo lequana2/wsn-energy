@@ -67,6 +67,7 @@ class RPL
 {
   private:
     IPv6 *net;
+
     int dioCounter;
     int dioCurrent;
     unsigned long dioInterval;

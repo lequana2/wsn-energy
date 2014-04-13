@@ -21,7 +21,6 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
   switch (packet->getKind())
   {
-
     case COMMAND: /* Command */
     {
       switch (check_and_cast<Command*>(packet)->getNote())
@@ -61,8 +60,10 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
       this->buffer->encapsulate(packet);
 
       // WSN need duty cycling trigger here
-      sendMessageToLower(buffer);
+      sendMessageToLower(buffer->dup());
       sendCommand(RDC_SEND);
+
+      counter = 0;
 
       // WSN unicast = waiting for ACK
       if (false)
@@ -154,10 +155,15 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           // WSN consider just sends data or ACK
           if (true)
           {
-
+            sendResult(RDC_SEND_OK);
+            delete buffer;
           }
           else
           {
+            // WSN need duty cycling trigger here
+            sendMessageToLower(buffer->dup());
+            sendCommand(RDC_SEND);
+            counter++;
           }
           break;
         }/* callback after transmitting */

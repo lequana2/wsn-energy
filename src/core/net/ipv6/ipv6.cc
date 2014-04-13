@@ -19,7 +19,7 @@
 #endif
 
 #ifndef ANNOTATE
-#define ANNOTATE 1
+#define ANNOTATE 0
 #endif
 
 namespace wsn_energy {
@@ -29,7 +29,6 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
-  isHavingPendingPacket = false;
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
@@ -40,29 +39,17 @@ void IPv6::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case NET_CHECK_BUFFER: /* Check buffer */
-        {
-          if (DEBUG)
-            ev << "SEND (NET) remaining: " << this->buffer.size() << endl;
-
-          if (this->buffer.size() == 0) // empty
-          {
-            isHavingPendingPacket = false;
-          }
-          else if (!isHavingPendingPacket) // In-turn
-          {
-            sendMessageToLower(this->buffer.front()); // send data to MAC buffer
-            (check_and_cast<Statistic*>(getModuleByPath("WSN.statistic")))->packetRateTracking(NET_SEND); // statistics
-            isHavingPendingPacket = true;
-          }
-          break;
-        } /* Check buffer */
-
         case NET_TIMER_DIO: /* DIO timer*/
         {
           this->rpl->handleDIOTimer();
           break;
         } /* DIO timer*/
+
+          //        case RPL_SOLICIT: /* WSN Solicit DODAG information*/
+          //        {
+          //          this->rpl->sendDIS(5);
+          //          break;
+          //        } /*Solicit information*/
 
         default:
           ev << "Unknown command" << endl;
@@ -105,6 +92,8 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
       else
       {
         // WSN Trigger local/global repair
+
+        delete packet;
       }
       break;
     } /* Data */
@@ -120,12 +109,6 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
           break;
         } /* Construct RPL DODAG*/
 
-        case RPL_SOLICIT: /* Solicit DODAG information*/
-        {
-          this->rpl->sendDIS(5);
-          break;
-        } /*Solicit information*/
-
         default:
           ev << "Unknown command" << endl;
           break;
@@ -137,6 +120,7 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
     case RESULT:
       /* Result */
     {
+      delete packet;
       break;
     } /* Result */
 
@@ -195,47 +179,10 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Result*>(packet)->getNote())
       {
-        case MAC_SEND_OK: /* ending transmitting phase, success */
+        case MAC_SEND_DEAD_NEIGHBOR: /* WSN ending transmitting phase, no ack, purge route */
         {
           if (DEBUG)
-            ev << "NET TRANS OK" << endl;
-
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, NET_CHECK_BUFFER);
-        }
-          break; /* ending transmitting phase */
-
-        case MAC_SEND_NO_ACK: /* WSN ending transmitting phase, no ack */
-        {
-          if (DEBUG)
-            ev << "Failure NET trans" << endl;
-
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, NET_CHECK_BUFFER);
-        }
-          break; /* ending transmitting phase */
-
-        case MAC_SEND_FATAL: /* WSN ending transmitting phase, abort */
-        {
-          if (DEBUG)
-            ev << "Failure NET trans" << endl;
-
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, NET_CHECK_BUFFER);
-        }
-          break; /* ending transmitting phase */
-
-        case MAC_SEND_ERROR: /* WSN ending transmitting phase, retry */
-        {
-          if (DEBUG)
-            ev << "Failure NET trans" << endl;
-
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, NET_CHECK_BUFFER);
+            ev << "NET TRANS FAILED" << endl;
         }
           break; /* ending transmitting phase */
 
@@ -256,25 +203,23 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 void IPv6::multicast(IpPacket *ipPacket)
 {
   ipPacket->setKind(DATA);
-  ipPacket->setIsBroadcast(true);
   ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(0);
 
-  this->buffer.push_back(ipPacket);
+  sendMessageToLower(ipPacket);
 
-  selfTimer(0, NET_CHECK_BUFFER);
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(NET_SEND));
 }
 
 void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
 {
   ipPacket->setKind(DATA);
-  ipPacket->setIsBroadcast(false);
   ipPacket->setSenderIpAddress(this->getId());
   ipPacket->setRecverIpAddress(recverIpAddress);
 
-  this->buffer.push_back(ipPacket);
+  sendMessageToLower(ipPacket);
 
-  selfTimer(0, NET_CHECK_BUFFER);
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(NET_SEND));
 }
 
 } /* namespace wsn_energy */

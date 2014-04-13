@@ -25,10 +25,15 @@ Define_Module(csma);
 void csma::deferPacket()
 {
   /* dismiss + announce failure duty */
-  if (buffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
+  if (frameBuffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
-    sendResult(MAC_SEND_ERROR);
-    delete buffer;     // clear buffer
+    // WSN self timer to considering dead neighbot or backoff or smt
+//    sendResult(MAC_SEND_ERROR);
+    this->buffer.pop_front();
+    isHavingPendingPacket = false;
+    selfTimer(0, MAC_CHECK_BUFFER);
+
+    delete frameBuffer;     // clear buffer
   }
   /* unslotted csma */
   else
@@ -36,19 +41,26 @@ void csma::deferPacket()
     double backoff;
     int backoff_transmission, backoff_exponent;
 
-    backoff_exponent = MAC_MAX_BE < buffer->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE : buffer->getNumberTransmission() + MAC_MIN_BE; // truncate
+    backoff_exponent =
+    MAC_MAX_BE < frameBuffer->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE :
+        frameBuffer->getNumberTransmission() + MAC_MIN_BE; // truncate
 
     backoff_transmission = 1 << backoff_exponent;
+
+    int backoffUnit;
 
     if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
       backoff = (rand() % (backoff_transmission)) * BACKOFF_PERIOD;
     else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-      backoff = (intuniform(0,backoff_transmission)) * BACKOFF_PERIOD;
+      backoffUnit = (intuniform(0, backoff_transmission));
+
+    backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 100000000.0;
 
     if (DEBUG)
       ev << "Random " << backoff_exponent << "/" << backoff_transmission << "/" << backoff << endl;
+    std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
 
-    buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
+    frameBuffer->setNumberTransmission(frameBuffer->getNumberTransmission() + 1);
 
     /* request to perform CCA */
     selfTimer(backoff, CHANNEL_CCA_REQUEST);

@@ -16,12 +16,8 @@ namespace wsn_energy {
 
 class IPv6 : public myModule
 {
-  private:
-    bool isHavingPendingPacket;
-
   public:
     RPL *rpl; // using RPL as routing protocol
-    std::list<IpPacket*> buffer; // Buffer message to send, public scope for debugging
 
     void multicast(IpPacket*);      // broadcast
     void unicast(IpPacket*, int);   // unicast with destination IP address

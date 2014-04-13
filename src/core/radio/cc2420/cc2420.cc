@@ -29,7 +29,7 @@ Define_Module(cc2420);
 
 double cc2420::intervalCCA()
 {
-  return 20 * SYMBOL;     // WSN 20 symbols (12 symbols switch-do not need if in receive mode, 8 symbols sample)
+  return 8 * SYMBOL;     // WSN 20 symbols (12 symbols switch-do not need if in receive mode, 8 symbols sample)
 }
 
 double cc2420::getTxPower()

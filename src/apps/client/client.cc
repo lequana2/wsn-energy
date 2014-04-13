@@ -84,7 +84,7 @@ void Client::processSelfMessage(cPacket* packet)
           sendMessageToLower(data);
 
           /* End to end statistics */
-          ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
+          (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND));
 
           if ((int) getModuleByPath("WSN")->par("scheme").doubleValue() == 2)
             if (this->numberOfPacket++ < MAX)  // control maximum number
@@ -121,20 +121,18 @@ void Client::processLowerLayerMessage(cPacket*)
 void Client::newData()
 {
   int sendInterval = 4; // second
-  int randomness = 4; // second
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
   if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
-    time = sendInterval + (rand() % (randomness * 1000)) / 1000.0;
+    time = sendInterval + (rand() % (1000)) / 1000.0;
   else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    time = sendInterval + intuniform(0, randomness * 1000) / 1000.0 / 1000;
+    time = sendInterval + intuniform(0, 900000000*sendInterval) / 900000000000.0;
 
 //  this->getParentModule()->bubble("Data");
 
   selfTimer(time, APP_SENSING_FLAG);
-//  selfTimer(4, APP_SENSING_FLAG);
 }
 
 }
