@@ -16,6 +16,7 @@ namespace wsn_energy {
 class MACdriver : public myModule
 {
   protected:
+    /* WSN ip-routing table !!! */
     FrameMAC *buffer;
 
     virtual void processSelfMessage(cPacket*);

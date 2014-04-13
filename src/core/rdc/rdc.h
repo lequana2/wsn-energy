@@ -17,6 +17,9 @@ namespace wsn_energy {
 class RDCdriver : public myModule
 {
   protected:
+    Command *waitForACK;
+    bool isWaitingACK;
+
     FrameRDC *buffer;
 
     virtual void processSelfMessage(cPacket*);

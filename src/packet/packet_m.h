@@ -77,12 +77,14 @@ enum COMMAND_FROM_APP {
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_FROM_NET{
- *     NET_CHECK_BUFFER = 0;
+ *     NET_CHECK_BUFFER       = 0;  
+ *     NET_TIMER_DIO          = 1;  
  * };
  * </pre>
  */
 enum COMMAND_FROM_NET {
-    NET_CHECK_BUFFER = 0
+    NET_CHECK_BUFFER = 0,
+    NET_TIMER_DIO = 1
 };
 
 /**
@@ -143,13 +145,16 @@ enum RESULT_FROM_MAC {
  * 	RDC_SEND   = 30; 
  * 	RDC_LISTEN = 31; 
  * 	RDC_IDLE   = 32; 
+ * 	
+ * 	RDC_WAIT_FOR_ACK = 34; 
  * };
  * </pre>
  */
 enum COMMAND_FROM_RDC {
     RDC_SEND = 30,
     RDC_LISTEN = 31,
-    RDC_IDLE = 32
+    RDC_IDLE = 32,
+    RDC_WAIT_FOR_ACK = 34
 };
 
 /**
@@ -308,14 +313,12 @@ inline void doUnpacking(cCommBuffer *b, Result& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Raw{
- * 	bool error; 
  * }
  * </pre>
  */
 class Raw : public ::cPacket
 {
   protected:
-    bool error_var;
 
   private:
     void copy(const Raw& other);
@@ -334,8 +337,6 @@ class Raw : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual bool getError() const;
-    virtual void setError(bool error);
 };
 
 inline void doPacking(cCommBuffer *b, Raw& obj) {obj.parsimPack(b);}
@@ -346,6 +347,8 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet FrameRDC{
  * 	int note;  
+ * 	
+ * 	bool isACK; 
  * }
  * </pre>
  */
@@ -353,6 +356,7 @@ class FrameRDC : public ::cPacket
 {
   protected:
     int note_var;
+    bool isACK_var;
 
   private:
     void copy(const FrameRDC& other);
@@ -373,6 +377,8 @@ class FrameRDC : public ::cPacket
     // field getter/setter methods
     virtual int getNote() const;
     virtual void setNote(int note);
+    virtual bool getIsACK() const;
+    virtual void setIsACK(bool isACK);
 };
 
 inline void doPacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimPack(b);}

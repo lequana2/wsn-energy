@@ -27,22 +27,22 @@ network WSN
 {
     parameters:
         int topology;
-        
+
         int numberClient;
 
         int trRange @unit(m);
         int coRange @unit(m);
         int ssRange @unit(m);
 
-        int width   @unit(m);
-        int height  @unit(m);
+        int width @unit(m);
+        int height @unit(m);
 
-		int scheme;
-		int rand;
-		
+        int scheme;
+        int rand;
+
         int isPolling;
         double polling;
-        
+
         int serverX @unit(m);
         int serverY @unit(m);
 
@@ -53,8 +53,8 @@ network WSN
             parameters:
                 trRange = trRange;
                 coRange = coRange;
-				axisX = serverX;
-				axisY = serverY;
+                axisX = serverX;
+                axisY = serverY;
         }
         client[numberClient]: ClientMote {
             parameters:
@@ -63,10 +63,7 @@ network WSN
                 axisX = 0;
                 axisY = 0;
         }
-        world: World {
-            parameters:
-                numberClient = numberClient;
-        }
+        world: World;
         statistic: Statistic;
     connections allowunconnected:
 }

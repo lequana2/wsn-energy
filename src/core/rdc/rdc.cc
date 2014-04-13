@@ -13,11 +13,39 @@ namespace wsn_energy {
 
 void RDCdriver::processSelfMessage(cPacket* packet)
 {
-  // WSN
+  // WSN send + recv ACK
   // RDC_SEND_OK     = 0; // send + receive ACK (if needed)
   // RDC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
   // RDC_SEND_FATAL  = 2; // fatal error, abort message
   // RDC_SEND_COL    = 3; // collision with PHY
+
+  switch (packet->getKind())
+  {
+
+    case COMMAND: /* Command */
+    {
+      switch (check_and_cast<Command*>(packet)->getNote())
+      {
+        case RDC_WAIT_FOR_ACK: /*no ACK*/
+        {
+          isWaitingACK = false;
+          sendResult(RDC_SEND_NO_ACK);
+
+          break;
+        }/* no ACK */
+
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+    } /* Command */
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
+  }
 }
 
 void RDCdriver::processUpperLayerMessage(cPacket* packet)
@@ -28,12 +56,24 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
     {
       this->buffer = new FrameRDC;
       this->buffer->setKind(DATA);
+      this->buffer->setIsACK(false);
 
       this->buffer->encapsulate(packet);
 
       // WSN need duty cycling trigger here
       sendMessageToLower(buffer);
       sendCommand(RDC_SEND);
+
+      // WSN unicast = waiting for ACK
+      if (false)
+      {
+        waitForACK = new Command;
+        waitForACK->setKind(COMMAND);
+        waitForACK->setNote(RDC_WAIT_FOR_ACK);
+        scheduleAt(0, waitForACK);
+
+        isWaitingACK = true;
+      }
 
       break;
     } /* Data */
@@ -68,11 +108,21 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      FrameMAC *frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
-      frameMac->setKind(DATA);
-      sendMessageToUpper(frameMac);
+      // WSN consider ACK or not
+      if (true)
+      {
+        FrameMAC *frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
+        frameMac->setKind(DATA);
+        sendMessageToUpper(frameMac);
+      }
+      else
+      {
+        cancelAndDelete(waitForACK);
+        isWaitingACK = false;
 
-      // delete header
+        sendResult(RDC_SEND_OK); // send success
+      }
+
       delete packet;
       break;
     } /* Data */
@@ -99,11 +149,18 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           break;
         }/* Internal error */
 
-        case PHY_TX_OK: /* callback after sending */
+        case PHY_TX_OK: /* callback after transmitting */
         {
-          sendResult(RDC_SEND_OK);
+          // WSN consider just sends data or ACK
+          if (true)
+          {
+
+          }
+          else
+          {
+          }
           break;
-        }/* callback after sending */
+        }/* callback after transmitting */
 
         default:
           ev << "Unknown result" << endl;

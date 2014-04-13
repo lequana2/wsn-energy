@@ -9,6 +9,8 @@
 #include "server.h"
 #include "statistic.h"
 #include "packet_m.h"
+#include <iostream>
+#include <fstream>
 
 namespace wsn_energy {
 
@@ -17,6 +19,11 @@ Define_Module(Server);
 void Server::initialize()
 {
   selfTimer(0, RPL_CONSTRUCT);
+
+  std::ofstream myfile;
+  myfile.open("data.txt");
+  myfile << "[Data received from client]";
+  myfile.close();
 }
 
 void Server::processSelfMessage(cPacket* packet)
@@ -38,6 +45,11 @@ void Server::processUpperLayerMessage(cPacket* packet)
 void Server::processLowerLayerMessage(cPacket* packet)
 {
   Data* data = check_and_cast<Data*>(packet);
+
+  std::ofstream myfile;
+  myfile.open("data.txt", std::ios::app);
+  myfile << "\n" << data->getValue();
+  myfile.close();
 
   //  this->getParentModule()->bubble(data->getValue());
 

@@ -40,9 +40,9 @@ void csma::deferPacket()
 
     backoff_transmission = 1 << backoff_exponent;
 
-    if (getParentModule()->getParentModule()->par("rand").doubleValue() == 0)
+    if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
       backoff = (rand() % (backoff_transmission)) * BACKOFF_PERIOD;
-    else if (getParentModule()->getParentModule()->par("rand").doubleValue() == 1)
+    else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
       backoff = (intuniform(0,backoff_transmission)) * BACKOFF_PERIOD;
 
     if (DEBUG)

@@ -21,7 +21,5 @@ package wsn_energy.util.world;
 simple World
 {
     parameters:
-        int numberClient;
-
         @display("p=-10,10;i=misc/globe");
 }

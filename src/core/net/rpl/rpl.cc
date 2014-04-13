@@ -21,6 +21,13 @@
 #include "energest.h"
 #include "hopEnergy.h"
 
+#ifndef DODAG_PAR
+#define DODAG_PAR
+#define RPL_DIO_INTERVAL_MIN          12 // 2 ^ 12 = 4096 ms = 4s, based on ContikiRPL
+#define RPL_DIO_INTERVAL_DOUBLINGS     8 // 2 ^ (8+12) = 1048576 ms = 17 min, based on ContikiRPL
+#define RPL_DIO_REDUNDANCY            10 // further RFC 6206, 10 is specified in RFC 6550
+#endif
+
 #ifndef ANNOTATE
 #define ANNOTATE 1
 #endif
@@ -61,6 +68,9 @@ void RPL::rpl_set_root()
   this->rplDag.version++;
   this->rplDag.joined = true;
   this->rplDag.rank = 1;
+
+  // WSN only 1, start dio timer
+//  resetDIOTimer();
 }
 
 void RPL::sendDIO()
@@ -94,6 +104,55 @@ void RPL::sendDIS(int hopTTL)
   icmp->setHopTTL(hopTTL);
 
   net->multicast(icmp);
+}
+
+void RPL::resetDIOTimer()
+{
+  // reset to initial stage
+  dioCounter = 0;
+  dioCurrent = RPL_DIO_INTERVAL_MIN;
+  newDIOinterval();
+}
+
+void RPL::newDIOinterval()
+{
+  // reset counter
+  dioCounter = 0;
+
+  // create new interval
+  dioInterval = 1 << dioCurrent;  // millis
+
+  std::cout << this->net->getId() << " has DIO interval: " << dioInterval << " of " << dioCurrent << endl;
+
+  /* random number between I/2 and I */
+  if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
+    dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
+  else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
+    dioInterval = dioInterval / 2 + (intuniform(0, 1000) / 1000.0) * dioInterval / 2;
+
+  dioInterval /= 1000.0;          // convert to sec
+
+  this->net->selfTimer(dioInterval, NET_TIMER_DIO); // self schedule
+}
+
+void RPL::handleDIOTimer()
+{
+  // handle when timer expired
+  if (!this->rplDag.joined) // link local not OK
+    this->net->selfTimer(0.02048, NET_TIMER_DIO); // 128 symbols
+
+  if (dioCounter < RPL_DIO_REDUNDANCY)
+  {
+    sendDIO();
+    dioCounter++;
+    this->net->selfTimer(dioInterval, NET_TIMER_DIO);
+  }
+  else
+  {
+    if (dioCurrent < RPL_DIO_INTERVAL_MIN + RPL_DIO_INTERVAL_DOUBLINGS)
+      dioCurrent++;
+    newDIOinterval();
+  }
 }
 
 void RPL::processICMP(IpPacket *packet)
@@ -280,14 +339,14 @@ void RPL::processDIO(DIO* dio)
         return;
       }
     }
+  }
 
-    // Bubble current rank
-    if (ANNOTATE)
-    {
-      char rank[10];
-      sprintf(rank, "Rank %d", (int) this->rplDag.rank);
-      net->getParentModule()->bubble(rank);
-    }
+  // Bubble current rank
+  if (ANNOTATE)
+  {
+    char rank[10];
+    sprintf(rank, "Rank %d", (int) this->rplDag.rank);
+    net->getParentModule()->bubble(rank);
   }
 }
 

@@ -25,17 +25,13 @@ Define_Module(World);
 
 void World::initialize()
 {
-  this->numberClient = par("numberClient");
+  this->numberClient = getParentModule()->par("numberClient").doubleValue();
 
-  // Arrange nodes into positions
+  /* Arrange nodes into positions */
   arrangeMotes();
 
-  // Create connections
+  /* Create connections */
   connectNodes();
-}
-
-void World::handleMessage(cMessage *msg)
-{
 }
 
 void World::finish()
@@ -64,7 +60,8 @@ void World::arrangeMotes()
   {
     switch ((int) getParentModule()->par("topology").doubleValue())
     {
-      case 0: /* server at center */
+      case 0: /* grid */
+      {
         if (col > 10)
         {
           row++;
@@ -80,9 +77,11 @@ void World::arrangeMotes()
         // Randomize
         x = uniform(x - 5, x + 5);
         y = uniform(y - 5, y + 5);
-        break; /* server at center */
+        break;
+      }/* grid */
 
       case 1: /* pyramid */
+      {
         if (col >= step)
         {
           col = 0;
@@ -96,7 +95,16 @@ void World::arrangeMotes()
         // Partition
         x = (int) (col * 25 + (getParentModule()->par("width").doubleValue() - 25 * step) / 2);
         y = (int) (row * 30 + 17);
-        break; /* pyramid */
+        break;
+      }/* pyramid */
+
+      case 2:/* Line */
+      {
+        step++;
+        x = 150;
+        y = step*30 + 150;
+        break;
+      } /* Line */
     }
 
     char modulePath[20];
@@ -247,13 +255,14 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
 
   host->onAir = onAir->dup();
 
-  // insert all in-transmission-range signal
+  // create all in-transmission-range signal
   for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
       it != host->moteIDWithinTransmissionRange.end(); it++)
   {
-    mySignal *signal = new mySignal(mote->getId(), (*it));
+    mySignal *signal = new mySignal(senderID, (*it));
     considerSignal(signal);
 
+    // insert into signal manager list
     this->signals.push_front(signal);
   }
 
@@ -262,7 +271,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
       it != host->moteIDWithinCollisionRange.end(); it++)
   {
     // only increase incoming signal
-    mySignal *signal = new mySignal(mote->getId(), (*it));
+    mySignal *signal = new mySignal(senderID, (*it));
     considerSignal(signal);
   }
 }
@@ -289,7 +298,7 @@ void World::releaseHost(RadioDriver* mote)
     return;
   }
 
-  // remove all signal
+  // release this host signal
   for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
     if ((*it)->radioSenderID == senderID)
     {
@@ -336,7 +345,8 @@ void World::stopListening(RadioDriver* mote)
 /*
  * a mote sudden listens
  */
-void World::suddenListening(RadioDriver *mote){
+void World::suddenListening(RadioDriver *mote)
+{
 // WSN consider all incoming message to note incomplete
 }
 
@@ -358,10 +368,10 @@ void World::considerSignal(mySignal* signal)
   // consider interfere signal at receiver
   if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal > 1)
   {
-    // in  this signal
+    // from this host signal
     signal->setInterferred();
 
-    // in other signal
+    // from other host signal
     for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
       if ((*it)->radioRecverID == recverID)
         (*it)->setInterferred();

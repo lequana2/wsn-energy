@@ -88,7 +88,8 @@ void Statistic::finish()
   // Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("WSN");
   int numberClient = wsn->par("numberClient").longValue();
-int shit = 0;
+  int shit = 0;
+
   for (int i = 0; i < numberClient; i++)
   {
     numSensorEnergy =
@@ -113,9 +114,9 @@ int shit = 0;
   emit(sigTimeListen, timeListen);
   emit(sigTotalEnergy, numTotalEnergy);
 
-  // WSN DEBUG
-  emit(sigNetRecv, shit);
-  emit(sigNetSend, timeIdle + timeTrans + timeListen);
+  // WSN just DEBUG
+  emit(sigRadioRecv, shit);
+  emit(sigRadioSend, timeIdle + timeTrans + timeListen);
 
   cancelAndDelete(polling);
 }

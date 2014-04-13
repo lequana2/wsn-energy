@@ -16,10 +16,10 @@ Define_Module(Client);
 
 void Client::initialize()
 {
-  this->maximumPacket = 0;
+  this->numberOfPacket = 0;
 
   /* Contiki test scheme */
-  switch ((int) this->getParentModule()->getParentModule()->par("scheme").doubleValue())
+  switch ((int) getModuleByPath("WSN")->par("scheme").doubleValue())
   {
     case 1: /* one event */
     {
@@ -76,15 +76,18 @@ void Client::processSelfMessage(cPacket* packet)
           Data *data = new Data;
           data->setKind(DATA);
           data->setTime(simTime().dbl());
-          data->setValue("Hello");
+
+          char buf[30];
+          sprintf(buf, "Hello %d from %d", numberOfPacket, this->getId());
+          data->setValue(buf); // WSN need to validate
 
           sendMessageToLower(data);
 
           /* End to end statistics */
           ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND);
 
-          if ((int) this->getParentModule()->getParentModule()->par("scheme").doubleValue() == 2)
-            if (this->maximumPacket++ < MAX)  // control maximum number
+          if ((int) getModuleByPath("WSN")->par("scheme").doubleValue() == 2)
+            if (this->numberOfPacket++ < MAX)  // control maximum number
               newData();
           break; /* new data */
         }
@@ -123,14 +126,15 @@ void Client::newData()
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-  if (getParentModule()->getParentModule()->par("rand").doubleValue() == 0)
+  if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
     time = sendInterval + (rand() % (randomness * 1000)) / 1000.0;
-  else if (getParentModule()->getParentModule()->par("rand").doubleValue() == 1)
+  else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
     time = sendInterval + intuniform(0, randomness * 1000) / 1000.0 / 1000;
 
 //  this->getParentModule()->bubble("Data");
 
-  selfTimer(time, APP_SENSING_FLAG);
+//  selfTimer(time, APP_SENSING_FLAG);
+  selfTimer(4, APP_SENSING_FLAG);
 }
 
 }

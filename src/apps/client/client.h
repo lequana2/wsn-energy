@@ -18,7 +18,7 @@ namespace wsn_energy {
 class Client : public myModule
 {
   private:
-    int maximumPacket;
+    int numberOfPacket;
     virtual void newData();
 
   protected:

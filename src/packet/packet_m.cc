@@ -63,6 +63,7 @@ EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_FROM_NET");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_FROM_NET"));
     e->insert(NET_CHECK_BUFFER, "NET_CHECK_BUFFER");
+    e->insert(NET_TIMER_DIO, "NET_TIMER_DIO");
 );
 
 EXECUTE_ON_STARTUP(
@@ -96,6 +97,7 @@ EXECUTE_ON_STARTUP(
     e->insert(RDC_SEND, "RDC_SEND");
     e->insert(RDC_LISTEN, "RDC_LISTEN");
     e->insert(RDC_IDLE, "RDC_IDLE");
+    e->insert(RDC_WAIT_FOR_ACK, "RDC_WAIT_FOR_ACK");
 );
 
 EXECUTE_ON_STARTUP(
@@ -610,7 +612,6 @@ Register_Class(Raw);
 
 Raw::Raw(const char *name, int kind) : cPacket(name,kind)
 {
-    this->error_var = 0;
 }
 
 Raw::Raw(const Raw& other) : cPacket(other)
@@ -632,29 +633,16 @@ Raw& Raw::operator=(const Raw& other)
 
 void Raw::copy(const Raw& other)
 {
-    this->error_var = other.error_var;
 }
 
 void Raw::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
-    doPacking(b,this->error_var);
 }
 
 void Raw::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
-    doUnpacking(b,this->error_var);
-}
-
-bool Raw::getError() const
-{
-    return error_var;
-}
-
-void Raw::setError(bool error)
-{
-    this->error_var = error;
 }
 
 class RawDescriptor : public cClassDescriptor
@@ -704,7 +692,7 @@ const char *RawDescriptor::getProperty(const char *propertyname) const
 int RawDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 0+basedesc->getFieldCount(object) : 0;
 }
 
 unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -715,10 +703,7 @@ unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
             return basedesc->getFieldTypeFlags(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,
-    };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return 0;
 }
 
 const char *RawDescriptor::getFieldName(void *object, int field) const
@@ -729,17 +714,12 @@ const char *RawDescriptor::getFieldName(void *object, int field) const
             return basedesc->getFieldName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldNames[] = {
-        "error",
-    };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return NULL;
 }
 
 int RawDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='e' && strcmp(fieldName, "error")==0) return base+0;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -751,10 +731,7 @@ const char *RawDescriptor::getFieldTypeString(void *object, int field) const
             return basedesc->getFieldTypeString(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldTypeStrings[] = {
-        "bool",
-    };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return NULL;
 }
 
 const char *RawDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -794,7 +771,6 @@ std::string RawDescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: return bool2string(pp->getError());
         default: return "";
     }
 }
@@ -809,7 +785,6 @@ bool RawDescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: pp->setError(string2bool(value)); return true;
         default: return false;
     }
 }
@@ -822,10 +797,7 @@ const char *RawDescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-    };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return NULL;
 }
 
 void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -847,6 +819,7 @@ Register_Class(FrameRDC);
 FrameRDC::FrameRDC(const char *name, int kind) : cPacket(name,kind)
 {
     this->note_var = 0;
+    this->isACK_var = 0;
 }
 
 FrameRDC::FrameRDC(const FrameRDC& other) : cPacket(other)
@@ -869,18 +842,21 @@ FrameRDC& FrameRDC::operator=(const FrameRDC& other)
 void FrameRDC::copy(const FrameRDC& other)
 {
     this->note_var = other.note_var;
+    this->isACK_var = other.isACK_var;
 }
 
 void FrameRDC::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->note_var);
+    doPacking(b,this->isACK_var);
 }
 
 void FrameRDC::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->note_var);
+    doUnpacking(b,this->isACK_var);
 }
 
 int FrameRDC::getNote() const
@@ -891,6 +867,16 @@ int FrameRDC::getNote() const
 void FrameRDC::setNote(int note)
 {
     this->note_var = note;
+}
+
+bool FrameRDC::getIsACK() const
+{
+    return isACK_var;
+}
+
+void FrameRDC::setIsACK(bool isACK)
+{
+    this->isACK_var = isACK;
 }
 
 class FrameRDCDescriptor : public cClassDescriptor
@@ -940,7 +926,7 @@ const char *FrameRDCDescriptor::getProperty(const char *propertyname) const
 int FrameRDCDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
 }
 
 unsigned int FrameRDCDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -953,8 +939,9 @@ unsigned int FrameRDCDescriptor::getFieldTypeFlags(void *object, int field) cons
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
 const char *FrameRDCDescriptor::getFieldName(void *object, int field) const
@@ -967,8 +954,9 @@ const char *FrameRDCDescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "note",
+        "isACK",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return (field>=0 && field<2) ? fieldNames[field] : NULL;
 }
 
 int FrameRDCDescriptor::findField(void *object, const char *fieldName) const
@@ -976,6 +964,7 @@ int FrameRDCDescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='n' && strcmp(fieldName, "note")==0) return base+0;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isACK")==0) return base+1;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -989,8 +978,9 @@ const char *FrameRDCDescriptor::getFieldTypeString(void *object, int field) cons
     }
     static const char *fieldTypeStrings[] = {
         "int",
+        "bool",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *FrameRDCDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1031,6 +1021,7 @@ std::string FrameRDCDescriptor::getFieldAsString(void *object, int field, int i)
     FrameRDC *pp = (FrameRDC *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getNote());
+        case 1: return bool2string(pp->getIsACK());
         default: return "";
     }
 }
@@ -1046,6 +1037,7 @@ bool FrameRDCDescriptor::setFieldAsString(void *object, int field, int i, const 
     FrameRDC *pp = (FrameRDC *)object; (void)pp;
     switch (field) {
         case 0: pp->setNote(string2long(value)); return true;
+        case 1: pp->setIsACK(string2bool(value)); return true;
         default: return false;
     }
 }
@@ -1060,8 +1052,9 @@ const char *FrameRDCDescriptor::getFieldStructName(void *object, int field) cons
     }
     static const char *fieldStructNames[] = {
         NULL,
+        NULL,
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameRDCDescriptor::getFieldStructPointer(void *object, int field, int i) const

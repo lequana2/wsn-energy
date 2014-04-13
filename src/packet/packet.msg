@@ -37,7 +37,8 @@ enum COMMAND_FROM_APP{
 
 // Net layer
 enum COMMAND_FROM_NET{
-    NET_CHECK_BUFFER = 0;
+    NET_CHECK_BUFFER       = 0;  // self-check its buffer
+    NET_TIMER_DIO          = 1;  // handle DIO timer
 };
 
 // ip packet type
@@ -68,6 +69,8 @@ enum COMMAND_FROM_RDC{
 	RDC_SEND   = 30; // transmit
 	RDC_LISTEN = 31; // listen
 	RDC_IDLE   = 32; // idle
+	
+	RDC_WAIT_FOR_ACK = 34; // wait for ack / listenning
 };
 
 // RDC layer result
@@ -120,11 +123,12 @@ packet Result{
 
 // Data
 packet Raw{
-	bool error; // is error
 }
 
 packet FrameRDC{
 	int note;  // control message
+	
+	bool isACK; // is ACK frame
 }
 
 packet FrameMAC{

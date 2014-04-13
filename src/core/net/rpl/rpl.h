@@ -67,6 +67,9 @@ class RPL
 {
   private:
     IPv6 *net;
+    int dioCounter;
+    int dioCurrent;
+    unsigned long dioInterval;
 
     void processDIO(DIO*);
     void processDIS(DIS*);
@@ -83,6 +86,10 @@ class RPL
     void sendDIS(int);
 
     void processICMP(IpPacket*);
+
+    void resetDIOTimer();
+    void newDIOinterval();
+    void handleDIOTimer();
 };
 
 } /* namespace wsn_energy */

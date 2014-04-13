@@ -16,7 +16,7 @@ void RadioDriver::initialize()
   this->coRange = par("coRange");
   this->incomingSignal = 0;
 
-  // WSN Turn on at first
+  // Turn on in initializing phase
   listen();
 }
 
@@ -302,28 +302,35 @@ void RadioDriver::listen()
  */
 void RadioDriver::received(Raw* raw)
 {
-  if (DEBUG)
-    ev << "Received !!!" << endl;
-
-  /* WSN hack receive a complete message */
-  if (!raw->getError())
-//  if (true)
+  /* hack receive a complete message */
+//  sendMessageToUpper(raw->decapsulate());
+//  return;
+  /* okay message from begin to end */
+  if (!raw->hasBitError())
   {
-    FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-//    frame->setNote(LAYER_RADIO_RECV_OK);
-    sendMessageToUpper(frame);
+    if (DEBUG)
+      ev << "Received !!!" << endl;
 
-    delete raw;
+    sendMessageToUpper(raw->decapsulate());
   }
   /* WSN receie a corrupt message */
-  else
+  else if (false)
   {
-    FrameRDC *frame = check_and_cast<FrameRDC*>(raw->decapsulate());
-//    frame->setNote(LAYER_RADIO_RECV_NOT_OK);
-    sendMessageToUpper(frame);
+    if (DEBUG)
+      ev << "Corrupted !!!" << endl;
 
-    delete raw;
+    sendResult(PHY_RECV_CORRUPTED);
   }
+  /* WSN receie an incompleted message */
+  else if (false)
+  {
+    if (DEBUG)
+      ev << "Incompleted !!!" << endl;
+
+    sendResult(PHY_RECV_INCOMPLETED);
+  }
+
+  delete raw;
 }
 
 /*

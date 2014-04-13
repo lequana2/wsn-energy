@@ -40,7 +40,7 @@ void IPv6::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case NET_CHECK_BUFFER: /* Check is in turn */
+        case NET_CHECK_BUFFER: /* Check buffer */
         {
           if (DEBUG)
             ev << "SEND (NET) remaining: " << this->buffer.size() << endl;
@@ -51,12 +51,18 @@ void IPv6::processSelfMessage(cPacket* packet)
           }
           else if (!isHavingPendingPacket) // In-turn
           {
-            sendMessageToLower(this->buffer.front());
+            sendMessageToLower(this->buffer.front()); // send data to MAC buffer
+            (check_and_cast<Statistic*>(getModuleByPath("WSN.statistic")))->packetRateTracking(NET_SEND); // statistics
             isHavingPendingPacket = true;
           }
           break;
-        }
-          /* Check is in turn */
+        } /* Check buffer */
+
+        case NET_TIMER_DIO: /* DIO timer*/
+        {
+          this->rpl->handleDIOTimer();
+          break;
+        } /* DIO timer*/
 
         default:
           ev << "Unknown command" << endl;
@@ -148,6 +154,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
     {
       if (DEBUG)
         ev << "RECV (NET)" << endl;
+
+      (check_and_cast<Statistic*>(getModuleByPath("WSN.statistic")))->packetRateTracking(NET_RECV); // statistics
 
       switch (check_and_cast<IpPacket*>(packet)->getMessageCode())
       {

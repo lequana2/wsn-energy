@@ -47,7 +47,6 @@ class World : public cSimpleModule
 
   protected:
     void initialize();
-    void handleMessage(cMessage *msg);
     void finish();
 
   public:
