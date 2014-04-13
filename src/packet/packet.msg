@@ -159,7 +159,6 @@ packet DIO  extends IpPacket{
 }
 
 packet DIS  extends IpPacket{
-	int hopTTL;
 }
 
 packet UdpPacket{

@@ -314,20 +314,13 @@ void RadioDriver::received(Raw* raw)
     sendMessageToUpper(raw->decapsulate());
   }
   /* WSN receie a corrupt message */
-  else if (false)
+  /* WSN receie an incompleted message */
+  else
   {
     if (DEBUG)
-      ev << "Corrupted !!!" << endl;
+      ev << "Nonsense signal !!!" << endl;
 
     sendResult(PHY_RECV_CORRUPTED);
-  }
-  /* WSN receie an incompleted message */
-  else if (false)
-  {
-    if (DEBUG)
-      ev << "Incompleted !!!" << endl;
-
-    sendResult(PHY_RECV_INCOMPLETED);
   }
 
   delete raw;

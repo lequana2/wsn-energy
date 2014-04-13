@@ -544,14 +544,12 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS  extends IpPacket{
- * 	int hopTTL;
  * }
  * </pre>
  */
 class DIS : public ::wsn_energy::IpPacket
 {
   protected:
-    int hopTTL_var;
 
   private:
     void copy(const DIS& other);
@@ -570,8 +568,6 @@ class DIS : public ::wsn_energy::IpPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getHopTTL() const;
-    virtual void setHopTTL(int hopTTL);
 };
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}

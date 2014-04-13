@@ -70,6 +70,7 @@ class RPL
     int dioCounter;
     int dioCurrent;
     unsigned long dioInterval;
+    double         dioDelay;
 
     void processDIO(DIO*);
     void processDIS(DIS*);

@@ -69,8 +69,8 @@ void RPL::rpl_set_root()
   this->rplDag.joined = true;
   this->rplDag.rank = 1;
 
-  // WSN only 1, start dio timer
-//  resetDIOTimer();
+  // start DIO timer
+  resetDIOTimer();
 }
 
 void RPL::sendDIO()
@@ -101,7 +101,6 @@ void RPL::sendDIS(int hopTTL)
   icmp->setMessageCode(NET_ICMP_RPL);
   icmp->setIcmpCode(NET_ICMP_DIO);
   icmp->setByteLength(DIS_LEN);
-  icmp->setHopTTL(hopTTL);
 
   net->multicast(icmp);
 }
@@ -122,17 +121,19 @@ void RPL::newDIOinterval()
   // create new interval
   dioInterval = 1 << dioCurrent;  // millis
 
-  std::cout << this->net->getId() << " has DIO interval: " << dioInterval << " of " << dioCurrent << endl;
-
   /* random number between I/2 and I */
   if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
     dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
   else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
     dioInterval = dioInterval / 2 + (intuniform(0, 1000) / 1000.0) * dioInterval / 2;
 
-  dioInterval /= 1000.0;          // convert to sec
+  dioDelay = dioInterval / 1000.0;          // convert to sec
 
-  this->net->selfTimer(dioInterval, NET_TIMER_DIO); // self schedule
+  std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at " << simTime() << endl;
+
+  // WSN simulation break
+  if (simTime() < 28800)
+    this->net->selfTimer(dioDelay, NET_TIMER_DIO); // self schedule
 }
 
 void RPL::handleDIOTimer()
@@ -145,7 +146,7 @@ void RPL::handleDIOTimer()
   {
     sendDIO();
     dioCounter++;
-    this->net->selfTimer(dioInterval, NET_TIMER_DIO);
+    this->net->selfTimer(dioDelay, NET_TIMER_DIO);
   }
   else
   {
@@ -212,7 +213,7 @@ void RPL::processDIO(DIO* dio)
       net->getParentModule()->gate(channelParent)->setDisplayString("ls=red,1");
     }
 
-    this->sendDIO();
+    this->resetDIOTimer();
   }
   else
   {
@@ -249,7 +250,7 @@ void RPL::processDIO(DIO* dio)
       }
 
       // Different
-      this->sendDIO();
+      this->resetDIOTimer();
     }
 
     // obsolete/maintenace DIO
@@ -291,7 +292,7 @@ void RPL::processDIO(DIO* dio)
           this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
 
           // Update parent
-          this->sendDIO();
+          this->resetDIOTimer();
         }
         // WSN siblings, same rank
         else if (this->rplDag.rank == dio->getRank())
@@ -358,7 +359,7 @@ void RPL::processDIS(DIS* msg)
 // currently in DAG, then broadcast DIS
   if (this->rplDag.joined)
   {
-    this->sendDIO();
+    this->resetDIOTimer();
   }
 // already
   else

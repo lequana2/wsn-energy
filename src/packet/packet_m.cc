@@ -1993,7 +1993,6 @@ Register_Class(DIS);
 
 DIS::DIS(const char *name, int kind) : wsn_energy::IpPacket(name,kind)
 {
-    this->hopTTL_var = 0;
 }
 
 DIS::DIS(const DIS& other) : wsn_energy::IpPacket(other)
@@ -2015,29 +2014,16 @@ DIS& DIS::operator=(const DIS& other)
 
 void DIS::copy(const DIS& other)
 {
-    this->hopTTL_var = other.hopTTL_var;
 }
 
 void DIS::parsimPack(cCommBuffer *b)
 {
     wsn_energy::IpPacket::parsimPack(b);
-    doPacking(b,this->hopTTL_var);
 }
 
 void DIS::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::IpPacket::parsimUnpack(b);
-    doUnpacking(b,this->hopTTL_var);
-}
-
-int DIS::getHopTTL() const
-{
-    return hopTTL_var;
-}
-
-void DIS::setHopTTL(int hopTTL)
-{
-    this->hopTTL_var = hopTTL;
 }
 
 class DISDescriptor : public cClassDescriptor
@@ -2087,7 +2073,7 @@ const char *DISDescriptor::getProperty(const char *propertyname) const
 int DISDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 0+basedesc->getFieldCount(object) : 0;
 }
 
 unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -2098,10 +2084,7 @@ unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
             return basedesc->getFieldTypeFlags(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,
-    };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return 0;
 }
 
 const char *DISDescriptor::getFieldName(void *object, int field) const
@@ -2112,17 +2095,12 @@ const char *DISDescriptor::getFieldName(void *object, int field) const
             return basedesc->getFieldName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldNames[] = {
-        "hopTTL",
-    };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return NULL;
 }
 
 int DISDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='h' && strcmp(fieldName, "hopTTL")==0) return base+0;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -2134,10 +2112,7 @@ const char *DISDescriptor::getFieldTypeString(void *object, int field) const
             return basedesc->getFieldTypeString(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldTypeStrings[] = {
-        "int",
-    };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return NULL;
 }
 
 const char *DISDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -2177,7 +2152,6 @@ std::string DISDescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     DIS *pp = (DIS *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getHopTTL());
         default: return "";
     }
 }
@@ -2192,7 +2166,6 @@ bool DISDescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     DIS *pp = (DIS *)object; (void)pp;
     switch (field) {
-        case 0: pp->setHopTTL(string2long(value)); return true;
         default: return false;
     }
 }
@@ -2205,10 +2178,7 @@ const char *DISDescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-    };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return NULL;
 }
 
 void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const

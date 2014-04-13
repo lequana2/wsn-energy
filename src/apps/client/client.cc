@@ -133,8 +133,8 @@ void Client::newData()
 
 //  this->getParentModule()->bubble("Data");
 
-//  selfTimer(time, APP_SENSING_FLAG);
-  selfTimer(4, APP_SENSING_FLAG);
+  selfTimer(time, APP_SENSING_FLAG);
+//  selfTimer(4, APP_SENSING_FLAG);
 }
 
 }
