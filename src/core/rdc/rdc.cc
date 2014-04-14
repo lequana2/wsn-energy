@@ -11,6 +11,13 @@
 
 namespace wsn_energy {
 
+void RDCdriver::initialize()
+{
+  isSendingBroadcast = true;
+  isWaitingACK = false;
+  sequence = 0;
+}
+
 void RDCdriver::processSelfMessage(cPacket* packet)
 {
   // WSN send + recv ACK
@@ -27,6 +34,7 @@ void RDCdriver::processSelfMessage(cPacket* packet)
       {
         case RDC_WAIT_FOR_ACK: /*no ACK*/
         {
+          // WSN reset parameter, prepare for new transmitting
           sendResult(RDC_SEND_NO_ACK);
           break;
         }/* no ACK */
@@ -51,34 +59,33 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      this->buffer = new FrameRDC;
+      counter = 0;
+
+      this->buffer = check_and_cast<Frame*>(packet->dup()); // duplicate buffer
       this->buffer->setKind(DATA);
       this->buffer->setIsACK(false);
       this->sequence++;
       this->buffer->setSequenceNumber(this->sequence);
 
-      if (check_and_cast<FrameMAC*>(packet)->getRecverMacAddress() == 0)
-        isSendingBroadcast = true;
-      else
-        isSendingBroadcast = false;
-
-      this->buffer->encapsulate(packet);
-
-      sendMessageToLower(buffer->dup());
-      sendCommand(RDC_SEND);
-
-      counter = 0;
-
-      // WSN unicast = waiting for ACK
-      if (false)
+      // consider broadcast or unicast
+      if (this->buffer->getRecverMacAddress() == 0)
       {
-        waitForACK = new Command;
-        waitForACK->setKind(COMMAND);
-        waitForACK->setNote(RDC_WAIT_FOR_ACK);
-        scheduleAt(0, waitForACK);
-
         isSendingBroadcast = true;
       }
+      else
+      {
+        isSendingBroadcast = false;
+
+        // WSN expire time to receive ACK
+//        waitForACK = new Command;
+//        waitForACK->setKind(COMMAND);
+//        waitForACK->setNote(RDC_WAIT_FOR_ACK);
+//        scheduleAt(0, waitForACK);
+      }
+
+      // send to lower
+      sendMessageToLower(buffer->dup());
+      sendCommand(RDC_SEND);
 
       break;
     } /* Data */
@@ -113,27 +120,27 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
+      Frame *frame = check_and_cast<Frame*>(packet);
+
       // WSN consider ACK or not
-      if (!(check_and_cast<FrameRDC*>(packet))->getIsACK())
+      if (!frame->getIsACK())
       {
         // Check MAC address
-        FrameMAC *frameMac = check_and_cast<FrameMAC*>(packet->decapsulate());
-        frameMac->setKind(DATA);
-
-        int recverMacID = frameMac->getRecverMacAddress();
-        int senderMacID = frameMac->getSenderMacAddress();
+        int recverMacID = frame->getRecverMacAddress();
+        int senderMacID = frame->getSenderMacAddress();
 
         if (recverMacID != 0 && recverMacID != this->getParentModule()->getModuleByPath(".mac")->getId())
         {
-          // lost packet, dismiss
-          delete frameMac;
+          // lost packet (! broadcast and wrong mac address) dismiss
+          delete packet;
         }
         else
         {
+          // check if receiving duplicated package
           bool isFound = false;
 
           // search through neighbor list
-          for (std::list<SequenceChecking*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
+          for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
           {
             // if found
             if ((*it)->senderID == senderMacID)
@@ -141,15 +148,15 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               isFound = true;
 
               // consider sequence number
-              if ((*it)->sequence < (check_and_cast<FrameRDC*>(packet)->getSequenceNumber()))
+              if ((*it)->sequence < frame->getSequenceNumber())
               {
-                ((*it))->sequence = check_and_cast<FrameRDC*>(packet)->getSequenceNumber();
-                sendMessageToUpper(frameMac);
+                ((*it))->sequence = frame->getSequenceNumber();
+                sendMessageToUpper(frame);
               }
               else
               {
                 // duplicated message, dismiss
-                delete frameMac;
+                delete packet;
               }
 
               break;
@@ -159,24 +166,23 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           // if not found
           if (!isFound)
           {
-            SequenceChecking *neighbor = new SequenceChecking;
+            Neighbor *neighbor = new Neighbor;
             neighbor->senderID = senderMacID;
-            neighbor->sequence = check_and_cast<FrameRDC*>(packet)->getSequenceNumber();
+            neighbor->sequence = frame->getSequenceNumber();
 
             this->neighbors.push_back(neighbor);
 
-            sendMessageToUpper(frameMac);
+            sendMessageToUpper(frame);
           }
         }
       }
       else
       {
-        cancelAndDelete(waitForACK);
-        isSendingBroadcast = false;
+        // WSN consider ACK, delete before cancel ?
+        delete packet;
 
         sendResult(RDC_SEND_OK); // send success
       }
-      delete packet;
       break;
     } /* Data */
 
@@ -208,13 +214,14 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           if (isSendingBroadcast)
           {
             // consider counter
-            if (counter < 3)
+            if (counter < 0)
             {
               sendMessageToLower(buffer->dup());
               sendCommand(RDC_SEND);
 
               counter++;
             }
+            // WSN hack
             else
             {
               sendResult(RDC_SEND_OK);
@@ -225,16 +232,14 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           {
             // WSN consider just send data/ack
             // WSN need duty cycling trigger here
-            // sendMessageToLower(buffer->dup());
-            // sendCommand(RDC_SEND);
-            // counter++;
-            if (counter < 3)
+            if (counter < 0)
             {
               sendMessageToLower(buffer->dup());
               sendCommand(RDC_SEND);
 
               counter++;
             }
+            // WSN hack
             else
             {
               sendResult(RDC_SEND_OK);

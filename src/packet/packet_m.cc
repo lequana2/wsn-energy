@@ -811,282 +811,27 @@ void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const
     }
 }
 
-Register_Class(FrameRDC);
+Register_Class(Frame);
 
-FrameRDC::FrameRDC(const char *name, int kind) : cPacket(name,kind)
-{
-    this->sequenceNumber_var = 0;
-    this->isACK_var = 0;
-}
-
-FrameRDC::FrameRDC(const FrameRDC& other) : cPacket(other)
-{
-    copy(other);
-}
-
-FrameRDC::~FrameRDC()
-{
-}
-
-FrameRDC& FrameRDC::operator=(const FrameRDC& other)
-{
-    if (this==&other) return *this;
-    cPacket::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void FrameRDC::copy(const FrameRDC& other)
-{
-    this->sequenceNumber_var = other.sequenceNumber_var;
-    this->isACK_var = other.isACK_var;
-}
-
-void FrameRDC::parsimPack(cCommBuffer *b)
-{
-    cPacket::parsimPack(b);
-    doPacking(b,this->sequenceNumber_var);
-    doPacking(b,this->isACK_var);
-}
-
-void FrameRDC::parsimUnpack(cCommBuffer *b)
-{
-    cPacket::parsimUnpack(b);
-    doUnpacking(b,this->sequenceNumber_var);
-    doUnpacking(b,this->isACK_var);
-}
-
-int FrameRDC::getSequenceNumber() const
-{
-    return sequenceNumber_var;
-}
-
-void FrameRDC::setSequenceNumber(int sequenceNumber)
-{
-    this->sequenceNumber_var = sequenceNumber;
-}
-
-bool FrameRDC::getIsACK() const
-{
-    return isACK_var;
-}
-
-void FrameRDC::setIsACK(bool isACK)
-{
-    this->isACK_var = isACK;
-}
-
-class FrameRDCDescriptor : public cClassDescriptor
-{
-  public:
-    FrameRDCDescriptor();
-    virtual ~FrameRDCDescriptor();
-
-    virtual bool doesSupport(cObject *obj) const;
-    virtual const char *getProperty(const char *propertyname) const;
-    virtual int getFieldCount(void *object) const;
-    virtual const char *getFieldName(void *object, int field) const;
-    virtual int findField(void *object, const char *fieldName) const;
-    virtual unsigned int getFieldTypeFlags(void *object, int field) const;
-    virtual const char *getFieldTypeString(void *object, int field) const;
-    virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
-
-    virtual std::string getFieldAsString(void *object, int field, int i) const;
-    virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
-
-    virtual const char *getFieldStructName(void *object, int field) const;
-    virtual void *getFieldStructPointer(void *object, int field, int i) const;
-};
-
-Register_ClassDescriptor(FrameRDCDescriptor);
-
-FrameRDCDescriptor::FrameRDCDescriptor() : cClassDescriptor("wsn_energy::FrameRDC", "cPacket")
-{
-}
-
-FrameRDCDescriptor::~FrameRDCDescriptor()
-{
-}
-
-bool FrameRDCDescriptor::doesSupport(cObject *obj) const
-{
-    return dynamic_cast<FrameRDC *>(obj)!=NULL;
-}
-
-const char *FrameRDCDescriptor::getProperty(const char *propertyname) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? basedesc->getProperty(propertyname) : NULL;
-}
-
-int FrameRDCDescriptor::getFieldCount(void *object) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
-}
-
-unsigned int FrameRDCDescriptor::getFieldTypeFlags(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldTypeFlags(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,
-        FD_ISEDITABLE,
-    };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
-}
-
-const char *FrameRDCDescriptor::getFieldName(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldName(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static const char *fieldNames[] = {
-        "sequenceNumber",
-        "isACK",
-    };
-    return (field>=0 && field<2) ? fieldNames[field] : NULL;
-}
-
-int FrameRDCDescriptor::findField(void *object, const char *fieldName) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceNumber")==0) return base+0;
-    if (fieldName[0]=='i' && strcmp(fieldName, "isACK")==0) return base+1;
-    return basedesc ? basedesc->findField(object, fieldName) : -1;
-}
-
-const char *FrameRDCDescriptor::getFieldTypeString(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldTypeString(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static const char *fieldTypeStrings[] = {
-        "int",
-        "bool",
-    };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
-}
-
-const char *FrameRDCDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldProperty(object, field, propertyname);
-        field -= basedesc->getFieldCount(object);
-    }
-    switch (field) {
-        default: return NULL;
-    }
-}
-
-int FrameRDCDescriptor::getArraySize(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    FrameRDC *pp = (FrameRDC *)object; (void)pp;
-    switch (field) {
-        default: return 0;
-    }
-}
-
-std::string FrameRDCDescriptor::getFieldAsString(void *object, int field, int i) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldAsString(object,field,i);
-        field -= basedesc->getFieldCount(object);
-    }
-    FrameRDC *pp = (FrameRDC *)object; (void)pp;
-    switch (field) {
-        case 0: return long2string(pp->getSequenceNumber());
-        case 1: return bool2string(pp->getIsACK());
-        default: return "";
-    }
-}
-
-bool FrameRDCDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->setFieldAsString(object,field,i,value);
-        field -= basedesc->getFieldCount(object);
-    }
-    FrameRDC *pp = (FrameRDC *)object; (void)pp;
-    switch (field) {
-        case 0: pp->setSequenceNumber(string2long(value)); return true;
-        case 1: pp->setIsACK(string2bool(value)); return true;
-        default: return false;
-    }
-}
-
-const char *FrameRDCDescriptor::getFieldStructName(void *object, int field) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldStructName(object, field);
-        field -= basedesc->getFieldCount(object);
-    }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-    };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
-}
-
-void *FrameRDCDescriptor::getFieldStructPointer(void *object, int field, int i) const
-{
-    cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount(object))
-            return basedesc->getFieldStructPointer(object, field, i);
-        field -= basedesc->getFieldCount(object);
-    }
-    FrameRDC *pp = (FrameRDC *)object; (void)pp;
-    switch (field) {
-        default: return NULL;
-    }
-}
-
-Register_Class(FrameMAC);
-
-FrameMAC::FrameMAC(const char *name, int kind) : cPacket(name,kind)
+Frame::Frame(const char *name, int kind) : cPacket(name,kind)
 {
     this->numberTransmission_var = 0;
+    this->sequenceNumber_var = 0;
+    this->isACK_var = 0;
     this->senderMacAddress_var = 0;
     this->recverMacAddress_var = 0;
 }
 
-FrameMAC::FrameMAC(const FrameMAC& other) : cPacket(other)
+Frame::Frame(const Frame& other) : cPacket(other)
 {
     copy(other);
 }
 
-FrameMAC::~FrameMAC()
+Frame::~Frame()
 {
 }
 
-FrameMAC& FrameMAC::operator=(const FrameMAC& other)
+Frame& Frame::operator=(const Frame& other)
 {
     if (this==&other) return *this;
     cPacket::operator=(other);
@@ -1094,64 +839,90 @@ FrameMAC& FrameMAC::operator=(const FrameMAC& other)
     return *this;
 }
 
-void FrameMAC::copy(const FrameMAC& other)
+void Frame::copy(const Frame& other)
 {
     this->numberTransmission_var = other.numberTransmission_var;
+    this->sequenceNumber_var = other.sequenceNumber_var;
+    this->isACK_var = other.isACK_var;
     this->senderMacAddress_var = other.senderMacAddress_var;
     this->recverMacAddress_var = other.recverMacAddress_var;
 }
 
-void FrameMAC::parsimPack(cCommBuffer *b)
+void Frame::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->numberTransmission_var);
+    doPacking(b,this->sequenceNumber_var);
+    doPacking(b,this->isACK_var);
     doPacking(b,this->senderMacAddress_var);
     doPacking(b,this->recverMacAddress_var);
 }
 
-void FrameMAC::parsimUnpack(cCommBuffer *b)
+void Frame::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->numberTransmission_var);
+    doUnpacking(b,this->sequenceNumber_var);
+    doUnpacking(b,this->isACK_var);
     doUnpacking(b,this->senderMacAddress_var);
     doUnpacking(b,this->recverMacAddress_var);
 }
 
-int FrameMAC::getNumberTransmission() const
+int Frame::getNumberTransmission() const
 {
     return numberTransmission_var;
 }
 
-void FrameMAC::setNumberTransmission(int numberTransmission)
+void Frame::setNumberTransmission(int numberTransmission)
 {
     this->numberTransmission_var = numberTransmission;
 }
 
-int FrameMAC::getSenderMacAddress() const
+int Frame::getSequenceNumber() const
+{
+    return sequenceNumber_var;
+}
+
+void Frame::setSequenceNumber(int sequenceNumber)
+{
+    this->sequenceNumber_var = sequenceNumber;
+}
+
+bool Frame::getIsACK() const
+{
+    return isACK_var;
+}
+
+void Frame::setIsACK(bool isACK)
+{
+    this->isACK_var = isACK;
+}
+
+int Frame::getSenderMacAddress() const
 {
     return senderMacAddress_var;
 }
 
-void FrameMAC::setSenderMacAddress(int senderMacAddress)
+void Frame::setSenderMacAddress(int senderMacAddress)
 {
     this->senderMacAddress_var = senderMacAddress;
 }
 
-int FrameMAC::getRecverMacAddress() const
+int Frame::getRecverMacAddress() const
 {
     return recverMacAddress_var;
 }
 
-void FrameMAC::setRecverMacAddress(int recverMacAddress)
+void Frame::setRecverMacAddress(int recverMacAddress)
 {
     this->recverMacAddress_var = recverMacAddress;
 }
 
-class FrameMACDescriptor : public cClassDescriptor
+class FrameDescriptor : public cClassDescriptor
 {
   public:
-    FrameMACDescriptor();
-    virtual ~FrameMACDescriptor();
+    FrameDescriptor();
+    virtual ~FrameDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -1170,34 +941,34 @@ class FrameMACDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(FrameMACDescriptor);
+Register_ClassDescriptor(FrameDescriptor);
 
-FrameMACDescriptor::FrameMACDescriptor() : cClassDescriptor("wsn_energy::FrameMAC", "cPacket")
+FrameDescriptor::FrameDescriptor() : cClassDescriptor("wsn_energy::Frame", "cPacket")
 {
 }
 
-FrameMACDescriptor::~FrameMACDescriptor()
+FrameDescriptor::~FrameDescriptor()
 {
 }
 
-bool FrameMACDescriptor::doesSupport(cObject *obj) const
+bool FrameDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<FrameMAC *>(obj)!=NULL;
+    return dynamic_cast<Frame *>(obj)!=NULL;
 }
 
-const char *FrameMACDescriptor::getProperty(const char *propertyname) const
+const char *FrameDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int FrameMACDescriptor::getFieldCount(void *object) const
+int FrameDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
 }
 
-unsigned int FrameMACDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int FrameDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1209,11 +980,13 @@ unsigned int FrameMACDescriptor::getFieldTypeFlags(void *object, int field) cons
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
-const char *FrameMACDescriptor::getFieldName(void *object, int field) const
+const char *FrameDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1223,23 +996,27 @@ const char *FrameMACDescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "numberTransmission",
+        "sequenceNumber",
+        "isACK",
         "senderMacAddress",
         "recverMacAddress",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldNames[field] : NULL;
 }
 
-int FrameMACDescriptor::findField(void *object, const char *fieldName) const
+int FrameDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='n' && strcmp(fieldName, "numberTransmission")==0) return base+0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "senderMacAddress")==0) return base+1;
-    if (fieldName[0]=='r' && strcmp(fieldName, "recverMacAddress")==0) return base+2;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceNumber")==0) return base+1;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isACK")==0) return base+2;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderMacAddress")==0) return base+3;
+    if (fieldName[0]=='r' && strcmp(fieldName, "recverMacAddress")==0) return base+4;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *FrameMACDescriptor::getFieldTypeString(void *object, int field) const
+const char *FrameDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1250,12 +1027,14 @@ const char *FrameMACDescriptor::getFieldTypeString(void *object, int field) cons
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
+        "bool",
+        "int",
         "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *FrameMACDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *FrameDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1268,7 +1047,7 @@ const char *FrameMACDescriptor::getFieldProperty(void *object, int field, const 
     }
 }
 
-int FrameMACDescriptor::getArraySize(void *object, int field) const
+int FrameDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1276,13 +1055,13 @@ int FrameMACDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    FrameMAC *pp = (FrameMAC *)object; (void)pp;
+    Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string FrameMACDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string FrameDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1290,16 +1069,18 @@ std::string FrameMACDescriptor::getFieldAsString(void *object, int field, int i)
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    FrameMAC *pp = (FrameMAC *)object; (void)pp;
+    Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getNumberTransmission());
-        case 1: return long2string(pp->getSenderMacAddress());
-        case 2: return long2string(pp->getRecverMacAddress());
+        case 1: return long2string(pp->getSequenceNumber());
+        case 2: return bool2string(pp->getIsACK());
+        case 3: return long2string(pp->getSenderMacAddress());
+        case 4: return long2string(pp->getRecverMacAddress());
         default: return "";
     }
 }
 
-bool FrameMACDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool FrameDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1307,16 +1088,18 @@ bool FrameMACDescriptor::setFieldAsString(void *object, int field, int i, const 
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    FrameMAC *pp = (FrameMAC *)object; (void)pp;
+    Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
         case 0: pp->setNumberTransmission(string2long(value)); return true;
-        case 1: pp->setSenderMacAddress(string2long(value)); return true;
-        case 2: pp->setRecverMacAddress(string2long(value)); return true;
+        case 1: pp->setSequenceNumber(string2long(value)); return true;
+        case 2: pp->setIsACK(string2bool(value)); return true;
+        case 3: pp->setSenderMacAddress(string2long(value)); return true;
+        case 4: pp->setRecverMacAddress(string2long(value)); return true;
         default: return false;
     }
 }
 
-const char *FrameMACDescriptor::getFieldStructName(void *object, int field) const
+const char *FrameDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1328,11 +1111,13 @@ const char *FrameMACDescriptor::getFieldStructName(void *object, int field) cons
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
-void *FrameMACDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *FrameDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1340,7 +1125,7 @@ void *FrameMACDescriptor::getFieldStructPointer(void *object, int field, int i) 
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    FrameMAC *pp = (FrameMAC *)object; (void)pp;
+    Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }

@@ -2582,3 +2582,73 @@ Tcl error: tkenv.cc#1919: ptr0x90b56c8 not found
 "performAnimations"
 
 
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#718: no such field in this object
+    while executing
+"opp_getobjectfield $msgptr kind"
+    (procedure "graphicalModuleWindow:drawMessage" line 15)
+    invoked from within
+"graphicalModuleWindow:drawMessage $c $msgptr $xx $yy"
+    (procedure "graphicalModuleWindow:drawMessageOnGate" line 26)
+    invoked from within
+"graphicalModuleWindow:drawMessageOnGate .ptr0x90ba728-2.c ptr0x90c5b30 ptr0x9283570"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#718: no such field in this object
+    while executing
+"opp_getobjectfield $msgptr kind"
+    (procedure "graphicalModuleWindow:drawMessage" line 15)
+    invoked from within
+"graphicalModuleWindow:drawMessage $c $msgptr $xx $yy"
+    (procedure "graphicalModuleWindow:drawMessageOnGate" line 26)
+    invoked from within
+"graphicalModuleWindow:drawMessageOnGate .ptr0x90ba6c0-2.c ptr0x90c5ca0 ptr0x92837e0"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#718: no such field in this object
+    while executing
+"opp_getobjectfield $msgptr kind"
+    (procedure "graphicalModuleWindow:drawMessage" line 15)
+    invoked from within
+"graphicalModuleWindow:drawMessage $c $msgptr $xx $yy"
+    (procedure "graphicalModuleWindow:drawMessageOnGate" line 26)
+    invoked from within
+"graphicalModuleWindow:drawMessageOnGate .ptr0x90ba840-2.c ptr0x90c5be8 ptr0x92872f8"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#718: no such field in this object
+    while executing
+"opp_getobjectfield $msgptr kind"
+    (procedure "graphicalModuleWindow:drawMessage" line 15)
+    invoked from within
+"graphicalModuleWindow:drawMessage $c $msgptr $xx $yy"
+    (procedure "graphicalModuleWindow:drawMessageOnGate" line 26)
+    invoked from within
+"graphicalModuleWindow:drawMessageOnGate .ptr0x90b2768-2.c ptr0x90bdb58 ptr0x92716e8"
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#718: no such field in this object
+    while executing
+"opp_getobjectfield $msgptr kind"
+    (procedure "graphicalModuleWindow:drawMessage" line 15)
+    invoked from within
+"graphicalModuleWindow:drawMessage $c $msgptr $xx $yy"
+    (procedure "graphicalModuleWindow:drawMessageOnGate" line 26)
+    invoked from within
+"graphicalModuleWindow:drawMessageOnGate .ptr0x90ba6f8-2.c ptr0x90c5be8 ptr0x9281d10"
+
+

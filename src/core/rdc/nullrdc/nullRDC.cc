@@ -24,11 +24,11 @@ namespace wsn_energy {
 
 Define_Module(nullRDC);
 
-void nullRDC::sendPacket(FrameRDC* frame)
+void nullRDC::sendPacket(Frame* frame)
 {
 }
 
-void nullRDC::sendSuccess(FrameRDC* frame)
+void nullRDC::sendSuccess(Frame* frame)
 {
   on();
   return;
@@ -39,7 +39,7 @@ void nullRDC::sendFailure()
   return;
 }
 
-void nullRDC::receiveSuccess(FrameMAC* frame)
+void nullRDC::receiveSuccess(Frame* frame)
 {
 }
 

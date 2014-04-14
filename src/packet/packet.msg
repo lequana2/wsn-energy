@@ -127,13 +127,11 @@ packet Result{
 packet Raw{
 }
 
-packet FrameRDC{
-	int sequenceNumber;   // sequence number    	
-	bool isACK; // is ACK frame
-}
-
-packet FrameMAC{
+packet Frame{
     int numberTransmission = 0; // meta-data: number transmission
+
+	int sequenceNumber;   // sequence number    	
+	bool isACK; 		  // is ACK frame
 
 	int senderMacAddress; // sender MAC address
 	int recverMacAddress; // recver MAC address

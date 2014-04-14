@@ -20,6 +20,7 @@ void Server::initialize()
 {
   selfTimer(0, RPL_CONSTRUCT);
 
+  // create new session file
   std::ofstream myfile;
   myfile.open("data.txt");
   myfile << "[Data received from client]";

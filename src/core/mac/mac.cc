@@ -29,13 +29,13 @@ void MACdriver::processSelfMessage(cPacket* packet)
           if (DEBUG)
             ev << "SEND (MAC) remaining: " << this->buffer.size() << endl;
 
-          if (this->buffer.size() == 0) // empty
+          if (this->buffer.size() == 0) // empty, do nothing, reset flag
           {
             isHavingPendingPacket = false;
           }
-          else if (!isHavingPendingPacket) // In-turn
+          else if (!isHavingPendingPacket) // do not have any pending packet
           {
-            this->frameBuffer = this->buffer.front();
+            this->frameBuffer = this->buffer.front(); // get message to be sent
             deferPacket(); // begin sending
 
             isHavingPendingPacket = true;
@@ -66,9 +66,9 @@ void MACdriver::processSelfMessage(cPacket* packet)
 
 void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
-  /* only accept data packet */
+  /* only process data packet */
   /* create new buffer */
-  FrameMAC *frame = new FrameMAC;
+  Frame *frame = new Frame;
   frame->setKind(DATA);
   frame->setByteLength(MAC_HEADER_FOOTER_LEN);
 
@@ -103,7 +103,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      receivePacket(check_and_cast<FrameMAC*>(packet)); // received message
+      receivePacket(check_and_cast<Frame*>(packet)); // received message
       break;
     } /* Data */
 
@@ -137,6 +137,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
+          delete this->frameBuffer;
           this->buffer.pop_front();
           isHavingPendingPacket = false;
           selfTimer(0, MAC_CHECK_BUFFER);
@@ -149,6 +150,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           // WSN need considering dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
+          delete this->frameBuffer;
           this->buffer.pop_front();
           isHavingPendingPacket = false;
           selfTimer(0, MAC_CHECK_BUFFER);
@@ -158,6 +160,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_FATAL: /* fatal error, abort message */
         {
+          delete this->frameBuffer;
           this->buffer.pop_front();
           isHavingPendingPacket = false;
           selfTimer(0, MAC_CHECK_BUFFER);
@@ -165,12 +168,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_COL: /* busy radio, just wait for 1 symbol */
+        case RDC_SEND_COL: /* busy radio, defer packet */
         {
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0.000016, MAC_CHECK_BUFFER);
-
+          deferPacket();
           break;
         } /* callback after sending */
 
@@ -199,10 +199,12 @@ void MACdriver::sendPacket()
   sendMessageToLower(frameBuffer);
 }
 
-void MACdriver::receivePacket(FrameMAC* frameMac)
+void MACdriver::receivePacket(Frame* frameMac)
 {
   if (DEBUG)
     ev << "RECV (MAC)" << endl;
+
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(MAC_RECV));
 
   IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
   ipPacket->setKind(DATA);

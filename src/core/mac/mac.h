@@ -13,18 +13,11 @@
 
 namespace wsn_energy {
 
-class IpTable
-{
-    int ipAddress;
-    int macAddress;
-};
-
 class MACdriver : public myModule
 {
   protected:
-//    std::list<IpTable> ipTable; // mac-ip table
     bool isHavingPendingPacket;
-    FrameMAC *frameBuffer;
+    Frame *frameBuffer;
 
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
@@ -37,10 +30,10 @@ class MACdriver : public myModule
     virtual void sendPacket();
 
     /* accept input from lowerlayer */
-    virtual void receivePacket(FrameMAC*);
+    virtual void receivePacket(Frame*);
 
   public:
-    std::list<FrameMAC*> buffer; // Buffer message to send, public scope for debugging
+    std::list<Frame*> buffer; // Buffer message to send, public scope for debugging
 };
 
 } /* namespace wsn_energy */

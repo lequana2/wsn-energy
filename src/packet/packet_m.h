@@ -344,89 +344,57 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet FrameRDC{
- * 	int sequenceNumber;   
- * 	bool isACK; 
- * }
- * </pre>
- */
-class FrameRDC : public ::cPacket
-{
-  protected:
-    int sequenceNumber_var;
-    bool isACK_var;
-
-  private:
-    void copy(const FrameRDC& other);
-
-  protected:
-    // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const FrameRDC&);
-
-  public:
-    FrameRDC(const char *name=NULL, int kind=0);
-    FrameRDC(const FrameRDC& other);
-    virtual ~FrameRDC();
-    FrameRDC& operator=(const FrameRDC& other);
-    virtual FrameRDC *dup() const {return new FrameRDC(*this);}
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
-
-    // field getter/setter methods
-    virtual int getSequenceNumber() const;
-    virtual void setSequenceNumber(int sequenceNumber);
-    virtual bool getIsACK() const;
-    virtual void setIsACK(bool isACK);
-};
-
-inline void doPacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, FrameRDC& obj) {obj.parsimUnpack(b);}
-
-/**
- * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
- * <pre>
- * packet FrameMAC{
+ * packet Frame{
  *     int numberTransmission = 0; 
+ * 
+ * 	int sequenceNumber;   
+ * 	bool isACK; 		  
  * 
  * 	int senderMacAddress; 
  * 	int recverMacAddress; 
  * }
  * </pre>
  */
-class FrameMAC : public ::cPacket
+class Frame : public ::cPacket
 {
   protected:
     int numberTransmission_var;
+    int sequenceNumber_var;
+    bool isACK_var;
     int senderMacAddress_var;
     int recverMacAddress_var;
 
   private:
-    void copy(const FrameMAC& other);
+    void copy(const Frame& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const FrameMAC&);
+    bool operator==(const Frame&);
 
   public:
-    FrameMAC(const char *name=NULL, int kind=0);
-    FrameMAC(const FrameMAC& other);
-    virtual ~FrameMAC();
-    FrameMAC& operator=(const FrameMAC& other);
-    virtual FrameMAC *dup() const {return new FrameMAC(*this);}
+    Frame(const char *name=NULL, int kind=0);
+    Frame(const Frame& other);
+    virtual ~Frame();
+    Frame& operator=(const Frame& other);
+    virtual Frame *dup() const {return new Frame(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
     virtual int getNumberTransmission() const;
     virtual void setNumberTransmission(int numberTransmission);
+    virtual int getSequenceNumber() const;
+    virtual void setSequenceNumber(int sequenceNumber);
+    virtual bool getIsACK() const;
+    virtual void setIsACK(bool isACK);
     virtual int getSenderMacAddress() const;
     virtual void setSenderMacAddress(int senderMacAddress);
     virtual int getRecverMacAddress() const;
     virtual void setRecverMacAddress(int recverMacAddress);
 };
 
-inline void doPacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, FrameMAC& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, Frame& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.

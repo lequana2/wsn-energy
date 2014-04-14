@@ -23,10 +23,6 @@ void Client::initialize()
   {
     case 1: /* one event */
     {
-      Command *command = new Command;
-      command->setKind(COMMAND);
-      command->setNote(APP_SENSING_FLAG);
-
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
         selfTimer(1, APP_SENSING_FLAG);
 
@@ -77,9 +73,11 @@ void Client::processSelfMessage(cPacket* packet)
           data->setKind(DATA);
           data->setTime(simTime().dbl());
 
+          // WSN data to send
           char buf[30];
           sprintf(buf, "Hello %d from %d", numberOfPacket, this->getId());
-          data->setValue(buf); // WSN need to validate
+          data->setValue(buf);
+          data->setByteLength(8);
 
           sendMessageToLower(data);
 
@@ -89,6 +87,7 @@ void Client::processSelfMessage(cPacket* packet)
           if ((int) getModuleByPath("WSN")->par("scheme").doubleValue() == 2)
             if (this->numberOfPacket++ < MAX)  // control maximum number
               newData();
+
           break; /* new data */
         }
 
@@ -128,7 +127,7 @@ void Client::newData()
   if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
     time = sendInterval + (rand() % (1000)) / 1000.0;
   else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    time = sendInterval + intuniform(0, 10000000*sendInterval) / 10000000000.0;
+    time = sendInterval + intuniform(0, 1000000 * sendInterval) / 1000000000.0;
 
 //  this->getParentModule()->bubble("Data");
 

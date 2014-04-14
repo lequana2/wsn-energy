@@ -66,7 +66,7 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 
 void UDP::processLowerLayerMessage(cPacket* packet)
 {
-  // is destination reached ?
+  // Has reached destination
   if (this->getParentModule()->getModuleByPath(".net")->getId()
       == check_and_cast<UdpPacket*>(packet)->getSinkIpAddress())
   {
@@ -75,7 +75,7 @@ void UDP::processLowerLayerMessage(cPacket* packet)
 
     delete packet;
   }
-  // Forwarding data
+  // Acts as intermediate node
   else
   {
     sendMessageToLower(packet);

@@ -12,10 +12,10 @@
 #define BACKOFF_PERIOD                0.00032 // second, 20 symbols
 #define MAC_MIN_BE                    3 // min backoff exponent
 #define MAC_MAX_BE                    5 // max backoff exponent
-#define MAX_BACKOFF_TRANSMISSION      3 // 3 tries per packet
+#define MAX_BACKOFF_TRANSMISSION      3 // 3 tries per frame
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -28,12 +28,11 @@ void csma::deferPacket()
   if (frameBuffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
     // WSN self timer to considering dead neighbot or backoff or smt
-//    sendResult(MAC_SEND_ERROR);
+
+    delete this->frameBuffer;     // clear buffer
     this->buffer.pop_front();
     isHavingPendingPacket = false;
     selfTimer(0, MAC_CHECK_BUFFER);
-
-    delete frameBuffer;     // clear buffer
   }
   /* unslotted csma */
   else
@@ -57,8 +56,10 @@ void csma::deferPacket()
     backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 100000000.0;
 
     if (DEBUG)
+    {
       ev << "Random " << backoff_exponent << "/" << backoff_transmission << "/" << backoff << endl;
-//    std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
+      std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
+    }
 
     frameBuffer->setNumberTransmission(frameBuffer->getNumberTransmission() + 1);
 

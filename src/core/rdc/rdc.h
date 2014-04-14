@@ -18,7 +18,7 @@
 
 namespace wsn_energy {
 
-class SequenceChecking
+class Neighbor
 {
   public:
     int senderID;
@@ -31,24 +31,26 @@ class RDCdriver : public myModule
     int counter;
 
   protected:
-    Command *waitForACK;
+//    Command *waitForACK;
     bool isSendingBroadcast;
     bool isWaitingACK;
     int sequence;
 
-    std::list<SequenceChecking*> neighbors;
+    std::list<Neighbor*> neighbors;
 
-    FrameRDC *buffer;
+    Frame *buffer;
+
+    virtual void initialize();
 
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
     virtual void processLowerLayerMessage(cPacket*);
 
     /* transmit demand */
-    virtual void sendPacket(FrameRDC*) = 0;
+    virtual void sendPacket(Frame*) = 0;
 
     /* call-back */
-    virtual void sendSuccess(FrameRDC*) = 0;
+    virtual void sendSuccess(Frame*) = 0;
     virtual void sendFailure() = 0;
 
     /* listen demand */
@@ -56,7 +58,7 @@ class RDCdriver : public myModule
     virtual void off();
 
     /* consider new-coming */
-    virtual void receiveSuccess(FrameMAC*) = 0;
+    virtual void receiveSuccess(Frame*) = 0;
     virtual void receiveFailure() = 0;
 };
 

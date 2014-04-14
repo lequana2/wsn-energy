@@ -29,6 +29,8 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
+
+  selfTimer(0.000016, NET_TIMER_DIS);
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
@@ -91,9 +93,9 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
       }
       else
       {
-        // Trigger local/global repair, 1 symbol ?
-        // WSN something go wrong here, kind of infinite loops
-        selfTimer(0.000016, NET_TIMER_DIS);
+        // WSN  Trigger local/global repair
+        // something go wrong here, kind of infinite loops
+        selfTimer(0, NET_TIMER_DIS);
         std::cout << "Repair @ " << simTime().dbl() << endl;
 
         delete packet;

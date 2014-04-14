@@ -37,7 +37,7 @@
 #endif
 
 #ifndef ANNOTATE_SIBLINGS
-#define ANNOTATE_SIBLINGS 0
+#define ANNOTATE_SIBLINGS 1
 #endif
 
 #ifndef DEBUG
@@ -61,6 +61,9 @@ void RPL::rpl_init()
 
   // choosing objective function
   this->rplDag.of = new hopEnergy;
+
+  // start DIO timer
+//  resetDIOTimer();
 }
 
 void RPL::rpl_set_root()
@@ -69,8 +72,7 @@ void RPL::rpl_set_root()
   this->rplDag.joined = true;
   this->rplDag.rank = 1;
 
-  // start DIO timer
-  resetDIOTimer();
+  this->sendDIO();
 }
 
 void RPL::sendDIO()
@@ -121,27 +123,26 @@ void RPL::newDIOinterval()
   dioInterval = 1 << dioCurrent;  // millis
 
   /* random number between I/2 and I */
-  if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
-    dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
-  else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    dioInterval = dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval;
-
-  dioDelay = dioInterval / 1000.0;          // convert to sec
+//  if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
+//    dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
+//  else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
+//    dioInterval = dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval;
+  dioDelay = (dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval) / 1000.0;      // convert to sec
 
   if (DEBUG)
     std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at "
         << simTime() << endl;
 
-  // WSN simulation break
+  // simulation break
   if (simTime() + dioDelay < 28800)
-    this->net->selfTimer(dioDelay, NET_TIMER_DIO); // self schedule
+    this->net->selfTimer(dioDelay, NET_TIMER_DIO); // self schedule (???)
 }
 
 void RPL::handleDIOTimer()
 {
   // handle when timer expired
   if (!this->rplDag.joined) // link local not OK
-    this->net->selfTimer(0.02048, NET_TIMER_DIO); // 128 symbols
+    this->net->selfTimer(dioDelay, NET_TIMER_DIO);
 
   if (dioCounter < RPL_DIO_REDUNDANCY)
   {
@@ -159,6 +160,10 @@ void RPL::handleDIOTimer()
 
 void RPL::handleDISTimer()
 {
+  // simulation break
+  if (simTime() < 28800)
+    return;
+
   if (!this->rplDag.joined)
     sendDIS();
   else
