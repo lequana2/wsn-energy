@@ -137,11 +137,10 @@ void RPL::newDIOinterval()
   dioInterval = 1 << dioCurrent;  // millis
 
   /* random number between I/2 and I */
-//  if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
-//    dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
-//  else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-//    dioInterval = dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval;
-  dioDelay = (dioInterval / 2.0 + (intuniform(0, 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
+  if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 0)
+    dioDelay = (dioInterval / 2.0 + ((rand() % 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
+  else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
+    dioDelay = (dioInterval / 2.0 + (intuniform(0, 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
 
   if (DEBUG)
     std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at "
@@ -346,14 +345,14 @@ void RPL::processDIO(DIO* dio)
 //            // Update new neighbor
 //            // this->rplDag.parentList.push_back(neighbor);
 //
-//            if (ANNOTATE_SIBLINGS)
-//            {
-//              char channelParent[20];
-//              sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
-//                  (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
-//              EV << channelParent << endl;
-//              net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
-//            }
+          if (ANNOTATE_SIBLINGS)
+          {
+            char channelParent[20];
+            sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+                (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
+            EV << channelParent << endl;
+            net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
+          }
 //          }
 //          // Update sibling
         }

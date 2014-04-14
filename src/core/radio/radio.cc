@@ -49,7 +49,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         case PHY_END_CCA: /* ending of CCA */
 //          if (this->incomingSignal > 0) /* Channel not free*/
-          if (false)  // WSN hack
+          if (false)  // WSN hack channel always free
           {
             if (DEBUG)
               ev << "Channel is busy" << endl;
@@ -303,9 +303,7 @@ void RadioDriver::listen()
  */
 void RadioDriver::received(Raw* raw)
 {
-  /* WSN hack receive a complete message */
-
-  if (true)
+  if (true)   // WSN hack receive a complete message
 //  if (!raw->hasBitError())
   {
     if (DEBUG)

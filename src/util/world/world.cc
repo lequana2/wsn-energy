@@ -70,9 +70,9 @@ void World::arrangeMotes()
         else
           col++;
 
-        // Partition
-        x = col * 25 + 15;
-        y = row * 25 + 5;
+        // Partition, 1 cell = 50*50
+        x = col * 40 + 15;
+        y = row * 40 + 5;
 
         // Randomize
         x = uniform(x - 5, x + 5);
@@ -102,7 +102,7 @@ void World::arrangeMotes()
       {
         step++;
         x = 150;
-        y = step*30 + 150;
+        y = step * 30 + 150;
         break;
       } /* Line */
     }
@@ -274,6 +274,14 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
     mySignal *signal = new mySignal(senderID, (*it));
     considerSignal(signal);
   }
+
+  // WSN draw range
+  if (ANNOTATE)
+  {
+    oss.seekp(0);
+    oss << mote->trRange << endl;
+    (&mote->getParentModule()->getDisplayString())->setTagArg("r", 0, oss.str().c_str());
+  }
 }
 
 /*
@@ -326,6 +334,12 @@ void World::releaseHost(RadioDriver* mote)
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
     check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+
+  // draw range
+  if (ANNOTATE)
+  {
+    (&mote->getParentModule()->getDisplayString())->setTagArg("r", 0, "0");
+  }
 }
 
 /*
