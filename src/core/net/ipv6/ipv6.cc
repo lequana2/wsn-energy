@@ -13,6 +13,7 @@
 #include "ipv6.h"
 #include "rpl.h"
 #include "energest.h"
+#include "count.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -50,14 +51,15 @@ void IPv6::processSelfMessage(cPacket* packet)
         case NET_TIMER_DIS: /* Solicit DODAG information*/
         {
           this->rpl->handleDISTimer();
+          delete packet;
           break;
         } /*Solicit information*/
 
         default:
+          delete packet;
           ev << "Unknown command" << endl;
           break;
       }
-      delete packet; // done command
       break;
     } /* Command */
 
@@ -146,6 +148,10 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
       (check_and_cast<Statistic*>(getModuleByPath("WSN.statistic")))->packetRateTracking(NET_RECV); // statistics
 
+      // WSN Byte count
+      check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
+          check_and_cast<IpPacket*>(packet)->getBitLength());
+
       switch (check_and_cast<IpPacket*>(packet)->getMessageCode())
       {
         case NET_DATA: /* forward data */
@@ -193,6 +199,12 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
         }
           break; /* ending transmitting phase */
 
+        case NET_DIO_SENT: /* just send DIO */
+        {
+          this->rpl->justSentDIO();
+          break;
+        } /* just send DIO*/
+
         default:
           ev << "Unknown result" << endl;
           break;
@@ -216,6 +228,9 @@ void IPv6::multicast(IpPacket *ipPacket)
   sendMessageToLower(ipPacket);
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(NET_SEND));
+
+  // WSN Byte count
+  check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(ipPacket->getBitLength());
 }
 
 void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
@@ -227,6 +242,9 @@ void IPv6::unicast(IpPacket *ipPacket, int recverIpAddress)
   sendMessageToLower(ipPacket);
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(NET_SEND));
+
+  // WSN Byte count
+  check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(ipPacket->getBitLength());
 }
 
 } /* namespace wsn_energy */

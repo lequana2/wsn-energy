@@ -15,6 +15,7 @@
 
 #include "statistic.h"
 #include "energest.h"
+#include "count.h"
 #include "mac.h"
 #include <iostream>
 #include <fstream>
@@ -28,8 +29,11 @@ Define_Module(Statistic);
 void Statistic::initialize()
 {
   polling = new cMessage();
+  pollingCount = new cMessage();
 
   // Initialize statistics number
+  numNetworkEnergyCount = 0;
+  numSensorEnergyCount = 0;
   numNetworkEnergy = 0;
   numTotalEnergy = 0;
   numTotalDelay = 0;
@@ -46,6 +50,8 @@ void Statistic::initialize()
   timeTrans = 0;
 
   // register signal
+  sigNetworkEnergyCount = registerSignal("networkEnergyCount");
+  sigSensorEnergyCount = registerSignal("sensorEnergyCount");
   sigNetworkEnergy = registerSignal("networkEnergy");
   sigSensorEnergy = registerSignal("sensorEnergy");
   sigTotalEnergy = registerSignal("totalEnergy");
@@ -64,8 +70,13 @@ void Statistic::initialize()
 
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
+  pollTotalSensorEnergyCount();
+
   if (getParentModule()->par("isPolling").doubleValue())
     scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+
+  if (getParentModule()->par("isPollingCount").doubleValue())
+    scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), pollingCount);
 }
 
 void Statistic::handleMessage(cMessage *msg)
@@ -76,6 +87,14 @@ void Statistic::handleMessage(cMessage *msg)
     {
       pollTotalSensorEnergy();
       scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+    }
+    else if (msg == pollingCount)
+    {
+      if (simTime() < 3600)
+      {
+        pollTotalSensorEnergyCount();
+        scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), pollingCount);
+      }
     }
   }
 }
@@ -106,7 +125,13 @@ void Statistic::finish()
         (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
     emit(sigSensorEnergy, numSensorEnergy);
 
-    shitRemainingInBuffer += (check_and_cast<MACdriver*>(wsn->getSubmodule("client", i)->getSubmodule("mac")))->buffer.size();
+    // residual energy
+    numSensorEnergyCount =
+        check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
+    emit(sigSensorEnergyCount, numSensorEnergyCount);
+
+    shitRemainingInBuffer +=
+        (check_and_cast<MACdriver*>(wsn->getSubmodule("client", i)->getSubmodule("mac")))->buffer.size();
   }
 
   emit(sigTimeIdle, timeIdle);
@@ -119,6 +144,22 @@ void Statistic::finish()
   emit(sigRadioSend, timeIdle + timeTrans + timeListen);
 
   cancelAndDelete(polling);
+}
+
+void Statistic::pollTotalSensorEnergyCount()
+{
+  cModule *wsn = getModuleByPath("WSN");
+  int numberClient = wsn->par("numberClient").longValue();
+
+  numNetworkEnergyCount = 0.0;
+
+  for (int i = 0; i < numberClient; i++)
+  {
+    numNetworkEnergyCount +=
+        (check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count")))->residualEnergy;
+  }
+
+  emit(sigNetworkEnergyCount, numNetworkEnergyCount);
 }
 
 void Statistic::pollTotalSensorEnergy()

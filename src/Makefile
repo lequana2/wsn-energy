@@ -20,6 +20,7 @@ INCLUDE_PATH = \
     -Iapps/client \
     -Iapps/server \
     -Icore \
+    -Icore/bytecount \
     -Icore/energest \
     -Icore/mac \
     -Icore/mac/csma \
@@ -59,6 +60,7 @@ OBJS = \
     $O/apps/client/client.o \
     $O/apps/server/server.o \
     $O/core/myModule.o \
+    $O/core/bytecount/count.o \
     $O/core/energest/energest.o \
     $O/core/mac/mac.o \
     $O/core/mac/csma/csma.o \
@@ -157,6 +159,7 @@ clean:
 	$(Q)-rm -f apps/client/*_m.cc apps/client/*_m.h
 	$(Q)-rm -f apps/server/*_m.cc apps/server/*_m.h
 	$(Q)-rm -f core/*_m.cc core/*_m.h
+	$(Q)-rm -f core/bytecount/*_m.cc core/bytecount/*_m.h
 	$(Q)-rm -f core/energest/*_m.cc core/energest/*_m.h
 	$(Q)-rm -f core/mac/*_m.cc core/mac/*_m.h
 	$(Q)-rm -f core/mac/csma/*_m.cc core/mac/csma/*_m.h
@@ -185,7 +188,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/energest/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc core/transport/*.cc core/transport/udp/*.cc mote/*.cc packet/*.cc util/*.cc util/signal/*.cc util/statistic/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/bytecount/*.cc core/energest/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc core/transport/*.cc core/transport/udp/*.cc mote/*.cc packet/*.cc util/*.cc util/signal/*.cc util/statistic/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
@@ -203,6 +206,12 @@ $O/apps/server/server.o: apps/server/server.cc \
 	util/statistic/statistic.h
 $O/core/myModule.o: core/myModule.cc \
 	core/myModule.h \
+	packet/packet_len.h \
+	packet/packet_m.h
+$O/core/bytecount/count.o: core/bytecount/count.cc \
+	core/bytecount/count.h \
+	core/myModule.h \
+	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/energest/energest.o: core/energest/energest.cc \
@@ -230,6 +239,7 @@ $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
+	core/bytecount/count.h \
 	core/energest/energest.h \
 	core/myModule.h \
 	core/net/ipv6/ipv6.h \
@@ -306,6 +316,7 @@ $O/packet/packet_m.o: packet/packet_m.cc \
 $O/util/signal/mySignal.o: util/signal/mySignal.cc \
 	util/signal/mySignal.h
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
+	core/bytecount/count.h \
 	core/energest/energest.h \
 	core/mac/mac.h \
 	core/myModule.h \

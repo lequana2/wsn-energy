@@ -21,11 +21,17 @@ package wsn_energy.util.statistic;
 simple Statistic
 {
     parameters:
+        @signal[networkEnergyCount](type="double");
+        @statistic[networkEnergyCount](title="Node energy (count)"; record=vector);
+
+        @signal[sensorEnergyCount](type="double");
+        @statistic[sensorEnergyCount](title="Sensor energy (count)"; record=vector);
+
         @signal[networkEnergy](type="double");
         @statistic[networkEnergy](title="Node energy"; record=vector);
 
         @signal[sensorEnergy](type="double");
-        @statistic[sensorEnergy](title="Node energy"; record=vector);
+        @statistic[sensorEnergy](title="Sensor energy"; record=vector);
 
         @signal[totalEnergy](type="double");
         @statistic[totalEnergy](title="Total energy"; record=last);

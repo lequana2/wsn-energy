@@ -66,6 +66,12 @@ EXECUTE_ON_STARTUP(
 );
 
 EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::RESULT_FROM_NET");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_FROM_NET"));
+    e->insert(NET_DIO_SENT, "NET_DIO_SENT");
+);
+
+EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::IP_PACKET_TYPE");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::IP_PACKET_TYPE"));
     e->insert(NET_DATA, "NET_DATA");

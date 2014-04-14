@@ -48,7 +48,8 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       switch (check_and_cast<Command*>(packet)->getNote())
       {
         case PHY_END_CCA: /* ending of CCA */
-          if (this->incomingSignal > 0) /* Channel not free*/
+//          if (this->incomingSignal > 0) /* Channel not free*/
+          if (false)  // WSN hack
           {
             if (DEBUG)
               ev << "Channel is busy" << endl;

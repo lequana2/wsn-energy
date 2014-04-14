@@ -22,6 +22,7 @@ import wsn_energy.core.mac.iMAC;
 import wsn_energy.core.rdc.iRDC;
 import wsn_energy.core.radio.iRadio;
 import wsn_energy.core.energest.Energest;
+import wsn_energy.core.bytecount.Count;
 
 //
 // TODO auto-generated type
@@ -55,6 +56,7 @@ module ServerMote
                 coRange = coRange;
         }
         energest: Energest;
+        count: Count;
     connections allowunconnected:
         app.lowerOut --> tra.upperIn;
         app.lowerIn <-- tra.upperOut;

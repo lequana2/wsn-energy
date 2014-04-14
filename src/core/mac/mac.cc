@@ -135,6 +135,12 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* channel is busy */
 
+        case NET_DIO_SENT: /* just send DIO */
+        {
+          sendResult(NET_DIO_SENT);
+          break;
+        }/* just send DIO */
+
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
           delete this->frameBuffer;

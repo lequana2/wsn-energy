@@ -22,6 +22,7 @@ import wsn_energy.core.mac.iMAC;
 import wsn_energy.core.rdc.iRDC;
 import wsn_energy.core.radio.iRadio;
 import wsn_energy.core.energest.Energest;
+import wsn_energy.core.bytecount.Count;
 
 //
 // TODO auto-generated type
@@ -45,7 +46,7 @@ module ClientMote
 
     submodules:
         app: <appType> like iApp;
-	    tra: <traType> like iTransport;
+        tra: <traType> like iTransport;
         net: <netType> like iNet;
         mac: <macType> like iMAC;
         rdc: <rdcType> like iRDC;
@@ -56,6 +57,7 @@ module ClientMote
         }
 
         energest: Energest;
+        count: Count;
     connections allowunconnected:
         app.lowerOut --> tra.upperIn;
         app.lowerIn <-- tra.upperOut;

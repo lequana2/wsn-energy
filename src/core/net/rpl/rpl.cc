@@ -50,6 +50,12 @@ RPL::RPL(IPv6 *net)
 {
   this->net = net;
   this->rpl_init();
+
+  this->dioTimer = new Command;
+  dioTimer->setKind(COMMAND);
+  dioTimer->setNote(NET_TIMER_DIO);
+
+  this->isDIOsent = true; // 0 sent - 0 success
 }
 
 void RPL::rpl_init()
@@ -89,6 +95,8 @@ void RPL::sendDIO()
       (check_and_cast<Energest*>(this->net->getParentModule()->getModuleByPath(".energest")))->energestRemaining);
 
   net->multicast(icmp);
+
+  isDIOsent = false; // keep track of lastest DIO
 }
 
 void RPL::sendDIS()
@@ -103,6 +111,11 @@ void RPL::sendDIS()
   icmp->setByteLength(DIS_LEN);
 
   net->multicast(icmp);
+}
+
+void RPL::justSentDIO()
+{
+  this->isDIOsent = true;
 }
 
 void RPL::resetDIOTimer()
@@ -128,29 +141,43 @@ void RPL::newDIOinterval()
 //    dioInterval = dioInterval / 2 + (rand() % 1000 / 1000.0) * dioInterval / 2;
 //  else if (simulation.getModuleByPath("WSN")->par("rand").doubleValue() == 1)
 //    dioInterval = dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval;
-  dioDelay = (dioInterval / 2.0 + (intuniform(0, 20000000) / 40000000.0) * dioInterval) / 1000.0;      // convert to sec
+  dioDelay = (dioInterval / 2.0 + (intuniform(0, 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
 
   if (DEBUG)
     std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at "
         << simTime() << endl;
 
   // simulation break
-  if (simTime() + dioDelay < 28800)
-    this->net->selfTimer(dioDelay, NET_TIMER_DIO); // self schedule (???)
+  if (simTime() + dioDelay < 3600)
+  {
+    this->net->cancelEvent(dioTimer);
+    this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+  }
 }
 
 void RPL::handleDIOTimer()
 {
   // handle when timer expired
-  if (!this->rplDag.joined) // link local not OK
-    this->net->selfTimer(dioDelay, NET_TIMER_DIO);
-
-  if (dioCounter < RPL_DIO_REDUNDANCY)
+  if (!this->rplDag.joined || !isDIOsent) // link local not OK or last DIO didn't sent
+  {
+    if (simTime() + dioDelay < 3600)
+    {
+      this->net->cancelEvent(dioTimer);
+      this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+    }
+  }
+  // do not exceed redundancy
+  else if (dioCounter < RPL_DIO_REDUNDANCY)
   {
     sendDIO();
     dioCounter++;
-    this->net->selfTimer(dioDelay, NET_TIMER_DIO);
+    if (simTime() + dioDelay < 3600)
+    {
+      this->net->cancelEvent(dioTimer);
+      this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+    }
   }
+  // exceed redundancy, double interval
   else
   {
     if (dioCurrent < RPL_DIO_INTERVAL_MIN + RPL_DIO_INTERVAL_DOUBLINGS)

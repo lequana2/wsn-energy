@@ -39,6 +39,13 @@ class Statistic : public cSimpleModule
 {
   private:
     cMessage *polling; // Timer for polling total sensor energy
+    cMessage *pollingCount; // Timer for polling total sensor energy (Hung's method)
+
+    double numNetworkEnergyCount; // Energy of all network (Hung's method)
+    simsignal_t sigNetworkEnergyCount;
+
+    double numSensorEnergyCount; // Energy for each distributed node (Hung's method)
+    simsignal_t sigSensorEnergyCount;
 
     double numNetworkEnergy; // Energy of all network
     simsignal_t sigNetworkEnergy;
@@ -87,6 +94,8 @@ class Statistic : public cSimpleModule
 
   public:
     void pollTotalSensorEnergy();
+    void pollTotalSensorEnergyCount();
+
     void packetRateTracking(int);
     void packetDelayTracking(double);
 };

@@ -88,6 +88,18 @@ enum COMMAND_FROM_NET {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
+ * enum RESULT_FROM_NET{
+ * 	NET_DIO_SENT          = 69; 
+ * }
+ * </pre>
+ */
+enum RESULT_FROM_NET {
+    NET_DIO_SENT = 69
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
  * enum IP_PACKET_TYPE{
  * 	NET_DATA        	  = 1;  
  * 	NET_ICMP_RPL		  = 2;  

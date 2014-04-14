@@ -34,11 +34,16 @@ enum COMMAND_FROM_APP{
 	RPL_CONSTRUCT = 3; // perform broadcasting DIO
 };
 
-// Net layer
+// Net layer command
 enum COMMAND_FROM_NET{
     NET_TIMER_DIO          = 1;  // handle DIO timer
     NET_TIMER_DIS          = 2;  // handle DIS timer
 };
+
+// Net layer result
+enum RESULT_FROM_NET{
+	NET_DIO_SENT          = 69; // just send dio
+}
 
 // ip packet type
 enum IP_PACKET_TYPE{

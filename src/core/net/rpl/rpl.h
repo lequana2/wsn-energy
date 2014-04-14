@@ -72,6 +72,9 @@ class RPL
     int dioCurrent;
     unsigned long dioInterval;
     double         dioDelay;
+    bool isDIOsent;
+
+    Command *dioTimer;
 
     void processDIO(DIO*);
     void processDIS(DIS*);
@@ -86,6 +89,8 @@ class RPL
 
     void sendDIO();
     void sendDIS();
+
+    void justSentDIO();
 
     void processICMP(IpPacket*);
 

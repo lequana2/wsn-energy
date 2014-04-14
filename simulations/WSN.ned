@@ -40,6 +40,7 @@ network WSN
         int scheme;
         int rand;
 
+		int isPollingCount;
         int isPolling;
         double polling;
 
