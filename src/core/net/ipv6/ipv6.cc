@@ -19,7 +19,7 @@
 #endif
 
 #ifndef ANNOTATE
-#define ANNOTATE 0
+#define ANNOTATE 1
 #endif
 
 namespace wsn_energy {

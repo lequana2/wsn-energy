@@ -71,8 +71,6 @@ void RPL::rpl_set_root()
   this->rplDag.version++;
   this->rplDag.joined = true;
   this->rplDag.rank = 1;
-
-  this->sendDIO();
 }
 
 void RPL::sendDIO()
@@ -109,6 +107,9 @@ void RPL::sendDIS()
 
 void RPL::resetDIOTimer()
 {
+  // urgent DIO
+  sendDIO();
+
   // reset to initial stage
   dioCurrent = RPL_DIO_INTERVAL_MIN;
   newDIOinterval();
