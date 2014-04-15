@@ -10,6 +10,10 @@
 #include "radio.h"
 #include "statistic.h"
 
+#ifndef SET_UP_DELAY
+#define SET_UP_DELAY 65
+#endif
+
 namespace wsn_energy {
 
 Define_Module(Client);
@@ -37,7 +41,7 @@ void Client::initialize()
 
     case 2: /* ignite periodically */
     {
-      newData();
+      selfTimer(SET_UP_DELAY, RPL_SET_UP);
       break;
     } /* ignite periodically */
 
@@ -67,6 +71,12 @@ void Client::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
+        case RPL_SET_UP: /* set up delay */
+        {
+          newData();
+          break;
+        }/* set up delay*/
+
         case APP_SENSING_FLAG: /* new data */
         {
           Data *data = new Data;
@@ -85,9 +95,12 @@ void Client::processSelfMessage(cPacket* packet)
           (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND));
 
           if ((int) getModuleByPath("WSN")->par("scheme").doubleValue() == 2)
+#ifdef MAX
             if (this->numberOfPacket++ < MAX)  // control maximum number
-              newData();
-
+#else
+            this->numberOfPacket++;
+#endif
+          newData();
           break; /* new data */
         }
 
@@ -124,10 +137,11 @@ void Client::newData()
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-  if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
-    time = sendInterval + (rand() % (1000)) / 1000.0;
-  else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-    time = sendInterval + intuniform(0, 1000000 * sendInterval) / 1000000000.0;
+//  if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
+//    time = sendInterval + (rand() % (1000)) / 1000.0;
+//  else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
+//    time = sendInterval + intuniform(0, 1000000 * sendInterval) / 1000000000.0;
+  time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
 
 //  this->getParentModule()->bubble("Data");
 

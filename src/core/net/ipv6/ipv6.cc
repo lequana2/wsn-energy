@@ -19,10 +19,6 @@
 #define DEBUG 1
 #endif
 
-#ifndef ANNOTATE
-#define ANNOTATE 1
-#endif
-
 namespace wsn_energy {
 
 Define_Module(IPv6);
@@ -78,14 +74,6 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
       /* Still have parent */
       if (this->rpl->rplDag.preferredParent != NULL)
       {
-        if (ANNOTATE)
-        {
-          char channelParent[20];
-          sprintf(channelParent, "out %d to %d", getParentModule()->getId(),
-              (simulation.getModule(this->rpl->rplDag.preferredParent->neighborID))->getParentModule()->getId());
-          getParentModule()->gate(channelParent)->setDisplayString("ls=purple,1");
-        }
-
         IpPacket *dataMessage = new IpPacket;
         dataMessage->setMessageCode(NET_DATA);
 
@@ -97,7 +85,7 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
       {
         // WSN  Trigger local/global repair
         // something go wrong here, kind of infinite loops
-        selfTimer(0, NET_TIMER_DIS);
+//        selfTimer(0, NET_TIMER_DIS);
         std::cout << "Repair @ " << simTime().dbl() << endl;
 
         delete packet;
@@ -193,9 +181,12 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
         case MAC_SEND_DEAD_NEIGHBOR: /* some neighbor cann't reach in MAC layer */
         {
           if (DEBUG)
-            ev << "NET TRANS FAILED" << endl;
+            ev << "NET DEAD NEIGHBOR" << endl;
 
-          // WSN RPL purge default route
+          // RPL purge default route
+          this->rpl->purgeRoute();
+
+          std::cout << "Purge route" << endl;
         }
           break; /* ending transmitting phase */
 

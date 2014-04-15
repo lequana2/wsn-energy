@@ -42,7 +42,7 @@ module ClientMote
         int trRange @unit(m);
         int coRange @unit(m);
 
-        @display("p=$axisX,$axisY;i=misc/node;is=m");
+        @display("p=$axisX,$axisY;i=misc/node;is=l");
 
     submodules:
         app: <appType> like iApp;

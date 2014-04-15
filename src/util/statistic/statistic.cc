@@ -48,6 +48,9 @@ void Statistic::initialize()
   timeIdle = 0;
   timeListen = 0;
   timeTrans = 0;
+  numDIOsent = 0;
+  numIPinter = 0;
+  numIPtrans = 0;
 
   // register signal
   sigNetworkEnergyCount = registerSignal("networkEnergyCount");
@@ -66,7 +69,11 @@ void Statistic::initialize()
   sigRadioRecv = registerSignal("radioRecv");
   sigTimeIdle = registerSignal("timeIdle");
   sigTimeListen = registerSignal("timeListen");
+  sigLifeTime = registerSignal("lifeTime");
   sigTimeTrans = registerSignal("timeTrans");
+  sigNumDIOsent = registerSignal("dioSent");
+  sigNumIPinter = registerSignal("ipInter");
+  signumIPtrans = registerSignal("ipTrans");
 
   // Record total sensor energy for first time
   pollTotalSensorEnergy();
@@ -90,7 +97,7 @@ void Statistic::handleMessage(cMessage *msg)
     }
     else if (msg == pollingCount)
     {
-      if (simTime() < 3600)
+      if (simTime() + getParentModule()->par("polling") < getModuleByPath("^")->par("timeLimit").doubleValue())
       {
         pollTotalSensorEnergyCount();
         scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), pollingCount);
@@ -144,6 +151,7 @@ void Statistic::finish()
   emit(sigRadioSend, timeIdle + timeTrans + timeListen);
 
   cancelAndDelete(polling);
+  cancelAndDelete(pollingCount);
 }
 
 void Statistic::pollTotalSensorEnergyCount()
@@ -186,36 +194,47 @@ void Statistic::packetRateTracking(int type)
   switch (type)
   {
     case APP_SEND:
-      numAppSend++;
-      emit(sigAppSend, numAppSend);
+      emit(sigAppSend, ++numAppSend);
       break;
     case APP_RECV:
-      numAppRecv++;
-      emit(sigAppRecv, numAppRecv);
+      emit(sigAppRecv, ++numAppRecv);
       break;
     case NET_SEND:
-      numNetSend++;
-      emit(sigNetSend, numNetSend);
+      emit(sigNetSend, ++numNetSend);
       break;
     case NET_RECV:
-      numNetRecv++;
-      emit(sigNetRecv, numNetRecv);
+      emit(sigNetRecv, ++numNetRecv);
       break;
     case MAC_SEND:
-      numMacSend++;
-      emit(sigMacSend, numMacSend);
+      emit(sigMacSend, ++numMacSend);
       break;
     case MAC_RECV:
-      numMacRecv++;
-      emit(sigMacRecv, numMacRecv);
+      emit(sigMacRecv, ++numMacRecv);
       break;
     case RADIO_SEND:
-      numRadioSend++;
-      emit(sigRadioSend, numRadioSend);
+      emit(sigRadioSend, ++numRadioSend);
       break;
     case RADIO_RECV:
-      numRadioRecv++;
-      emit(sigRadioRecv, numRadioRecv);
+      emit(sigRadioRecv, ++numRadioRecv);
+      break;
+    case DIO_SENT:
+      emit(sigNumDIOsent, ++numDIOsent);
+      break;
+    case IP_INTER:
+      emit(sigNumIPinter, ++numIPinter);
+      break;
+    case IP_TRANS:
+      emit(signumIPtrans, ++numIPtrans);
+      break;
+    case LIFE_TIME_INCREASE_SERVER_NEIGHBOR:
+      this->numServerNeighbor++;
+      std::cout << "Server neighbor: " << numServerNeighbor << endl;
+      break;
+    case LIFE_TIME_DECREASE_SERVER_NEIGHBOR:
+      this->numServerNeighbor--;
+      std::cout << "Dead neighbor: " << numServerNeighbor << endl;
+      if (this->numServerNeighbor == 0)
+        emit(sigLifeTime, simTime().dbl());
       break;
   }
 }

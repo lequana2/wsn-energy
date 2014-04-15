@@ -61,6 +61,7 @@ enum SPECIAL_EVENT {
  * 	APP_ENVIRON_FLAG = 2; 
  * 	
  * 	RPL_CONSTRUCT = 3; 
+ * 	RPL_SET_UP	  = 4; 
  * };
  * </pre>
  */
@@ -68,7 +69,8 @@ enum COMMAND_FROM_APP {
     APP_WORKING_FLAG = 0,
     APP_SENSING_FLAG = 1,
     APP_ENVIRON_FLAG = 2,
-    RPL_CONSTRUCT = 3
+    RPL_CONSTRUCT = 3,
+    RPL_SET_UP = 4
 };
 
 /**

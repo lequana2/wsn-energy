@@ -9,7 +9,7 @@
 #ifndef __WSN_ENERGY_SOURCE_H
 #define __WSN_ENERGY_SOURCE_H
 
-#define MAX 900
+//#define MAX 900
 
 #include <myModule.h>
 

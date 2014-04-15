@@ -10,7 +10,7 @@
 #include "packet_m.h"
 
 #ifndef CONTIKI_MAC_REDUNDANCY
-#define CONTIKI_MAC_REDUNDANCY 3
+#define CONTIKI_MAC_REDUNDANCY 1
 #endif
 
 namespace wsn_energy {
@@ -218,12 +218,10 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           if (isSendingBroadcast)
           {
             // consider counter
-            if (counter < CONTIKI_MAC_REDUNDANCY)
+            if (++counter < CONTIKI_MAC_REDUNDANCY)
             {
               sendMessageToLower(buffer->dup());
               sendCommand(RDC_SEND);
-
-              counter++;
             }
             // WSN hack
             else
@@ -231,26 +229,24 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               // consider just send DIO
               if ((check_and_cast<IpPacket*>(buffer->getEncapsulatedPacket()))->getMessageCode() == NET_ICMP_RPL
                   && (check_and_cast<IpPacket*>(buffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIO)
-                sendResult (NET_DIO_SENT);
+                sendResult(NET_DIO_SENT);
               sendResult(RDC_SEND_OK);
               delete buffer;
             }
           }
+          // WSN consider just send data/ack
+          // WSN need duty cycling trigger here
           else
           {
-            // WSN consider just send data/ack
-            // WSN need duty cycling trigger here
-            if (counter < CONTIKI_MAC_REDUNDANCY)
+            if (++counter < CONTIKI_MAC_REDUNDANCY)
             {
               sendMessageToLower(buffer->dup());
               sendCommand(RDC_SEND);
-
-              counter++;
             }
             // WSN hack
             else
             {
-              sendResult(RDC_SEND_OK);
+              sendResult(RDC_SEND_NO_ACK);
               delete buffer;
             }
           }

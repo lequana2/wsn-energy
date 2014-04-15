@@ -14,6 +14,7 @@
 // 
 
 #include "udp.h"
+#include "statistic.h"
 
 namespace wsn_energy {
 
@@ -29,6 +30,8 @@ void UDP::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
+      (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(IP_TRANS));
+
       UdpPacket *udpPacket = new UdpPacket;
       udpPacket->setKind(DATA);
       udpPacket->setSourceIpAddress(getParentModule()->getModuleByPath(".net")->getId());
@@ -78,6 +81,8 @@ void UDP::processLowerLayerMessage(cPacket* packet)
   // Acts as intermediate node
   else
   {
+    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(IP_INTER));
+
     sendMessageToLower(packet);
   }
 }

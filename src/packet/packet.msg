@@ -32,6 +32,7 @@ enum COMMAND_FROM_APP{
 	APP_ENVIRON_FLAG = 2; // data from enviroment
 	
 	RPL_CONSTRUCT = 3; // perform broadcasting DIO
+	RPL_SET_UP	  = 4; // delay for setting up
 };
 
 // Net layer command

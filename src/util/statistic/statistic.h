@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 
 #ifndef DEF
-#define DEF 1
+#define DEF
 #define APP_SEND 0
 #define APP_RECV 1
 #define NET_SEND 2
@@ -28,6 +28,11 @@
 #define MAC_RECV 5
 #define RADIO_SEND 6
 #define RADIO_RECV 7
+#define DIO_SENT   8
+#define IP_INTER   9
+#define IP_TRANS   10
+#define LIFE_TIME_INCREASE_SERVER_NEIGHBOR  11
+#define LIFE_TIME_DECREASE_SERVER_NEIGHBOR  12
 #endif
 
 namespace wsn_energy {
@@ -86,6 +91,17 @@ class Statistic : public cSimpleModule
     simsignal_t sigTimeTrans;
     simsignal_t sigTimeListen;
     simsignal_t sigTimeIdle;
+
+    int numDIOsent;
+    int numIPinter;
+    int numIPtrans;
+
+    simsignal_t sigNumDIOsent;
+    simsignal_t sigNumIPinter;
+    simsignal_t signumIPtrans;
+
+    int         numServerNeighbor;
+    simsignal_t sigLifeTime;
 
   protected:
     virtual void initialize();

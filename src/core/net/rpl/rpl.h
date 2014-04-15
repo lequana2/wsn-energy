@@ -99,6 +99,8 @@ class RPL
     void handleDIOTimer();
 
     void handleDISTimer();
+
+    void purgeRoute();
 };
 
 } /* namespace wsn_energy */

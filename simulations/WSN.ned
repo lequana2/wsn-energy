@@ -30,17 +30,18 @@ network WSN
 
         int numberClient;
 
+		int timeLimit;
+        int width @unit(m);
+        int height @unit(m);
+
         int trRange @unit(m);
         int coRange @unit(m);
         int ssRange @unit(m);
 
-        int width @unit(m);
-        int height @unit(m);
-
         int scheme;
         int rand;
 
-		int isPollingCount;
+        int isPollingCount;
         int isPolling;
         double polling;
 
@@ -64,7 +65,7 @@ network WSN
                 axisX = 0;
                 axisY = 0;
         }
-        world: World;
         statistic: Statistic;
+        world: World;
     connections allowunconnected:
 }

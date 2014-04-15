@@ -9,6 +9,10 @@
 
 #include <of/hopEnergy.h>
 
+#ifndef ANNOTATE_DEFAULT_ROUTE
+#define ANNOTATE_DEFAULT_ROUTE 1
+#endif
+
 namespace wsn_energy {
 
 RPL_neighbor* hopEnergy::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2)
@@ -33,10 +37,23 @@ unsigned long hopEnergy::calculateRank(RPL_neighbor* parent)
   return parent->neighborRank + 1;
 }
 
-RPL_neighbor* hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentList)
+void hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentList, RPL_neighbor*& currentPreferredParent, int moteID)
 {
+  // delete old preferred parent (if needed)
+  if (ANNOTATE_DEFAULT_ROUTE && currentPreferredParent != NULL)
+  {
+    char channelParent[20];
+    sprintf(channelParent, "out %d to %d", moteID,
+    simulation.getModule(currentPreferredParent->neighborID)->getParentModule()->getId());
+    simulation.getModule(moteID)->gate(channelParent)->setDisplayString("ls=,0");
+  }
+
+  // Incase of update after purging route
   if (parentList.size() == 0)
-    return NULL;
+  {
+    currentPreferredParent = NULL;
+    return;
+  }
 
   std::list<RPL_neighbor*>::iterator iterator = parentList.begin();
   RPL_neighbor *preferredParent = *iterator;
@@ -52,7 +69,16 @@ RPL_neighbor* hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentLi
       preferredParent = *iterator;
   }
 
-  return preferredParent;
+  currentPreferredParent = preferredParent;
+
+  // draw new preferred parent (if exist)
+  if (ANNOTATE_DEFAULT_ROUTE && currentPreferredParent != NULL)
+  {
+    char channelParent[20];
+    sprintf(channelParent, "out %d to %d", moteID,
+    simulation.getModule(currentPreferredParent->neighborID)->getParentModule()->getId());
+    simulation.getModule(moteID)->gate(channelParent)->setDisplayString("ls=purple,1");
+  }
 }
 
 } /* namespace wsn_energy */

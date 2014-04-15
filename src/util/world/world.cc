@@ -8,6 +8,7 @@
 
 #include "world.h"
 #include "radio.h"
+#include "statistic.h"
 
 #include <math.h>
 
@@ -17,6 +18,10 @@
 
 #ifndef DEBUG
 #define DEBUG 1
+#endif
+
+#ifndef BYTECOUNT
+#define BYTECOUNT 1
 #endif
 
 namespace wsn_energy {
@@ -62,7 +67,7 @@ void World::arrangeMotes()
     {
       case 0: /* grid */
       {
-        if (col > 10)
+        if (col > 12)
         {
           row++;
           col = 0;
@@ -71,8 +76,8 @@ void World::arrangeMotes()
           col++;
 
         // Partition, 1 cell = 50*50
-        x = col * 40 + 15;
-        y = row * 40 + 5;
+        x = col * 35 + 15;
+        y = row * 35 + 15;
 
         // Randomize
         x = uniform(x - 5, x + 5);
@@ -179,6 +184,13 @@ void World::deployConnection(RadioDriver* mote)
     switch (this->validateConnection(mote, otherMote))
     {
       case WITHIN_TRANS:
+        // bytecount: calculate number of server neighbor
+        if (BYTECOUNT)
+        {
+          if (mote->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+            check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(
+                LIFE_TIME_INCREASE_SERVER_NEIGHBOR);
+        }
         host->moteIDWithinTransmissionRange.push_front(otherMote->getId());
         break;
 
@@ -275,7 +287,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
     considerSignal(signal);
   }
 
-  // WSN draw range
+  // draw range
   if (ANNOTATE)
   {
     oss.seekp(0);

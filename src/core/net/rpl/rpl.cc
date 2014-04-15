@@ -20,6 +20,7 @@
 #include "ipv6.h"
 #include "energest.h"
 #include "hopEnergy.h"
+#include "statistic.h"
 
 #ifndef DODAG_PAR
 #define DODAG_PAR
@@ -33,11 +34,11 @@
 #endif
 
 #ifndef ANNOTATE_PARENT
-#define ANNOTATE_PARENT 1
+#define ANNOTATE_PARENT 0
 #endif
 
 #ifndef ANNOTATE_SIBLINGS
-#define ANNOTATE_SIBLINGS 1
+#define ANNOTATE_SIBLINGS 0
 #endif
 
 #ifndef DEBUG
@@ -97,6 +98,8 @@ void RPL::sendDIO()
   net->multicast(icmp);
 
   isDIOsent = false; // keep track of lastest DIO
+
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(DIO_SENT));
 }
 
 void RPL::sendDIS()
@@ -120,9 +123,6 @@ void RPL::justSentDIO()
 
 void RPL::resetDIOTimer()
 {
-  // urgent DIO
-  sendDIO();
-
   // reset to initial stage
   dioCurrent = RPL_DIO_INTERVAL_MIN;
   newDIOinterval();
@@ -147,7 +147,7 @@ void RPL::newDIOinterval()
         << simTime() << endl;
 
   // simulation break
-  if (simTime() + dioDelay < 3600)
+  if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
   {
     this->net->cancelEvent(dioTimer);
     this->net->scheduleAt(simTime() + dioDelay, dioTimer);
@@ -159,7 +159,7 @@ void RPL::handleDIOTimer()
   // handle when timer expired
   if (!this->rplDag.joined || !isDIOsent) // link local not OK or last DIO didn't sent
   {
-    if (simTime() + dioDelay < 3600)
+    if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
     {
       this->net->cancelEvent(dioTimer);
       this->net->scheduleAt(simTime() + dioDelay, dioTimer);
@@ -170,7 +170,7 @@ void RPL::handleDIOTimer()
   {
     sendDIO();
     dioCounter++;
-    if (simTime() + dioDelay < 3600)
+    if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
     {
       this->net->cancelEvent(dioTimer);
       this->net->scheduleAt(simTime() + dioDelay, dioTimer);
@@ -188,13 +188,13 @@ void RPL::handleDIOTimer()
 void RPL::handleDISTimer()
 {
   // simulation break
-  if (simTime() < 28800)
+  if (simTime() < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
     return;
 
   if (!this->rplDag.joined)
     sendDIS();
-  else
-    this->net->selfTimer(1, NET_TIMER_DIS);
+//  else
+//    this->net->selfTimer(1, NET_TIMER_DIS);
 }
 
 void RPL::processICMP(IpPacket *packet)
@@ -242,7 +242,8 @@ void RPL::processDIO(DIO* dio)
     this->rplDag.rank = this->rplDag.of->calculateRank(neighbor);
 
     this->rplDag.parentList.push_back(neighbor);
-    this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+    this->rplDag.of->updatePreferredParent(this->rplDag.parentList, this->rplDag.preferredParent,
+        this->net->getParentModule()->getId());
 
     // draw new connection
     if (ANNOTATE_PARENT)
@@ -267,7 +268,8 @@ void RPL::processDIO(DIO* dio)
       this->rplDag.rank = this->rplDag.of->calculateRank(neighbor);
 
       this->rplDag.parentList.clear();
-      this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+      this->rplDag.of->updatePreferredParent(this->rplDag.parentList, this->rplDag.preferredParent,
+          this->net->getParentModule()->getId());
 
       // remove annotate
       if (ANNOTATE)
@@ -330,7 +332,8 @@ void RPL::processDIO(DIO* dio)
           }
 
           // Update preferred parent
-          this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+          this->rplDag.of->updatePreferredParent(this->rplDag.parentList, this->rplDag.preferredParent,
+              this->net->getParentModule()->getId());
 
           // Update parent
           this->resetDIOTimer();
@@ -344,15 +347,14 @@ void RPL::processDIO(DIO* dio)
 //            ev << "new neighbor" << endl;
 //            // Update new neighbor
 //            // this->rplDag.parentList.push_back(neighbor);
-//
-          if (ANNOTATE_SIBLINGS)
-          {
-            char channelParent[20];
-            sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
-                (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
-            EV << channelParent << endl;
-            net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
-          }
+//          if (ANNOTATE_SIBLINGS)
+//          {
+//            char channelParent[20];
+//            sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
+//                (simulation.getModule(neighbor->neighborID))->getParentModule()->getId());
+//            EV << channelParent << endl;
+//            net->getParentModule()->gate(channelParent)->setDisplayString("ls=blue,1");
+//          }
 //          }
 //          // Update sibling
         }
@@ -372,7 +374,8 @@ void RPL::processDIO(DIO* dio)
           (*oldParent)->neighborRank = neighbor->nodeQuality.energy;
 
           // Update preferred parent
-          this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+          this->rplDag.of->updatePreferredParent(this->rplDag.parentList, this->rplDag.preferredParent,
+              this->net->getParentModule()->getId());
         }
         else
         {
@@ -405,6 +408,20 @@ void RPL::processDIS(DIS* msg)
   // else dismiss DIS
   else
   {
+  }
+}
+
+void RPL::purgeRoute()
+{
+  this->rplDag.parentList.remove(this->rplDag.preferredParent);
+  this->rplDag.of->updatePreferredParent(this->rplDag.parentList, this->rplDag.preferredParent,
+      this->net->getParentModule()->getId());
+
+  if (this->rplDag.preferredParent == NULL) // floating node
+  {
+    // local repair
+    this->rplDag.joined = false;
+    this->net->selfTimer(0, NET_TIMER_DIS);
   }
 }
 }/* namespace wsn_energy */

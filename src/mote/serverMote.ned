@@ -42,7 +42,7 @@ module ServerMote
         int trRange @unit(m);
         int coRange @unit(m);
 
-        @display("p=$axisX,$axisY;i=abstract/db;is=m");
+        @display("p=$axisX,$axisY;i=abstract/db;is=l");
 
     submodules:
         app: <appType> like iApp;
