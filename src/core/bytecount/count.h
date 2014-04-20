@@ -12,7 +12,7 @@
 #include <omnetpp.h>
 
 #ifndef POWER
-#define POWER        6000.0 // micro Jun 100 mJ
+#define POWER         3000.0 // micro Jun 100 mJ
 #define E_ELEC         0.005 // micro 50  nJ
 #define E_FS         0.00001 // micro 10 pJ
 #define D                 50 // meters

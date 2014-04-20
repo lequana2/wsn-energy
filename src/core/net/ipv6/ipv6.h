@@ -17,7 +17,8 @@ namespace wsn_energy {
 class IPv6 : public myModule
 {
   private:
-    IpPacket* getIPpacketFromBufferQueue();
+    IpPacket *pendingPacket;
+    void preparePacketToBeSent();
 
   protected:
     void initialize();
@@ -28,7 +29,6 @@ class IPv6 : public myModule
     void processLowerLayerMessage(cPacket*);
 
   public:
-    bool isHavingPendingPacket;
     std::list<IpPacket*> ipPacketQueue; // Buffer message to send, public scope for debugging
 
     RPL *rpl; // using RPL as routing protocol

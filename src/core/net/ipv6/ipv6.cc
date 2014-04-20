@@ -26,15 +26,13 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
+  this->pendingPacket = NULL;
 
   selfTimer(0.000016, NET_TIMER_DIS);
-
-  this->isHavingPendingPacket = false;
 }
 
 void IPv6::finish()
 {
-  this->rpl->finish();
   // WSN Clear queue !!!
   std::cout << "SEND (NET) remaining: " << this->ipPacketQueue.size() << " @ " << this->getId() << endl;
 }
@@ -49,27 +47,26 @@ void IPv6::processSelfMessage(cPacket* packet)
       {
         case NET_CHECK_BUFFER: /* Check buffer */
         {
-          if (this->ipPacketQueue.size() == 0) // empty, do nothing, reset flag
+          if (ipPacketQueue.size() == 0) // empty, do nothing, reset flag
           {
-            this->isHavingPendingPacket = false;
+            pendingPacket = NULL;
           }
-          else if (!this->isHavingPendingPacket) // do not have any pending packet
+          else if (pendingPacket == NULL) // do not have any pending packet
           {
             if (DEBUG)
               std::cout << "SEND (NET) remaining: " << this->ipPacketQueue.size() << " @ " << this->getId() << endl;
 
             // get packet and sen to MAC layer
-            IpPacket* ipPacket = this->getIPpacketFromBufferQueue();
+            preparePacketToBeSent();
 
-            if (ipPacket == NULL)
+            if (pendingPacket == NULL)
             {
               // unsuccessful dequeue, just ignore and wait for another check
             }
             else
             {
               // successful dequeue
-              sendMessageToLower(ipPacket);
-              isHavingPendingPacket = true;
+              sendMessageToLower(pendingPacket->dup());
             }
           }
           delete packet;
@@ -85,7 +82,6 @@ void IPv6::processSelfMessage(cPacket* packet)
         case NET_TIMER_DIS: /* Solicit DODAG information*/
         {
           this->rpl->handleDISTimer();
-          delete packet;
           break;
         } /* Solicit DODAG information */
 
@@ -173,6 +169,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           else
           {
             // Energy calculated by counting bits
+            // WSN what if dead while receiving ???
             if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
               check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
                   check_and_cast<IpPacket*>(packet)->getBitLength());
@@ -212,7 +209,10 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
         case MAC_FINISH_PHASE: /* MAC layer finish a transmitting phase */
         {
           // check buffer
-          this->isHavingPendingPacket = false;
+          this->ipPacketQueue.remove(pendingPacket);
+          cancelAndDelete(pendingPacket);
+          pendingPacket = NULL;
+
           selfTimer(0, NET_CHECK_BUFFER);
           break;
         }/* MAC layer finish a transmitting phase */
@@ -258,33 +258,30 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
   }
 }
 
-IpPacket* IPv6::getIPpacketFromBufferQueue()
+void IPv6::preparePacketToBeSent()
 {
   // get first packet from queue
-  IpPacket* ipPacket = check_and_cast<IpPacket*>(this->ipPacketQueue.front());
+  pendingPacket = check_and_cast<IpPacket*>(this->ipPacketQueue.front());
 
-  if (ipPacket->getMessageCode() == NET_ICMP_RPL)
+  if (pendingPacket->getMessageCode() == NET_ICMP_RPL)
   {
     // Energy calculated by counting bits
-    if (ipPacket->getIcmpCode() == NET_ICMP_DIO)
+    if (pendingPacket->getIcmpCode() == NET_ICMP_DIO)
     {
       if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
       {
         if (getModuleByPath("^.^")->par("usingELB").boolValue())
-          check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(ipPacket->getBitLength() + 8);
+          check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength() + 8);
         else
-          check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(ipPacket->getBitLength());
+          check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength());
       }
     }
-    else if (ipPacket->getIcmpCode() == NET_ICMP_DIO)
+    else if (pendingPacket->getIcmpCode() == NET_ICMP_DIO)
     {
-      check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(ipPacket->getBitLength());
+      check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength());
     }
-
-    this->ipPacketQueue.pop_front();
-    return ipPacket;
   }
-  else if (ipPacket->getMessageCode() == NET_DATA)
+  else if (pendingPacket->getMessageCode() == NET_DATA)
   {
     // if data, consider parent
     if (this->rpl->rplDag.preferredParent == NULL)
@@ -292,7 +289,7 @@ IpPacket* IPv6::getIPpacketFromBufferQueue()
       // if no parent found, wait
       // if (DEBUG)
       std::cout << "NET: no parent found, wait" << endl;
-      return NULL;
+      this->pendingPacket = NULL;
     }
     else
     {
@@ -300,20 +297,15 @@ IpPacket* IPv6::getIPpacketFromBufferQueue()
 
       // Energy calculated by counting bits
       if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
-        check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(ipPacket->getBitLength());
+        check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength());
 
       // if not, change IP address submit
-      ipPacket->setRecverIpAddress(this->rpl->rplDag.preferredParent->neighborID);
+      pendingPacket->setRecverIpAddress(this->rpl->rplDag.preferredParent->neighborID);
 
       // WSN hack is neccesary ? /update every round/net-ack
-//       this->rpl->updatePrefferredParent();
-
-      this->ipPacketQueue.pop_front();
-      return ipPacket;
+      // this->rpl->updatePrefferredParent();
     }
   }
-
-  return NULL;
 }
 
 void IPv6::multicast(IpPacket *ipPacket)

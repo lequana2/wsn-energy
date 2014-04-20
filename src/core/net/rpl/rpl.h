@@ -88,7 +88,6 @@ class RPL
 
     void rpl_init();
     void rpl_set_root();
-    void finish();
 
     void sendDIO();
     void sendDIS();

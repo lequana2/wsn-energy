@@ -70,8 +70,7 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 void UDP::processLowerLayerMessage(cPacket* packet)
 {
   // Has reached destination
-  if (this->getParentModule()->getModuleByPath(".net")->getId()
-      == check_and_cast<UdpPacket*>(packet)->getSinkIpAddress())
+  if (getModuleByPath("^.net")->getId() == check_and_cast<UdpPacket*>(packet)->getSinkIpAddress())
   {
     ev << "Arrived base station !!!" << endl;
     sendMessageToUpper(packet->decapsulate());

@@ -152,9 +152,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
         {
           transmit_end();
 
-          // clear buffer
-          delete this->bufferTXFIFO;
-
           /* Feedback to RDC */
           sendResult(PHY_TX_OK);
           break;
@@ -281,6 +278,9 @@ void RadioDriver::transmit_end()
     ev << "End transmitting" << endl;
 
   ((World*) simulation.getModuleByPath("world"))->releaseHost(this);
+
+  // clear buffer
+  delete this->bufferTXFIFO;
 }
 
 /*

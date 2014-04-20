@@ -77,10 +77,6 @@ void RPL::rpl_set_root()
   sendDIO();
 }
 
-void RPL::finish()
-{
-}
-
 void RPL::sendDIO()
 {
   ev << "Broadcast DIO" << endl;
@@ -172,6 +168,11 @@ void RPL::handleDIOTimer()
       this->net->cancelEvent(dioTimer);
       this->net->scheduleAt(simTime() + dioDelay, dioTimer);
     }
+    else
+    {
+      this->net->cancelAndDelete(dioTimer);
+      return;
+    }
   }
   // do not exceed redundancy
   else if (dioCounter < RPL_DIO_REDUNDANCY)
@@ -196,8 +197,11 @@ void RPL::handleDIOTimer()
 void RPL::handleDISTimer()
 {
   // simulation break
-  if (simTime() < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+  if (simTime() + 1 > this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+  {
+    this->net->cancelAndDelete(this->disTimer);
     return;
+  }
 
   this->net->cancelEvent(this->disTimer);
 
