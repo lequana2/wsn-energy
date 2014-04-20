@@ -31,7 +31,7 @@ class RDCdriver : public myModule
     int counter;
 
   protected:
-//    Command *waitForACK;
+    Command *waitForACK;
     bool isSendingBroadcast;
     bool isWaitingACK;
     int sequence;
@@ -40,11 +40,15 @@ class RDCdriver : public myModule
 
     Frame *buffer;
 
-    virtual void initialize();
+    void initialize();
 
-    virtual void processSelfMessage(cPacket*);
-    virtual void processUpperLayerMessage(cPacket*);
-    virtual void processLowerLayerMessage(cPacket*);
+    void processSelfMessage(cPacket*);
+    void processUpperLayerMessage(cPacket*);
+    void processLowerLayerMessage(cPacket*);
+
+    /* listen demand */
+    void on();
+    void off();
 
     /* transmit demand */
     virtual void sendPacket(Frame*) = 0;
@@ -52,10 +56,6 @@ class RDCdriver : public myModule
     /* call-back */
     virtual void sendSuccess(Frame*) = 0;
     virtual void sendFailure() = 0;
-
-    /* listen demand */
-    virtual void on();
-    virtual void off();
 
     /* consider new-coming */
     virtual void receiveSuccess(Frame*) = 0;

@@ -16,18 +16,25 @@ namespace wsn_energy {
 
 class IPv6 : public myModule
 {
-  public:
-    RPL *rpl; // using RPL as routing protocol
-
-    void multicast(IpPacket*);      // broadcast
-    void unicast(IpPacket*, int);   // unicast with destination IP address
+  private:
+    IpPacket* getIPpacketFromBufferQueue();
 
   protected:
-    virtual void initialize();
+    void initialize();
+    void finish();
 
-    virtual void processSelfMessage(cPacket*);
-    virtual void processUpperLayerMessage(cPacket*);
-    virtual void processLowerLayerMessage(cPacket*);
+    void processSelfMessage(cPacket*);
+    void processUpperLayerMessage(cPacket*);
+    void processLowerLayerMessage(cPacket*);
+
+  public:
+    bool isHavingPendingPacket;
+    std::list<IpPacket*> ipPacketQueue; // Buffer message to send, public scope for debugging
+
+    RPL *rpl; // using RPL as routing protocol
+
+    void multicast(IpPacket*); // multicast to all neighbor
+    void unicast(IpPacket*);   // unicast with default route
 };
 
 }

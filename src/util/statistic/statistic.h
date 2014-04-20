@@ -1,25 +1,18 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
+ *
+ *  functioning: statistics and exporting functions
+ */
 
 #ifndef __TRACKINGWSN_STATCOLLECTOR_H_
 #define __TRACKINGWSN_STATCOLLECTOR_H_
 
 #include <omnetpp.h>
 
-#ifndef DEF
-#define DEF
+#ifndef DEFINE
+#define DEFINE
 #define APP_SEND 0
 #define APP_RECV 1
 #define NET_SEND 2
@@ -33,6 +26,9 @@
 #define IP_TRANS   10
 #define LIFE_TIME_INCREASE_SERVER_NEIGHBOR  11
 #define LIFE_TIME_DECREASE_SERVER_NEIGHBOR  12
+#define LIFE_TIME_PERCENTAGE_DEAD_NODE      13
+#define DELAY_APP_LAYER 14
+#define DELAY_NET_LAYER 15
 #endif
 
 namespace wsn_energy {
@@ -43,6 +39,7 @@ namespace wsn_energy {
 class Statistic : public cSimpleModule
 {
   private:
+    /* energy */
     cMessage *polling; // Timer for polling total sensor energy
     cMessage *pollingCount; // Timer for polling total sensor energy (Hung's method)
 
@@ -61,11 +58,16 @@ class Statistic : public cSimpleModule
     double numTotalEnergy;  // Energy remaining in whole network
     simsignal_t sigTotalEnergy;
 
-    double numTotalDelay; // Total delayTime
-    simsignal_t sigTotalDelay;
+    /* total delay */
+    double numTotalDelayApp; // Total delay app layer
+    simsignal_t sigTotalDelayApp;
 
+    double numTotalDelayNet;  // Total delay net layer
+    simsignal_t sigTotalDelayNet;
+
+    /* packet number*/
     int numRadioSend; // Number of radio message to send
-    int numRadioRecv; // Number of failed radio sending
+    int numRadioRecv; // Number of radio failed due to collision, nor incomplete
     simsignal_t sigRadioSend;
     simsignal_t sigRadioRecv;
 
@@ -84,6 +86,7 @@ class Statistic : public cSimpleModule
     simsignal_t sigAppSend;
     simsignal_t sigAppRecv;
 
+    /* duty cycling tracking */
     double timeTrans;
     double timeListen;
     double timeIdle;
@@ -92,6 +95,7 @@ class Statistic : public cSimpleModule
     simsignal_t sigTimeListen;
     simsignal_t sigTimeIdle;
 
+    /* number of each packet type in net layer */
     int numDIOsent;
     int numIPinter;
     int numIPtrans;
@@ -100,8 +104,16 @@ class Statistic : public cSimpleModule
     simsignal_t sigNumIPinter;
     simsignal_t signumIPtrans;
 
-    int         numServerNeighbor;
-    simsignal_t sigLifeTime;
+    /* network life time*/
+    int numServerNeighbor;
+    int numLiveNode;
+
+    simsignal_t sigLifeTimeRoute;
+    simsignal_t sigLifeTimePercentage;
+
+    /* polling for energy */
+    void pollTotalSensorEnergy();
+    void pollTotalSensorEnergyCount();
 
   protected:
     virtual void initialize();
@@ -109,11 +121,8 @@ class Statistic : public cSimpleModule
     void finish();
 
   public:
-    void pollTotalSensorEnergy();
-    void pollTotalSensorEnergyCount();
-
-    void packetRateTracking(int);
-    void packetDelayTracking(double);
+    void registerStatistic(int);
+    void registerStatisticDelay(int, double);
 };
 }
 #endif

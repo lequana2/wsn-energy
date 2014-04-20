@@ -13,9 +13,9 @@ cplusplus {{
 namespace wsn_energy;
 
 enum MESSAGE_KIND{
-	COMMAND = 4; // YELLOW command to lower
 	RESULT  = 1; // GREEN result from lower
 	DATA    = 2; // BLUE data to buffer lower/upper
+	COMMAND = 4; // YELLOW command to lower
 };
 
 // Environment
@@ -26,63 +26,66 @@ enum SPECIAL_EVENT{
 };
 
 // App layer
-enum COMMAND_FROM_APP{
-	APP_WORKING_FLAG = 0; // data from another node 
-	APP_SENSING_FLAG = 1; // data from sensor
-	APP_ENVIRON_FLAG = 2; // data from enviroment
+enum COMMAND_APP{
+	APP_ENVIRON_FLAG = 2; // data from enviroment, to sensor
+	APP_SENSING_FLAG = 1; // data from sensor, to apps
+	APP_WORKING_FLAG = 0; // data from another node, acts as intermediate node 
 	
-	RPL_CONSTRUCT = 3; // perform broadcasting DIO
-	RPL_SET_UP	  = 4; // delay for setting up
+	RPL_CONSTRUCT 	 = 3; // base station ignitation
+	RPL_SET_UP_DELAY = 4; // delay for setting up
 };
 
 // Net layer command
-enum COMMAND_FROM_NET{
-    NET_TIMER_DIO          = 1;  // handle DIO timer
-    NET_TIMER_DIS          = 2;  // handle DIS timer
+enum COMMAND_NET{
+    NET_TIMER_DIO       = 1;  // self-command handle DIO timer
+    NET_TIMER_DIS       = 2;  // self-command handle DIS timer
+
+	NET_CHECK_BUFFER    = 3; // check buffer
 };
 
 // Net layer result
-enum RESULT_FROM_NET{
-	NET_DIO_SENT          = 69; // just send dio
+enum RESULT_NET{
+	NET_DIO_SENT	= 23; // has send dio
+	NET_DIS_SENT    = 24; // has send dis
 }
 
 // ip packet type
 enum IP_PACKET_TYPE{
 	NET_DATA        	  = 1;  // normal data message
-	NET_ICMP_RPL		  = 2;  // kind of ICMP
 	
+	NET_ICMP_RPL		  = 2;  // kind of ICMP
 	NET_ICMP_DIO    	  = 3;	// ICMP DIO message
 	NET_ICMP_DIS    	  = 4;	// ICMP DIS message
 };
 
 // MAC layer command
-enum COMMAND_FROM_MAC{
-	CHANNEL_CCA_REQUEST = 70; // request CCA
-	MAC_SEND_BUFFER     = 71; // send frame
-	MAC_CHECK_BUFFER    = 72; // check buffer
+enum COMMAND_MAC{
+	CHANNEL_CCA_REQUEST = 70; // request CCA, to PHY
+	
+	MAC_BEGIN_SEND_FRAME = 73; // begin sending a frame
+	MAC_END_SEND_FRAME   = 74; // after sending a frame, begin interframe space (sifs/lifs)
+	MAC_EXPIRE_IFS		 = 75; // IFS has expired, ready for next frame
 };
 
 // MAC layer result
 enum RESULT_FROM_MAC{
     MAC_SEND_DEAD_NEIGHBOR = 5;
-    
-//	MAC_SEND_OK		= 0; // sent + receive ACK (if needed)
-//	MAC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
-//	MAC_SEND_FATAL  = 2; // fatal error, abort message
-//	MAC_SEND_ERROR  = 3; // exceed total number of transmission, try again later
+	
+	MAC_FINISH_PHASE       = 29; // finish 1 transmitting phase    
+	MAC_SEND_END_TRANSMIT  = 28; // sent + receive ACK (if needed)
 };
 
 // RDC layer command
-enum COMMAND_FROM_RDC{
-	RDC_SEND   = 30; // transmit
-	RDC_LISTEN = 31; // listen
-	RDC_IDLE   = 32; // idle
+enum COMMAND_RDC{
+	RDC_TRANSMIT = 30; // transmit
+	RDC_LISTEN 	 = 31; // listen
+	RDC_IDLE     = 32; // idle
 	
 	RDC_WAIT_FOR_ACK = 34; // wait for ack / listenning
 };
 
 // RDC layer result
-enum RESULT_FROM_RDC{
+enum RESULT_RDC{
 	RDC_SEND_OK     = 0; // send + receive ACK (if needed)
 	RDC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
 	RDC_SEND_FATAL  = 2; // fatal error, abort message
@@ -90,8 +93,8 @@ enum RESULT_FROM_RDC{
 };
 
 // PHY layer
-enum COMMAND_FROM_PHY{
-	PHY_BEGIN_CCA       = 10; // radio begin CCA ???
+enum COMMAND_PHY{
+	PHY_BEGIN_CCA       = 10; // radio begin CCA
 	PHY_END_CCA         = 11; // radio end CCA
 	
  	PHY_SWITCH_TRANSMIT	= 12; // switch to transmit mode
@@ -106,7 +109,7 @@ enum COMMAND_FROM_PHY{
  	PHY_IDLING  	 = 18; // begin idling
 };
 
-enum RESULT_FROM_PHY{
+enum RESULT_PHY{
 	CHANNEL_CLEAR   	= 10; // CCA clear
 	CHANNEL_BUSY    	= 11; // CCA busy
 	

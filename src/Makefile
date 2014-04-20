@@ -206,6 +206,7 @@ $O/apps/server/server.o: apps/server/server.cc \
 	util/statistic/statistic.h
 $O/core/myModule.o: core/myModule.cc \
 	core/myModule.h \
+	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h
 $O/core/bytecount/count.o: core/bytecount/count.cc \
@@ -262,6 +263,7 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	packet/packet_m.h \
 	util/statistic/statistic.h
 $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
+	core/bytecount/count.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
 	core/net/rpl/rpl.h \
@@ -270,6 +272,8 @@ $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
 $O/core/radio/radio.o: core/radio/radio.cc \
 	core/energest/energest.h \
 	core/myModule.h \
+	core/net/ipv6/ipv6.h \
+	core/net/rpl/rpl.h \
 	core/radio/radio.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
@@ -297,6 +301,7 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	util/statistic/statistic.h \
 	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
+	core/bytecount/count.h \
 	core/myModule.h \
 	core/rdc/rdc.h \
 	packet/packet_len.h \
@@ -321,8 +326,9 @@ $O/util/signal/mySignal.o: util/signal/mySignal.cc \
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/bytecount/count.h \
 	core/energest/energest.h \
-	core/mac/mac.h \
 	core/myModule.h \
+	core/net/ipv6/ipv6.h \
+	core/net/rpl/rpl.h \
 	packet/packet_len.h \
 	packet/packet_m.h \
 	util/statistic/statistic.h

@@ -30,12 +30,12 @@ void UDP::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(IP_TRANS));
+      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatistic(IP_TRANS));
 
       UdpPacket *udpPacket = new UdpPacket;
       udpPacket->setKind(DATA);
       udpPacket->setSourceIpAddress(getParentModule()->getModuleByPath(".net")->getId());
-      udpPacket->setSinkIpAddress(simulation.getModuleByPath("server.net")->getId());
+      udpPacket->setSinkIpAddress(getModuleByPath("^.^.server.net")->getId());
 
       udpPacket->encapsulate(packet);
 
@@ -81,7 +81,7 @@ void UDP::processLowerLayerMessage(cPacket* packet)
   // Acts as intermediate node
   else
   {
-    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(IP_INTER));
+    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(IP_INTER));
 
     sendMessageToLower(packet);
   }

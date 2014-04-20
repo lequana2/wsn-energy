@@ -23,60 +23,62 @@ class ObjectiveFunction;
 class NodeQuality
 {
   public:
-    double hopCount;
-    double energy;
+    int hopCount; // hop count from base station to this neighbor
+    double energy; // energy of this neighbor
 };
 
 class LinkQuality
 {
   public:
-    double etx;
+    double etx; // expected transmission number
 };
 
 class RPL_neighbor
 {
   public:
-    int neighborID;
-    unsigned long neighborRank;
+    int neighborID; // IPv6 of neighbor
+    unsigned long neighborRank; // rank of this neighbor
 
-    NodeQuality nodeQuality;
-    LinkQuality linkQuality;
+    NodeQuality nodeQuality; // quality of this neighbor
+    LinkQuality linkQuality; // quality of link between this neighbor and ownner mote
 };
 
 class RPL_dag
 {
   public:
-    bool joined;
-    int dodagID;
-    int version;
-    // Self rank
-    unsigned long rank;
+    /* DODAG information*/
+    bool joined; // is this node involved in the DODAG
+    int dodagID; // ID of DODAG (IP of base station)
+    int version; // version of DODAG
+    ObjectiveFunction *of; // Objective Function
 
-    // upward route
-    RPL_neighbor *preferredParent;
+    unsigned long rank; // Owner rank
 
-    // neighbor information
-    std::list<RPL_neighbor*> parentList;
-    std::list<RPL_neighbor*> siblingList;
-
-    // Objective Function
-    ObjectiveFunction *of;
+    /* routing information */
+    RPL_neighbor *preferredParent; // default-upward route
+    std::list<RPL_neighbor*> parentList; // list of neighbor with better rank
+    std::list<RPL_neighbor*> siblingList; // list of neighbor with same rank
 };
 
 class RPL
 {
   private:
-    IPv6 *net;
+    IPv6 *net; // Net-layer owner
 
     int dioCounter;
     int dioCurrent;
     unsigned long dioInterval;
-    double         dioDelay;
+    double dioDelay;
     bool isDIOsent;
+    bool isDISsent;
 
     Command *dioTimer;
+    Command *disTimer;
 
     void processDIO(DIO*);
+    void resetDIOTimer();
+    void newDIOinterval();
+
     void processDIS(DIS*);
 
   public:
@@ -84,22 +86,22 @@ class RPL
 
     RPL(IPv6 *net);
 
-    void rpl_set_root();
     void rpl_init();
+    void rpl_set_root();
+    void finish();
 
     void sendDIO();
     void sendDIS();
 
-    void justSentDIO();
+    void hasSentDIO();
+    void hasSentDIS();
 
     void processICMP(IpPacket*);
 
-    void resetDIOTimer();
-    void newDIOinterval();
     void handleDIOTimer();
-
     void handleDISTimer();
 
+    void updatePrefferredParent();
     void purgeRoute();
 };
 

@@ -21,23 +21,23 @@ package wsn_energy.util.statistic;
 simple Statistic
 {
     parameters:
-        @signal[networkEnergyCount](type="double");
+        @signal[networkEnergyCount](type="int");
         @statistic[networkEnergyCount](title="Node energy (count)"; record=vector);
-
-        @signal[sensorEnergyCount](type="double");
+        @signal[sensorEnergyCount](type="int");
         @statistic[sensorEnergyCount](title="Sensor energy (count)"; record=vector);
 
         @signal[networkEnergy](type="double");
         @statistic[networkEnergy](title="Node energy"; record=vector);
-
         @signal[sensorEnergy](type="double");
         @statistic[sensorEnergy](title="Sensor energy"; record=vector);
 
         @signal[totalEnergy](type="double");
         @statistic[totalEnergy](title="Total energy"; record=last);
 
-        @signal[totalDelay](type="double");
-        @statistic[totalDelay](title="Total delay: "; record=last);
+        @signal[totalDelayApp](type="double");
+        @statistic[totalDelayApp](title="Total delay (app): "; record=last);
+		@signal[totalDelayNet](type="double");
+        @statistic[totalDelayNet](title="Total delay (net): "; record=last);
 
         @signal[appSend](type="int");
         @signal[appSecv](type="int");
@@ -47,15 +47,6 @@ simple Statistic
         @signal[macRecv](type="int");
         @signal[radioSend](type="int");
         @signal[radioRecv](type="int");
-        @signal[timeIdle](type="double");
-        @signal[timeTrans](type="double");
-        @signal[timeListen](type="double");
-
-        @signal[dioSent](type="int");
-        @signal[ipInter](type="int");
-        @signal[ipTrans](type="int");
-        @signal[lifeTime](type="double");
-
         @statistic[appSend](title="Number of app layer send: "; record=last);
         @statistic[appRecv](title="Number of app layer recv: "; record=last);
         @statistic[netSend](title="Number of net layer send: "; record=last);
@@ -64,15 +55,25 @@ simple Statistic
         @statistic[macRecv](title="Number of mac layer recv: "; record=last);
         @statistic[radioSend](title="Number of radio layer send: "; record=last);
         @statistic[radioRecv](title="Number of radio layer recv: "; record=last);
+        
+        @signal[timeIdle](type="double");
+        @signal[timeTrans](type="double");
+        @signal[timeListen](type="double");
         @statistic[timeIdle](title="Time idling: "; record=last);
         @statistic[timeTrans](title="Time transmitting: "; record=last);
         @statistic[timeListen](title="Time listening: "; record=last);
 
+		@signal[dioSent](type="int");
+        @signal[ipInter](type="int");
+        @signal[ipTrans](type="int");
         @statistic[dioSent](title="Number of DIO  send       : "; record=last);
         @statistic[ipInter](title="Number of ip forwarding   : "; record=last);
         @statistic[ipTrans](title="Number of ip transmitting : "; record=last);
 
-        @statistic[lifeTime](title="Network life time: "; record=last);
+		@signal[lifeTime](type="double");
+        @signal[lifeTimePercentage](type="double");
+        @statistic[lifeTimeRoute](title="Network life time (route): "; record=last);
+        @statistic[lifeTimePercentage](title="Network life time (percentage): "; record=last);
 
         @display("p=-10,40;i=block/table2");
 }

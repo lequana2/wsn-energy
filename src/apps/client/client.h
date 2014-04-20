@@ -9,8 +9,6 @@
 #ifndef __WSN_ENERGY_SOURCE_H
 #define __WSN_ENERGY_SOURCE_H
 
-//#define MAX 900
-
 #include <myModule.h>
 
 namespace wsn_energy {
@@ -23,7 +21,6 @@ class Client : public myModule
 
   protected:
     void initialize();
-    void handleMessage(cMessage*);
 
   public:
     virtual void processSelfMessage(cPacket*);

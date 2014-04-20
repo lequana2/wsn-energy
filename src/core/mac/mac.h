@@ -16,14 +16,13 @@ namespace wsn_energy {
 class MACdriver : public myModule
 {
   protected:
-    bool isHavingPendingPacket;
     Frame *frameBuffer;
 
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
     virtual void processLowerLayerMessage(cPacket*);
 
-    /* backoff transmitting */
+    /* backoff transmitting, CCA is involved */
     virtual void deferPacket() = 0;
 
     /* send buffer packet */
@@ -31,9 +30,6 @@ class MACdriver : public myModule
 
     /* accept input from lowerlayer */
     virtual void receivePacket(Frame*);
-
-  public:
-    std::list<Frame*> buffer; // Buffer message to send, public scope for debugging
 };
 
 } /* namespace wsn_energy */

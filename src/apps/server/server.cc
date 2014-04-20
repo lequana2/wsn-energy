@@ -55,8 +55,8 @@ void Server::processLowerLayerMessage(cPacket* packet)
   //  this->getParentModule()->bubble(data->getValue());
 
   // End to end statistics
-  ((Statistic*) simulation.getModuleByPath("statistic"))->packetRateTracking(APP_RECV);
-  ((Statistic*) simulation.getModuleByPath("statistic"))->packetDelayTracking(simTime().dbl() - data->getTime());
+  ((Statistic*) simulation.getModuleByPath("statistic"))->registerStatistic(APP_RECV);
+  ((Statistic*) simulation.getModuleByPath("statistic"))->registerStatisticDelay(DELAY_APP_LAYER, simTime().dbl() - data->getTime());
 
   delete packet;
 }

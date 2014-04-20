@@ -1,17 +1,13 @@
 /*
- * hopEnergy.cpp
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
  *
- *  Created on: Mar 31, 2014
- *      Author: quan
- *  
- *  Functioning:
+ *  functioning: refer to hopEnergy.h
  */
 
 #include <of/hopEnergy.h>
-
-#ifndef ANNOTATE_DEFAULT_ROUTE
-#define ANNOTATE_DEFAULT_ROUTE 1
-#endif
+#include "count.h"
 
 namespace wsn_energy {
 
@@ -37,23 +33,11 @@ unsigned long hopEnergy::calculateRank(RPL_neighbor* parent)
   return parent->neighborRank + 1;
 }
 
-void hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentList, RPL_neighbor*& currentPreferredParent, int moteID)
+RPL_neighbor* hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentList)
 {
-  // delete old preferred parent (if needed)
-  if (ANNOTATE_DEFAULT_ROUTE && currentPreferredParent != NULL)
-  {
-    char channelParent[20];
-    sprintf(channelParent, "out %d to %d", moteID,
-    simulation.getModule(currentPreferredParent->neighborID)->getParentModule()->getId());
-    simulation.getModule(moteID)->gate(channelParent)->setDisplayString("ls=,0");
-  }
-
   // Incase of update after purging route
   if (parentList.size() == 0)
-  {
-    currentPreferredParent = NULL;
-    return;
-  }
+    return NULL;
 
   std::list<RPL_neighbor*>::iterator iterator = parentList.begin();
   RPL_neighbor *preferredParent = *iterator;
@@ -64,21 +48,18 @@ void hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentList, RPL_n
     if ((*iterator)->neighborRank < preferredParent->neighborRank)
       preferredParent = *iterator;
     // Same rank but better energy
-    else if ((*iterator)->neighborRank == preferredParent->neighborRank
-        && (*iterator)->nodeQuality.energy > preferredParent->nodeQuality.energy)
-      preferredParent = *iterator;
+    else if ((*iterator)->neighborRank == preferredParent->neighborRank)
+    {
+      if ( simulation.getModuleByPath("WSN")->par("usingELB").boolValue()
+          && check_and_cast<Count*>(
+          simulation.getModule((*iterator)->neighborID)->getParentModule()->getSubmodule("count"))->residualEnergy
+              < check_and_cast<Count*>(
+              simulation.getModule(preferredParent->neighborID)->getParentModule()->getSubmodule("count"))->residualEnergy)
+        preferredParent = *iterator;
+    }
   }
 
-  currentPreferredParent = preferredParent;
-
-  // draw new preferred parent (if exist)
-  if (ANNOTATE_DEFAULT_ROUTE && currentPreferredParent != NULL)
-  {
-    char channelParent[20];
-    sprintf(channelParent, "out %d to %d", moteID,
-    simulation.getModule(currentPreferredParent->neighborID)->getParentModule()->getId());
-    simulation.getModule(moteID)->gate(channelParent)->setDisplayString("ls=purple,1");
-  }
+  return preferredParent;
 }
 
 } /* namespace wsn_energy */

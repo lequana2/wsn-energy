@@ -1,10 +1,9 @@
 /*
- * hopEnergy.h
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
  *
- *  Created on: Mar 31, 2014
- *      Author: quan
- *  
- *  Functioning:
+ *  functioning: multi-objective function hop/energy
  */
 
 #ifndef HOPENERGY_H_
@@ -19,7 +18,7 @@ class hopEnergy : public ObjectiveFunction
   public:
     RPL_neighbor* bestParent(RPL_neighbor*, RPL_neighbor*);
     unsigned long calculateRank(RPL_neighbor*);
-    void updatePreferredParent(std::list<RPL_neighbor*>, RPL_neighbor*&, int);
+    RPL_neighbor* updatePreferredParent(std::list<RPL_neighbor*>);
 };
 
 } /* namespace wsn_energy */

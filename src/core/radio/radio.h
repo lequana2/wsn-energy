@@ -33,16 +33,21 @@
 
 #ifndef COLORIZE
 #define COLORIZE 1
-#define OFF_COLOR      "black"
-#define IDLE_COLOR     "gray"
-#define TRANSMIT_COLOR "blue"
-#define LISTEN_COLOR   "orange"
+#define OFF_COLOR       "black"
+#define IDLE_COLOR      "brown"
+#define TRANSMIT_COLOR  "blue"
+#define LISTEN_COLOR    "yellow"
+#define RECEIVING_COLOR "orange"
 #endif
 
+#ifndef WORKING_MODE
+#define WORKING_MODE
 #define POWER_DOWN      0 // power down
 #define IDLE            1 // do nothing
-#define TRANSMITTING    2 // transmitting something
+#define TRANSMITTING    2 // transmitting
 #define LISTENING       3 // listening to nothing
+#define RECEIVING       4 // listening to something
+#endif
 
 namespace wsn_energy {
 
@@ -79,8 +84,6 @@ class RadioDriver : public myModule
     int status;  // sleep, transmitting, listening, receiving
     int trRange; // simulated transmission range according to TXPOWER
     int coRange; // simulated collission range according to RXPOWER
-
-    int incomingSignal; // number of incoming signal
 
     void switchOscilatorMode(int mode);     // Switch oscilator mode, public for battery
 };

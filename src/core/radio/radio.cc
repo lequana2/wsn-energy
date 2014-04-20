@@ -3,6 +3,7 @@
 #include "world.h"
 #include "statistic.h"
 #include "energest.h"
+#include "ipv6.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -14,7 +15,6 @@ void RadioDriver::initialize()
 {
   this->trRange = par("trRange");
   this->coRange = par("coRange");
-  this->incomingSignal = 0;
 
   // Turn on in initializing phase
   listen();
@@ -22,7 +22,6 @@ void RadioDriver::initialize()
 
 void RadioDriver::handleMessage(cMessage* msg)
 {
-  // stop working
   if (this->status == POWER_DOWN)
   {
     delete msg;
@@ -48,7 +47,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       switch (check_and_cast<Command*>(packet)->getNote())
       {
         case PHY_END_CCA: /* ending of CCA */
-          if (this->incomingSignal > 0) /* Channel not free*/
+          if (check_and_cast<World*>(simulation.getModuleByPath("world"))->isFreeChannel(this)) /* Channel not free*/
 //          if (false)  // WSN hack channel always free
           {
             if (DEBUG)
@@ -156,9 +155,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
           // clear buffer
           delete this->bufferTXFIFO;
 
-          // WSN after sending, switch immediately to listen
-          listen();
-
           /* Feedback to RDC */
           sendResult(PHY_TX_OK);
           break;
@@ -215,7 +211,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
           selfTimer(intervalCCA(), PHY_END_CCA);
           break; /* CCA request */
 
-        case RDC_SEND: /* transmitting */
+        case RDC_TRANSMIT: /* transmitting */
           switch (this->status)
           {
             case TRANSMITTING: /* radio is transmitting */
@@ -265,7 +261,7 @@ void RadioDriver::transmit_begin()
     ev << "Start transmitting" << endl;
 
   // register
-  ((World*) simulation.getModuleByPath("world"))->registerHost(this, bufferTXFIFO);
+  check_and_cast<World*>(simulation.getModuleByPath("world"))->registerHost(this, bufferTXFIFO);
 
   // switch mode
   switchOscilatorMode(TRANSMITTING);
@@ -333,7 +329,7 @@ void RadioDriver::sleep()
   if (DEBUG)
     ev << "IDLE (PHY)" << endl;
 
-  ((World*) simulation.getModuleByPath("world"))->stopListening(this);
+  ((World*) simulation.getModuleByPath("world"))->suddenStopListening(this);
   switchOscilatorMode(IDLE);
 }
 
@@ -346,35 +342,56 @@ void RadioDriver::switchOscilatorMode(int type)
   {
     case IDLE:
       this->status = IDLE;
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_IDLE,
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOn(ENERGEST_TYPE_IDLE,
           getIdPower());
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, IDLE_COLOR);
       break;
 
     case LISTENING:
       this->status = LISTENING;
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_LISTEN,
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_IDLE);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOn(ENERGEST_TYPE_LISTEN,
           getRxPower());
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
       break;
 
+    case RECEIVING:
+      this->status = RECEIVING;
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_IDLE);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOn(ENERGEST_TYPE_LISTEN,
+          getRxPower());
+      (&getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVING_COLOR);
+      break;
+
     case TRANSMITTING:
       this->status = TRANSMITTING;
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_IDLE);
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOff(ENERGEST_TYPE_LISTEN);
-      (check_and_cast<Energest*>(getParentModule()->getModuleByPath(".energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_IDLE);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_LISTEN);
+      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOn(ENERGEST_TYPE_TRANSMIT,
           getTxPower());
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
       break;
 
-    case POWER_DOWN:
+    case POWER_DOWN: {
       this->status = POWER_DOWN;
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
+
+      // remove preferred parent connection
+      IPv6* net = check_and_cast<IPv6*>(getParentModule()->getSubmodule("net"));
+      if (net->rpl->rplDag.preferredParent != NULL)
+      {
+        char channelParent[20];
+        sprintf(channelParent, "out %d to %d", this->getParentModule()->getId(),
+        simulation.getModule(net->rpl->rplDag.preferredParent->neighborID)->getParentModule()->getId());
+        getParentModule()->gate(channelParent)->setDisplayString("ls=,0");
+      }
+
       break;
+    }
   }
 }
 }  // namespace wsn_energy

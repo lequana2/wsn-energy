@@ -27,12 +27,8 @@ void csma::deferPacket()
   /* dismiss + announce failure duty */
   if (frameBuffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
-    // WSN self timer to considering dead neighbot or backoff or smt
-
+    // WSN self timer to considering dead neighbot or backoff or IFS expired smt
     delete this->frameBuffer;     // clear buffer
-    this->buffer.pop_front();
-    isHavingPendingPacket = false;
-    selfTimer(0, MAC_CHECK_BUFFER);
   }
   /* unslotted csma */
   else
@@ -48,9 +44,9 @@ void csma::deferPacket()
 
     int backoffUnit;
 
-    if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
+    if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
       backoff = (rand() % (backoff_transmission)) * BACKOFF_PERIOD;
-    else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
+    else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
       backoffUnit = (intuniform(0, backoff_transmission));
 
     backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 100000000.0;

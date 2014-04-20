@@ -26,27 +26,31 @@ import wsn_energy.util.statistic.Statistic;
 network WSN
 {
     parameters:
+        int timeLimit;
+
         int topology;
 
-        int numberClient;
+        bool usingFLR;
+        bool usingELB;
 
-		int timeLimit;
         int width @unit(m);
         int height @unit(m);
 
-        int trRange @unit(m);
-        int coRange @unit(m);
-        int ssRange @unit(m);
+        int numberClient;
+
+        int serverX @unit(m);
+        int serverY @unit(m);
 
         int scheme;
         int rand;
 
-        int isPollingCount;
-        int isPolling;
+        bool isPollingCount;
+        bool isPolling;
         double polling;
 
-        int serverX @unit(m);
-        int serverY @unit(m);
+        int trRange @unit(m);
+        int coRange @unit(m);
+        int ssRange @unit(m);
 
         @display("bgs=6,m;bgb=$width,$height,#C6C6FF,#0000FF,2");
 

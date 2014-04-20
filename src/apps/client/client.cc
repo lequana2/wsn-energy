@@ -10,8 +10,10 @@
 #include "radio.h"
 #include "statistic.h"
 
-#ifndef SET_UP_DELAY
-#define SET_UP_DELAY 65
+//#define MAX 900
+
+#ifndef SET_UP_DELAY_TIME
+#define SET_UP_DELAY_TIME 65
 #endif
 
 namespace wsn_energy {
@@ -23,25 +25,25 @@ void Client::initialize()
   this->numberOfPacket = 0;
 
   /* Contiki test scheme */
-  switch ((int) getModuleByPath("WSN")->par("scheme").doubleValue())
+  switch ((int) getModuleByPath("^.^")->par("scheme").doubleValue())
   {
     case 1: /* one event */
     {
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        selfTimer(1, APP_SENSING_FLAG);
+        selfTimer(SET_UP_DELAY_TIME + 10, APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        selfTimer(2, APP_SENSING_FLAG);
+        selfTimer(SET_UP_DELAY_TIME + 20, APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        selfTimer(3, APP_SENSING_FLAG);
+        selfTimer(SET_UP_DELAY_TIME + 30, APP_SENSING_FLAG);
 
       break;
     } /* one event */
 
     case 2: /* ignite periodically */
     {
-      selfTimer(SET_UP_DELAY, RPL_SET_UP);
+      selfTimer(SET_UP_DELAY_TIME, RPL_SET_UP_DELAY);
       break;
     } /* ignite periodically */
 
@@ -49,18 +51,6 @@ void Client::initialize()
       ev << "Just construct " << endl;
       break;
   }
-}
-
-void Client::handleMessage(cMessage *msg)
-{
-  /* sensor stops working */
-  if (check_and_cast<RadioDriver*>(this->getParentModule()->getModuleByPath(".radio")) == POWER_DOWN)
-  {
-    delete msg;
-    return;
-  }
-
-  myModule::handleMessage(msg);
 }
 
 void Client::processSelfMessage(cPacket* packet)
@@ -71,7 +61,7 @@ void Client::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case RPL_SET_UP: /* set up delay */
+        case RPL_SET_UP_DELAY: /* set up delay */
         {
           newData();
           break;
@@ -92,15 +82,18 @@ void Client::processSelfMessage(cPacket* packet)
           sendMessageToLower(data);
 
           /* End to end statistics */
-          (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(APP_SEND));
+          (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(APP_SEND));
 
-          if ((int) getModuleByPath("WSN")->par("scheme").doubleValue() == 2)
+          if ((int) getModuleByPath("^.^")->par("scheme").doubleValue() == 2)
+          {
 #ifdef MAX
             if (this->numberOfPacket++ < MAX)  // control maximum number
 #else
             this->numberOfPacket++;
 #endif
-          newData();
+            newData();
+          }
+
           break; /* new data */
         }
 
@@ -137,11 +130,10 @@ void Client::newData()
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-//  if (getModuleByPath("WSN")->par("rand").doubleValue() == 0)
-//    time = sendInterval + (rand() % (1000)) / 1000.0;
-//  else if (getModuleByPath("WSN")->par("rand").doubleValue() == 1)
-//    time = sendInterval + intuniform(0, 1000000 * sendInterval) / 1000000000.0;
-  time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
+  if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
+    time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
+  else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
+    time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
 
 //  this->getParentModule()->bubble("Data");
 

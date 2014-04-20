@@ -7,6 +7,7 @@
  */
 
 #include "myModule.h"
+#include "radio.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -20,6 +21,13 @@ void myModule::initialize()
 
 void myModule::handleMessage(cMessage *msg)
 {
+  /* power down */
+  if (check_and_cast<RadioDriver*>(this->getModuleByPath("^.radio"))->status == POWER_DOWN)
+  {
+    delete msg;
+    return;
+  }
+
   if (msg->isSelfMessage())
   {
     if (DEBUG)

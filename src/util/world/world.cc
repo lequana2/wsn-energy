@@ -42,13 +42,20 @@ void World::initialize()
 void World::finish()
 {
   this->oss.clear();
-  for (std::list<Host*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+  for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
   {
     (*it)->moteIDWithinTransmissionRange.clear();
     (*it)->moteIDWithinCollisionRange.clear();
   }
   this->hosts.clear();
   this->signals.clear();
+}
+
+/*
+ * WSN search mode on mote list given its ID
+ */
+Mote& World::searchMote(int moteID)
+{
 }
 
 /*
@@ -152,7 +159,7 @@ void World::connectNodes()
  */
 void World::deployConnection(RadioDriver* mote)
 {
-  Host *host = new Host;
+  Mote *host = new Mote;
   host->moteID = mote->getId();
 
   // Check with base station
@@ -188,8 +195,8 @@ void World::deployConnection(RadioDriver* mote)
         if (BYTECOUNT)
         {
           if (mote->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
-            check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(
-                LIFE_TIME_INCREASE_SERVER_NEIGHBOR);
+            check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(
+            LIFE_TIME_INCREASE_SERVER_NEIGHBOR);
         }
         host->moteIDWithinTransmissionRange.push_front(otherMote->getId());
         break;
@@ -250,9 +257,9 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
 
   // Search host by id
   int senderID = mote->getId();
-  Host *host;
+  Mote *host;
 
-  for (std::list<Host*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+  for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
   {
     if ((*it)->moteID == senderID)
       host = *it;
@@ -303,9 +310,9 @@ void World::releaseHost(RadioDriver* mote)
 {
   // Search host by id
   int senderID = mote->getId();
-  Host *host;
+  Mote *host;
 
-  for (std::list<Host*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+  for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
   {
     if ((*it)->moteID == senderID)
       host = *it;
@@ -340,12 +347,14 @@ void World::releaseHost(RadioDriver* mote)
   // decrease count of in-transmission-range signal
   for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
       it != host->moteIDWithinTransmissionRange.end(); it++)
-    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+    // WSN consider host incoming signal
+    ;
 
   // decrease count of only-in-collision-range signal
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
-    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+    // WSN consider host incoming signal
+    ;
 
   // draw range
   if (ANNOTATE)
@@ -355,9 +364,17 @@ void World::releaseHost(RadioDriver* mote)
 }
 
 /*
+ * a mote sudden listens
+ */
+void World::suddenBeginListening(RadioDriver *mote)
+{
+// WSN consider all incoming message to note incomplete
+}
+
+/*
  * a mote stop listening
  */
-void World::stopListening(RadioDriver* mote)
+void World::suddenStopListening(RadioDriver* mote)
 {
   // Receiver ID
   int recverID = mote->getId();
@@ -369,14 +386,6 @@ void World::stopListening(RadioDriver* mote)
 }
 
 /*
- * a mote sudden listens
- */
-void World::suddenListening(RadioDriver *mote)
-{
-// WSN consider all incoming message to note incomplete
-}
-
-/*
  * register on-air signal
  */
 void World::considerSignal(mySignal* signal)
@@ -385,14 +394,17 @@ void World::considerSignal(mySignal* signal)
   int recverID = signal->radioRecverID;
 
   // increase incoming signal
-  (check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal++;
+  // WSN consider host incoming signal
+  ;
 
   // Incomplete message
   if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->status != LISTENING)
     signal->setIncompleted();
 
   // consider interfere signal at receiver
-  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal > 1)
+  // WSN consider host incoming signal
+  ;
+  if (true)
   {
     // from this host signal
     signal->setInterferred();
@@ -402,6 +414,21 @@ void World::considerSignal(mySignal* signal)
       if ((*it)->radioRecverID == recverID)
         (*it)->setInterferred();
   }
+}
+
+/*
+ * WSN what the fuck ???
+ */
+void World::checkCCAResult()
+{
+}
+
+/*
+ * check if channel is free at location of this radio driver
+ */
+bool World::isFreeChannel(RadioDriver* mote)
+{
+  return false; // WSN ???
 }
 
 /*

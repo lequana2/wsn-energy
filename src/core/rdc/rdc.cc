@@ -8,6 +8,7 @@
 
 #include <rdc.h>
 #include "packet_m.h"
+#include "count.h"
 
 #ifndef CONTIKI_MAC_REDUNDANCY
 #define CONTIKI_MAC_REDUNDANCY 1
@@ -89,7 +90,7 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
 
       // send to lower
       sendMessageToLower(buffer->dup());
-      sendCommand(RDC_SEND);
+      sendCommand(RDC_TRANSMIT);
 
       break;
     } /* Data */
@@ -126,13 +127,14 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
     {
       Frame *frame = check_and_cast<Frame*>(packet);
 
-      // WSN consider ACK or not
+      // not an ACK, packet must be ICMP (broadcast) or data (unicast)
       if (!frame->getIsACK())
       {
         // Check MAC address
         int recverMacID = frame->getRecverMacAddress();
         int senderMacID = frame->getSenderMacAddress();
 
+        // unicast + wrong MAC address
         if (recverMacID != 0 && recverMacID != this->getParentModule()->getModuleByPath(".mac")->getId())
         {
           // lost packet (! broadcast and wrong mac address) dismiss
@@ -146,7 +148,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           // search through neighbor list
           for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
           {
-            // if found
+            // if neighbor in MAC-IP table
             if ((*it)->senderID == senderMacID)
             {
               isFound = true;
@@ -167,7 +169,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
             }
           }
 
-          // if not found
+          // if neighbor not in MAC-IP table, create new
           if (!isFound)
           {
             Neighbor *neighbor = new Neighbor;
@@ -180,6 +182,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           }
         }
       }
+      // is ACK
       else
       {
         // WSN consider ACK, delete before cancel ?
@@ -214,39 +217,46 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
         case PHY_TX_OK: /* callback after transmitting */
         {
-          // consider just sends broadcast/unicast data
+          // consider just sends broadcast data
           if (isSendingBroadcast)
           {
             // consider counter
             if (++counter < CONTIKI_MAC_REDUNDANCY)
             {
+              // WSN hack need implementing duty cycling here
               sendMessageToLower(buffer->dup());
-              sendCommand(RDC_SEND);
+              sendCommand(RDC_TRANSMIT);
             }
-            // WSN hack
+            // hack
             else
             {
-              // consider just send DIO
-              if ((check_and_cast<IpPacket*>(buffer->getEncapsulatedPacket()))->getMessageCode() == NET_ICMP_RPL
-                  && (check_and_cast<IpPacket*>(buffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIO)
-                sendResult(NET_DIO_SENT);
+              // broadcast message always succeed !!!
               sendResult(RDC_SEND_OK);
+              on();
               delete buffer;
             }
           }
-          // WSN consider just send data/ack
-          // WSN need duty cycling trigger here
+          // WSN consider just send unicast (data/ack)
           else
           {
             if (++counter < CONTIKI_MAC_REDUNDANCY)
             {
+              // WSN hack need implementing duty cycling here
               sendMessageToLower(buffer->dup());
-              sendCommand(RDC_SEND);
+              sendCommand(RDC_TRANSMIT);
             }
-            // WSN hack
             else
             {
-              sendResult(RDC_SEND_NO_ACK);
+              // WSN hack, given the TX range 100%, ACK only lost if the sender node energy is too low
+              if (check_and_cast<Count*>(
+                  simulation.getModule(
+                      check_and_cast<IpPacket*>(this->buffer->getEncapsulatedPacket())->getRecverIpAddress())->getModuleByPath(
+                      "^.count"))->residualEnergy == 0)
+                sendResult(RDC_SEND_NO_ACK);
+              else
+                sendResult(RDC_SEND_OK);
+
+              on();
               delete buffer;
             }
           }

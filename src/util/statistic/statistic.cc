@@ -1,22 +1,15 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ *  created on : Mar 5, 2014
+ *      author : Mr.Quan LE
+ *      email  : lequana2@gmail.com
+ *
+ *  functioning: refer to statistic.h
+ */
 
 #include "statistic.h"
 #include "energest.h"
 #include "count.h"
-#include "mac.h"
+#include "ipv6.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -36,7 +29,8 @@ void Statistic::initialize()
   numSensorEnergyCount = 0;
   numNetworkEnergy = 0;
   numTotalEnergy = 0;
-  numTotalDelay = 0;
+  numTotalDelayApp = 0;
+  numTotalDelayNet = 0;
   numAppSend = 0;
   numAppRecv = 0;
   numNetSend = 0;
@@ -51,6 +45,7 @@ void Statistic::initialize()
   numDIOsent = 0;
   numIPinter = 0;
   numIPtrans = 0;
+  numLiveNode = getParentModule()->par("numberClient").doubleValue();
 
   // register signal
   sigNetworkEnergyCount = registerSignal("networkEnergyCount");
@@ -58,7 +53,8 @@ void Statistic::initialize()
   sigNetworkEnergy = registerSignal("networkEnergy");
   sigSensorEnergy = registerSignal("sensorEnergy");
   sigTotalEnergy = registerSignal("totalEnergy");
-  sigTotalDelay = registerSignal("totalDelay");
+  sigTotalDelayApp = registerSignal("totalDelayApp");
+  sigTotalDelayNet = registerSignal("totalDelayNet");
   sigAppSend = registerSignal("appSend");
   sigAppRecv = registerSignal("appRecv");
   sigNetSend = registerSignal("netSend");
@@ -69,20 +65,18 @@ void Statistic::initialize()
   sigRadioRecv = registerSignal("radioRecv");
   sigTimeIdle = registerSignal("timeIdle");
   sigTimeListen = registerSignal("timeListen");
-  sigLifeTime = registerSignal("lifeTime");
   sigTimeTrans = registerSignal("timeTrans");
   sigNumDIOsent = registerSignal("dioSent");
   sigNumIPinter = registerSignal("ipInter");
   signumIPtrans = registerSignal("ipTrans");
+  sigLifeTimeRoute = registerSignal("lifeTimeRoute");
+  sigLifeTimePercentage = registerSignal("lifeTimePercentage");
 
-  // Record total sensor energy for first time
-  pollTotalSensorEnergy();
-  pollTotalSensorEnergyCount();
+  // start polling
+  if (getParentModule()->par("isPolling").boolValue())
+    scheduleAt(simTime(), polling);
 
-  if (getParentModule()->par("isPolling").doubleValue())
-    scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
-
-  if (getParentModule()->par("isPollingCount").doubleValue())
+  if (getParentModule()->par("isPollingCount").boolValue())
     scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), pollingCount);
 }
 
@@ -112,7 +106,7 @@ void Statistic::finish()
   pollTotalSensorEnergy();
 
   // Power status of remaining sensor(s)
-  cModule *wsn = getModuleByPath("WSN");
+  cModule *wsn = getModuleByPath("^");
   int numberClient = wsn->par("numberClient").longValue();
   int shitRemainingInBuffer = 0;
 
@@ -138,7 +132,7 @@ void Statistic::finish()
     emit(sigSensorEnergyCount, numSensorEnergyCount);
 
     shitRemainingInBuffer +=
-        (check_and_cast<MACdriver*>(wsn->getSubmodule("client", i)->getSubmodule("mac")))->buffer.size();
+        (check_and_cast<IPv6*>(wsn->getSubmodule("client", i)->getSubmodule("net")))->ipPacketQueue.size();
   }
 
   emit(sigTimeIdle, timeIdle);
@@ -146,7 +140,7 @@ void Statistic::finish()
   emit(sigTimeListen, timeListen);
   emit(sigTotalEnergy, numTotalEnergy);
 
-  // WSN just DEBUG
+  // WSN debug
   emit(sigRadioRecv, shitRemainingInBuffer);
   emit(sigRadioSend, timeIdle + timeTrans + timeListen);
 
@@ -187,10 +181,11 @@ void Statistic::pollTotalSensorEnergy()
   emit(sigNetworkEnergy, numNetworkEnergy);
 }
 
-void Statistic::packetRateTracking(int type)
+void Statistic::registerStatistic(int type)
 {
   Enter_Method_Silent
-  ("packetRateTracking");
+  ("registerStatistic");
+
   switch (type)
   {
     case APP_SEND:
@@ -232,18 +227,38 @@ void Statistic::packetRateTracking(int type)
       break;
     case LIFE_TIME_DECREASE_SERVER_NEIGHBOR:
       this->numServerNeighbor--;
-      std::cout << "Dead neighbor: " << numServerNeighbor << endl;
+//      std::cout << "Dead neighbor: " << numServerNeighbor << endl;
       if (this->numServerNeighbor == 0)
-        emit(sigLifeTime, simTime().dbl());
+        emit(sigLifeTimeRoute, simTime().dbl());
+      break;
+    case LIFE_TIME_PERCENTAGE_DEAD_NODE:
+      this->numLiveNode--;
+      // WSN hack
+      if (this->numLiveNode < 137 && this->numLiveNode > -1) // 70 % deadnode -> life time
+      {
+        emit(sigLifeTimePercentage, simTime().dbl());
+        this->numLiveNode = -1;
+      }
       break;
   }
 }
 
-void Statistic::packetDelayTracking(double delayTime)
+void Statistic::registerStatisticDelay(int type, double delayTime)
 {
   Enter_Method_Silent
-  ("packetDelayTracking");
-  numTotalDelay += delayTime;
-  emit(sigTotalDelay, numTotalDelay);
+  ("registerStatisticDelay");
+
+  switch (type)
+  {
+    case DELAY_APP_LAYER: /* end to end delay */
+      numTotalDelayApp += delayTime;
+      emit(sigTotalDelayApp, numTotalDelayApp);
+      break;
+
+    case DELAY_NET_LAYER: /* hop to hop delay */
+      numTotalDelayNet += delayTime;
+      emit(sigTotalDelayNet, numTotalDelayNet);
+      break;
+  }
 }
 }

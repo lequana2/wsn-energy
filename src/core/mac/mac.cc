@@ -14,6 +14,11 @@
 #define DEBUG 1
 #endif
 
+#ifndef IFS
+#define IFS
+#define SIFS 0.000192 // 12 symbols
+#endif
+
 namespace wsn_energy {
 
 void MACdriver::processSelfMessage(cPacket* packet)
@@ -24,24 +29,11 @@ void MACdriver::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case MAC_CHECK_BUFFER: /* Check buffer */
+        case MAC_EXPIRE_IFS: /* expire IFS */
         {
-          if (DEBUG)
-            ev << "SEND (MAC) remaining: " << this->buffer.size() << endl;
-
-          if (this->buffer.size() == 0) // empty, do nothing, reset flag
-          {
-            isHavingPendingPacket = false;
-          }
-          else if (!isHavingPendingPacket) // do not have any pending packet
-          {
-            this->frameBuffer = this->buffer.front(); // get message to be sent
-            deferPacket(); // begin sending
-
-            isHavingPendingPacket = true;
-          }
+          sendResult(MAC_FINISH_PHASE);
           break;
-        } /* Check buffer */
+        } /* expire IFS*/
 
         case CHANNEL_CCA_REQUEST: /* perform CCA*/
         {
@@ -67,34 +59,34 @@ void MACdriver::processSelfMessage(cPacket* packet)
 void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
   /* only process data packet */
+
   /* create new buffer */
-  Frame *frame = new Frame;
-  frame->setKind(DATA);
-  frame->setByteLength(MAC_HEADER_FOOTER_LEN);
+  frameBuffer = new Frame;
+  frameBuffer->setKind(DATA);
+  frameBuffer->setByteLength(MAC_HEADER_FOOTER_LEN);
 
   /*  meta data */
-  frame->setNumberTransmission(0);
+  frameBuffer->setNumberTransmission(0);
 
-  /* MAC address */
-  frame->setSenderMacAddress(this->getId());
+  /* WSN hack */
+  frameBuffer->setSenderMacAddress(this->getId());
+
+  /* MAC - IP address */
   if (check_and_cast<IpPacket*>(packet)->getRecverIpAddress() == 0)
-    frame->setRecverMacAddress(0);
+    frameBuffer->setRecverMacAddress(0);
   else
-    frame->setRecverMacAddress(
+    frameBuffer->setRecverMacAddress(
         simulation.getModule(check_and_cast<IpPacket*>(packet)->getRecverIpAddress())->getParentModule()->getModuleByPath(
             ".mac")->getId());
 
   /* encapsulate */
-  frame->encapsulate((IpPacket*) packet);
+  frameBuffer->encapsulate((IpPacket*) packet);
 
-  /* insert into buffer */
-  this->buffer.push_back(frame);
-
-  /* check buffer */
-  selfTimer(0, MAC_CHECK_BUFFER);
+  /* backoff and CCA */
+  deferPacket();
 
   if (DEBUG)
-    ev << "Frame length: " << frame->getByteLength() << endl;
+    ev << "Frame length: " << frameBuffer->getByteLength() << endl;
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -106,18 +98,6 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
       receivePacket(check_and_cast<Frame*>(packet)); // received message
       break;
     } /* Data */
-
-    case COMMAND: /* Command */
-    {
-      switch (check_and_cast<Command*>(packet)->getNote())
-      {
-        default:
-          ev << "Unknown command" << endl;
-          break;
-      }
-      delete packet; // done command
-      break;
-    } /* Command */
 
     case RESULT: /* Result */
     {
@@ -135,46 +115,46 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* channel is busy */
 
-        case NET_DIO_SENT: /* just send DIO */
-        {
-          sendResult(NET_DIO_SENT);
-          break;
-        }/* just send DIO */
-
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
+          // consider just send DIO
+          if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getMessageCode() == NET_ICMP_RPL)
+          {
+            if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIO)
+              sendResult(NET_DIO_SENT);
+            else if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIS)
+              sendResult(NET_DIS_SENT);
+          }
+
+          selfTimer(SIFS, MAC_EXPIRE_IFS);
+
           delete this->frameBuffer;
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, MAC_CHECK_BUFFER);
-
           break;
-        } /* callback after sending */
+        } /* successful transmitting and receive ACK if needed */
 
-        case RDC_SEND_NO_ACK: /* transmitting but no ACK */
+        case RDC_SEND_NO_ACK:
+          /* transmitting unicast but no ACK received */
         {
           // WSN need considering dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
-          delete this->frameBuffer;
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, MAC_CHECK_BUFFER);
+          selfTimer(SIFS, MAC_EXPIRE_IFS);
 
+          delete this->frameBuffer;
           break;
         } /* callback after sending */
 
-        case RDC_SEND_FATAL: /* fatal error, abort message */
+        case RDC_SEND_FATAL:
+          /* fatal error, abort message */
         {
-          delete this->frameBuffer;
-          this->buffer.pop_front();
-          isHavingPendingPacket = false;
-          selfTimer(0, MAC_CHECK_BUFFER);
+          selfTimer(0, MAC_EXPIRE_IFS);
 
+          delete this->frameBuffer;
           break;
         } /* callback after sending */
 
-        case RDC_SEND_COL: /* busy radio, defer packet */
+        case RDC_SEND_COL:
+          /* busy radio, defer packet */
         {
           deferPacket();
           break;
@@ -198,9 +178,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 void MACdriver::sendPacket()
 {
   if (DEBUG)
-    ev << "SEND (MAC)" << endl;
+    ev << "READY & SEND (MAC)" << endl;
 
-  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(MAC_SEND));
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
 
   sendMessageToLower(frameBuffer);
 }
@@ -208,9 +188,9 @@ void MACdriver::sendPacket()
 void MACdriver::receivePacket(Frame* frameMac)
 {
   if (DEBUG)
-    ev << "RECV (MAC)" << endl;
+    ev << "RECEIVE (MAC)" << endl;
 
-  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->packetRateTracking(MAC_RECV));
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
 
   IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
   ipPacket->setKind(DATA);
