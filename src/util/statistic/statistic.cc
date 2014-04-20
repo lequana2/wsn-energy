@@ -43,6 +43,7 @@ void Statistic::initialize()
   timeListen = 0;
   timeTrans = 0;
   numDIOsent = 0;
+  numDISsent = 0;
   numIPinter = 0;
   numIPtrans = 0;
   numLiveNode = getParentModule()->par("numberClient").doubleValue();
@@ -67,6 +68,7 @@ void Statistic::initialize()
   sigTimeListen = registerSignal("timeListen");
   sigTimeTrans = registerSignal("timeTrans");
   sigNumDIOsent = registerSignal("dioSent");
+  sigNumDISsent = registerSignal("disSent");
   sigNumIPinter = registerSignal("ipInter");
   signumIPtrans = registerSignal("ipTrans");
   sigLifeTimeRoute = registerSignal("lifeTimeRoute");
@@ -214,6 +216,9 @@ void Statistic::registerStatistic(int type)
       break;
     case DIO_SENT:
       emit(sigNumDIOsent, ++numDIOsent);
+      break;
+    case DIS_SENT:
+      emit(sigNumDISsent, ++numDISsent);
       break;
     case IP_INTER:
       emit(sigNumIPinter, ++numIPinter);

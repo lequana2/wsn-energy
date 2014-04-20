@@ -156,6 +156,8 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         case RDC_SEND_COL:
           /* busy radio, defer packet */
         {
+          if (DEBUG)
+            std::cout << "PHY busy" << endl;
           deferPacket();
           break;
         } /* callback after sending */

@@ -64,9 +64,11 @@ simple Statistic
         @statistic[timeListen](title="Time listening: "; record=last);
 
 		@signal[dioSent](type="int");
+		@signal[disSent](type="int");
         @signal[ipInter](type="int");
         @signal[ipTrans](type="int");
         @statistic[dioSent](title="Number of DIO  send       : "; record=last);
+        @statistic[disSent](title="Number of DIS  send       : "; record=last);
         @statistic[ipInter](title="Number of ip forwarding   : "; record=last);
         @statistic[ipTrans](title="Number of ip transmitting : "; record=last);
 

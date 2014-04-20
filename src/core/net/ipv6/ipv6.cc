@@ -34,7 +34,14 @@ void IPv6::initialize()
 void IPv6::finish()
 {
   // WSN Clear queue !!!
-  std::cout << "SEND (NET) remaining: " << this->ipPacketQueue.size() << " @ " << this->getId() << endl;
+  std::cout << "SEND (NET) remaining: " << this->ipPacketQueue.size() << " @ " << this->getParentModule()->getFullName()
+      << endl;
+
+  for (std::list<IpPacket*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
+    cancelAndDelete(*it);
+  this->ipPacketQueue.clear();
+
+  this->rpl->finish();
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
@@ -171,16 +178,22 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             // Energy calculated by counting bits
             // WSN what if dead while receiving ???
             if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
+            {
               check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
                   check_and_cast<IpPacket*>(packet)->getBitLength());
+              check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
+                  simTime().dbl() - check_and_cast<IpPacket*>(packet)->getTime()); // statistics
+            }
 
             sendMessageToUpper(packet->decapsulate()); // Forward to upper layer
           }
+
           delete packet;
           break;
         } /* forward data */
 
-        case NET_ICMP_RPL: /* RPL ICMP */
+        case NET_ICMP_RPL:
+          /* RPL ICMP */
         {
           // Energy calculated by counting bits
           if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
@@ -345,6 +358,7 @@ void IPv6::unicast(IpPacket *ipPacket)
     return;
   }
 
+  ipPacket->setTime(simTime().dbl());
   ipPacket->setKind(DATA);
   ipPacket->setSenderIpAddress(this->getId());
   // the recver address will be decided just intime

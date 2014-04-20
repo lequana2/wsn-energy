@@ -22,13 +22,14 @@
 #define RADIO_SEND 6
 #define RADIO_RECV 7
 #define DIO_SENT   8
-#define IP_INTER   9
-#define IP_TRANS   10
-#define LIFE_TIME_INCREASE_SERVER_NEIGHBOR  11
-#define LIFE_TIME_DECREASE_SERVER_NEIGHBOR  12
-#define LIFE_TIME_PERCENTAGE_DEAD_NODE      13
-#define DELAY_APP_LAYER 14
-#define DELAY_NET_LAYER 15
+#define DIS_SENT   9
+#define IP_INTER   10
+#define IP_TRANS   11
+#define LIFE_TIME_INCREASE_SERVER_NEIGHBOR  12
+#define LIFE_TIME_DECREASE_SERVER_NEIGHBOR  13
+#define LIFE_TIME_PERCENTAGE_DEAD_NODE      14
+#define DELAY_APP_LAYER 15
+#define DELAY_NET_LAYER 16
 #endif
 
 namespace wsn_energy {
@@ -97,10 +98,12 @@ class Statistic : public cSimpleModule
 
     /* number of each packet type in net layer */
     int numDIOsent;
+    int numDISsent;
     int numIPinter;
     int numIPtrans;
 
     simsignal_t sigNumDIOsent;
+    simsignal_t sigNumDISsent;
     simsignal_t sigNumIPinter;
     simsignal_t signumIPtrans;
 

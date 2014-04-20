@@ -425,6 +425,8 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
  * 	int messageCode;	
  * 	int icmpCode;       
  * 
+ *     double time;  
+ * 
  *     int senderIpAddress; 
  *     int recverIpAddress; 
  * }
@@ -435,6 +437,7 @@ class IpPacket : public ::cPacket
   protected:
     int messageCode_var;
     int icmpCode_var;
+    double time_var;
     int senderIpAddress_var;
     int recverIpAddress_var;
 
@@ -459,6 +462,8 @@ class IpPacket : public ::cPacket
     virtual void setMessageCode(int messageCode);
     virtual int getIcmpCode() const;
     virtual void setIcmpCode(int icmpCode);
+    virtual double getTime() const;
+    virtual void setTime(double time);
     virtual int getSenderIpAddress() const;
     virtual void setSenderIpAddress(int senderIpAddress);
     virtual int getRecverIpAddress() const;

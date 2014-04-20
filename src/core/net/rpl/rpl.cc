@@ -77,6 +77,14 @@ void RPL::rpl_set_root()
   sendDIO();
 }
 
+void RPL::finish()
+{
+  if (dioTimer->isSelfMessage())
+    this->net->cancelAndDelete(dioTimer);
+  if (disTimer->isSelfMessage())
+    this->net->cancelAndDelete(disTimer);
+}
+
 void RPL::sendDIO()
 {
   ev << "Broadcast DIO" << endl;
@@ -111,6 +119,8 @@ void RPL::sendDIS()
   dis->setByteLength(DIS_LEN);
 
   net->multicast(dis);
+
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIS_SENT));
 
   this->isDISsent = false; // keep track of lastest DIS
 }
@@ -437,6 +447,7 @@ void RPL::processDIS(DIS* msg)
 
 void RPL::purgeRoute()
 {
+  // remove default route and update preffered parent
   this->rplDag.parentList.remove(this->rplDag.preferredParent);
   this->updatePrefferredParent();
 
@@ -446,7 +457,10 @@ void RPL::purgeRoute()
     // fast-local repair
     if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag.siblingList.size() != 0)
     {
+      // Self increase rank
       this->rplDag.rank++;
+
+      // Debate all siblings in parent list
       for (std::list<RPL_neighbor*>::iterator it = this->rplDag.siblingList.begin();
           it != this->rplDag.siblingList.end(); it++)
         this->rplDag.parentList.push_back(*it);

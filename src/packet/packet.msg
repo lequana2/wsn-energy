@@ -150,6 +150,8 @@ packet IpPacket{
 	int messageCode;	// type message (Data, ICMP)
 	int icmpCode;       // ICMP type
 
+    double time;  // meta-data: timestamp upon sending
+
     int senderIpAddress; // sender IP address
     int recverIpAddress; // recver IP address
 }
