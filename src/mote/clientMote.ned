@@ -42,22 +42,36 @@ module ClientMote
         int trRange @unit(m);
         int coRange @unit(m);
 
-        @display("p=$axisX,$axisY;i=misc/node;is=l");
+        @display("p=$axisX,$axisY;i=misc/node2;is=l");
 
     submodules:
-        app: <appType> like iApp;
-        tra: <traType> like iTransport;
-        net: <netType> like iNet;
-        mac: <macType> like iMAC;
-        rdc: <rdcType> like iRDC;
+        app: <appType> like iApp {
+            @display("p=150,50");
+        }
+        tra: <traType> like iTransport {
+            @display("p=150,150");
+        }
+        net: <netType> like iNet {
+            @display("p=150,250");
+        }
+        mac: <macType> like iMAC {
+            @display("p=150,350");
+        }
+        rdc: <rdcType> like iRDC {
+            @display("p=150,450");
+        }
         radio: <radioType> like iRadio {
             parameters:
                 trRange = trRange;
                 coRange = coRange;
+                @display("p=150,550");
         }
-
-        energest: Energest;
-        count: Count;
+        energest: Energest {
+            @display("p=50,50");
+        }
+        count: Count {
+            @display("p=50,125");
+        }
     connections allowunconnected:
         app.lowerOut --> tra.upperIn;
         app.lowerIn <-- tra.upperOut;

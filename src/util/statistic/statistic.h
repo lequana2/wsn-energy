@@ -28,8 +28,9 @@
 #define LIFE_TIME_INCREASE_SERVER_NEIGHBOR  12
 #define LIFE_TIME_DECREASE_SERVER_NEIGHBOR  13
 #define LIFE_TIME_PERCENTAGE_DEAD_NODE      14
-#define DELAY_APP_LAYER 15
-#define DELAY_NET_LAYER 16
+#define LIFE_TIME_FIRST_DEAD_NODE           15 // WSN need to implement
+#define DELAY_APP_LAYER 16
+#define DELAY_NET_LAYER 17
 #endif
 
 namespace wsn_energy {

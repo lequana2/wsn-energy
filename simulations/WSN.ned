@@ -27,6 +27,7 @@ network WSN
 {
     parameters:
         int timeLimit;
+        int setupDelay;
 
         int topology;
 

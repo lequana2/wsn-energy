@@ -91,16 +91,17 @@ void RPL::sendDIO()
 
   DIO *dio = new DIO();
 
-  dio->setMessageCode(NET_ICMP_RPL);
-  dio->setIcmpCode(NET_ICMP_DIO);
+  // WSN
+//  dio->setMessageCode(NET_ICMP_RPL);
+//  dio->setIcmpCode(NET_ICMP_DIO);
   dio->setVersion(this->rplDag.version);
   dio->setRank(this->rplDag.rank);
-  dio->setByteLength(DIO_LEN);
+//  dio->setByteLength(DIO_LEN);
 
   dio->setSelfEnergy(
       (check_and_cast<Energest*>(this->net->getParentModule()->getModuleByPath(".energest")))->energestRemaining);
 
-  net->multicast(dio);
+//  net->multicast(dio);
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
 
@@ -114,11 +115,12 @@ void RPL::sendDIS()
 
   DIS *dis = new DIS();
 
-  dis->setMessageCode(NET_ICMP_RPL);
-  dis->setIcmpCode(NET_ICMP_DIS);
-  dis->setByteLength(DIS_LEN);
-
-  net->multicast(dis);
+  // WSN
+//  dis->setMessageCode(NET_ICMP_RPL);
+//  dis->setIcmpCode(NET_ICMP_DIS);
+//  dis->setByteLength(DIS_LEN);
+//
+//  net->multicast(dis);
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIS_SENT));
 
@@ -223,7 +225,8 @@ void RPL::handleDISTimer()
 
 void RPL::processICMP(IpPacket *packet)
 {
-  switch (packet->getIcmpCode())
+//  switch (packet->getIcmpCode())
+  switch(1)
   {
     case NET_ICMP_DIO: /* receiving DIO */
     {
@@ -257,7 +260,8 @@ void RPL::processDIO(DIO* dio)
 
   // Consider neighborID
   RPL_neighbor *neighbor = new RPL_neighbor();
-  neighbor->neighborID = dio->getSenderIpAddress();
+  // WSN
+//  neighbor->neighborID = dio->getSenderIpAddress();
   neighbor->neighborRank = dio->getRank();
   neighbor->nodeQuality.energy = dio->getSelfEnergy();
 

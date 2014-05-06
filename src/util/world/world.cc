@@ -113,8 +113,8 @@ void World::arrangeMotes()
       case 2:/* Line */
       {
         step++;
-        x = 150;
-        y = step * 30 + 150;
+        x = 240;
+        y = 30;
         break;
       } /* Line */
     }

@@ -11,9 +11,10 @@
 #include "statistic.h"
 
 //#define MAX 900
+#define MAX 2
 
-#ifndef SET_UP_DELAY_TIME
-#define SET_UP_DELAY_TIME 65
+#ifndef DEBUG
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -30,20 +31,20 @@ void Client::initialize()
     case 1: /* one event */
     {
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        selfTimer(SET_UP_DELAY_TIME + 10, APP_SENSING_FLAG);
+        selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 10, APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        selfTimer(SET_UP_DELAY_TIME + 20, APP_SENSING_FLAG);
+        selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 20, APP_SENSING_FLAG);
 
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
-        selfTimer(SET_UP_DELAY_TIME + 30, APP_SENSING_FLAG);
+        selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 30, APP_SENSING_FLAG);
 
       break;
     } /* one event */
 
     case 2: /* ignite periodically */
     {
-      selfTimer(SET_UP_DELAY_TIME, RPL_SET_UP_DELAY);
+      selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue(), RPL_SET_UP_DELAY);
       break;
     } /* ignite periodically */
 
@@ -73,7 +74,7 @@ void Client::processSelfMessage(cPacket* packet)
           data->setKind(DATA);
           data->setTime(simTime().dbl());
 
-          // WSN data to send
+          // hack data to send
           char buf[30];
           sprintf(buf, "Hello %d from %d", numberOfPacket, this->getId());
           data->setValue(buf);
@@ -91,7 +92,7 @@ void Client::processSelfMessage(cPacket* packet)
 #else
             this->numberOfPacket++;
 #endif
-            newData();
+              newData();
           }
 
           break; /* new data */
@@ -135,7 +136,8 @@ void Client::newData()
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
     time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
 
-//  this->getParentModule()->bubble("Data");
+  if (DEBUG)
+    this->getParentModule()->bubble("Data");
 
   selfTimer(time, APP_SENSING_FLAG);
 }

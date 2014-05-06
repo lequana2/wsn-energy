@@ -15,7 +15,7 @@
 #define MAX_BACKOFF_TRANSMISSION      3 // 3 tries per frame
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 namespace wsn_energy {

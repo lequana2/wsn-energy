@@ -18,7 +18,8 @@ Define_Module(Server);
 
 void Server::initialize()
 {
-  selfTimer(0, RPL_CONSTRUCT);
+  // WSN DEBUG
+//  selfTimer(0, RPL_CONSTRUCT);
 
   // create new session file
   std::ofstream myfile;

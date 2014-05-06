@@ -34,8 +34,8 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 
       UdpPacket *udpPacket = new UdpPacket;
       udpPacket->setKind(DATA);
-      udpPacket->setSourceIpAddress(getParentModule()->getModuleByPath(".net")->getId());
-      udpPacket->setSinkIpAddress(getModuleByPath("^.^.server.net")->getId());
+//      udpPacket->setSourceIpAddress(getParentModule()->getModuleByPath(".net")->getId());
+//      udpPacket->setSinkIpAddress(getModuleByPath("^.^.server.net")->getId());
 
       udpPacket->encapsulate(packet);
 
@@ -70,20 +70,20 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 void UDP::processLowerLayerMessage(cPacket* packet)
 {
   // Has reached destination
-  if (getModuleByPath("^.net")->getId() == check_and_cast<UdpPacket*>(packet)->getSinkIpAddress())
-  {
-    ev << "Arrived base station !!!" << endl;
-    sendMessageToUpper(packet->decapsulate());
-
-    delete packet;
-  }
-  // Acts as intermediate node
-  else
-  {
-    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(IP_INTER));
-
-    sendMessageToLower(packet);
-  }
+//  if (getModuleByPath("^.net")->getId() == check_and_cast<UdpPacket*>(packet)->getSinkIpAddress())
+//  {
+//    ev << "Arrived base station !!!" << endl;
+//    sendMessageToUpper(packet->decapsulate());
+//
+//    delete packet;
+//  }
+//  // Acts as intermediate node
+//  else
+//  {
+//    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(IP_INTER));
+//
+//    sendMessageToLower(packet);
+//  }
 }
 
 } //namespace

@@ -63,21 +63,21 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   /* create new buffer */
   frameBuffer = new Frame;
   frameBuffer->setKind(DATA);
-  frameBuffer->setByteLength(MAC_HEADER_FOOTER_LEN);
+  frameBuffer->setByteLength(frameBuffer->getHeaderLength());
 
   /*  meta data */
   frameBuffer->setNumberTransmission(0);
 
   /* WSN hack */
-  frameBuffer->setSenderMacAddress(this->getId());
+//  frameBuffer->setSenderMacAddress(this->getId());
 
   /* MAC - IP address */
-  if (check_and_cast<IpPacket*>(packet)->getRecverIpAddress() == 0)
-    frameBuffer->setRecverMacAddress(0);
-  else
-    frameBuffer->setRecverMacAddress(
-        simulation.getModule(check_and_cast<IpPacket*>(packet)->getRecverIpAddress())->getParentModule()->getModuleByPath(
-            ".mac")->getId());
+//  if (check_and_cast<IpPacket*>(packet)->getRecverIpAddress() == 0)
+//    frameBuffer->setRecverMacAddress(0);
+//  else
+//    frameBuffer->setRecverMacAddress(
+//        simulation.getModule(check_and_cast<IpPacket*>(packet)->getRecverIpAddress())->getParentModule()->getModuleByPath(
+//            ".mac")->getId());
 
   /* encapsulate */
   frameBuffer->encapsulate((IpPacket*) packet);
@@ -118,13 +118,13 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
           // consider just send DIO
-          if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getMessageCode() == NET_ICMP_RPL)
-          {
-            if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIO)
-              sendResult(NET_DIO_SENT);
-            else if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIS)
-              sendResult(NET_DIS_SENT);
-          }
+//          if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getMessageCode() == NET_ICMP_RPL)
+//          {
+//            if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIO)
+//              sendResult(NET_DIO_SENT);
+//            else if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIS)
+//              sendResult(NET_DIS_SENT);
+//          }
 
           selfTimer(SIFS, MAC_EXPIRE_IFS);
 

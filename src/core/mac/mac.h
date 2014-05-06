@@ -13,6 +13,16 @@
 
 namespace wsn_energy {
 
+class shortAddress802154
+{
+    char octet[2];
+};
+
+class longAddress802154
+{
+    char octect[8];
+};
+
 class MACdriver : public myModule
 {
   protected:
@@ -30,6 +40,13 @@ class MACdriver : public myModule
 
     /* accept input from lowerlayer */
     virtual void receivePacket(Frame*);
+
+  public:
+    // 802.15.4 self address
+    int linkLocalAddress;
+
+    // 802.15.4 default router address
+    int defaultRoute;
 };
 
 } /* namespace wsn_energy */

@@ -14,6 +14,10 @@
 
 namespace wsn_energy {
 
+class IPv6Address{
+    char octet[16];
+};
+
 class IPv6 : public myModule
 {
   private:
