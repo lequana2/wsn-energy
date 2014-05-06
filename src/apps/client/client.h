@@ -11,21 +11,30 @@
 
 #include <myModule.h>
 
+#ifndef UDP_PORT
+#define UDP_PORT
+#define UDP_SERVER_PORT 5678 // UDP port
+#define UDP_CLIENT_PORT 8765 // UDP port
+#endif
+
 namespace wsn_energy {
 
 class Client : public myModule
 {
   private:
-    int numberOfPacket;
+    int packetOrder;
     virtual void newData();
 
   protected:
     void initialize();
 
   public:
-    virtual void processSelfMessage(cPacket*);
-    virtual void processUpperLayerMessage(cPacket*);
-    virtual void processLowerLayerMessage(cPacket*);
+    void processSelfMessage(cPacket*);
+    void processUpperLayerMessage(cPacket*);
+    void processLowerLayerMessage(cPacket*);
+
+    // Send message API using UDP/IP
+    void sendMessage(char*,int,int,int);
 };
 
 }

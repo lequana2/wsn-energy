@@ -34,12 +34,12 @@ void IPv6::initialize()
   this->pendingPacket = NULL;
 
   // set up delay
-  if (!RPL_MAINTAIN)
-    selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 1, NET_TIMER_DIS);
+//  if (!RPL_MAINTAIN)
+//    selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 1, NET_TIMER_DIS);
 
   // WSN just for test
-  if (getId() == simulation.getModuleByPath("client[0].net")->getId())
-    selfTimer(0, 190);
+//  if (getId() == simulation.getModuleByPath("client[0].net")->getId())
+//    selfTimer(0, 190);
 }
 
 void IPv6::finish()

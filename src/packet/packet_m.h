@@ -1102,10 +1102,10 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
  * 
  * 
  * 
- * 
- * 
- * 
- * 
+ * 	short sourcePort;      
+ * 	short destinationPort; 
+ * 	short length;          
+ * 	short checksum;        
  * 
  * 
  * 
@@ -1151,6 +1151,10 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
 class UdpPacket : public ::cPacket
 {
   protected:
+    short sourcePort_var;
+    short destinationPort_var;
+    short length_var;
+    short checksum_var;
 
   private:
     void copy(const UdpPacket& other);
@@ -1169,6 +1173,14 @@ class UdpPacket : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
+    virtual short getSourcePort() const;
+    virtual void setSourcePort(short sourcePort);
+    virtual short getDestinationPort() const;
+    virtual void setDestinationPort(short destinationPort);
+    virtual short getLength() const;
+    virtual void setLength(short length);
+    virtual short getChecksum() const;
+    virtual void setChecksum(short checksum);
 };
 
 inline void doPacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimPack(b);}
@@ -1181,6 +1193,9 @@ inline void doUnpacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimUnpack(b);}
  *     double time;  		
  *     int payloadLength;  
  *     
+ *     int destinationPort; 	  
+ *     int destinationIPAddress; 
+ *     
  * 	string value; 		
  * }
  * </pre>
@@ -1190,6 +1205,8 @@ class Data : public ::cPacket
   protected:
     double time_var;
     int payloadLength_var;
+    int destinationPort_var;
+    int destinationIPAddress_var;
     opp_string value_var;
 
   private:
@@ -1213,6 +1230,10 @@ class Data : public ::cPacket
     virtual void setTime(double time);
     virtual int getPayloadLength() const;
     virtual void setPayloadLength(int payloadLength);
+    virtual int getDestinationPort() const;
+    virtual void setDestinationPort(int destinationPort);
+    virtual int getDestinationIPAddress() const;
+    virtual void setDestinationIPAddress(int destinationIPAddress);
     virtual const char * getValue() const;
     virtual void setValue(const char * value);
 };

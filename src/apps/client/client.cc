@@ -17,13 +17,32 @@
 #define DEBUG 0
 #endif
 
+// WSN set global address
+//
+// SELF ADDRESS
+// uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
+//  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+//  uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
+//
+// SERVER ADDRESS
+//#if 0
+///* Mode 1 - 64 bits inline */
+//   uip_ip6addr(&server_ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 1);
+//#elif 1
+///* Mode 2 - 16 bits inline */
+//  uip_ip6addr(&server_ipaddr, 0xaaaa, 0, 0, 0, 0, 0x00ff, 0xfe00, 1);
+//#else
+///* Mode 3 - derived from server link-local (MAC) address */
+//  uip_ip6addr(&server_ipaddr, 0xaaaa, 0, 0, 0, 0x0250, 0xc2ff, 0xfea8, 0xcd1a); //redbee-econotag
+//#endif
+
 namespace wsn_energy {
 
 Define_Module(Client);
 
 void Client::initialize()
 {
-  this->numberOfPacket = 0;
+  this->packetOrder = 0;
 
   /* Contiki test scheme */
   switch ((int) getModuleByPath("^.^")->par("scheme").doubleValue())
@@ -49,7 +68,8 @@ void Client::initialize()
     } /* ignite periodically */
 
     default:
-      ev << "Just construct " << endl;
+      if (DEBUG)
+        ev << "Just construct " << endl;
       break;
   }
 }
@@ -70,27 +90,26 @@ void Client::processSelfMessage(cPacket* packet)
 
         case APP_SENSING_FLAG: /* new data */
         {
-          Data *data = new Data;
-          data->setKind(DATA);
-          data->setTime(simTime().dbl());
-
-          // hack data to send
+          // create data to send
           char buf[30];
-          sprintf(buf, "Hello %d from %d", numberOfPacket, this->getId());
-          data->setValue(buf);
-          data->setByteLength(8);
+          int len = sprintf(buf, "Hello %d from %d", packetOrder, this->getId());
 
-          sendMessageToLower(data);
+          // hack port, address
+          int destinationPort = UDP_SERVER_PORT;
+          int destinationAddress = simulation.getModuleByPath("server.net")->getId();
+
+          sendMessage(buf, len, destinationPort, destinationAddress);
 
           /* End to end statistics */
           (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(APP_SEND));
 
+          // Timer for next message
           if ((int) getModuleByPath("^.^")->par("scheme").doubleValue() == 2)
           {
 #ifdef MAX
-            if (this->numberOfPacket++ < MAX)  // control maximum number
+            if (this->packetOrder++ < MAX)  // control maximum number
 #else
-            this->numberOfPacket++;
+            this->packetOrder++;
 #endif
               newData();
           }
@@ -121,7 +140,6 @@ void Client::processUpperLayerMessage(cPacket*)
 
 void Client::processLowerLayerMessage(cPacket*)
 {
-  return;
 }
 
 void Client::newData()
@@ -134,12 +152,33 @@ void Client::newData()
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
-    time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
+//    time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
+    time = intuniform(0, 1000000) / 1000000.0 * sendInterval;
 
   if (DEBUG)
     this->getParentModule()->bubble("Data");
 
   selfTimer(time, APP_SENSING_FLAG);
+}
+
+void Client::sendMessage(char *value, int len, int destinationPort, int destinationAddress)
+{
+  // intialization
+  Data *data = new Data;
+  data->setKind(DATA);
+
+  // meta-data
+  data->setTime(simTime().dbl());
+  data->setPayloadLength(len);
+
+  // control-data
+  data->setDestinationPort(destinationPort);
+  data->setDestinationIPAddress(destinationAddress);
+
+  // data
+  data->setValue(value);
+
+  sendMessageToLower(data);
 }
 
 }

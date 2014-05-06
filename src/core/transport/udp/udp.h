@@ -18,6 +18,12 @@
 
 #include <myModule.h>
 
+#ifndef UDP_PORT
+#define UDP_PORT
+#define UDP_SERVER_PORT 5678 // UDP port
+#define UDP_CLIENT_PORT 8765 // UDP port
+#endif
+
 namespace wsn_energy {
 
 class UDP : public myModule

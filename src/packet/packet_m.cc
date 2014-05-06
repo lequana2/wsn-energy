@@ -4113,6 +4113,10 @@ Register_Class(UdpPacket);
 
 UdpPacket::UdpPacket(const char *name, int kind) : cPacket(name,kind)
 {
+    this->sourcePort_var = 0;
+    this->destinationPort_var = 0;
+    this->length_var = 0;
+    this->checksum_var = 0;
 }
 
 UdpPacket::UdpPacket(const UdpPacket& other) : cPacket(other)
@@ -4134,16 +4138,68 @@ UdpPacket& UdpPacket::operator=(const UdpPacket& other)
 
 void UdpPacket::copy(const UdpPacket& other)
 {
+    this->sourcePort_var = other.sourcePort_var;
+    this->destinationPort_var = other.destinationPort_var;
+    this->length_var = other.length_var;
+    this->checksum_var = other.checksum_var;
 }
 
 void UdpPacket::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
+    doPacking(b,this->sourcePort_var);
+    doPacking(b,this->destinationPort_var);
+    doPacking(b,this->length_var);
+    doPacking(b,this->checksum_var);
 }
 
 void UdpPacket::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
+    doUnpacking(b,this->sourcePort_var);
+    doUnpacking(b,this->destinationPort_var);
+    doUnpacking(b,this->length_var);
+    doUnpacking(b,this->checksum_var);
+}
+
+short UdpPacket::getSourcePort() const
+{
+    return sourcePort_var;
+}
+
+void UdpPacket::setSourcePort(short sourcePort)
+{
+    this->sourcePort_var = sourcePort;
+}
+
+short UdpPacket::getDestinationPort() const
+{
+    return destinationPort_var;
+}
+
+void UdpPacket::setDestinationPort(short destinationPort)
+{
+    this->destinationPort_var = destinationPort;
+}
+
+short UdpPacket::getLength() const
+{
+    return length_var;
+}
+
+void UdpPacket::setLength(short length)
+{
+    this->length_var = length;
+}
+
+short UdpPacket::getChecksum() const
+{
+    return checksum_var;
+}
+
+void UdpPacket::setChecksum(short checksum)
+{
+    this->checksum_var = checksum;
 }
 
 class UdpPacketDescriptor : public cClassDescriptor
@@ -4193,7 +4249,7 @@ const char *UdpPacketDescriptor::getProperty(const char *propertyname) const
 int UdpPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 0+basedesc->getFieldCount(object) : 0;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int UdpPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -4204,7 +4260,13 @@ unsigned int UdpPacketDescriptor::getFieldTypeFlags(void *object, int field) con
             return basedesc->getFieldTypeFlags(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    return 0;
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *UdpPacketDescriptor::getFieldName(void *object, int field) const
@@ -4215,12 +4277,23 @@ const char *UdpPacketDescriptor::getFieldName(void *object, int field) const
             return basedesc->getFieldName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    return NULL;
+    static const char *fieldNames[] = {
+        "sourcePort",
+        "destinationPort",
+        "length",
+        "checksum",
+    };
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int UdpPacketDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount(object) : 0;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourcePort")==0) return base+0;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationPort")==0) return base+1;
+    if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+2;
+    if (fieldName[0]=='c' && strcmp(fieldName, "checksum")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -4232,7 +4305,13 @@ const char *UdpPacketDescriptor::getFieldTypeString(void *object, int field) con
             return basedesc->getFieldTypeString(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    return NULL;
+    static const char *fieldTypeStrings[] = {
+        "short",
+        "short",
+        "short",
+        "short",
+    };
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *UdpPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -4272,6 +4351,10 @@ std::string UdpPacketDescriptor::getFieldAsString(void *object, int field, int i
     }
     UdpPacket *pp = (UdpPacket *)object; (void)pp;
     switch (field) {
+        case 0: return long2string(pp->getSourcePort());
+        case 1: return long2string(pp->getDestinationPort());
+        case 2: return long2string(pp->getLength());
+        case 3: return long2string(pp->getChecksum());
         default: return "";
     }
 }
@@ -4286,6 +4369,10 @@ bool UdpPacketDescriptor::setFieldAsString(void *object, int field, int i, const
     }
     UdpPacket *pp = (UdpPacket *)object; (void)pp;
     switch (field) {
+        case 0: pp->setSourcePort(string2long(value)); return true;
+        case 1: pp->setDestinationPort(string2long(value)); return true;
+        case 2: pp->setLength(string2long(value)); return true;
+        case 3: pp->setChecksum(string2long(value)); return true;
         default: return false;
     }
 }
@@ -4298,7 +4385,13 @@ const char *UdpPacketDescriptor::getFieldStructName(void *object, int field) con
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    return NULL;
+    static const char *fieldStructNames[] = {
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+    };
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *UdpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -4321,6 +4414,8 @@ Data::Data(const char *name, int kind) : cPacket(name,kind)
 {
     this->time_var = 0;
     this->payloadLength_var = 0;
+    this->destinationPort_var = 0;
+    this->destinationIPAddress_var = 0;
     this->value_var = 0;
 }
 
@@ -4345,6 +4440,8 @@ void Data::copy(const Data& other)
 {
     this->time_var = other.time_var;
     this->payloadLength_var = other.payloadLength_var;
+    this->destinationPort_var = other.destinationPort_var;
+    this->destinationIPAddress_var = other.destinationIPAddress_var;
     this->value_var = other.value_var;
 }
 
@@ -4353,6 +4450,8 @@ void Data::parsimPack(cCommBuffer *b)
     cPacket::parsimPack(b);
     doPacking(b,this->time_var);
     doPacking(b,this->payloadLength_var);
+    doPacking(b,this->destinationPort_var);
+    doPacking(b,this->destinationIPAddress_var);
     doPacking(b,this->value_var);
 }
 
@@ -4361,6 +4460,8 @@ void Data::parsimUnpack(cCommBuffer *b)
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->time_var);
     doUnpacking(b,this->payloadLength_var);
+    doUnpacking(b,this->destinationPort_var);
+    doUnpacking(b,this->destinationIPAddress_var);
     doUnpacking(b,this->value_var);
 }
 
@@ -4382,6 +4483,26 @@ int Data::getPayloadLength() const
 void Data::setPayloadLength(int payloadLength)
 {
     this->payloadLength_var = payloadLength;
+}
+
+int Data::getDestinationPort() const
+{
+    return destinationPort_var;
+}
+
+void Data::setDestinationPort(int destinationPort)
+{
+    this->destinationPort_var = destinationPort;
+}
+
+int Data::getDestinationIPAddress() const
+{
+    return destinationIPAddress_var;
+}
+
+void Data::setDestinationIPAddress(int destinationIPAddress)
+{
+    this->destinationIPAddress_var = destinationIPAddress;
 }
 
 const char * Data::getValue() const
@@ -4441,7 +4562,7 @@ const char *DataDescriptor::getProperty(const char *propertyname) const
 int DataDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
 }
 
 unsigned int DataDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -4456,8 +4577,10 @@ unsigned int DataDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DataDescriptor::getFieldName(void *object, int field) const
@@ -4471,9 +4594,11 @@ const char *DataDescriptor::getFieldName(void *object, int field) const
     static const char *fieldNames[] = {
         "time",
         "payloadLength",
+        "destinationPort",
+        "destinationIPAddress",
         "value",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldNames[field] : NULL;
 }
 
 int DataDescriptor::findField(void *object, const char *fieldName) const
@@ -4482,7 +4607,9 @@ int DataDescriptor::findField(void *object, const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='t' && strcmp(fieldName, "time")==0) return base+0;
     if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+1;
-    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+2;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationPort")==0) return base+2;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIPAddress")==0) return base+3;
+    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+4;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -4497,9 +4624,11 @@ const char *DataDescriptor::getFieldTypeString(void *object, int field) const
     static const char *fieldTypeStrings[] = {
         "double",
         "int",
+        "int",
+        "int",
         "string",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DataDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -4541,7 +4670,9 @@ std::string DataDescriptor::getFieldAsString(void *object, int field, int i) con
     switch (field) {
         case 0: return double2string(pp->getTime());
         case 1: return long2string(pp->getPayloadLength());
-        case 2: return oppstring2string(pp->getValue());
+        case 2: return long2string(pp->getDestinationPort());
+        case 3: return long2string(pp->getDestinationIPAddress());
+        case 4: return oppstring2string(pp->getValue());
         default: return "";
     }
 }
@@ -4558,7 +4689,9 @@ bool DataDescriptor::setFieldAsString(void *object, int field, int i, const char
     switch (field) {
         case 0: pp->setTime(string2double(value)); return true;
         case 1: pp->setPayloadLength(string2long(value)); return true;
-        case 2: pp->setValue((value)); return true;
+        case 2: pp->setDestinationPort(string2long(value)); return true;
+        case 3: pp->setDestinationIPAddress(string2long(value)); return true;
+        case 4: pp->setValue((value)); return true;
         default: return false;
     }
 }
@@ -4575,8 +4708,10 @@ const char *DataDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *DataDescriptor::getFieldStructPointer(void *object, int field, int i) const

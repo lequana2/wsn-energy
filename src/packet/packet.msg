@@ -424,10 +424,10 @@ packet UdpPacket{
 //  
 //	int headerLength = 3;
 //
-//	short sourcePort;      // 2 bytes of source port
-//	short destinationPort; // 	2 bytes of destination port
-//	short length;          // 	2 bytes of packet length
-//	short checksum;        // 	2 bytes of check sum of pseudo-header (IP header) 
+	short sourcePort;      // 2 bytes of source port
+	short destinationPort; // 	2 bytes of destination port
+	short length;          // 	2 bytes of packet length
+	short checksum;        // 	2 bytes of check sum of pseudo-header (IP header) 
 
 
 // 		compressed HC1 = 3 bytes RFC 4944
@@ -473,6 +473,9 @@ packet UdpPacket{
 packet Data{
     double time;  		// meta-data: timestamp upon sending
     int payloadLength;  // meta-data: undefined length of data
+    
+    int destinationPort; 	  // control-data: destination port
+    int destinationIPAddress; // control-data: destination IP Address
     
 	string value; 		// undefined length, data to be sent to server
 }

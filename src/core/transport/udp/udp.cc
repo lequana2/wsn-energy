@@ -16,6 +16,10 @@
 #include "udp.h"
 #include "statistic.h"
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 namespace wsn_energy {
 
 Define_Module(UDP);
@@ -30,36 +34,27 @@ void UDP::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
+      /* statistics */
       (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatistic(IP_TRANS));
 
+      /* Initialisation */
       UdpPacket *udpPacket = new UdpPacket;
       udpPacket->setKind(DATA);
-//      udpPacket->setSourceIpAddress(getParentModule()->getModuleByPath(".net")->getId());
-//      udpPacket->setSinkIpAddress(getModuleByPath("^.^.server.net")->getId());
 
+      // set up port
+      udpPacket->setSourcePort(UDP_CLIENT_PORT);
+      udpPacket->setDestinationPort((check_and_cast<Data*>(packet))->getDestinationPort());
+
+      // length (in-line pseudo-header)
+      // checksum (in-line pseudo-header)
+
+      // encapsulate data
       udpPacket->encapsulate(packet);
 
       sendMessageToLower(udpPacket);
 
       break;
     } /* Data */
-
-    case COMMAND: /* Command */
-    {
-      switch (check_and_cast<Command*>(packet)->getNote())
-      {
-        case RPL_CONSTRUCT: {
-          sendCommand(RPL_CONSTRUCT);
-          break;
-        }
-
-        default:
-          ev << "Unknown command" << endl;
-          break;
-      }
-      delete packet; // done command
-      break;
-    } /* Command */
 
     default:
       ev << "Unknown kind" << endl;
@@ -69,21 +64,22 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 
 void UDP::processLowerLayerMessage(cPacket* packet)
 {
-  // Has reached destination
-//  if (getModuleByPath("^.net")->getId() == check_and_cast<UdpPacket*>(packet)->getSinkIpAddress())
-//  {
-//    ev << "Arrived base station !!!" << endl;
-//    sendMessageToUpper(packet->decapsulate());
-//
-//    delete packet;
-//  }
-//  // Acts as intermediate node
-//  else
-//  {
-//    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(IP_INTER));
-//
-//    sendMessageToLower(packet);
-//  }
+  int packetDestinationPort = (check_and_cast<UdpPacket*>(packet))->getDestinationPort();
+
+  // Has reached approciate port
+  if (packetDestinationPort == UDP_SERVER_PORT)
+  {
+    if (DEBUG)
+      ev << "Arrived base station !!!" << endl;
+
+    sendMessageToUpper(packet->decapsulate());
+  }
+  else
+  {
+    // Drop
+  }
+
+  delete packet;
 }
 
 } //namespace

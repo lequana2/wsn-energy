@@ -12,15 +12,16 @@
 #include <iostream>
 #include <fstream>
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 namespace wsn_energy {
 
 Define_Module(Server);
 
 void Server::initialize()
 {
-  // WSN DEBUG
-//  selfTimer(0, RPL_CONSTRUCT);
-
   // create new session file
   std::ofstream myfile;
   myfile.open("data.txt");
@@ -30,12 +31,6 @@ void Server::initialize()
 
 void Server::processSelfMessage(cPacket* packet)
 {
-  switch (packet->getKind())
-  {
-    case COMMAND:
-      sendMessageToLower(packet);
-      break;
-  }
 }
 
 void Server::processUpperLayerMessage(cPacket* packet)
@@ -53,11 +48,13 @@ void Server::processLowerLayerMessage(cPacket* packet)
   myfile << "\n" << data->getValue();
   myfile.close();
 
-  //  this->getParentModule()->bubble(data->getValue());
+  if (DEBUG)
+    this->getParentModule()->bubble(data->getValue());
 
   // End to end statistics
   ((Statistic*) simulation.getModuleByPath("statistic"))->registerStatistic(APP_RECV);
-  ((Statistic*) simulation.getModuleByPath("statistic"))->registerStatisticDelay(DELAY_APP_LAYER, simTime().dbl() - data->getTime());
+  ((Statistic*) simulation.getModuleByPath("statistic"))->registerStatisticDelay(DELAY_APP_LAYER,
+      simTime().dbl() - data->getTime());
 
   delete packet;
 }
