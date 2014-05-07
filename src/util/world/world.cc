@@ -6,11 +6,26 @@
  *  functioning: refer to world.h
  */
 
-#include "world.h"
-#include "radio.h"
-#include "statistic.h"
-
+#include <cdisplaystring.h>
+#include <cenvir.h>
+#include <cgate.h>
+#include <cobjectfactory.h>
+#include <cownedobject.h>
+#include <cpar.h>
+#include <cregistrationlist.h>
+#include <csimulation.h>
+#include <distrib.h>
 #include <math.h>
+#include <onstartup.h>
+#include <regmacros.h>
+#include <simutil.h>
+#include <statistic.h>
+#include <world.h>
+//#include "radio.h"
+#include <cstdio>
+#include <list>
+#include <sstream>
+#include <string>
 
 #ifndef ANNOTATE
 #define ANNOTATE 1
@@ -18,10 +33,6 @@
 
 #ifndef DEBUG
 #define DEBUG 1
-#endif
-
-#ifndef BYTECOUNT
-#define BYTECOUNT 1
 #endif
 
 namespace wsn_energy {
@@ -49,13 +60,6 @@ void World::finish()
   }
   this->hosts.clear();
   this->signals.clear();
-}
-
-/*
- * WSN search mode on mote list given its ID
- */
-Mote& World::searchMote(int moteID)
-{
 }
 
 /*
@@ -192,7 +196,7 @@ void World::deployConnection(RadioDriver* mote)
     {
       case WITHIN_TRANS:
         // bytecount: calculate number of server neighbor
-        if (BYTECOUNT)
+        if (getModuleByPath("^")->par("isPollingCount").boolValue())
         {
           if (mote->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
             check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(

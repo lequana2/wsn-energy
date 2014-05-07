@@ -23,8 +23,8 @@ moduleinterface iRadio
     parameters:
         @display("i=block/mac");
 
-        int trRange @unit(m);
-        int coRange @unit(m);
+        double trRange @unit(m);
+        double coRange @unit(m);
 
     gates:
         input upperIn;

@@ -14,14 +14,10 @@
 
 namespace wsn_energy {
 
-class IPv6Address{
-    char octet[16];
-};
-
 class IPv6 : public myModule
 {
   private:
-    IpPacket *pendingPacket;
+    IpPacketInterface *pendingPacket;
     void preparePacketToBeSent();
 
   protected:
@@ -33,12 +29,14 @@ class IPv6 : public myModule
     void processLowerLayerMessage(cPacket*);
 
   public:
-    std::list<IpPacket*> ipPacketQueue; // Buffer message to send, public scope for debugging
+    std::list<IpPacketInterface*> ipPacketQueue; // Buffer message to send, public scope for debugging
 
     RPL *rpl; // using RPL as routing protocol
 
-    void multicast(IpPacket*); // multicast to all neighbor
-    void unicast(IpPacket*);   // unicast with default route
+    void putIntoQueue(IpPacketInterface*); // put packet into queue
+
+    void multicast(IcmpPacket*);        // multicast an icmp packet
+    void unicast(UdpPacketInterface*);  // unicast an udp packet
 };
 
 }

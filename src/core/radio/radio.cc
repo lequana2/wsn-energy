@@ -4,6 +4,7 @@
 #include "statistic.h"
 #include "energest.h"
 #include "ipv6.h"
+#include "math.h"
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -13,8 +14,39 @@ namespace wsn_energy {
 
 void RadioDriver::initialize()
 {
-  this->trRange = par("trRange");
-  this->coRange = par("coRange");
+  // free space path loss formula
+  // units: [d] = km; [f] = MHz
+  // FSPL = 20*log(d,10) + 20*log(f,10) + 32.45
+
+  // Link budget
+  // P(Rx)[dBm] = P(Tx)[dBm] + G(Tx)[dBi] + G(Rx)[dBi] - FSPL[dB]
+
+  // Then
+  // log(d,10) = (P(Tx) - P(Rx) + G(Tx) + G(Rx) - 20*log(f,10) - 32.45) / 20
+
+  // Transmission power
+  this->txPower = TXPOWER_MAX;
+
+  // Range
+  // d = d0*pow(10,(PL(d0) - PL(d))/(10*path_loss_exponent))
+  //
+  // indoor
+  // d0 = 1m
+  // PL(d0) = -37 dBm
+  //
+  // fluctuate +- 10dBm
+
+  // expected Transmission range
+  this->trRange = 1000 * pow(10, ((txPower - RX_SENSITIVITY - 20.0 * log10(FREQUENCY) - 32.45) / (20.0)));
+
+  // expected Collision range
+  this->coRange = 1000 * pow(10, ((txPower - CCA_THRESHOLD - 20.0 * log10(FREQUENCY) - 32.45) / (20.0)));
+
+  if (DEBUG)
+    std::cout << "Radio " << this->trRange << " and " << this->coRange << endl;
+
+  this->par("trRange").setDoubleValue(trRange);
+  this->par("coRange").setDoubleValue(coRange);
 
   // Turn on in initializing phase
   listen();

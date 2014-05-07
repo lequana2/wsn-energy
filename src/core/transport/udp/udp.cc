@@ -37,16 +37,28 @@ void UDP::processUpperLayerMessage(cPacket* packet)
       /* statistics */
       (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatistic(IP_TRANS));
 
-      /* Initialisation */
-      UdpPacket *udpPacket = new UdpPacket;
-      udpPacket->setKind(DATA);
+      // create interface
+      UdpPacketInterface *udpPacket;
 
-      // set up port
-      udpPacket->setSourcePort(UDP_CLIENT_PORT);
-      udpPacket->setDestinationPort((check_and_cast<Data*>(packet))->getDestinationPort());
+      if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+      {
+        // WSN compress using HC01
+      }
+      else
+      {
+        // initialisation
+        udpPacket = new UdpPacketStandard;
+        udpPacket->setKind(DATA);
+        udpPacket->setByteLength(udpPacket->getHeaderLength());
 
-      // length (in-line pseudo-header)
-      // checksum (in-line pseudo-header)
+        // set up port
+        (check_and_cast<UdpPacketStandard*>(udpPacket))->setSourcePort(UDP_CLIENT_PORT);
+        (check_and_cast<UdpPacketStandard*>(udpPacket))->setDestinationPort(
+            (check_and_cast<Data*>(packet))->getDestinationPort());
+
+        // length (in-line pseudo-header)
+        // checksum (in-line pseudo-header)
+      }
 
       // encapsulate data
       udpPacket->encapsulate(packet);
@@ -64,7 +76,16 @@ void UDP::processUpperLayerMessage(cPacket* packet)
 
 void UDP::processLowerLayerMessage(cPacket* packet)
 {
-  int packetDestinationPort = (check_and_cast<UdpPacket*>(packet))->getDestinationPort();
+  int packetDestinationPort;
+
+  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+  {
+    // WSN uncompress using HC01
+  }
+  else
+  {
+    packetDestinationPort = (check_and_cast<UdpPacketStandard*>(packet))->getDestinationPort();
+  }
 
   // Has reached approciate port
   if (packetDestinationPort == UDP_SERVER_PORT)
@@ -72,6 +93,7 @@ void UDP::processLowerLayerMessage(cPacket* packet)
     if (DEBUG)
       ev << "Arrived base station !!!" << endl;
 
+    // get data and send to receiver application
     sendMessageToUpper(packet->decapsulate());
   }
   else

@@ -18,23 +18,6 @@
 
 #include "radio.h"
 
-/*
- * Specification for CC2420
- */
-#ifndef CC2420
-#define CC2420
-#define FREQUENCY          2400.0  // MHz
-#define TXPOWER_LEVEL_MAX    31.0  // level max
-#define TXPOWER_LEVEL_MIN     0.0  // level min
-#define TXPOWER_MAX           0.0  // dBm
-#define TXPOWER_MIN         -90.0  // dBm
-#define TXPOWER_CURRENT_MAX  17.4  // mA
-#define RXPOWER_CURRENT      18.8  // mA
-#define IDPOWER_CURRENT       3.3  // mA
-#define SUPPLY_VOLTAGE        1.8  // V
-#define SLPOWER               0.04 // mA
-#endif
-
 namespace wsn_energy {
 
 class cc2420 : public RadioDriver

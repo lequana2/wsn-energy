@@ -223,34 +223,33 @@ void RPL::handleDISTimer()
     this->net->scheduleAt(simTime() + 1, disTimer);
 }
 
-void RPL::processICMP(IpPacket *packet)
+void RPL::processICMP(IcmpPacket *icmpPacket)
 {
 //  switch (packet->getIcmpCode())
-  switch(1)
-  {
-    case NET_ICMP_DIO: /* receiving DIO */
-    {
-      this->processDIO(check_and_cast<DIO*>(packet));
-      /* consider preferred parent is un-nultified under behavior of DIO */
-      if (this->rplDag.preferredParent != NULL)
-        this->net->selfTimer(0, NET_CHECK_BUFFER); // prepare to send data again
-
-      delete packet;
-      break;
-    } /* receiving DIO */
-
-    case NET_ICMP_DIS: /* receiving DIS */
-    {
-      this->processDIS(check_and_cast<DIS*>(packet));
-      delete packet;
-      break;
-    } /* receiving DIS */
-
-    default:
-      if (DEBUG)
-        ev << "Missing resolution" << endl;
-      break;
-  }
+//  {
+//    case NET_ICMP_DIO: /* receiving DIO */
+//    {
+//      this->processDIO(check_and_cast<DIO*>(packet));
+//      /* consider preferred parent is un-nultified under behavior of DIO */
+//      if (this->rplDag.preferredParent != NULL)
+//        this->net->selfTimer(0, NET_CHECK_BUFFER); // prepare to send data again
+//
+//      delete packet;
+//      break;
+//    } /* receiving DIO */
+//
+//    case NET_ICMP_DIS: /* receiving DIS */
+//    {
+//      this->processDIS(check_and_cast<DIS*>(packet));
+//      delete packet;
+//      break;
+//    } /* receiving DIS */
+//
+//    default:
+//      if (DEBUG)
+//        ev << "Missing resolution" << endl;
+//      break;
+//  }
 }
 
 void RPL::processDIO(DIO* dio)

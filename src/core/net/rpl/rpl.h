@@ -96,7 +96,7 @@ class RPL
     void hasSentDIO();
     void hasSentDIS();
 
-    void processICMP(IpPacket*);
+    void processICMP(IcmpPacket*);
 
     void handleDIOTimer();
     void handleDISTimer();

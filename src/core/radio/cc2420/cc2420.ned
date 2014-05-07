@@ -26,8 +26,8 @@ simple cc2420 like iRadio
         @class("cc2420");
         @display("i=block/mac");
 
-        int trRange @unit(m);
-        int coRange @unit(m);
+        double trRange @unit(m) = default(0);
+        double coRange @unit(m) = default(0);
 
     gates:
         input upperIn;

@@ -29,12 +29,12 @@ Define_Module(cc2420);
 
 double cc2420::intervalCCA()
 {
-  return 8 * SYMBOL;     // only sample in 8 symbols
+  return 8 * SYMBOL;
 }
 
 double cc2420::getTxPower()
 {
-  return TXPOWER_CURRENT_MAX * SUPPLY_VOLTAGE;
+  return txPower * SUPPLY_VOLTAGE;
 }
 
 double cc2420::getRxPower()

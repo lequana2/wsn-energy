@@ -19,9 +19,8 @@
 #define DEBUG 0
 #endif
 
-// WSN just for debug
-#ifndef RPL_MAINTAIN
-#define RPL_MAINTAIN 0
+#ifndef HOP_LIMIT
+#define HOP_LIMIT 64
 #endif
 
 namespace wsn_energy {
@@ -33,60 +32,49 @@ void IPv6::initialize()
   this->rpl = new RPL(this);
   this->pendingPacket = NULL;
 
-  // set up delay
-//  if (!RPL_MAINTAIN)
-//    selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 1, NET_TIMER_DIS);
-
-  // WSN just for test
-//  if (getId() == simulation.getModuleByPath("client[0].net")->getId())
-//    selfTimer(0, 190);
+  // WSN If server then create RPL DODAG
+  //  this->rpl->rpl_set_root();
 }
 
 void IPv6::finish()
 {
-  std::cout << "SEND (NET) remaining: " << this->ipPacketQueue.size() << " @ " << this->getParentModule()->getFullName()
-      << endl;
+  if (DEBUG)
+    std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName() << endl;
 
   // Clear queue !!!
-  for (std::list<IpPacket*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
+  for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
     cancelAndDelete(*it);
+
   this->ipPacketQueue.clear();
 
+  // clear RPL
   this->rpl->finish();
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
 {
+  // if power down, does not put into queue
+  if (check_and_cast<RadioDriver*>(this->getModuleByPath("^.radio")) == POWER_DOWN)
+  {
+    delete packet;
+    return;
+  }
+
   switch (packet->getKind())
   {
     case COMMAND: /* Command */
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case 190: /*WSN test*/{
-          IpPacket *ipPacket = new IpPacket;
-//          ipPacket->setMessageCode(NET_DATA);
-          unicast(ipPacket);
-
-          UdpPacket *udpPacket = new UdpPacket;
-
-          ipPacket->encapsulate(udpPacket);
-
-          break;
-        }/*WSN test*/
-
         case NET_CHECK_BUFFER: /* Check buffer */
         {
-          if (ipPacketQueue.size() == 0) // empty, do nothing, reset flag
+          if (ipPacketQueue.size() == 0) // empty, do nothing, assign pending packet equals NULL
           {
             pendingPacket = NULL;
           }
           else if (pendingPacket == NULL) // do not have any pending packet
           {
-            if (DEBUG)
-              std::cout << "SEND (NET) remaining: " << this->ipPacketQueue.size() << " @ " << this->getId() << endl;
-
-            // get packet and sen to MAC layer
+            // prepare a packet to be sent
             preparePacketToBeSent();
 
             if (pendingPacket == NULL)
@@ -95,7 +83,9 @@ void IPv6::processSelfMessage(cPacket* packet)
             }
             else
             {
-              // successful dequeue
+              // WSN
+              // successful dequeue, create a duplicate ?!?
+              // send to lower and dequeue ?!?
               sendMessageToLower(pendingPacket->dup());
             }
           }
@@ -105,14 +95,14 @@ void IPv6::processSelfMessage(cPacket* packet)
 
         case NET_TIMER_DIO: /* DIO timer*/
         {
-          if (this->rpl->rplDag.joined && RPL_MAINTAIN)
+          if (this->rpl->rplDag.joined)
             this->rpl->handleDIOTimer();
           break;
         } /* DIO timer*/
 
         case NET_TIMER_DIS: /* Solicit DODAG information*/
         {
-          if (!this->rpl->rplDag.joined && RPL_MAINTAIN)
+          if (!this->rpl->rplDag.joined)
             this->rpl->handleDISTimer();
           break;
         } /* Solicit DODAG information */
@@ -135,41 +125,14 @@ void IPv6::processSelfMessage(cPacket* packet)
 
 void IPv6::processUpperLayerMessage(cPacket* packet)
 {
-  // WSN just for DEBUG
-  if (!RPL_MAINTAIN)
-    return;
-
   switch (packet->getKind())
   {
     case DATA: /* Data */
     {
-      IpPacket *dataMessage = new IpPacket;
-//      dataMessage->setMessageCode(NET_DATA);
-      dataMessage->encapsulate(packet);
-
-      unicast(dataMessage);
+      unicast(check_and_cast<UdpPacketInterface*>(packet));
 
       break;
     } /* Data */
-
-    case COMMAND: /* Command */
-    {
-      switch (check_and_cast<Command*>(packet)->getNote())
-      {
-        case RPL_CONSTRUCT: /* Construct RPL DODAG */
-        {
-          this->rpl->rpl_set_root();
-          break;
-        } /* Construct RPL DODAG*/
-
-        default:
-          if (DEBUG)
-            std::cout << "Unknown command" << endl;
-          break;
-      }
-      delete packet; // done command
-      break;
-    } /* Command */
 
     default:
       if (DEBUG)
@@ -303,8 +266,9 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 void IPv6::preparePacketToBeSent()
 {
   // get first packet from queue
-  pendingPacket = check_and_cast<IpPacket*>(this->ipPacketQueue.front());
+  pendingPacket = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
 
+//  WSN what the fuck is these shitties ?!?!?
 //  if (pendingPacket->getMessageCode() == NET_ICMP_RPL)
 //  {
 //    // Energy calculated by counting bits
@@ -354,52 +318,68 @@ void IPv6::preparePacketToBeSent()
 //  }
 }
 
-void IPv6::multicast(IpPacket *ipPacket)
+void IPv6::putIntoQueue(IpPacketInterface* ipPacket)
 {
-  if (check_and_cast<RadioDriver*>(this->getModuleByPath("^.radio")) == POWER_DOWN)
-  {
-    delete ipPacket;
-    return;
-  }
+//  insert into buffer and check
+  this->ipPacketQueue.push_back(ipPacket);
 
-  ipPacket->setKind(DATA);
-  ipPacket->setSenderIpAddress(this->getId());
-  ipPacket->setRecverIpAddress(0);
-
-  // insert into buffer and check
-//  if (ipPacket->getMessageCode() == NET_ICMP_RPL)
-//  {
-//    // if DIO push back
-//    if (ipPacket->getIcmpCode() == NET_ICMP_DIO)
-//      this->ipPacketQueue.push_back(ipPacket);
-//    // if DIS push front
-//    else if (ipPacket->getIcmpCode() == NET_ICMP_DIS)
-//      this->ipPacketQueue.push_front(ipPacket);
-//  }
-
-  // Check buffer
   selfTimer(0, NET_CHECK_BUFFER);
 }
 
-void IPv6::unicast(IpPacket *ipPacket)
+void IPv6::multicast(IcmpPacket *icmpPacket)
 {
-  /* stops working */
-  if (check_and_cast<RadioDriver*>(this->getModuleByPath("^.radio")) == POWER_DOWN)
+  // create interface
+  IpPacketInterface *ipPacket;
+
+  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    delete ipPacket;
-    return;
+    // WSN compress using HC01
+  }
+  else
+  {
+    // WSN set up ICMP
+    // initialisation
+    ipPacket = new IpPacketStandard;
+    ipPacket->setKind(DATA);
+    ipPacket->setByteLength(ipPacket->getHeaderLength());
+
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setNextHeader(NEXT_HEADER_UDP);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(HOP_LIMIT);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setSourceIpAddress(this->getId());
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setDestinationIpAddress(0);
   }
 
-  ipPacket->setTime(simTime().dbl());
-  ipPacket->setKind(DATA);
-  ipPacket->setSenderIpAddress(this->getId());
-  // the recver address will be decided just intime
+  ipPacket->encapsulate(icmpPacket);
 
-  // insert into buffers
-  this->ipPacketQueue.push_back(ipPacket);
+  putIntoQueue(ipPacket);
+}
 
-  // Check buffer
-  selfTimer(0, NET_CHECK_BUFFER);
+void IPv6::unicast(UdpPacketInterface *udpPacket)
+{
+  // create interface
+  IpPacketInterface *ipPacket;
+
+  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+  {
+    // WSN compress using HC01
+  }
+  else
+  {
+    // initialisation
+    ipPacket = new IpPacketStandard;
+    ipPacket->setKind(DATA);
+    ipPacket->setByteLength(ipPacket->getHeaderLength());
+
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setNextHeader(NEXT_HEADER_UDP);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(HOP_LIMIT);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setSourceIpAddress(this->getId());
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setDestinationIpAddress(
+        (check_and_cast<Data*>(udpPacket->getEncapsulatedPacket()))->getDestinationIPAddress());
+  }
+
+  ipPacket->encapsulate(udpPacket);
+
+  putIntoQueue(ipPacket);
 }
 
 } /* namespace wsn_energy */

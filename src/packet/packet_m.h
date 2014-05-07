@@ -35,14 +35,14 @@ enum MESSAGE_KIND {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum SPECIAL_EVENT{
+ * enum MANUAL_EVENT{
  * 	NODE_STARTUP  = 0; 
  * 	OUT_OF_ENERGY = 1; 
  * 	NODE_DESTRUCT = 2; 
  * };
  * </pre>
  */
-enum SPECIAL_EVENT {
+enum MANUAL_EVENT {
     NODE_STARTUP = 0,
     OUT_OF_ENERGY = 1,
     NODE_DESTRUCT = 2
@@ -56,7 +56,6 @@ enum SPECIAL_EVENT {
  * 	APP_SENSING_FLAG = 1; 
  * 	APP_WORKING_FLAG = 0; 
  * 	
- * 	RPL_CONSTRUCT 	 = 3; 
  * 	RPL_SET_UP_DELAY = 4; 
  * };
  * </pre>
@@ -65,7 +64,6 @@ enum COMMAND_APP {
     APP_ENVIRON_FLAG = 2,
     APP_SENSING_FLAG = 1,
     APP_WORKING_FLAG = 0,
-    RPL_CONSTRUCT = 3,
     RPL_SET_UP_DELAY = 4
 };
 
@@ -76,13 +74,16 @@ enum COMMAND_APP {
  *     NET_TIMER_DIO       = 1; 
  *     NET_TIMER_DIS       = 2; 
  * 	NET_CHECK_BUFFER    = 3; 
+ * 
+ * 	RPL_CONSTRUCT 	 	= 4; 
  * };
  * </pre>
  */
 enum COMMAND_NET {
     NET_TIMER_DIO = 1,
     NET_TIMER_DIS = 2,
-    NET_CHECK_BUFFER = 3
+    NET_CHECK_BUFFER = 3,
+    RPL_CONSTRUCT = 4
 };
 
 /**
@@ -102,20 +103,43 @@ enum RESULT_NET {
 /**
  * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * enum IP_PACKET_TYPE{
- * 	NET_DATA        	  = 1;  
- * 	
- * 	NET_ICMP_RPL		  = 2;  
- * 	NET_ICMP_DIO    	  = 3;	
- * 	NET_ICMP_DIS    	  = 4;	
+ * enum IP_PACKET_NEXT_HEADER{
+ *     NEXT_HEADER_UDP		= 0; 
+ *     NEXT_HEADER_TCP		= 1; 
+ *     NEXT_HEADER_ICMP	= 2; 
  * };
  * </pre>
  */
-enum IP_PACKET_TYPE {
-    NET_DATA = 1,
-    NET_ICMP_RPL = 2,
-    NET_ICMP_DIO = 3,
-    NET_ICMP_DIS = 4
+enum IP_PACKET_NEXT_HEADER {
+    NEXT_HEADER_UDP = 0,
+    NEXT_HEADER_TCP = 1,
+    NEXT_HEADER_ICMP = 2
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum ICMP_TYPE{
+ *     ICMP_RPL		= 0; 
+ * }
+ * </pre>
+ */
+enum ICMP_TYPE {
+    ICMP_RPL = 0
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum ICMP_CODE{
+ * 	RPL_DIO_CODE   	  = 0;	
+ * 	RPL_DIS_CODE	  = 1;	
+ * }
+ * </pre>
+ */
+enum ICMP_CODE {
+    RPL_DIO_CODE = 0,
+    RPL_DIS_CODE = 1
 };
 
 /**
@@ -135,6 +159,24 @@ enum COMMAND_MAC {
     MAC_BEGIN_SEND_FRAME = 73,
     MAC_END_SEND_FRAME = 74,
     MAC_EXPIRE_IFS = 75
+};
+
+/**
+ * Enum generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum FRAME_TYPE{
+ *     FRAME_BEACON  	= 35; 
+ *     FRAME_COMMAND 	= 36; 
+ * 	FRAME_DATA 		= 37; 
+ * 	FRAME_ACK  		= 38; 
+ * }
+ * </pre>
+ */
+enum FRAME_TYPE {
+    FRAME_BEACON = 35,
+    FRAME_COMMAND = 36,
+    FRAME_DATA = 37,
+    FRAME_ACK = 38
 };
 
 /**
@@ -162,7 +204,8 @@ enum RESULT_FROM_MAC {
  * 	RDC_LISTEN 	 = 31; 
  * 	RDC_IDLE     = 32; 
  * 	
- * 	RDC_WAIT_FOR_ACK = 34; 
+ * 	RDC_WAIT_FOR_ACK  = 34; 
+ * 	RDC_CHANNEL_CHECK = 35; 
  * };
  * </pre>
  */
@@ -170,7 +213,8 @@ enum COMMAND_RDC {
     RDC_TRANSMIT = 30,
     RDC_LISTEN = 31,
     RDC_IDLE = 32,
-    RDC_WAIT_FOR_ACK = 34
+    RDC_WAIT_FOR_ACK = 34,
+    RDC_CHANNEL_CHECK = 35
 };
 
 /**
@@ -340,9 +384,8 @@ inline void doUnpacking(cCommBuffer *b, Result& obj) {obj.parsimUnpack(b);}
  *     
  *     
  *     
+ *     
  *     int maxPayloadLength = 127;
- *     
- *     
  * }
  * </pre>
  */
@@ -383,20 +426,20 @@ inline void doUnpacking(cCommBuffer *b, Raw& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet Frame{
  *     int numberTransmission = 0; 
- *     int headerLength; 
+ *     int headerLength; 			
  *     
  *     
  * 	
  * 	
- * 	uint8_t frameType;        		    
- *   	uint8_t securityEnabled;  		    
- *   	uint8_t framePending;     			
- *   	uint8_t ackRequired;      			
- *   	uint8_t panIdCompression; 			
- * 	uint8_t reserved; 		     	    
- *   	uint8_t destinationAddressMode;     
- *   	uint8_t frameVersion;     		    
- *   	uint8_t sourceAddressMode;          
+ * 	int 	frameType;        		    
+ *   	int 	securityEnabled;  		    
+ *   	int 	framePending;     			
+ *   	bool 	ackRequired;      			
+ *   	bool 	panIdCompression; 			
+ * 	int 	reserved; 		     	    
+ *   	int 	destinationAddressMode;     
+ *   	int 	frameVersion;     		    
+ *   	int 	sourceAddressMode;          
  *   	
  *   	
  *   	uint16_t frameCheckSequence;
@@ -408,15 +451,15 @@ class Frame : public ::cPacket
   protected:
     int numberTransmission_var;
     int headerLength_var;
-    uint8_t frameType_var;
-    uint8_t securityEnabled_var;
-    uint8_t framePending_var;
-    uint8_t ackRequired_var;
-    uint8_t panIdCompression_var;
-    uint8_t reserved_var;
-    uint8_t destinationAddressMode_var;
-    uint8_t frameVersion_var;
-    uint8_t sourceAddressMode_var;
+    int frameType_var;
+    int securityEnabled_var;
+    int framePending_var;
+    bool ackRequired_var;
+    bool panIdCompression_var;
+    int reserved_var;
+    int destinationAddressMode_var;
+    int frameVersion_var;
+    int sourceAddressMode_var;
     uint16_t frameCheckSequence_var;
 
   private:
@@ -440,24 +483,24 @@ class Frame : public ::cPacket
     virtual void setNumberTransmission(int numberTransmission);
     virtual int getHeaderLength() const;
     virtual void setHeaderLength(int headerLength);
-    virtual uint8_t getFrameType() const;
-    virtual void setFrameType(uint8_t frameType);
-    virtual uint8_t getSecurityEnabled() const;
-    virtual void setSecurityEnabled(uint8_t securityEnabled);
-    virtual uint8_t getFramePending() const;
-    virtual void setFramePending(uint8_t framePending);
-    virtual uint8_t getAckRequired() const;
-    virtual void setAckRequired(uint8_t ackRequired);
-    virtual uint8_t getPanIdCompression() const;
-    virtual void setPanIdCompression(uint8_t panIdCompression);
-    virtual uint8_t getReserved() const;
-    virtual void setReserved(uint8_t reserved);
-    virtual uint8_t getDestinationAddressMode() const;
-    virtual void setDestinationAddressMode(uint8_t destinationAddressMode);
-    virtual uint8_t getFrameVersion() const;
-    virtual void setFrameVersion(uint8_t frameVersion);
-    virtual uint8_t getSourceAddressMode() const;
-    virtual void setSourceAddressMode(uint8_t sourceAddressMode);
+    virtual int getFrameType() const;
+    virtual void setFrameType(int frameType);
+    virtual int getSecurityEnabled() const;
+    virtual void setSecurityEnabled(int securityEnabled);
+    virtual int getFramePending() const;
+    virtual void setFramePending(int framePending);
+    virtual bool getAckRequired() const;
+    virtual void setAckRequired(bool ackRequired);
+    virtual bool getPanIdCompression() const;
+    virtual void setPanIdCompression(bool panIdCompression);
+    virtual int getReserved() const;
+    virtual void setReserved(int reserved);
+    virtual int getDestinationAddressMode() const;
+    virtual void setDestinationAddressMode(int destinationAddressMode);
+    virtual int getFrameVersion() const;
+    virtual void setFrameVersion(int frameVersion);
+    virtual int getSourceAddressMode() const;
+    virtual void setSourceAddressMode(int sourceAddressMode);
     virtual uint16_t getFrameCheckSequence() const;
     virtual void setFrameCheckSequence(uint16_t frameCheckSequence);
 };
@@ -468,27 +511,68 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet FrameData extends Frame{
- *    	int headerLength; 
- *     
- *   	uint8_t dataSequenceNumber;          	
- *   	
- *   	
- *     
- * 	
- * 	
- * 	
- * 	
- * 	
- * 	
- *     
- * 	int senderMacAddress; 
- * 	int recverMacAddress; 
- * 	int checkSequenceNumber;
+ * packet FrameDataStandard extends Frame{
  * 
+ *    	headerLength = 25; 
+ *     
+ *   	int dataSequenceNumber;	
+ *   	
+ * 	int sourcePanID;	  		
+ * 	int destinationPanID; 		
+ * 	int sourceMacAddress; 		
+ * 	int destinationMacAddress;  
+ * }
+ * </pre>
+ */
+class FrameDataStandard : public ::wsn_energy::Frame
+{
+  protected:
+    int dataSequenceNumber_var;
+    int sourcePanID_var;
+    int destinationPanID_var;
+    int sourceMacAddress_var;
+    int destinationMacAddress_var;
+
+  private:
+    void copy(const FrameDataStandard& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const FrameDataStandard&);
+
+  public:
+    FrameDataStandard(const char *name=NULL, int kind=0);
+    FrameDataStandard(const FrameDataStandard& other);
+    virtual ~FrameDataStandard();
+    FrameDataStandard& operator=(const FrameDataStandard& other);
+    virtual FrameDataStandard *dup() const {return new FrameDataStandard(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getDataSequenceNumber() const;
+    virtual void setDataSequenceNumber(int dataSequenceNumber);
+    virtual int getSourcePanID() const;
+    virtual void setSourcePanID(int sourcePanID);
+    virtual int getDestinationPanID() const;
+    virtual void setDestinationPanID(int destinationPanID);
+    virtual int getSourceMacAddress() const;
+    virtual void setSourceMacAddress(int sourceMacAddress);
+    virtual int getDestinationMacAddress() const;
+    virtual void setDestinationMacAddress(int destinationMacAddress);
+};
+
+inline void doPacking(cCommBuffer *b, FrameDataStandard& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, FrameDataStandard& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet FrameDataCompressed extends Frame{
+ * 
+ * 	 int headerLength = 32;
  * 	
- * 	
- * 	
+ * 
  * 
  * 
  * 
@@ -544,63 +628,49 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
  * }
  * </pre>
  */
-class FrameData : public ::wsn_energy::Frame
+class FrameDataCompressed : public ::wsn_energy::Frame
 {
   protected:
     int headerLength_var;
-    uint8_t dataSequenceNumber_var;
-    int senderMacAddress_var;
-    int recverMacAddress_var;
-    int checkSequenceNumber_var;
 
   private:
-    void copy(const FrameData& other);
+    void copy(const FrameDataCompressed& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const FrameData&);
+    bool operator==(const FrameDataCompressed&);
 
   public:
-    FrameData(const char *name=NULL, int kind=0);
-    FrameData(const FrameData& other);
-    virtual ~FrameData();
-    FrameData& operator=(const FrameData& other);
-    virtual FrameData *dup() const {return new FrameData(*this);}
+    FrameDataCompressed(const char *name=NULL, int kind=0);
+    FrameDataCompressed(const FrameDataCompressed& other);
+    virtual ~FrameDataCompressed();
+    FrameDataCompressed& operator=(const FrameDataCompressed& other);
+    virtual FrameDataCompressed *dup() const {return new FrameDataCompressed(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
     virtual int getHeaderLength() const;
     virtual void setHeaderLength(int headerLength);
-    virtual uint8_t getDataSequenceNumber() const;
-    virtual void setDataSequenceNumber(uint8_t dataSequenceNumber);
-    virtual int getSenderMacAddress() const;
-    virtual void setSenderMacAddress(int senderMacAddress);
-    virtual int getRecverMacAddress() const;
-    virtual void setRecverMacAddress(int recverMacAddress);
-    virtual int getCheckSequenceNumber() const;
-    virtual void setCheckSequenceNumber(int checkSequenceNumber);
 };
 
-inline void doPacking(cCommBuffer *b, FrameData& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, FrameData& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, FrameDataCompressed& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, FrameDataCompressed& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet FrameACK extends Frame{
- *     
- * 	int headerLength = 3;
+ * 	headerLength = 3; 
  * 
- *    	uint8_t dataSequenceNumber;          	
+ *    	int dataSequenceNumber;          	
  * }
  * </pre>
  */
 class FrameACK : public ::wsn_energy::Frame
 {
   protected:
-    int headerLength_var;
-    uint8_t dataSequenceNumber_var;
+    int dataSequenceNumber_var;
 
   private:
     void copy(const FrameACK& other);
@@ -619,10 +689,8 @@ class FrameACK : public ::wsn_energy::Frame
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getHeaderLength() const;
-    virtual void setHeaderLength(int headerLength);
-    virtual uint8_t getDataSequenceNumber() const;
-    virtual void setDataSequenceNumber(uint8_t dataSequenceNumber);
+    virtual int getDataSequenceNumber() const;
+    virtual void setDataSequenceNumber(int dataSequenceNumber);
 };
 
 inline void doPacking(cCommBuffer *b, FrameACK& obj) {obj.parsimPack(b);}
@@ -632,24 +700,23 @@ inline void doUnpacking(cCommBuffer *b, FrameACK& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet FrameBeacon extends Frame{
- * 	int headerLength; 
+ * 	headerLength = 26;
  *     
- * 	uint8_t beaconSequenceNumber;	
+ * 	int beaconSequenceNumber;	
  * 	
- * 	
- *   	uint16_t destinationPanId;    	
- *   	uint8_t  destinationAddress[8]; 
- *   	uint16_t sourcePanId;     	    
- *   	uint8_t  sourceAddress[8];      
+ * 	int sourcePanID;	  		
+ * 	int destinationPanID; 		
+ * 	int sourceMacAddress; 		
+ * 	int destinationMacAddress;  
  *   	
  *   	
- *   	uint8_t beaconOrder;			
- *   	uint8_t superFrameOrder;		
- *   	uint8_t finalCAPslot;			
- *   	uint8_t batteryLifeExtension;	
- *   	uint8_t reserved;				
- *   	uint8_t PANcoordinator;			
- *   	uint8_t associationPermit;		
+ *   	int beaconOrder;			
+ *   	int superFrameOrder;		
+ *   	int finalCAPslot;			
+ *   	int batteryLifeExtension;	
+ *   	int reserved;				
+ *   	int PANcoordinator;			
+ *   	int associationPermit;		
  * 
  * 	
  * 	
@@ -660,19 +727,18 @@ inline void doUnpacking(cCommBuffer *b, FrameACK& obj) {obj.parsimUnpack(b);}
 class FrameBeacon : public ::wsn_energy::Frame
 {
   protected:
-    int headerLength_var;
-    uint8_t beaconSequenceNumber_var;
-    uint16_t destinationPanId_var;
-    uint8_t destinationAddress_var[8];
-    uint16_t sourcePanId_var;
-    uint8_t sourceAddress_var[8];
-    uint8_t beaconOrder_var;
-    uint8_t superFrameOrder_var;
-    uint8_t finalCAPslot_var;
-    uint8_t batteryLifeExtension_var;
-    uint8_t reserved_var;
-    uint8_t PANcoordinator_var;
-    uint8_t associationPermit_var;
+    int beaconSequenceNumber_var;
+    int sourcePanID_var;
+    int destinationPanID_var;
+    int sourceMacAddress_var;
+    int destinationMacAddress_var;
+    int beaconOrder_var;
+    int superFrameOrder_var;
+    int finalCAPslot_var;
+    int batteryLifeExtension_var;
+    int reserved_var;
+    int PANcoordinator_var;
+    int associationPermit_var;
 
   private:
     void copy(const FrameBeacon& other);
@@ -691,34 +757,30 @@ class FrameBeacon : public ::wsn_energy::Frame
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getHeaderLength() const;
-    virtual void setHeaderLength(int headerLength);
-    virtual uint8_t getBeaconSequenceNumber() const;
-    virtual void setBeaconSequenceNumber(uint8_t beaconSequenceNumber);
-    virtual uint16_t getDestinationPanId() const;
-    virtual void setDestinationPanId(uint16_t destinationPanId);
-    virtual unsigned int getDestinationAddressArraySize() const;
-    virtual uint8_t getDestinationAddress(unsigned int k) const;
-    virtual void setDestinationAddress(unsigned int k, uint8_t destinationAddress);
-    virtual uint16_t getSourcePanId() const;
-    virtual void setSourcePanId(uint16_t sourcePanId);
-    virtual unsigned int getSourceAddressArraySize() const;
-    virtual uint8_t getSourceAddress(unsigned int k) const;
-    virtual void setSourceAddress(unsigned int k, uint8_t sourceAddress);
-    virtual uint8_t getBeaconOrder() const;
-    virtual void setBeaconOrder(uint8_t beaconOrder);
-    virtual uint8_t getSuperFrameOrder() const;
-    virtual void setSuperFrameOrder(uint8_t superFrameOrder);
-    virtual uint8_t getFinalCAPslot() const;
-    virtual void setFinalCAPslot(uint8_t finalCAPslot);
-    virtual uint8_t getBatteryLifeExtension() const;
-    virtual void setBatteryLifeExtension(uint8_t batteryLifeExtension);
-    virtual uint8_t getReserved() const;
-    virtual void setReserved(uint8_t reserved);
-    virtual uint8_t getPANcoordinator() const;
-    virtual void setPANcoordinator(uint8_t PANcoordinator);
-    virtual uint8_t getAssociationPermit() const;
-    virtual void setAssociationPermit(uint8_t associationPermit);
+    virtual int getBeaconSequenceNumber() const;
+    virtual void setBeaconSequenceNumber(int beaconSequenceNumber);
+    virtual int getSourcePanID() const;
+    virtual void setSourcePanID(int sourcePanID);
+    virtual int getDestinationPanID() const;
+    virtual void setDestinationPanID(int destinationPanID);
+    virtual int getSourceMacAddress() const;
+    virtual void setSourceMacAddress(int sourceMacAddress);
+    virtual int getDestinationMacAddress() const;
+    virtual void setDestinationMacAddress(int destinationMacAddress);
+    virtual int getBeaconOrder() const;
+    virtual void setBeaconOrder(int beaconOrder);
+    virtual int getSuperFrameOrder() const;
+    virtual void setSuperFrameOrder(int superFrameOrder);
+    virtual int getFinalCAPslot() const;
+    virtual void setFinalCAPslot(int finalCAPslot);
+    virtual int getBatteryLifeExtension() const;
+    virtual void setBatteryLifeExtension(int batteryLifeExtension);
+    virtual int getReserved() const;
+    virtual void setReserved(int reserved);
+    virtual int getPANcoordinator() const;
+    virtual void setPANcoordinator(int PANcoordinator);
+    virtual int getAssociationPermit() const;
+    virtual void setAssociationPermit(int associationPermit);
 };
 
 inline void doPacking(cCommBuffer *b, FrameBeacon& obj) {obj.parsimPack(b);}
@@ -728,18 +790,17 @@ inline void doUnpacking(cCommBuffer *b, FrameBeacon& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet FrameCommand extends Frame{
- *     int headerLength; 
+ *     headerLength = 25;
  *     
- * 	uint8_t dataSequenceNumber;	
+ * 	int dataSequenceNumber;	
  * 	
- * 	
- *   	uint16_t destinationPanId;    	
- *   	uint8_t  destinationAddress[8]; 
- *   	uint16_t sourcePanId;     	    
- *   	uint8_t  sourceAddress[8];      
+ * 	int sourcePanID;	  		
+ * 	int destinationPanID; 		
+ * 	int sourceMacAddress; 		
+ * 	int destinationMacAddress;  
  *   	
  *   	
- *   	uint8_t commandType; 
+ *   	int commandType; 
  * 
  * 	
  * 	
@@ -758,13 +819,12 @@ inline void doUnpacking(cCommBuffer *b, FrameBeacon& obj) {obj.parsimUnpack(b);}
 class FrameCommand : public ::wsn_energy::Frame
 {
   protected:
-    int headerLength_var;
-    uint8_t dataSequenceNumber_var;
-    uint16_t destinationPanId_var;
-    uint8_t destinationAddress_var[8];
-    uint16_t sourcePanId_var;
-    uint8_t sourceAddress_var[8];
-    uint8_t commandType_var;
+    int dataSequenceNumber_var;
+    int sourcePanID_var;
+    int destinationPanID_var;
+    int sourceMacAddress_var;
+    int destinationMacAddress_var;
+    int commandType_var;
 
   private:
     void copy(const FrameCommand& other);
@@ -783,22 +843,18 @@ class FrameCommand : public ::wsn_energy::Frame
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getHeaderLength() const;
-    virtual void setHeaderLength(int headerLength);
-    virtual uint8_t getDataSequenceNumber() const;
-    virtual void setDataSequenceNumber(uint8_t dataSequenceNumber);
-    virtual uint16_t getDestinationPanId() const;
-    virtual void setDestinationPanId(uint16_t destinationPanId);
-    virtual unsigned int getDestinationAddressArraySize() const;
-    virtual uint8_t getDestinationAddress(unsigned int k) const;
-    virtual void setDestinationAddress(unsigned int k, uint8_t destinationAddress);
-    virtual uint16_t getSourcePanId() const;
-    virtual void setSourcePanId(uint16_t sourcePanId);
-    virtual unsigned int getSourceAddressArraySize() const;
-    virtual uint8_t getSourceAddress(unsigned int k) const;
-    virtual void setSourceAddress(unsigned int k, uint8_t sourceAddress);
-    virtual uint8_t getCommandType() const;
-    virtual void setCommandType(uint8_t commandType);
+    virtual int getDataSequenceNumber() const;
+    virtual void setDataSequenceNumber(int dataSequenceNumber);
+    virtual int getSourcePanID() const;
+    virtual void setSourcePanID(int sourcePanID);
+    virtual int getDestinationPanID() const;
+    virtual void setDestinationPanID(int destinationPanID);
+    virtual int getSourceMacAddress() const;
+    virtual void setSourceMacAddress(int sourceMacAddress);
+    virtual int getDestinationMacAddress() const;
+    virtual void setDestinationMacAddress(int destinationMacAddress);
+    virtual int getCommandType() const;
+    virtual void setCommandType(int commandType);
 };
 
 inline void doPacking(cCommBuffer *b, FrameCommand& obj) {obj.parsimPack(b);}
@@ -807,20 +863,59 @@ inline void doUnpacking(cCommBuffer *b, FrameCommand& obj) {obj.parsimUnpack(b);
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet IpPacket{  
- *     double time;  
+ * packet IpPacketInterface{
+ *     double time;  			
+ *     int 	headerLength; 	
+ * }
+ * </pre>
+ */
+class IpPacketInterface : public ::cPacket
+{
+  protected:
+    double time_var;
+    int headerLength_var;
+
+  private:
+    void copy(const IpPacketInterface& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const IpPacketInterface&);
+
+  public:
+    IpPacketInterface(const char *name=NULL, int kind=0);
+    IpPacketInterface(const IpPacketInterface& other);
+    virtual ~IpPacketInterface();
+    IpPacketInterface& operator=(const IpPacketInterface& other);
+    virtual IpPacketInterface *dup() const {return new IpPacketInterface(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual double getTime() const;
+    virtual void setTime(double time);
+    virtual int getHeaderLength() const;
+    virtual void setHeaderLength(int headerLength);
+};
+
+inline void doPacking(cCommBuffer *b, IpPacketInterface& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, IpPacketInterface& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet IpPacketStandard extends IpPacketInterface{  
  * 
+ *     headerLength = 40;
  *     
- *     
- *     
- *     
- *     
- *     
- *     
- *     
- *     
- *     
- *     
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
  *     
  *     int version;
  *     int trafficClass;
@@ -828,94 +923,40 @@ inline void doUnpacking(cCommBuffer *b, FrameCommand& obj) {obj.parsimUnpack(b);
  *     int payloadLength;
  *     int nextHeader; 
  *     int hopLimit;
- *     int senderIpAddress; 
- *     int recverIpAddress; 
- *     
- *     
- * 	
- * 	
- * 	
- *     
- *     
- *     
- * 	int headerLength = 2;
- * 
- * 	
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *     int sourceIpAddress;
+ *     int destinationIpAddress;
  * }
  * </pre>
  */
-class IpPacket : public ::cPacket
+class IpPacketStandard : public ::wsn_energy::IpPacketInterface
 {
   protected:
-    double time_var;
     int version_var;
     int trafficClass_var;
     int flowLabel_var;
     int payloadLength_var;
     int nextHeader_var;
     int hopLimit_var;
-    int senderIpAddress_var;
-    int recverIpAddress_var;
-    int headerLength_var;
+    int sourceIpAddress_var;
+    int destinationIpAddress_var;
 
   private:
-    void copy(const IpPacket& other);
+    void copy(const IpPacketStandard& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const IpPacket&);
+    bool operator==(const IpPacketStandard&);
 
   public:
-    IpPacket(const char *name=NULL, int kind=0);
-    IpPacket(const IpPacket& other);
-    virtual ~IpPacket();
-    IpPacket& operator=(const IpPacket& other);
-    virtual IpPacket *dup() const {return new IpPacket(*this);}
+    IpPacketStandard(const char *name=NULL, int kind=0);
+    IpPacketStandard(const IpPacketStandard& other);
+    virtual ~IpPacketStandard();
+    IpPacketStandard& operator=(const IpPacketStandard& other);
+    virtual IpPacketStandard *dup() const {return new IpPacketStandard(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual double getTime() const;
-    virtual void setTime(double time);
     virtual int getVersion() const;
     virtual void setVersion(int version);
     virtual int getTrafficClass() const;
@@ -928,16 +969,117 @@ class IpPacket : public ::cPacket
     virtual void setNextHeader(int nextHeader);
     virtual int getHopLimit() const;
     virtual void setHopLimit(int hopLimit);
-    virtual int getSenderIpAddress() const;
-    virtual void setSenderIpAddress(int senderIpAddress);
-    virtual int getRecverIpAddress() const;
-    virtual void setRecverIpAddress(int recverIpAddress);
-    virtual int getHeaderLength() const;
-    virtual void setHeaderLength(int headerLength);
+    virtual int getSourceIpAddress() const;
+    virtual void setSourceIpAddress(int sourceIpAddress);
+    virtual int getDestinationIpAddress() const;
+    virtual void setDestinationIpAddress(int destinationIpAddress);
 };
 
-inline void doPacking(cCommBuffer *b, IpPacket& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, IpPacket& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, IpPacketStandard& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, IpPacketStandard& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet IpPacketCompressed extends IpPacketInterface{
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 	
+ * 	headerLength = 2;
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 	int sourceIPAddress; 			
+ * 	int destinationIPAddress; 		
+ * 	int trafficClassAndFlowLabel; 	
+ * 	int nextHeader;					
+ * 	int hc2encoding;				
+ * }
+ * </pre>
+ */
+class IpPacketCompressed : public ::wsn_energy::IpPacketInterface
+{
+  protected:
+    int sourceIPAddress_var;
+    int destinationIPAddress_var;
+    int trafficClassAndFlowLabel_var;
+    int nextHeader_var;
+    int hc2encoding_var;
+
+  private:
+    void copy(const IpPacketCompressed& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const IpPacketCompressed&);
+
+  public:
+    IpPacketCompressed(const char *name=NULL, int kind=0);
+    IpPacketCompressed(const IpPacketCompressed& other);
+    virtual ~IpPacketCompressed();
+    IpPacketCompressed& operator=(const IpPacketCompressed& other);
+    virtual IpPacketCompressed *dup() const {return new IpPacketCompressed(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getSourceIPAddress() const;
+    virtual void setSourceIPAddress(int sourceIPAddress);
+    virtual int getDestinationIPAddress() const;
+    virtual void setDestinationIPAddress(int destinationIPAddress);
+    virtual int getTrafficClassAndFlowLabel() const;
+    virtual void setTrafficClassAndFlowLabel(int trafficClassAndFlowLabel);
+    virtual int getNextHeader() const;
+    virtual void setNextHeader(int nextHeader);
+    virtual int getHc2encoding() const;
+    virtual void setHc2encoding(int hc2encoding);
+};
+
+inline void doPacking(cCommBuffer *b, IpPacketCompressed& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, IpPacketCompressed& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
@@ -1003,6 +1145,7 @@ inline void doUnpacking(cCommBuffer *b, IcmpPacket& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIO{
+ *     
  * 	int dodagID; 
  * 	int version; 
  * 	
@@ -1097,58 +1240,56 @@ inline void doUnpacking(cCommBuffer *b, DIS& obj) {obj.parsimUnpack(b);}
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
- * packet UdpPacket{
+ * packet UdpPacketInterface{
+ *     int headerLength; 
+ * }
+ * </pre>
+ */
+class UdpPacketInterface : public ::cPacket
+{
+  protected:
+    int headerLength_var;
+
+  private:
+    void copy(const UdpPacketInterface& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const UdpPacketInterface&);
+
+  public:
+    UdpPacketInterface(const char *name=NULL, int kind=0);
+    UdpPacketInterface(const UdpPacketInterface& other);
+    virtual ~UdpPacketInterface();
+    UdpPacketInterface& operator=(const UdpPacketInterface& other);
+    virtual UdpPacketInterface *dup() const {return new UdpPacketInterface(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual int getHeaderLength() const;
+    virtual void setHeaderLength(int headerLength);
+};
+
+inline void doPacking(cCommBuffer *b, UdpPacketInterface& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, UdpPacketInterface& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet UdpPacketStandard extends UdpPacketInterface{
  * 
  * 
- * 
+ * 	headerLength = 8;  
  * 
  * 	short sourcePort;      
  * 	short destinationPort; 
  * 	short length;          
  * 	short checksum;        
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
  * }
  * </pre>
  */
-class UdpPacket : public ::cPacket
+class UdpPacketStandard : public ::wsn_energy::UdpPacketInterface
 {
   protected:
     short sourcePort_var;
@@ -1157,18 +1298,18 @@ class UdpPacket : public ::cPacket
     short checksum_var;
 
   private:
-    void copy(const UdpPacket& other);
+    void copy(const UdpPacketStandard& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const UdpPacket&);
+    bool operator==(const UdpPacketStandard&);
 
   public:
-    UdpPacket(const char *name=NULL, int kind=0);
-    UdpPacket(const UdpPacket& other);
-    virtual ~UdpPacket();
-    UdpPacket& operator=(const UdpPacket& other);
-    virtual UdpPacket *dup() const {return new UdpPacket(*this);}
+    UdpPacketStandard(const char *name=NULL, int kind=0);
+    UdpPacketStandard(const UdpPacketStandard& other);
+    virtual ~UdpPacketStandard();
+    UdpPacketStandard& operator=(const UdpPacketStandard& other);
+    virtual UdpPacketStandard *dup() const {return new UdpPacketStandard(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -1183,15 +1324,101 @@ class UdpPacket : public ::cPacket
     virtual void setChecksum(short checksum);
 };
 
-inline void doPacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, UdpPacket& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, UdpPacketStandard& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, UdpPacketStandard& obj) {obj.parsimUnpack(b);}
+
+/**
+ * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * packet UdpPacketCompressed extends UdpPacketInterface{
+ * 
+ * 
+ * 	headerLength = 3; 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 	
+ * 	bool udpSourcePort;			
+ * 	bool udpDestinationPort;	
+ * 	short length;				
+ * 	short checksum; 			
+ * }
+ * </pre>
+ */
+class UdpPacketCompressed : public ::wsn_energy::UdpPacketInterface
+{
+  protected:
+    bool udpSourcePort_var;
+    bool udpDestinationPort_var;
+    short length_var;
+    short checksum_var;
+
+  private:
+    void copy(const UdpPacketCompressed& other);
+
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const UdpPacketCompressed&);
+
+  public:
+    UdpPacketCompressed(const char *name=NULL, int kind=0);
+    UdpPacketCompressed(const UdpPacketCompressed& other);
+    virtual ~UdpPacketCompressed();
+    UdpPacketCompressed& operator=(const UdpPacketCompressed& other);
+    virtual UdpPacketCompressed *dup() const {return new UdpPacketCompressed(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    // field getter/setter methods
+    virtual bool getUdpSourcePort() const;
+    virtual void setUdpSourcePort(bool udpSourcePort);
+    virtual bool getUdpDestinationPort() const;
+    virtual void setUdpDestinationPort(bool udpDestinationPort);
+    virtual short getLength() const;
+    virtual void setLength(short length);
+    virtual short getChecksum() const;
+    virtual void setChecksum(short checksum);
+};
+
+inline void doPacking(cCommBuffer *b, UdpPacketCompressed& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, UdpPacketCompressed& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet Data{
  *     double time;  		
- *     int payloadLength;  
  *     
  *     int destinationPort; 	  
  *     int destinationIPAddress; 
@@ -1204,7 +1431,6 @@ class Data : public ::cPacket
 {
   protected:
     double time_var;
-    int payloadLength_var;
     int destinationPort_var;
     int destinationIPAddress_var;
     opp_string value_var;
@@ -1228,8 +1454,6 @@ class Data : public ::cPacket
     // field getter/setter methods
     virtual double getTime() const;
     virtual void setTime(double time);
-    virtual int getPayloadLength() const;
-    virtual void setPayloadLength(int payloadLength);
     virtual int getDestinationPort() const;
     virtual void setDestinationPort(int destinationPort);
     virtual int getDestinationIPAddress() const;

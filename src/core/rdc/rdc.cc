@@ -14,13 +14,22 @@
 #define CONTIKI_MAC_REDUNDANCY 1
 #endif
 
+#ifndef WAITING_ACK_PERIOD
+#define WAITING_ACK_PERIOD 1
+#endif
+
 namespace wsn_energy {
 
 void RDCdriver::initialize()
 {
-  isSendingBroadcast = true;
   isWaitingACK = false;
-  sequence = 0;
+
+  // WSN channel check
+  channelCheck = new Command;
+  channelCheck->setKind(COMMAND);
+  channelCheck->setNote(RDC_CHANNEL_CHECK);
+
+  scheduleAt(CHANNEL_CHECK_INTERVAL, channelCheck);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -37,7 +46,13 @@ void RDCdriver::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case RDC_WAIT_FOR_ACK: /*no ACK*/
+        case RDC_CHANNEL_CHECK: /* channel check */{
+          // Turn on
+          // Turn off
+          break;
+        } /* channel check*/
+
+        case RDC_WAIT_FOR_ACK: /* no ACK */
         {
           // WSN reset parameter, prepare for new transmitting
           sendResult(RDC_SEND_NO_ACK);
@@ -60,69 +75,73 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
 void RDCdriver::processUpperLayerMessage(cPacket* packet)
 {
-//  switch (packet->getKind())
-//  {
-//    case DATA: /* Data */
-//    {
-//      counter = 0;
-//
-//      this->buffer = check_and_cast<Frame*>(packet->dup()); // duplicate buffer
-//      this->buffer->setKind(DATA);
-//      this->buffer->setIsACK(false);
-//      this->sequence++;
-//      this->buffer->setSequenceNumber(this->sequence);
-//
-//      // consider broadcast or unicast
-//      if (this->buffer->getRecverMacAddress() == 0)
-//      {
-//        isSendingBroadcast = true;
-//      }
-//      else
-//      {
-//        isSendingBroadcast = false;
-//
-//        // WSN expire time to receive ACK
-////        waitForACK = new Command;
-////        waitForACK->setKind(COMMAND);
-////        waitForACK->setNote(RDC_WAIT_FOR_ACK);
-////        scheduleAt(0, waitForACK);
-//      }
-//
-//      // send to lower
-//      sendMessageToLower(buffer->dup());
-//      sendCommand(RDC_TRANSMIT);
-//
-//      break;
-//    } /* Data */
-//
-//    case COMMAND: /* Command */
-//    {
-//      switch (check_and_cast<Command*>(packet)->getNote())
-//      {
-//        case CHANNEL_CCA_REQUEST: /* request CCA */
-//        {
-//          sendCommand(CHANNEL_CCA_REQUEST);
-//          break;
-//        } /* request CCA */
-//
-//        default:
-//          ev << "Unknown command" << endl;
-//          break;
-//      }
-//      delete packet; // done command
-//      break;
-//    } /* Command */
-//
-//    default:
-//      ev << "Unknown kind" << endl;
-//      break;
-//  }
+  switch (packet->getKind())
+  {
+    case DATA: /* Data */
+    {
+      switch ((check_and_cast<Frame*>(packet))->getFrameType())
+      {
+        case FRAME_DATA:
+          counter = 0;
+
+          this->buffer = check_and_cast<Frame*>(packet->dup()); // duplicate buffer
+
+          // consider broadcast or unicast
+          if (this->buffer->getAckRequired())
+          {
+            isWaitingACK = true;
+
+            // expire time to receive ACK per all packet !!!
+            waitForACK = new Command;
+            waitForACK->setKind(COMMAND);
+            waitForACK->setNote(RDC_WAIT_FOR_ACK);
+
+            // WSN timeout ACK
+            scheduleAt(WAITING_ACK_PERIOD, waitForACK);
+          }
+          else
+          {
+            isWaitingACK = false;
+          }
+
+          // send to lower
+          // WSN defer ???
+          sendMessageToLower(buffer->dup());
+          sendCommand(RDC_TRANSMIT);
+
+          break;
+      }
+      break;
+    } /* Data */
+
+    case COMMAND: /* Command */
+    {
+      switch (check_and_cast<Command*>(packet)->getNote())
+      {
+        case CHANNEL_CCA_REQUEST: /* request CCA */
+        {
+          sendCommand(CHANNEL_CCA_REQUEST);
+          break;
+        } /* request CCA */
+
+        default:
+          ev << "Unknown command" << endl;
+          break;
+      }
+      delete packet; // done command
+      break;
+    } /* Command */
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
+  }
 }
 
 void RDCdriver::processLowerLayerMessage(cPacket* packet)
 {
-//  switch (packet->getKind())
-//  {
+  switch (packet->getKind())
+  {
 //    case DATA: /* Data */
 //    {
 //      Frame *frame = check_and_cast<Frame*>(packet);
@@ -192,62 +211,63 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 //      }
 //      break;
 //    } /* Data */
-//
-//    case RESULT: /* Result */
-//    {
-//      switch (check_and_cast<Result*>(packet)->getNote())
-//      {
-//        case CHANNEL_CLEAR: /* Channel is clear */
-//        {
-//          sendResult(CHANNEL_CLEAR);
-//          break;
-//        } /* Channel is busy */
-//
-//        case CHANNEL_BUSY: /* Channel is clear */
-//        {
-//          sendResult(CHANNEL_BUSY);
-//          break;
-//        }/* Channel is busy */
-//
-//        case PHY_TX_ERR: /* Internal error */
-//        {
-//          sendResult(RDC_SEND_FATAL);
-//          break;
-//        }/* Internal error */
-//
-//        case PHY_TX_OK: /* callback after transmitting */
-//        {
-//          // consider just sends broadcast data
-//          if (isSendingBroadcast)
-//          {
-//            // consider counter
-//            if (++counter < CONTIKI_MAC_REDUNDANCY)
-//            {
-//              // WSN hack need implementing duty cycling here
-//              sendMessageToLower(buffer->dup());
-//              sendCommand(RDC_TRANSMIT);
-//            }
-//            // hack
-//            else
-//            {
-//              // broadcast message always succeed !!!
-//              sendResult(RDC_SEND_OK);
-//              on();
-//              delete buffer;
-//            }
-//          }
-//          // WSN consider just send unicast (data/ack)
-//          else
-//          {
-//            if (++counter < CONTIKI_MAC_REDUNDANCY)
-//            {
-//              // WSN hack need implementing duty cycling here
-//              sendMessageToLower(buffer->dup());
-//              sendCommand(RDC_TRANSMIT);
-//            }
-//            else
-//            {
-//              // WSN hack, given the TX range 100%, ACK only lost if the sender node energy is too low
+
+    case RESULT: /* Result */
+    {
+      switch (check_and_cast<Result*>(packet)->getNote())
+      {
+        case CHANNEL_CLEAR: /* Channel is clear */
+        {
+          sendResult(CHANNEL_CLEAR);
+          break;
+        } /* Channel is busy */
+
+        case CHANNEL_BUSY: /* Channel is clear */
+        {
+          sendResult(CHANNEL_BUSY);
+          break;
+        }/* Channel is busy */
+
+        case PHY_TX_ERR: /* Internal error */
+        {
+          sendResult(RDC_SEND_FATAL);
+          break;
+        }/* Internal error */
+
+        case PHY_TX_OK: /* callback after transmitting */
+        {
+          // WSN consider just sends broadcast data
+          if (!isWaitingACK)
+          {
+            // consider counter
+            if (++counter < CONTIKI_MAC_REDUNDANCY)
+            {
+              // WSN hack need implementing duty cycling here
+              sendMessageToLower(buffer->dup());
+              sendCommand(RDC_TRANSMIT);
+            }
+            // hack
+            else
+            {
+              // broadcast message always succeed !!!
+              sendResult(RDC_SEND_OK);
+              // WSN intermediate switch to listen mode
+              on();
+              delete buffer;
+            }
+          }
+          // WSN consider just send unicast (data/ack)
+          else
+          {
+            if (++counter < CONTIKI_MAC_REDUNDANCY)
+            {
+              // WSN hack need implementing duty cycling here
+              sendMessageToLower(buffer->dup());
+              sendCommand(RDC_TRANSMIT);
+            }
+            else
+            {
+              // WSN hack, given the TX range 100%, ACK only lost if the sender node energy is too low
 //              if (check_and_cast<Count*>(
 //                  simulation.getModule(
 //                      check_and_cast<IpPacket*>(this->buffer->getEncapsulatedPacket())->getRecverIpAddress())->getModuleByPath(
@@ -257,24 +277,24 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 //                sendResult(RDC_SEND_OK);
 //
 //              on();
-//              delete buffer;
-//            }
-//          }
-//          break;
-//        }/* callback after transmitting */
-//
-//        default:
-//          ev << "Unknown result" << endl;
-//          break;
-//      }
-//      delete packet; // done result
-//      break;
-//    } /* Result */
-//
-//    default:
-//      ev << "Unknown kind" << endl;
-//      break;
-//  }
+              delete buffer;
+            }
+          }
+          break;
+        }/* callback after transmitting */
+
+        default:
+          ev << "Unknown result" << endl;
+          break;
+      }
+      delete packet; // done result
+      break;
+    } /* Result */
+
+    default:
+      ev << "Unknown kind" << endl;
+      break;
+  }
 }
 
 void RDCdriver::on()

@@ -16,7 +16,9 @@
 
 #ifndef IFS
 #define IFS
-#define SIFS 0.000192 // 12 symbols
+#define MAX_SIFS_FRAME_SIZE 18 // octets
+#define SIFS 0.000192          // 12 symbols
+#define LIFS 0.00064           // 40 symbols
 #endif
 
 namespace wsn_energy {
@@ -29,17 +31,18 @@ void MACdriver::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case MAC_EXPIRE_IFS: /* expire IFS */
-        {
-          sendResult(MAC_FINISH_PHASE);
-          break;
-        } /* expire IFS*/
-
         case CHANNEL_CCA_REQUEST: /* perform CCA*/
         {
           sendCommand(CHANNEL_CCA_REQUEST);
           break;
         } /* perform CCA */
+
+        case MAC_EXPIRE_IFS: /* expire IFS */
+        {
+          // WSN no ack ???
+          sendResult(MAC_FINISH_PHASE);
+          break;
+        } /* expire IFS*/
 
         default:
           ev << "Unknown command" << endl;
@@ -60,27 +63,46 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
 {
   /* only process data packet */
 
-  /* create new buffer */
-  frameBuffer = new Frame;
-  frameBuffer->setKind(DATA);
-  frameBuffer->setByteLength(frameBuffer->getHeaderLength());
+  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+  {
+    // WSN compress using HC01
+  }
+  else
+  {
+    // intialisation
+    frameBuffer = new FrameDataStandard;
+    frameBuffer->setKind(DATA);
+    frameBuffer->setByteLength(frameBuffer->getHeaderLength());
 
-  /*  meta data */
-  frameBuffer->setNumberTransmission(0);
+    /*  meta data */
+    frameBuffer->setNumberTransmission(0);
 
-  /* WSN hack */
-//  frameBuffer->setSenderMacAddress(this->getId());
+    // FCF
+    frameBuffer->setFrameType(FRAME_DATA);
+    frameBuffer->setPanIdCompression(false);
 
-  /* MAC - IP address */
-//  if (check_and_cast<IpPacket*>(packet)->getRecverIpAddress() == 0)
-//    frameBuffer->setRecverMacAddress(0);
-//  else
-//    frameBuffer->setRecverMacAddress(
-//        simulation.getModule(check_and_cast<IpPacket*>(packet)->getRecverIpAddress())->getParentModule()->getModuleByPath(
-//            ".mac")->getId());
+    // sequence number
+    (check_and_cast<FrameDataStandard*>(frameBuffer))->setDataSequenceNumber(this->sequenceNumber++);
 
-  /* encapsulate */
-  frameBuffer->encapsulate((IpPacket*) packet);
+    // address fields
+    (check_and_cast<FrameDataStandard*>(frameBuffer))->setSourceMacAddress(this->getId());
+
+    if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() == 0)
+    {
+      (check_and_cast<FrameDataStandard*>(frameBuffer))->setDestinationMacAddress(0);
+      frameBuffer->setAckRequired(false);
+    }
+    else
+    {
+      // using default route
+      (check_and_cast<FrameDataStandard*>(frameBuffer))->setDestinationMacAddress(
+          simulation.getModule(check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress())->getParentModule()->getModuleByPath(
+              ".mac")->getId());
+      frameBuffer->setAckRequired(true);
+    }
+  }
+
+  frameBuffer->encapsulate(packet);
 
   /* backoff and CCA */
   deferPacket();
@@ -194,10 +216,10 @@ void MACdriver::receivePacket(Frame* frameMac)
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
 
-  IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
-  ipPacket->setKind(DATA);
-
-  sendMessageToUpper(ipPacket);
+//  IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
+//  ipPacket->setKind(DATA);
+//
+//  sendMessageToUpper(ipPacket);
 
   delete frameMac;
 }

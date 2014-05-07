@@ -10,6 +10,7 @@
 #include "radio.h"
 #include "statistic.h"
 
+// define number of packet each sensor need to send
 //#define MAX 900
 #define MAX 2
 
@@ -163,13 +164,13 @@ void Client::newData()
 
 void Client::sendMessage(char *value, int len, int destinationPort, int destinationAddress)
 {
-  // intialization
+  // intialisation
   Data *data = new Data;
   data->setKind(DATA);
+  data->setByteLength(len);
 
   // meta-data
   data->setTime(simTime().dbl());
-  data->setPayloadLength(len);
 
   // control-data
   data->setDestinationPort(destinationPort);

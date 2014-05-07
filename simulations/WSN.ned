@@ -33,6 +33,7 @@ network WSN
 
         bool usingFLR;
         bool usingELB;
+        bool usingHDC;
 
         int width @unit(m);
         int height @unit(m);
@@ -49,8 +50,6 @@ network WSN
         bool isPolling;
         double polling;
 
-        int trRange @unit(m);
-        int coRange @unit(m);
         int ssRange @unit(m);
 
         @display("bgs=6,m;bgb=$width,$height,#C6C6FF,#0000FF,2");
@@ -58,15 +57,11 @@ network WSN
     submodules:
         server: ServerMote {
             parameters:
-                trRange = trRange;
-                coRange = coRange;
                 axisX = serverX;
                 axisY = serverY;
         }
         client[numberClient]: ClientMote {
             parameters:
-                trRange = trRange;
-                coRange = coRange;
                 axisX = 0;
                 axisY = 0;
         }

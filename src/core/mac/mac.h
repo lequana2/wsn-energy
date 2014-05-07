@@ -13,20 +13,11 @@
 
 namespace wsn_energy {
 
-class shortAddress802154
-{
-    char octet[2];
-};
-
-class longAddress802154
-{
-    char octect[8];
-};
-
 class MACdriver : public myModule
 {
   protected:
-    Frame *frameBuffer;
+    Frame* frameBuffer;
+    int sequenceNumber;
 
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);

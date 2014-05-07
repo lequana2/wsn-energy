@@ -19,20 +19,38 @@
 #include "myModule.h"
 
 #ifndef HARDWARE
-#define HARDWARE                           1
-#define SWITCH_MODE_DELAY                  0              // second
-#define SYMBOL                             0.000016       // 1 symbol = 4/250 millisecond
-#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    SYMBOL*12      // 12 symbols
-#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   SYMBOL*12      // 12 symbols
-#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  SYMBOL*24      // 24 symbols
-#define SWITCH_MODE_DELAY_TRANS_TO_IDLE    SYMBOL*0       // 0 symbol
-#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  SYMBOL*24      // 24 symbols
-#define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   SYMBOL*0       // 0 symbol
-#define DATA_RATE                          250000.0       // bit per second
+#define HARDWARE
+#define SWITCH_MODE_DELAY                  0        // second
+#define SYMBOL                             0.000016 // 1 symbol = 4/250 millisecond
+#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    0.000192 // 12 symbols
+#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   0.000192 // 12 symbols
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  0.000384 // 24 symbols
+#define SWITCH_MODE_DELAY_TRANS_TO_IDLE    0        // 0 symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000384 // 24 symbols
+#define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   0        // 0 symbol
+#define DATA_RATE                          250000.0 // bit per second
+#define CCA_PERIOD                         0.000128 // seconds
+#endif
+
+/*
+ * Specification for CC2420
+ */
+#ifndef CC2420
+#define CC2420
+#define CHANNEL                26   // channel name
+#define FREQUENCY          2400.0   // MHz
+#define TXPOWER_MAX           0.0   // dBm
+#define TXPOWER_MIN         -24.0   // dBm
+#define RX_SENSITIVITY      -95.0   // dBm
+#define CCA_THRESHOLD       -77.0   // dBm, programable RSSI.CCA_THR
+#define TXPOWER_CURRENT_MAX  17.4   // mA
+#define RXPOWER_CURRENT      18.8   // mA
+#define IDPOWER_CURRENT       0.426 // mA
+#define SUPPLY_VOLTAGE        3.3   // V, VREG_IN
 #endif
 
 #ifndef COLORIZE
-#define COLORIZE 1
+#define COLORIZE
 #define OFF_COLOR       "black"
 #define IDLE_COLOR      "brown"
 #define TRANSMIT_COLOR  "blue"
@@ -43,10 +61,10 @@
 #ifndef WORKING_MODE
 #define WORKING_MODE
 #define POWER_DOWN      0 // power down
-#define IDLE            1 // do nothing
-#define TRANSMITTING    2 // transmitting
-#define LISTENING       3 // listening to nothing
-#define RECEIVING       4 // listening to something
+#define IDLE            1 // do nothing (free)
+#define TRANSMITTING    2 // transmitting (busy)
+#define LISTENING       3 // listening to nothing (free)
+#define RECEIVING       4 // listening to something (busy)
 #endif
 
 namespace wsn_energy {
@@ -54,7 +72,7 @@ namespace wsn_energy {
 class RadioDriver : public myModule
 {
   private:
-    Raw     *bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
+    Raw* bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
 
     // Self functioning
     void transmit_begin();
@@ -81,11 +99,12 @@ class RadioDriver : public myModule
     void processLowerLayerMessage(cPacket*);
 
   public:
-    int status;  // sleep, transmitting, listening, receiving
-    int trRange; // simulated transmission range according to TXPOWER
-    int coRange; // simulated collission range according to RXPOWER
+    int status;     // sleep, transmitting, listening, receiving
+    double txPower; // transmit power
+    double trRange; // simulated transmission range according to txPower
+    double coRange; // simulated collission range according to txPower
 
-    void switchOscilatorMode(int mode);     // Switch oscilator mode, public for battery
+    void switchOscilatorMode(int mode);     // Switch oscilator mode, public for manipulated by battery, bytecount
 };
 
 } /* namespace wsn_energy */

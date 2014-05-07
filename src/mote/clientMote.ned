@@ -39,8 +39,6 @@ module ClientMote
 
         int axisX @unit(m);
         int axisY @unit(m);
-        int trRange @unit(m);
-        int coRange @unit(m);
 
         @display("p=$axisX,$axisY;i=misc/node2;is=l");
 
@@ -62,8 +60,6 @@ module ClientMote
         }
         radio: <radioType> like iRadio {
             parameters:
-                trRange = trRange;
-                coRange = coRange;
                 @display("p=150,550");
         }
         energest: Energest {
