@@ -7,23 +7,13 @@
 #include "math.h"
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
 
 void RadioDriver::initialize()
 {
-  // free space path loss formula
-  // units: [d] = km; [f] = MHz
-  // FSPL = 20*log(d,10) + 20*log(f,10) + 32.45
-
-  // Link budget
-  // P(Rx)[dBm] = P(Tx)[dBm] + G(Tx)[dBi] + G(Rx)[dBi] - FSPL[dB]
-
-  // Then
-  // log(d,10) = (P(Tx) - P(Rx) + G(Tx) + G(Rx) - 20*log(f,10) - 32.45) / 20
-
   // Transmission power
   this->txPower = TXPOWER_MAX;
 
@@ -36,11 +26,18 @@ void RadioDriver::initialize()
   //
   // fluctuate +- 10dBm
 
-  // expected Transmission range
-  this->trRange = 1000 * pow(10, ((txPower - RX_SENSITIVITY - 20.0 * log10(FREQUENCY) - 32.45) / (20.0)));
+  double d0 = 1.0;
+  double pl0 = -37.0;
+  double pathLossExponent = 2.8;
+  int signalFluctuate = 10;
+  int rssiAccuracy = 6;
 
-  // expected Collision range
-  this->coRange = 1000 * pow(10, ((txPower - CCA_THRESHOLD - 20.0 * log10(FREQUENCY) - 32.45) / (20.0)));
+  // expected Transmission range
+  this->trRange = d0 * pow(10, (pl0 - RX_SENSITIVITY - signalFluctuate) / (10 * pathLossExponent));
+
+  // WSN expected Collision range
+  // this->coRange = d0 * pow(10, (pl0 - CCA_THRESHOLD  + rssiAccuracy) / (10 * pathLossExponent));
+  this->coRange = this->trRange;
 
   if (DEBUG)
     std::cout << "Radio " << this->trRange << " and " << this->coRange << endl;
@@ -49,7 +46,7 @@ void RadioDriver::initialize()
   this->par("coRange").setDoubleValue(coRange);
 
   // Turn on in initializing phase
-  listen();
+  // listen();
 }
 
 void RadioDriver::handleMessage(cMessage* msg)

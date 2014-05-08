@@ -34,16 +34,16 @@ double nullRadio::intervalCCA()
 
 double nullRadio::getTxPower()
 {
-  return 1;
+  return 0;
 }
 
 double nullRadio::getRxPower()
 {
-  return 1;
+  return 0;
 }
 
 double nullRadio::getIdPower(){
-  return 1;
+  return 0;
 }
 
 } /* namespace wsn_energy */

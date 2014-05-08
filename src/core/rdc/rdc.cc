@@ -18,12 +18,16 @@
 #define WAITING_ACK_PERIOD 1
 #endif
 
+#ifndef CONTIKI_MAC
+#define CONTIKI_MAC
+#define CCA_CHECK_PER_INTERVAL 2
+#define NUMBER_OF_CONSECUTIVE_CCA_BEFORE_TRANSMISSION 6
+#endif
+
 namespace wsn_energy {
 
 void RDCdriver::initialize()
 {
-  isWaitingACK = false;
-
   // WSN channel check
   channelCheck = new Command;
   channelCheck->setKind(COMMAND);
@@ -82,26 +86,23 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
       switch ((check_and_cast<Frame*>(packet))->getFrameType())
       {
         case FRAME_DATA:
-          counter = 0;
+          selfSequenceNumber = 0;
 
           this->buffer = check_and_cast<Frame*>(packet->dup()); // duplicate buffer
 
           // consider broadcast or unicast
           if (this->buffer->getAckRequired())
           {
-            isWaitingACK = true;
-
             // expire time to receive ACK per all packet !!!
             waitForACK = new Command;
             waitForACK->setKind(COMMAND);
             waitForACK->setNote(RDC_WAIT_FOR_ACK);
 
             // WSN timeout ACK
-            scheduleAt(WAITING_ACK_PERIOD, waitForACK);
+            scheduleAt(simTime() + WAITING_ACK_PERIOD, waitForACK);
           }
           else
           {
-            isWaitingACK = false;
           }
 
           // send to lower
@@ -118,6 +119,8 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
+        // WSN prepare a transmission session
+
         case CHANNEL_CCA_REQUEST: /* request CCA */
         {
           sendCommand(CHANNEL_CCA_REQUEST);
@@ -237,48 +240,48 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
         case PHY_TX_OK: /* callback after transmitting */
         {
           // WSN consider just sends broadcast data
-          if (!isWaitingACK)
+          if (true)
           {
             // consider counter
-            if (++counter < CONTIKI_MAC_REDUNDANCY)
-            {
-              // WSN hack need implementing duty cycling here
-              sendMessageToLower(buffer->dup());
-              sendCommand(RDC_TRANSMIT);
-            }
-            // hack
-            else
-            {
-              // broadcast message always succeed !!!
-              sendResult(RDC_SEND_OK);
-              // WSN intermediate switch to listen mode
-              on();
-              delete buffer;
-            }
+//            if (++selfSequenceNumber < CONTIKI_MAC_REDUNDANCY)
+//            {
+//              // WSN hack need implementing duty cycling here
+//              sendMessageToLower(buffer->dup());
+//              sendCommand(RDC_TRANSMIT);
+//            }
+//            // hack
+//            else
+//            {
+//              // broadcast message always succeed !!!
+//              sendResult(RDC_SEND_OK);
+//              // WSN intermediate switch to listen mode
+//              on();
+//              delete buffer;
+//            }
           }
           // WSN consider just send unicast (data/ack)
           else
           {
-            if (++counter < CONTIKI_MAC_REDUNDANCY)
-            {
-              // WSN hack need implementing duty cycling here
-              sendMessageToLower(buffer->dup());
-              sendCommand(RDC_TRANSMIT);
-            }
-            else
-            {
-              // WSN hack, given the TX range 100%, ACK only lost if the sender node energy is too low
-//              if (check_and_cast<Count*>(
-//                  simulation.getModule(
-//                      check_and_cast<IpPacket*>(this->buffer->getEncapsulatedPacket())->getRecverIpAddress())->getModuleByPath(
-//                      "^.count"))->residualEnergy == 0)
-//                sendResult(RDC_SEND_NO_ACK);
-//              else
-//                sendResult(RDC_SEND_OK);
-//
-//              on();
-              delete buffer;
-            }
+//            if (++selfSequenceNumber < CONTIKI_MAC_REDUNDANCY)
+//            {
+//              // WSN hack need implementing duty cycling here
+//              sendMessageToLower(buffer->dup());
+//              sendCommand(RDC_TRANSMIT);
+//            }
+//            else
+//            {
+//              // WSN hack, given the TX range 100%, ACK only lost if the sender node energy is too low
+////              if (check_and_cast<Count*>(
+////                  simulation.getModule(
+////                      check_and_cast<IpPacket*>(this->buffer->getEncapsulatedPacket())->getRecverIpAddress())->getModuleByPath(
+////                      "^.count"))->residualEnergy == 0)
+////                sendResult(RDC_SEND_NO_ACK);
+////              else
+////                sendResult(RDC_SEND_OK);
+////
+////              on();
+//              delete buffer;
+//            }
           }
           break;
         }/* callback after transmitting */
@@ -304,6 +307,11 @@ void RDCdriver::on()
 
 void RDCdriver::off()
 {
+  // WSN Server never sleeps ???
+  // Server never sleep after a transmission session
+  if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+    return;
+
   sendCommand(RDC_IDLE);
 }
 
