@@ -86,8 +86,6 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
       switch ((check_and_cast<Frame*>(packet))->getFrameType())
       {
         case FRAME_DATA:
-          selfSequenceNumber = 0;
-
           this->buffer = check_and_cast<Frame*>(packet->dup()); // duplicate buffer
 
           // consider broadcast or unicast
