@@ -10,6 +10,7 @@
 #define MACDRIVER_H_
 
 #include "myModule.h"
+#include <frame_m.h>
 
 namespace wsn_energy {
 

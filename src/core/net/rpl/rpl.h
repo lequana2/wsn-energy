@@ -10,7 +10,8 @@
 #define RPL_H_
 
 #include <list>
-#include "packet_m.h"
+#include <packet_m.h>
+#include <strobe_m.h>
 
 #define RANK_INFINITY 0xffff
 

@@ -10,6 +10,9 @@
 #define NET_H_
 
 #include <myModule.h>
+#include <packet_m.h>
+#include <segment_m.h>
+#include <data_m.h>
 #include "rpl.h"
 
 namespace wsn_energy {

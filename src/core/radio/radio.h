@@ -17,6 +17,7 @@
 #define RADIO_H_
 
 #include "myModule.h"
+#include "signal_m.h"
 
 #ifndef HARDWARE
 #define HARDWARE

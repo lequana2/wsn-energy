@@ -10,6 +10,7 @@
 #define __WSN_ENERGY_SINK_H
 
 #include <myModule.h>
+#include <data_m.h>
 
 #ifndef UDP_PORT
 #define UDP_PORT

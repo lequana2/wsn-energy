@@ -10,7 +10,7 @@
 #define __WSN_ENERGY_TEST_H_
 
 #include <omnetpp.h>
-#include <packet_m.h>
+#include <strobe_m.h>
 
 namespace wsn_energy {
 

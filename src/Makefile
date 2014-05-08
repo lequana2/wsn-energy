@@ -217,43 +217,56 @@ $O/apps/client/client.o: apps/client/client.cc \
 	apps/client/client.h \
 	core/myModule.h \
 	core/radio/radio.h \
-	package/packet/packet_m.h \
+	package/data/data_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
 	core/myModule.h \
+	package/data/data_m.h \
 	package/packet/packet_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/core/myModule.o: core/myModule.cc \
 	core/myModule.h \
 	core/radio/radio.h \
-	package/packet/packet_m.h
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h
 $O/core/bytecount/count.o: core/bytecount/count.cc \
 	core/bytecount/count.h \
 	core/myModule.h \
 	core/radio/radio.h \
-	package/packet/packet_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/core/energest/energest.o: core/energest/energest.cc \
 	core/energest/energest.h \
 	core/myModule.h \
 	core/radio/radio.h \
-	package/packet/packet_m.h
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h
 $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
 	core/myModule.h \
+	package/frame/frame_m.h \
 	package/packet/packet_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/core/mac/csma/csma.o: core/mac/csma/csma.cc \
 	core/mac/csma/csma.h \
 	core/mac/mac.h \
 	core/myModule.h \
-	package/packet/packet_m.h
+	package/frame/frame_m.h \
+	package/packet/packet_m.h \
+	package/strobe/strobe_m.h
 $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	core/mac/mac.h \
 	core/mac/nullmac/nullMAC.h \
 	core/myModule.h \
-	package/packet/packet_m.h
+	package/frame/frame_m.h \
+	package/packet/packet_m.h \
+	package/strobe/strobe_m.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/bytecount/count.h \
 	core/energest/energest.h \
@@ -261,7 +274,11 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
+	package/data/data_m.h \
 	package/packet/packet_m.h \
+	package/segment/segment_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
 	util/statistic/statistic.h \
 	util/world/world.h
@@ -272,21 +289,29 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
 	core/net/rpl/rpl.h \
+	package/data/data_m.h \
 	package/packet/packet_m.h \
+	package/segment/segment_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
 	core/bytecount/count.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
 	core/net/rpl/rpl.h \
-	package/packet/packet_m.h
+	package/packet/packet_m.h \
+	package/strobe/strobe_m.h
 $O/core/radio/radio.o: core/radio/radio.cc \
 	core/energest/energest.h \
 	core/myModule.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
+	package/data/data_m.h \
 	package/packet/packet_m.h \
+	package/segment/segment_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
 	util/statistic/statistic.h \
 	util/world/world.h
@@ -296,6 +321,8 @@ $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	core/radio/cc2420/cc2420.h \
 	core/radio/radio.h \
 	package/packet/packet_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
 	util/statistic/statistic.h \
 	util/world/world.h
@@ -305,6 +332,8 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	core/radio/nullradio/nullRadio.h \
 	core/radio/radio.h \
 	package/packet/packet_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
 	util/statistic/statistic.h \
 	util/world/world.h
@@ -312,16 +341,22 @@ $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/bytecount/count.h \
 	core/myModule.h \
 	core/rdc/rdc.h \
-	package/packet/packet_m.h
+	package/frame/frame_m.h \
+	package/packet/packet_m.h \
+	package/strobe/strobe_m.h
 $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
 	core/myModule.h \
 	core/rdc/nullrdc/nullRDC.h \
 	core/rdc/rdc.h \
-	package/packet/packet_m.h
+	package/frame/frame_m.h \
+	package/packet/packet_m.h \
+	package/strobe/strobe_m.h
 $O/core/transport/udp/udp.o: core/transport/udp/udp.cc \
 	core/myModule.h \
 	core/transport/udp/udp.h \
-	package/packet/packet_m.h \
+	package/data/data_m.h \
+	package/segment/segment_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/package/data/data_m.o: package/data/data_m.cc \
 	package/data/data_m.h
@@ -343,12 +378,17 @@ $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/myModule.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
+	package/data/data_m.h \
 	package/packet/packet_m.h \
+	package/segment/segment_m.h \
+	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/util/world/world.o: util/world/world.cc \
 	core/myModule.h \
 	core/radio/radio.h \
 	package/packet/packet_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
 	util/statistic/statistic.h \
 	util/world/world.h

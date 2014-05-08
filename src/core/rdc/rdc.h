@@ -33,7 +33,7 @@
 #endif
 
 #include <myModule.h>
-#include "packet_m.h"
+#include <frame_m.h>
 
 namespace wsn_energy {
 

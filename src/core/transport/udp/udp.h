@@ -17,6 +17,8 @@
 #define __WSN_ENERGY_TRANSPORT_H_
 
 #include <myModule.h>
+#include <segment_m.h>
+#include <data_m.h>
 
 #ifndef UDP_PORT
 #define UDP_PORT
