@@ -39,7 +39,6 @@ void MACdriver::processSelfMessage(cPacket* packet)
 
         case MAC_EXPIRE_IFS: /* expire IFS */
         {
-          // WSN no ack ???
           sendResult(MAC_FINISH_PHASE);
           break;
         } /* expire IFS*/
@@ -139,23 +138,17 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
-          // consider just send DIO
-//          if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getMessageCode() == NET_ICMP_RPL)
-//          {
-//            if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIO)
-//              sendResult(NET_DIO_SENT);
-//            else if ((check_and_cast<IpPacket*>(frameBuffer->getEncapsulatedPacket()))->getIcmpCode() == NET_ICMP_DIS)
-//              sendResult(NET_DIS_SENT);
-//          }
-
-          selfTimer(SIFS, MAC_EXPIRE_IFS);
+          // consider IFS
+          if (this->frameBuffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+            selfTimer(LIFS, MAC_EXPIRE_IFS);
+          else
+            selfTimer(SIFS, MAC_EXPIRE_IFS);
 
           delete this->frameBuffer;
           break;
         } /* successful transmitting and receive ACK if needed */
 
-        case RDC_SEND_NO_ACK:
-          /* transmitting unicast but no ACK received */
+        case RDC_SEND_NO_ACK: /* transmitting unicast but no ACK received */
         {
           // WSN need considering dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
@@ -166,8 +159,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_FATAL:
-          /* fatal error, abort message */
+        case RDC_SEND_FATAL: /* fatal error, abort message */
         {
           selfTimer(0, MAC_EXPIRE_IFS);
 
@@ -175,8 +167,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* callback after sending */
 
-        case RDC_SEND_COL:
-          /* busy radio, defer packet */
+        case RDC_SEND_COL: /* busy radio, defer packet */
         {
           if (DEBUG)
             std::cout << "PHY busy" << endl;
@@ -201,8 +192,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
 void MACdriver::sendPacket()
 {
-  if (DEBUG)
-    ev << "READY & SEND (MAC)" << endl;
+  // WSN prepare a transmission phase
+  // WSN wait until RDC is not busy then process
+  // WSN if RDC is busy (receiving) then defer
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
 
@@ -214,12 +206,10 @@ void MACdriver::receivePacket(Frame* frameMac)
   if (DEBUG)
     ev << "RECEIVE (MAC)" << endl;
 
+  /* statistics */
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
 
-//  IpPacket* ipPacket = check_and_cast<IpPacket*>(frameMac->decapsulate());
-//  ipPacket->setKind(DATA);
-//
-//  sendMessageToUpper(ipPacket);
+  sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
 
   delete frameMac;
 }

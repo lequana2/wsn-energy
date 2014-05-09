@@ -52,34 +52,19 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
             // turn on radio
             on();
-            // begin CCA indicator
+
+            // WSN begin CCA indicator
             // wait for CCA interval
             selfTimer(CCA_CHECK_TIME, RDC_CHANNEL_CHECK);
-
-            // WSN seen
-            // continue listening
-            // if listening to message, then receive and off and send ACK
-            // if listening to noise, then after timeout then perform new interval
-
-            // WSN not seen
-            off();
-            // consider if last cca
-            if (ccaCounter == 0)
-            {
-              // release checking phase
-              isOnAnCheckingPhase = false;
-
-              // schedule next checking phase
-              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_CHANNEL_CHECK);
-            }
-            else
-            {
-              // schedule next cca
-              selfTimer(CCA_SLEEP_TIME, RDC_CHANNEL_CHECK);
-            }
           }
           break;
         } /* channel check*/
+
+        case RDC_SEND_FRAME: /* send frame */
+        {
+          send();
+          break;
+        } /* send frame */
 
         default:
           ev << "Unknown command" << endl;
@@ -107,8 +92,13 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
           this->buffer = check_and_cast<Frame*>(packet->dup()); // write to buffer
 
           // WSN acquire transmitting phases
+          isOnAnTranssmissionPhase = true;
 
           // WSN acquire phase lock
+
+          // WSN cca
+
+          // WSN send frame
 
           break;
       }
@@ -220,15 +210,49 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       {
         case CHANNEL_CLEAR: /* Channel is clear */
         {
-          // WSN consider is on checking phase/MAC request
-          sendResult(CHANNEL_CLEAR);
+          // consider is on checking phase/MAC request
+          if (isOnAnCheckingPhase)
+          {
+            // WSN not seen
+            off();
+            // consider if last cca
+            if (ccaCounter == 0)
+            {
+              // release checking phase
+              isOnAnCheckingPhase = false;
+
+              // schedule next checking phase
+              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_CHANNEL_CHECK);
+            }
+            else
+            {
+              // schedule next cca
+              selfTimer(CCA_SLEEP_TIME, RDC_CHANNEL_CHECK);
+            }
+          }
+          else
+          {
+            // send result back to MAC layer
+            sendResult(CHANNEL_CLEAR);
+          }
           break;
         } /* Channel is busy */
 
         case CHANNEL_BUSY: /* Channel is clear */
         {
-          // WSN consider is on checking phase/MAC request
-          sendResult(CHANNEL_BUSY);
+          // consider is on checking phase/MAC request
+          if (isOnAnCheckingPhase)
+          {
+            // WSN seen
+            // continue listening
+            // if listening to message, then receive and off and send ACK
+            // if listening to noise, then after timeout then perform new interval
+          }
+          else
+          {
+            // send result back to MAC layer
+            sendResult(CHANNEL_BUSY);
+          }
           break;
         }/* Channel is busy */
 

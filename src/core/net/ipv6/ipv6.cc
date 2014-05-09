@@ -83,9 +83,7 @@ void IPv6::processSelfMessage(cPacket* packet)
             }
             else
             {
-              // WSN
               // successful dequeue, create a duplicate ?!?
-              // send to lower and dequeue ?!?
               sendMessageToLower(pendingPacket->dup());
             }
           }
@@ -213,6 +211,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
       {
         case MAC_FINISH_PHASE: /* MAC layer finish a transmitting phase */
         {
+          // WSN consider if just send a DIO
+
           // check buffer
           this->ipPacketQueue.remove(pendingPacket);
           cancelAndDelete(pendingPacket);

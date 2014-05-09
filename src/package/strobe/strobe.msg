@@ -97,6 +97,7 @@ enum COMMAND_RDC{
 	RDC_CCA_REQUEST = 3; // cca -> listening and then checking result, does not turn off radio
 	
 	RDC_CHANNEL_CHECK = 4; // channel check
+	RDC_SEND_FRAME    = 5; // send frame
 };
 
 enum RESULT_RDC{
