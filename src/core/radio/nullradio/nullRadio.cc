@@ -29,7 +29,7 @@ Define_Module(nullRadio);
 
 double nullRadio::intervalCCA()
 {
-  return 0;
+  return (12 + 8) * SYMBOL; // 12 symbols switch mode + 8 symbols sample
 }
 
 double nullRadio::getTxPower()
@@ -42,7 +42,8 @@ double nullRadio::getRxPower()
   return 0;
 }
 
-double nullRadio::getIdPower(){
+double nullRadio::getIdPower()
+{
   return 0;
 }
 

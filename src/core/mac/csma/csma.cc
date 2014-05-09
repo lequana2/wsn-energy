@@ -25,10 +25,10 @@ Define_Module(csma);
 void csma::deferPacket()
 {
   /* dismiss + announce failure duty */
-  if (frameBuffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
+  if (buffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
     // WSN self timer to considering dead neighbot or backoff or IFS expired smt
-    delete this->frameBuffer;     // clear buffer
+    delete this->buffer;     // clear buffer
   }
   /* unslotted csma */
   else
@@ -37,8 +37,8 @@ void csma::deferPacket()
     int backoff_transmission, backoff_exponent;
 
     backoff_exponent =
-    MAC_MAX_BE < frameBuffer->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE :
-        frameBuffer->getNumberTransmission() + MAC_MIN_BE; // truncate
+    MAC_MAX_BE < buffer->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE :
+        buffer->getNumberTransmission() + MAC_MIN_BE; // truncate
 
     backoff_transmission = 1 << backoff_exponent;
 
@@ -57,7 +57,7 @@ void csma::deferPacket()
       std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
     }
 
-    frameBuffer->setNumberTransmission(frameBuffer->getNumberTransmission() + 1);
+    buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
 
     /* request to perform CCA */
     selfTimer(backoff, MAC_CCA_REQUEST);

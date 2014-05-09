@@ -15,7 +15,6 @@
 
 #ifndef CHANNEL_CHECK
 #define CHANNEL_CHECK
-#define FAST_SLEEP               1        // using fast-sleep
 // check rate
 #define CHANNEL_CHECK_RATE       8        // Hertz
 #define CHANNEL_CHECK_INTERVAL   0.125    // second
@@ -68,19 +67,19 @@ class RDCdriver : public myModule
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);
 
-    /* demand */
+    /* demand radio layer*/
     void send();
     void on();
     void off();
 
-    /* transmit demand */
+    /* begin a transmission phase */
     virtual void sendPacket(Frame*) = 0;
 
-    /* call-back */
+    /* after a transmission phase */
     virtual void sendSuccess(Frame*) = 0;
     virtual void sendFailure() = 0;
 
-    /* consider new-coming */
+    /* after a listening phase */
     virtual void receiveSuccess(Frame*) = 0;
     virtual void receiveFailure() = 0;
 };

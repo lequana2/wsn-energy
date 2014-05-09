@@ -27,20 +27,20 @@ void RadioDriver::initialize()
   // fluctuate     +- 10dBm
   // rssi accuracy +- 6dBm
 
-  double d0 = 1.0;
-  double pl0 = -37.0;
+  double d0 = 1.0;   // fixed
+  double pl0 = -37.0; // fixed
   double pathLossExponent = 2.8;
   int signalFluctuate = 10;
   int rssiAccuracy = 6;
 
   // expected Transmission range
-  this->trRange = d0 * pow(10, (pl0 - RX_SENSITIVITY - signalFluctuate) / (10 * pathLossExponent));
+  this->trRange = d0 * pow(10, (pl0 - (RX_SENSITIVITY + signalFluctuate)) / (10 * pathLossExponent));
 
   // expected Collision range
-  this->coRange = d0 * pow(10, (pl0 - RSSI_SENSITIVITY - rssiAccuracy) / (10 * pathLossExponent));
+  this->coRange = d0 * pow(10, (pl0 - (RSSI_SENSITIVITY + rssiAccuracy)) / (10 * pathLossExponent));
 
   if (DEBUG)
-    std::cout << "Radio " << this->trRange << " and " << this->coRange << endl;
+    std::cout << "Transmission range: " << this->trRange << " and Collision range: " << this->coRange << endl;
 
   this->par("trRange").setDoubleValue(trRange);
   this->par("coRange").setDoubleValue(coRange);
@@ -76,8 +76,8 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       switch (check_and_cast<Command*>(packet)->getNote())
       {
         case PHY_END_CCA: /* ending of CCA */
-          if (check_and_cast<World*>(simulation.getModuleByPath("world"))->isFreeChannel(this)) /* Channel not free*/
-//          if (false)  // WSN hack channel always free
+        {
+          if (!this->ccaResult)
           {
             if (DEBUG)
               ev << "Channel is busy" << endl;
@@ -93,7 +93,8 @@ void RadioDriver::processSelfMessage(cPacket* packet)
             /* Feedback to RDC */
             sendResult(CHANNEL_CLEAR);
           } /* Channel clear */
-          break; /* ending of CCA */
+          break;
+        }/* ending of CCA */
 
         case PHY_SWITCH_TRANSMIT: /* switch to transmit */
         {
@@ -169,32 +170,28 @@ void RadioDriver::processSelfMessage(cPacket* packet)
           break;
         }/* switch to sleep */
 
-        case PHY_BEGIN_TRANSMIT:
-          /* end transmitting */
+        case PHY_BEGIN_TRANSMIT: /* begin transmitting*/
         {
           transmit_begin();
           break;
         }/* begin transmit */
 
-        case PHY_END_TRANSMIT:
-          /* end transmitting */
+        case PHY_END_TRANSMIT: /* end transmitting */
         {
           transmit_end();
 
-          /* Feedback to RDC */
+          // Feedback to RDC
           sendResult(PHY_TX_OK);
           break;
         } /* end transmitting*/
 
-        case PHY_LISTENING:
-          /* begin listening*/
+        case PHY_LISTENING: /* begin listening*/
         {
           listen();
           break;
         }/* begin listening */
 
-        case PHY_IDLING:
-          /* idling */
+        case PHY_IDLING: /* idling */
         {
           sleep();
           break;
@@ -233,22 +230,13 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        // WSN CCA request
         case RDC_CCA_REQUEST: /* CCA request */
+          this->ccaResult = true; // free channel
           selfTimer(intervalCCA(), PHY_END_CCA);
           break; /* CCA request */
 
         case RDC_TRANSMIT: /* transmitting */
-          switch (this->status)
-          {
-            case TRANSMITTING: /* radio is transmitting */
-              break; /* radio is transmitting */
-
-            case LISTENING: /* Ignite transmitting */
-            case IDLE: /* Ignite transmitting */
-              selfTimer(0, PHY_SWITCH_TRANSMIT);
-              break; /* Ignite transmitting */
-          }
+          selfTimer(0, PHY_SWITCH_TRANSMIT);
           break; /* transmitting */
 
         case RDC_LISTEN:/* turn on listening */
@@ -276,7 +264,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
 void RadioDriver::processLowerLayerMessage(cPacket* packet)
 {
   /* It is the lowest layer */
-  return;
 }
 
 /*
@@ -285,7 +272,7 @@ void RadioDriver::processLowerLayerMessage(cPacket* packet)
 void RadioDriver::transmit_begin()
 {
   if (DEBUG)
-    ev << "Start transmitting" << endl;
+    ev << "PHY: begin transmitting" << endl;
 
   // register
   check_and_cast<World*>(simulation.getModuleByPath("world"))->registerHost(this, bufferTXFIFO);
@@ -305,9 +292,12 @@ void RadioDriver::transmit_begin()
 void RadioDriver::transmit_end()
 {
   if (DEBUG)
-    ev << "End transmitting" << endl;
+    ev << "PHY: end transmitting" << endl;
 
   ((World*) simulation.getModuleByPath("world"))->releaseHost(this);
+
+  // switch mode
+  switchOscilatorMode(IDLE);
 
   // clear buffer
   delete this->bufferTXFIFO;
@@ -319,7 +309,7 @@ void RadioDriver::transmit_end()
 void RadioDriver::listen()
 {
   if (DEBUG)
-    ev << "LISTEN (PHY)" << endl;
+    ev << "PHY: LISTEN" << endl;
 
   switchOscilatorMode(LISTENING);
 }
@@ -330,22 +320,12 @@ void RadioDriver::listen()
 void RadioDriver::received(Raw* raw)
 {
   if (true)   // WSN hack receive a complete message
-//  if (!raw->hasBitError())
+//    if (!raw->hasBitError())
   {
     if (DEBUG)
-      ev << "Received !!!" << endl;
+      ev << "PHY: RECEIVED" << endl;
 
-    /* okay message from begin to end */
     sendMessageToUpper(raw->decapsulate());
-  }
-  /* WSN receie a corrupt message */
-  /* WSN receie an incompleted message */
-  else
-  {
-    if (DEBUG)
-      ev << "Nonsense signal !!!" << endl;
-
-    sendResult(PHY_RECV_CORRUPTED);
   }
 
   delete raw;
@@ -360,6 +340,7 @@ void RadioDriver::sleep()
     ev << "IDLE (PHY)" << endl;
 
   ((World*) simulation.getModuleByPath("world"))->suddenStopListening(this);
+
   switchOscilatorMode(IDLE);
 }
 
@@ -410,6 +391,7 @@ void RadioDriver::switchOscilatorMode(int type)
       this->status = POWER_DOWN;
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
 
+      // WSN switch to remove default route
       // remove preferred parent connection
       IPv6* net = check_and_cast<IPv6*>(getParentModule()->getSubmodule("net"));
       if (net->rpl->rplDag.preferredParent != NULL)

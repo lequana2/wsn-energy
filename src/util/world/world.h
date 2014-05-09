@@ -72,8 +72,6 @@ class World : public cSimpleModule
     void suddenBeginListening(RadioDriver*); // recver begin listening
     void suddenStopListening(RadioDriver*);   // recver stop listening
 
-    bool isFreeChannel(RadioDriver*); // check is free channel
-
     double calculateDistance(RadioDriver*, RadioDriver*);  // calculate distance between 2 motes
     double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate
 };

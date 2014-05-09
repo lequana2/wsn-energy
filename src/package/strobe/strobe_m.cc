@@ -129,6 +129,7 @@ EXECUTE_ON_STARTUP(
     e->insert(RDC_IDLE, "RDC_IDLE");
     e->insert(RDC_CCA_REQUEST, "RDC_CCA_REQUEST");
     e->insert(RDC_CHANNEL_CHECK, "RDC_CHANNEL_CHECK");
+    e->insert(RDC_SEND_FRAME, "RDC_SEND_FRAME");
 );
 
 EXECUTE_ON_STARTUP(
@@ -164,9 +165,6 @@ EXECUTE_ON_STARTUP(
     e->insert(PHY_TX_OK, "PHY_TX_OK");
     e->insert(PHY_TX_ERR, "PHY_TX_ERR");
     e->insert(PHY_BUSY, "PHY_BUSY");
-    e->insert(PHY_RECV_OK, "PHY_RECV_OK");
-    e->insert(PHY_RECV_CORRUPTED, "PHY_RECV_CORRUPTED");
-    e->insert(PHY_RECV_INCOMPLETED, "PHY_RECV_INCOMPLETED");
 );
 
 Register_Class(Command);

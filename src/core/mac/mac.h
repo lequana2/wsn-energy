@@ -17,7 +17,7 @@ namespace wsn_energy {
 class MACdriver : public myModule
 {
   protected:
-    Frame* frameBuffer;
+    Frame* buffer;
     int sequenceNumber;
 
     virtual void processSelfMessage(cPacket*);

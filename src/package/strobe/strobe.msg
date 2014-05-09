@@ -136,11 +136,6 @@ enum RESULT_PHY{
 	PHY_TX_OK		 	= 12; // send okay
 	PHY_TX_ERR 		 	= 13; // internal error, does not need to resend e.g: packet is too big
 	PHY_BUSY		 	= 14; // radio is transmitting or receiving
-	
-	// receiving result
-	PHY_RECV_OK          = 15; // receive a completed message
-	PHY_RECV_CORRUPTED   = 16; // receive a corrupted message
-	PHY_RECV_INCOMPLETED = 17; // receive part of a message
 };
 
 // Command 

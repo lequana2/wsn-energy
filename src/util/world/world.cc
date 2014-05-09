@@ -408,21 +408,6 @@ void World::considerSignal(mySignal* signal)
 }
 
 /*
- * check if channel is free at location of this radio driver
- */
-bool World::isFreeChannel(RadioDriver* mote)
-{
-  for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
-    if ((*it)->moteID == mote->getId())
-      return (*it)->incomingSignal == 0;
-
-  if (DEBUG)
-    ev << "Unknown host" << endl;
-
-  return false;
-}
-
-/*
  * Calculate distance util
  */
 double World::calculateDistance(RadioDriver *a, RadioDriver *b)

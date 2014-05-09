@@ -209,6 +209,7 @@ enum RESULT_FROM_MAC {
  * 	RDC_CCA_REQUEST = 3; 
  * 	
  * 	RDC_CHANNEL_CHECK = 4; 
+ * 	RDC_SEND_FRAME    = 5; 
  * };
  * </pre>
  */
@@ -217,7 +218,8 @@ enum COMMAND_RDC {
     RDC_LISTEN = 1,
     RDC_IDLE = 2,
     RDC_CCA_REQUEST = 3,
-    RDC_CHANNEL_CHECK = 4
+    RDC_CHANNEL_CHECK = 4,
+    RDC_SEND_FRAME = 5
 };
 
 /**
@@ -287,11 +289,6 @@ enum COMMAND_PHY {
  * 	PHY_TX_OK		 	= 12; 
  * 	PHY_TX_ERR 		 	= 13; 
  * 	PHY_BUSY		 	= 14; 
- * 	
- * 	
- * 	PHY_RECV_OK          = 15; 
- * 	PHY_RECV_CORRUPTED   = 16; 
- * 	PHY_RECV_INCOMPLETED = 17; 
  * };
  * </pre>
  */
@@ -300,10 +297,7 @@ enum RESULT_PHY {
     CHANNEL_BUSY = 11,
     PHY_TX_OK = 12,
     PHY_TX_ERR = 13,
-    PHY_BUSY = 14,
-    PHY_RECV_OK = 15,
-    PHY_RECV_CORRUPTED = 16,
-    PHY_RECV_INCOMPLETED = 17
+    PHY_BUSY = 14
 };
 
 /**

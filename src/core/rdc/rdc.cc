@@ -20,7 +20,8 @@ void RDCdriver::initialize()
   ccaCounter = 0;
 
   // start channel check timer
-  selfTimer(0, RDC_CHANNEL_CHECK);
+  if (getParentModule()->getId() != simulation.getModuleByPath("server")->getId())
+    selfTimer(0, RDC_CHANNEL_CHECK);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -35,8 +36,8 @@ void RDCdriver::processSelfMessage(cPacket* packet)
         {
           if (ccaCounter == 0) // starting a new checking phase
           {
-            // consider is on old checking session
-            // consider is on transmission session
+            // WSN consider is on old checking session
+            // WSN consider is on transmission session
 
             // acquire checking phase
             isOnAnCheckingPhase = true;
@@ -53,9 +54,8 @@ void RDCdriver::processSelfMessage(cPacket* packet)
             // turn on radio
             on();
 
-            // WSN begin CCA indicator
-            // wait for CCA interval
-            selfTimer(CCA_CHECK_TIME, RDC_CHANNEL_CHECK);
+            // begin CCA indicator
+            sendCommand(RDC_CCA_REQUEST);
           }
           break;
         } /* channel check*/
@@ -89,15 +89,15 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
       switch ((check_and_cast<Frame*>(packet))->getFrameType())
       {
         case FRAME_DATA:
+          // WSN begin a transmission phase
           this->buffer = check_and_cast<Frame*>(packet->dup()); // write to buffer
 
           // WSN acquire transmitting phases
           isOnAnTranssmissionPhase = true;
 
+          // WSN begin transmission phase
           // WSN acquire phase lock
-
           // WSN cca
-
           // WSN send frame
 
           break;
@@ -109,10 +109,9 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        // WSN prepare a transmission session
         case MAC_CCA_REQUEST: /* request CCA */
         {
-          sendCommand(MAC_CCA_REQUEST);
+          sendCommand(RDC_CCA_REQUEST);
           break;
         } /* request CCA */
 
@@ -213,8 +212,11 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           // consider is on checking phase/MAC request
           if (isOnAnCheckingPhase)
           {
-            // WSN not seen
+            // WSN is switch to transmission phase ?
+
+            // not seen
             off();
+
             // consider if last cca
             if (ccaCounter == 0)
             {
@@ -230,10 +232,18 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               selfTimer(CCA_SLEEP_TIME, RDC_CHANNEL_CHECK);
             }
           }
+          else if (isOnAnTranssmissionPhase)
+          {
+            // WSN clear
+            // WSN send
+          }
           else
           {
             // send result back to MAC layer
             sendResult(CHANNEL_CLEAR);
+
+            // turn off radio
+            off();
           }
           break;
         } /* Channel is busy */
@@ -243,15 +253,24 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           // consider is on checking phase/MAC request
           if (isOnAnCheckingPhase)
           {
+            // WSN is switch to transmission phase ?
             // WSN seen
-            // continue listening
-            // if listening to message, then receive and off and send ACK
-            // if listening to noise, then after timeout then perform new interval
+            // WSN continue listening
+            // WSN if listening to message, then receive and off and send ACK
+            // WSN if listening to noise, then after timeout then perform new interval
+          }
+          else if (isOnAnTranssmissionPhase)
+          {
+            // WSN seen
+            // WSN backoff
           }
           else
           {
             // send result back to MAC layer
             sendResult(CHANNEL_BUSY);
+
+            // turn off radio
+            off();
           }
           break;
         }/* Channel is busy */

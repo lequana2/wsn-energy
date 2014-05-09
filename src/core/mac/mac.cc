@@ -69,45 +69,45 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   else
   {
     // intialisation
-    frameBuffer = new FrameDataStandard;
-    frameBuffer->setKind(DATA);
-    frameBuffer->setByteLength(frameBuffer->getHeaderLength());
+    buffer = new FrameDataStandard;
+    buffer->setKind(DATA);
+    buffer->setByteLength(buffer->getHeaderLength());
 
     /*  meta data */
-    frameBuffer->setNumberTransmission(0);
+    buffer->setNumberTransmission(0);
 
     // FCF
-    frameBuffer->setFrameType(FRAME_DATA);
-    frameBuffer->setPanIdCompression(false);
+    buffer->setFrameType(FRAME_DATA);
+    buffer->setPanIdCompression(false);
 
     // sequence number
-    (check_and_cast<FrameDataStandard*>(frameBuffer))->setDataSequenceNumber(this->sequenceNumber++);
+    (check_and_cast<FrameDataStandard*>(buffer))->setDataSequenceNumber(this->sequenceNumber++);
 
     // address fields
-    (check_and_cast<FrameDataStandard*>(frameBuffer))->setSourceMacAddress(this->getId());
+    (check_and_cast<FrameDataStandard*>(buffer))->setSourceMacAddress(this->getId());
 
     if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() == 0)
     {
-      (check_and_cast<FrameDataStandard*>(frameBuffer))->setDestinationMacAddress(0);
-      frameBuffer->setAckRequired(false);
+      (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(0);
+      buffer->setAckRequired(false);
     }
     else
     {
       // using default route
-      (check_and_cast<FrameDataStandard*>(frameBuffer))->setDestinationMacAddress(
+      (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(
           simulation.getModule(check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress())->getParentModule()->getModuleByPath(
               ".mac")->getId());
-      frameBuffer->setAckRequired(true);
+      buffer->setAckRequired(true);
     }
   }
 
-  frameBuffer->encapsulate(packet);
+  buffer->encapsulate(packet);
 
   /* backoff and CCA */
   deferPacket();
 
   if (DEBUG)
-    ev << "Frame length: " << frameBuffer->getByteLength() << endl;
+    ev << "Frame length: " << buffer->getByteLength() << endl;
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -139,12 +139,12 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
           // consider IFS
-          if (this->frameBuffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+          if (this->buffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
             selfTimer(LIFS, MAC_EXPIRE_IFS);
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
 
-          delete this->frameBuffer;
+          delete this->buffer;
           break;
         } /* successful transmitting and receive ACK if needed */
 
@@ -155,7 +155,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
           selfTimer(SIFS, MAC_EXPIRE_IFS);
 
-          delete this->frameBuffer;
+          delete this->buffer;
           break;
         } /* callback after sending */
 
@@ -163,7 +163,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         {
           selfTimer(0, MAC_EXPIRE_IFS);
 
-          delete this->frameBuffer;
+          delete this->buffer;
           break;
         } /* callback after sending */
 
@@ -198,7 +198,7 @@ void MACdriver::sendPacket()
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
 
-  sendMessageToLower(frameBuffer);
+  sendMessageToLower(buffer);
 }
 
 void MACdriver::receivePacket(Frame* frameMac)

@@ -29,7 +29,7 @@ Define_Module(cc2420);
 
 double cc2420::intervalCCA()
 {
-  return 8 * SYMBOL;
+  return (12 + 8) * SYMBOL; // 12 symbols switch mode + 8 symbols sample
 }
 
 double cc2420::getTxPower()
