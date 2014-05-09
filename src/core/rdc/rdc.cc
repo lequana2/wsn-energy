@@ -10,58 +10,76 @@
 #include "packet_m.h"
 #include "count.h"
 
-#ifndef CONTIKI_MAC_REDUNDANCY
-#define CONTIKI_MAC_REDUNDANCY 1
-#endif
-
-#ifndef WAITING_ACK_PERIOD
-#define WAITING_ACK_PERIOD 1
-#endif
-
-#ifndef CONTIKI_MAC
-#define CONTIKI_MAC
-#define CCA_CHECK_PER_INTERVAL 2
-#define NUMBER_OF_CONSECUTIVE_CCA_BEFORE_TRANSMISSION 6
-#endif
-
 namespace wsn_energy {
 
 void RDCdriver::initialize()
 {
-  // WSN channel check
-  channelCheck = new Command;
-  channelCheck->setKind(COMMAND);
-  channelCheck->setNote(RDC_CHANNEL_CHECK);
+  // intitialisation
+  isOnAnTranssmissionPhase = false;
+  isOnAnCheckingPhase = false;
+  ccaCounter = 0;
 
-  scheduleAt(CHANNEL_CHECK_INTERVAL, channelCheck);
+  // start channel check timer
+  selfTimer(0, RDC_CHANNEL_CHECK);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
 {
-  // WSN send + recv ACK
-  // RDC_SEND_OK     = 0; // send + receive ACK (if needed)
-  // RDC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
-  // RDC_SEND_FATAL  = 2; // fatal error, abort message
-  // RDC_SEND_COL    = 3; // collision with PHY
-
   switch (packet->getKind())
   {
     case COMMAND: /* Command */
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case RDC_CHANNEL_CHECK: /* channel check */{
-          // Turn on
-          // Turn off
+        case RDC_CHANNEL_CHECK: /* channel check */
+        {
+          if (ccaCounter == 0) // starting a new checking phase
+          {
+            // consider is on old checking session
+            // consider is on transmission session
+
+            // acquire checking phase
+            isOnAnCheckingPhase = true;
+            ccaCounter = CCA_COUNT_MAX;
+
+            // start checking phase
+            selfTimer(0, RDC_CHANNEL_CHECK);
+          }
+          else // next cca
+          {
+            // decrease cca counter
+            ccaCounter--;
+
+            // turn on radio
+            on();
+            // begin CCA indicator
+            // wait for CCA interval
+            selfTimer(CCA_CHECK_TIME, RDC_CHANNEL_CHECK);
+
+            // WSN seen
+            // continue listening
+            // if listening to message, then receive and off and send ACK
+            // if listening to noise, then after timeout then perform new interval
+
+            // WSN not seen
+            off();
+            // consider if last cca
+            if (ccaCounter == 0)
+            {
+              // release checking phase
+              isOnAnCheckingPhase = false;
+
+              // schedule next checking phase
+              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_CHANNEL_CHECK);
+            }
+            else
+            {
+              // schedule next cca
+              selfTimer(CCA_SLEEP_TIME, RDC_CHANNEL_CHECK);
+            }
+          }
           break;
         } /* channel check*/
-
-        case RDC_WAIT_FOR_ACK: /* no ACK */
-        {
-          // WSN reset parameter, prepare for new transmitting
-          sendResult(RDC_SEND_NO_ACK);
-          break;
-        }/* no ACK */
 
         default:
           ev << "Unknown command" << endl;
@@ -86,27 +104,11 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
       switch ((check_and_cast<Frame*>(packet))->getFrameType())
       {
         case FRAME_DATA:
-          this->buffer = check_and_cast<Frame*>(packet->dup()); // duplicate buffer
+          this->buffer = check_and_cast<Frame*>(packet->dup()); // write to buffer
 
-          // consider broadcast or unicast
-          if (this->buffer->getAckRequired())
-          {
-            // expire time to receive ACK per all packet !!!
-            waitForACK = new Command;
-            waitForACK->setKind(COMMAND);
-            waitForACK->setNote(RDC_WAIT_FOR_ACK);
+          // WSN acquire transmitting phases
 
-            // WSN timeout ACK
-            scheduleAt(simTime() + WAITING_ACK_PERIOD, waitForACK);
-          }
-          else
-          {
-          }
-
-          // send to lower
-          // WSN defer ???
-          sendMessageToLower(buffer->dup());
-          sendCommand(RDC_TRANSMIT);
+          // WSN acquire phase lock
 
           break;
       }
@@ -118,10 +120,9 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
       switch (check_and_cast<Command*>(packet)->getNote())
       {
         // WSN prepare a transmission session
-
-        case CHANNEL_CCA_REQUEST: /* request CCA */
+        case MAC_CCA_REQUEST: /* request CCA */
         {
-          sendCommand(CHANNEL_CCA_REQUEST);
+          sendCommand(MAC_CCA_REQUEST);
           break;
         } /* request CCA */
 
@@ -219,12 +220,14 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       {
         case CHANNEL_CLEAR: /* Channel is clear */
         {
+          // WSN consider is on checking phase/MAC request
           sendResult(CHANNEL_CLEAR);
           break;
         } /* Channel is busy */
 
         case CHANNEL_BUSY: /* Channel is clear */
         {
+          // WSN consider is on checking phase/MAC request
           sendResult(CHANNEL_BUSY);
           break;
         }/* Channel is busy */
@@ -298,6 +301,12 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
   }
 }
 
+void RDCdriver::send()
+{
+  sendMessageToLower(this->buffer->dup());
+  sendCommand(RDC_TRANSMIT);
+}
+
 void RDCdriver::on()
 {
   sendCommand(RDC_LISTEN);
@@ -305,9 +314,8 @@ void RDCdriver::on()
 
 void RDCdriver::off()
 {
-  // WSN Server never sleeps ???
-  // Server never sleep after a transmission session
-  if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+  // Server never sleep after listening/receiving and transmittingsession either
+  if (getId() == simulation.getModuleByPath("server.rdc")->getId())
     return;
 
   sendCommand(RDC_IDLE);

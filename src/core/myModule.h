@@ -31,8 +31,7 @@ class myModule : public cSimpleModule
     void sendCommand(int);
     void sendResult(int);
 
-  public:
-    void selfTimer(double,int); // for particular purpose
+    void selfTimer(double,int);
 };
 
 } //namespace

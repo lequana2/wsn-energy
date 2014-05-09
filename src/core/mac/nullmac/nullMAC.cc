@@ -26,7 +26,7 @@ void nullMAC::deferPacket()
     /* request to perform CCA */
     Command *requestCCA = new Command;
     requestCCA->setKind(COMMAND);
-    requestCCA->setNote(CHANNEL_CCA_REQUEST);
+    requestCCA->setNote(MAC_CCA_REQUEST);
     scheduleAt(simTime(), requestCCA);
   }
 }

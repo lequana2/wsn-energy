@@ -60,7 +60,7 @@ void csma::deferPacket()
     frameBuffer->setNumberTransmission(frameBuffer->getNumberTransmission() + 1);
 
     /* request to perform CCA */
-    selfTimer(backoff, CHANNEL_CCA_REQUEST);
+    selfTimer(backoff, MAC_CCA_REQUEST);
   }
 }
 

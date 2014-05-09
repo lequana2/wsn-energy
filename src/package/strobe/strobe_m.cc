@@ -34,8 +34,8 @@ void doUnpacking(cCommBuffer *, T& t) {
 namespace wsn_energy {
 
 EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::MESSAGE_KIND");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::MESSAGE_KIND"));
+    cEnum *e = cEnum::find("wsn_energy::KIND");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::KIND"));
     e->insert(DATA, "DATA");
     e->insert(COMMAND, "COMMAND");
     e->insert(RESULT, "RESULT");
@@ -54,17 +54,16 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_APP"));
     e->insert(APP_ENVIRON_FLAG, "APP_ENVIRON_FLAG");
     e->insert(APP_SENSING_FLAG, "APP_SENSING_FLAG");
-    e->insert(APP_WORKING_FLAG, "APP_WORKING_FLAG");
     e->insert(RPL_SET_UP_DELAY, "RPL_SET_UP_DELAY");
 );
 
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_NET");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_NET"));
+    e->insert(RPL_CONSTRUCT, "RPL_CONSTRUCT");
     e->insert(NET_TIMER_DIO, "NET_TIMER_DIO");
     e->insert(NET_TIMER_DIS, "NET_TIMER_DIS");
     e->insert(NET_CHECK_BUFFER, "NET_CHECK_BUFFER");
-    e->insert(RPL_CONSTRUCT, "RPL_CONSTRUCT");
 );
 
 EXECUTE_ON_STARTUP(
@@ -98,8 +97,8 @@ EXECUTE_ON_STARTUP(
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_MAC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_MAC"));
-    e->insert(CHANNEL_CCA_REQUEST, "CHANNEL_CCA_REQUEST");
-    e->insert(FRAME_TRANS_REQUEST, "FRAME_TRANS_REQUEST");
+    e->insert(MAC_CCA_REQUEST, "MAC_CCA_REQUEST");
+    e->insert(MAC_ASK_SEND_FRAME, "MAC_ASK_SEND_FRAME");
     e->insert(MAC_BEGIN_SEND_FRAME, "MAC_BEGIN_SEND_FRAME");
     e->insert(MAC_END_SEND_FRAME, "MAC_END_SEND_FRAME");
     e->insert(MAC_EXPIRE_IFS, "MAC_EXPIRE_IFS");
@@ -128,7 +127,7 @@ EXECUTE_ON_STARTUP(
     e->insert(RDC_TRANSMIT, "RDC_TRANSMIT");
     e->insert(RDC_LISTEN, "RDC_LISTEN");
     e->insert(RDC_IDLE, "RDC_IDLE");
-    e->insert(RDC_WAIT_FOR_ACK, "RDC_WAIT_FOR_ACK");
+    e->insert(RDC_CCA_REQUEST, "RDC_CCA_REQUEST");
     e->insert(RDC_CHANNEL_CHECK, "RDC_CHANNEL_CHECK");
 );
 

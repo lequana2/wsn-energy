@@ -19,19 +19,6 @@
 #include "myModule.h"
 #include "signal_m.h"
 
-#ifndef HARDWARE
-#define HARDWARE
-#define SWITCH_MODE_DELAY                  0          // second
-#define SYMBOL                             0.000016   // 1 symbol = 4/250 millisecond
-#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    0.000192   // 12 symbols
-#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   0.000192   // 12 symbols
-#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  0.000384   // 24 symbols
-#define SWITCH_MODE_DELAY_TRANS_TO_IDLE    0          // 0 symbol
-#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000384   // 24 symbols
-#define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   0          // 0 symbol
-#define DATA_RATE                          250000.0   // bit per second
-#endif
-
 /*
  * Specification for CC2420
  */
@@ -39,15 +26,25 @@
 #define CC2420
 #define CHANNEL                26   // channel name
 #define FREQUENCY          2400.0   // MHz
+#define DATA_RATE        250000.0   // bit per second
 #define TXPOWER_MAX           0.0   // dBm
 #define TXPOWER_MIN         -24.0   // dBm
 #define RX_SENSITIVITY      -94.0   // dBm
+#define RSSI_SENSITIVITY   -100.0   // dBm
 #define CCA_THRESHOLD       -77.0   // dBm, default, programable RSSI.CCA_THR
 #define CCA_PERIOD          00128   // seconds
 #define TXPOWER_CURRENT_MAX  17.4   // mA
 #define RXPOWER_CURRENT      18.8   // mA
 #define IDPOWER_CURRENT       0.426 // mA
 #define SUPPLY_VOLTAGE        3.3   // V, VREG_IN
+// working delay
+#define SYMBOL                             0.000016   // 1 symbol = 4/250 millisecond
+#define SWITCH_MODE_DELAY_IDLE_TO_TRANS    0.000192   // 12 symbols
+#define SWITCH_MODE_DELAY_IDLE_TO_LISTEN   0.000192   // 12 symbols
+#define SWITCH_MODE_DELAY_TRANS_TO_LISTEN  0.000384   // 24 symbols
+#define SWITCH_MODE_DELAY_TRANS_TO_IDLE    0          // 0 symbol
+#define SWITCH_MODE_DELAY_LISTEN_TO_TRANS  0.000384   // 24 symbols
+#define SWITCH_MODE_DELAY_LISTEN_TO_IDLE   0          // 0 symbol
 #endif
 
 #ifndef WORKING_MODE
@@ -96,6 +93,7 @@ class RadioDriver : public myModule
     void processLowerLayerMessage(cPacket*);
 
   public:
+    bool ccaResult; // cca result
     int status;     // sleep, transmitting, listening, receiving
     double txPower; // transmit power
     double trRange; // simulated transmission range according to txPower

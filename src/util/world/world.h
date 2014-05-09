@@ -41,8 +41,7 @@ class Mote
     std::list<int> moteIDWithinTransmissionRange; // mote in transmission range
     std::list<int> moteIDWithinCollisionRange;    // mote out of transmission range, but in collision range
 
-    int incomingSignal;        // WSN number of incoming signal
-    bool resultCCA;            // WSN result of CCA
+    int incomingSignal;        // number of sensing signal (tranmitting + sensing)
 };
 
 class World : public cSimpleModule
@@ -73,8 +72,7 @@ class World : public cSimpleModule
     void suddenBeginListening(RadioDriver*); // recver begin listening
     void suddenStopListening(RadioDriver*);   // recver stop listening
 
-    void checkCCAResult();            // WSN check CCA result (???)
-    bool isFreeChannel(RadioDriver*); // WSN check is free channel
+    bool isFreeChannel(RadioDriver*); // check is free channel
 
     double calculateDistance(RadioDriver*, RadioDriver*);  // calculate distance between 2 motes
     double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate

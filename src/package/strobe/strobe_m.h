@@ -19,14 +19,14 @@ namespace wsn_energy {
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
- * enum MESSAGE_KIND{
+ * enum KIND{
  * 	DATA    = 2; 
  * 	COMMAND = 4; 
  * 	RESULT  = 1; 
  * };
  * </pre>
  */
-enum MESSAGE_KIND {
+enum KIND {
     DATA = 2,
     COMMAND = 4,
     RESULT = 1
@@ -52,52 +52,51 @@ enum MANUAL_EVENT {
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_APP{
- * 	APP_ENVIRON_FLAG = 2; 
+ * 	APP_ENVIRON_FLAG = 0; 
  * 	APP_SENSING_FLAG = 1; 
- * 	APP_WORKING_FLAG = 0; 
  * 	
- * 	RPL_SET_UP_DELAY = 4; 
+ * 	RPL_SET_UP_DELAY = 2; 
  * };
  * </pre>
  */
 enum COMMAND_APP {
-    APP_ENVIRON_FLAG = 2,
+    APP_ENVIRON_FLAG = 0,
     APP_SENSING_FLAG = 1,
-    APP_WORKING_FLAG = 0,
-    RPL_SET_UP_DELAY = 4
+    RPL_SET_UP_DELAY = 2
 };
 
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_NET{
+ *     RPL_CONSTRUCT 	 	= 0; 
+ *     
  *     NET_TIMER_DIO       = 1; 
  *     NET_TIMER_DIS       = 2; 
+ * 	
  * 	NET_CHECK_BUFFER    = 3; 
- * 
- * 	RPL_CONSTRUCT 	 	= 4; 
  * };
  * </pre>
  */
 enum COMMAND_NET {
+    RPL_CONSTRUCT = 0,
     NET_TIMER_DIO = 1,
     NET_TIMER_DIS = 2,
-    NET_CHECK_BUFFER = 3,
-    RPL_CONSTRUCT = 4
+    NET_CHECK_BUFFER = 3
 };
 
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum RESULT_NET{
- * 	NET_DIO_SENT	= 23; 
- * 	NET_DIS_SENT    = 24; 
+ * 	NET_DIO_SENT	= 10; 
+ * 	NET_DIS_SENT    = 11; 
  * }
  * </pre>
  */
 enum RESULT_NET {
-    NET_DIO_SENT = 23,
-    NET_DIS_SENT = 24
+    NET_DIO_SENT = 10,
+    NET_DIS_SENT = 11
 };
 
 /**
@@ -146,77 +145,79 @@ enum ICMP_CODE {
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_MAC{
- * 	CHANNEL_CCA_REQUEST = 70; 
- * 	FRAME_TRANS_REQUEST = 71; 
+ * 	MAC_CCA_REQUEST = 0; 
  * 	
- * 	MAC_BEGIN_SEND_FRAME = 73; 
- * 	MAC_END_SEND_FRAME   = 74; 
- * 	MAC_EXPIRE_IFS		 = 75; 
+ * 	MAC_ASK_SEND_FRAME 	 = 1; 
+ * 	MAC_BEGIN_SEND_FRAME = 2; 
+ * 	MAC_END_SEND_FRAME   = 3; 
+ * 	
+ * 	MAC_EXPIRE_IFS		 = 4; 
  * };
  * </pre>
  */
 enum COMMAND_MAC {
-    CHANNEL_CCA_REQUEST = 70,
-    FRAME_TRANS_REQUEST = 71,
-    MAC_BEGIN_SEND_FRAME = 73,
-    MAC_END_SEND_FRAME = 74,
-    MAC_EXPIRE_IFS = 75
+    MAC_CCA_REQUEST = 0,
+    MAC_ASK_SEND_FRAME = 1,
+    MAC_BEGIN_SEND_FRAME = 2,
+    MAC_END_SEND_FRAME = 3,
+    MAC_EXPIRE_IFS = 4
 };
 
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum FRAME_TYPE{
- *     FRAME_BEACON  	= 35; 
- *     FRAME_COMMAND 	= 36; 
- * 	FRAME_DATA 		= 37; 
- * 	FRAME_ACK  		= 38; 
+ *     FRAME_BEACON  	= 0; 
+ *     FRAME_COMMAND 	= 1; 
+ * 	FRAME_DATA 		= 2; 
+ * 	FRAME_ACK  		= 3; 
  * }
  * </pre>
  */
 enum FRAME_TYPE {
-    FRAME_BEACON = 35,
-    FRAME_COMMAND = 36,
-    FRAME_DATA = 37,
-    FRAME_ACK = 38
+    FRAME_BEACON = 0,
+    FRAME_COMMAND = 1,
+    FRAME_DATA = 2,
+    FRAME_ACK = 3
 };
 
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum RESULT_FROM_MAC{
- *     MAC_SEND_DEAD_NEIGHBOR = 5;
+ *     MAC_SEND_DEAD_NEIGHBOR = 0; 
  * 	
- * 	MAC_FINISH_PHASE       = 29; 
- * 	MAC_SEND_END_TRANSMIT  = 28; 
+ * 	MAC_FINISH_PHASE       = 1; 
+ * 	MAC_SEND_END_TRANSMIT  = 2; 
  * };
  * </pre>
  */
 enum RESULT_FROM_MAC {
-    MAC_SEND_DEAD_NEIGHBOR = 5,
-    MAC_FINISH_PHASE = 29,
-    MAC_SEND_END_TRANSMIT = 28
+    MAC_SEND_DEAD_NEIGHBOR = 0,
+    MAC_FINISH_PHASE = 1,
+    MAC_SEND_END_TRANSMIT = 2
 };
 
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_RDC{
- * 	RDC_TRANSMIT = 30; 
- * 	RDC_LISTEN 	 = 31; 
- * 	RDC_IDLE     = 32; 
+ * 	RDC_TRANSMIT = 0; 
+ * 	RDC_LISTEN 	 = 1; 
+ * 	RDC_IDLE     = 2; 
  * 	
- * 	RDC_WAIT_FOR_ACK  = 34; 
- * 	RDC_CHANNEL_CHECK = 35; 
+ * 	RDC_CCA_REQUEST = 3; 
+ * 	
+ * 	RDC_CHANNEL_CHECK = 4; 
  * };
  * </pre>
  */
 enum COMMAND_RDC {
-    RDC_TRANSMIT = 30,
-    RDC_LISTEN = 31,
-    RDC_IDLE = 32,
-    RDC_WAIT_FOR_ACK = 34,
-    RDC_CHANNEL_CHECK = 35
+    RDC_TRANSMIT = 0,
+    RDC_LISTEN = 1,
+    RDC_IDLE = 2,
+    RDC_CCA_REQUEST = 3,
+    RDC_CHANNEL_CHECK = 4
 };
 
 /**
@@ -256,9 +257,9 @@ enum RESULT_RDC {
  *  	PHY_BEGIN_TRANSMIT  = 15; 
  * 	PHY_END_TRANSMIT	= 16; 
  * 
- *  	PHY_LISTENING    = 17; 
+ *  	PHY_LISTENING    	= 17; 
  *  	
- *  	PHY_IDLING  	 = 18; 
+ *  	PHY_IDLING  	 	= 18; 
  * };
  * </pre>
  */
@@ -278,12 +279,15 @@ enum COMMAND_PHY {
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum RESULT_PHY{
+ *     
  * 	CHANNEL_CLEAR   	= 10; 
  * 	CHANNEL_BUSY    	= 11; 
  * 	
- * 	PHY_TX_OK		 = 12; 
- * 	PHY_TX_ERR 		 = 13; 
- * 	PHY_BUSY		 = 14; 
+ * 	
+ * 	PHY_TX_OK		 	= 12; 
+ * 	PHY_TX_ERR 		 	= 13; 
+ * 	PHY_BUSY		 	= 14; 
+ * 	
  * 	
  * 	PHY_RECV_OK          = 15; 
  * 	PHY_RECV_CORRUPTED   = 16; 

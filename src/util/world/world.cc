@@ -6,22 +6,9 @@
  *  functioning: refer to world.h
  */
 
-#include <cdisplaystring.h>
-#include <cenvir.h>
-#include <cgate.h>
-#include <cobjectfactory.h>
-#include <cownedobject.h>
-#include <cpar.h>
-#include <cregistrationlist.h>
-#include <csimulation.h>
-#include <distrib.h>
 #include <math.h>
-#include <onstartup.h>
-#include <regmacros.h>
-#include <simutil.h>
 #include <statistic.h>
 #include <world.h>
-//#include "radio.h"
 #include <cstdio>
 #include <list>
 #include <sstream>
@@ -368,11 +355,11 @@ void World::releaseHost(RadioDriver* mote)
 }
 
 /*
- * a mote sudden listens
+ * WSN a mote sudden listens
  */
 void World::suddenBeginListening(RadioDriver *mote)
 {
-// WSN consider all incoming message to note incomplete
+  // consider all incoming message to note incomplete
 }
 
 /*
@@ -421,18 +408,18 @@ void World::considerSignal(mySignal* signal)
 }
 
 /*
- * WSN what the fuck ???
- */
-void World::checkCCAResult()
-{
-}
-
-/*
  * check if channel is free at location of this radio driver
  */
 bool World::isFreeChannel(RadioDriver* mote)
 {
-  return false; // WSN ???
+  for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
+    if ((*it)->moteID == mote->getId())
+      return (*it)->incomingSignal == 0;
+
+  if (DEBUG)
+    ev << "Unknown host" << endl;
+
+  return false;
 }
 
 /*

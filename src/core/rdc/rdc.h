@@ -49,14 +49,12 @@ class RDCdriver : public myModule
 {
   private:
     // contikimac controls
-    bool isOnAnTranssmissionSession;
+    bool isOnAnTranssmissionPhase;
+    bool isOnAnCheckingPhase;
     int ccaCounter;
     double cumulativeSessionTime;
 
   protected:
-    Command* channelCheck;
-    Command* waitForACK;
-
     // For neighbor discovery protocol (NDP) - link-local aquire
     // For sequence checker
     // For phase optimization
@@ -70,7 +68,8 @@ class RDCdriver : public myModule
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);
 
-    /* listen demand */
+    /* demand */
+    void send();
     void on();
     void off();
 

@@ -31,9 +31,9 @@ void MACdriver::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case CHANNEL_CCA_REQUEST: /* perform CCA*/
+        case MAC_CCA_REQUEST: /* perform CCA*/
         {
-          sendCommand(CHANNEL_CCA_REQUEST);
+          sendCommand(MAC_CCA_REQUEST);
           break;
         } /* perform CCA */
 

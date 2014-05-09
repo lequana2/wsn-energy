@@ -14,7 +14,7 @@ namespace wsn_energy {
 
 void RadioDriver::initialize()
 {
-  // Transmission power
+  // Transmission power, programabble
   this->txPower = TXPOWER_MAX;
 
   // Range
@@ -24,7 +24,8 @@ void RadioDriver::initialize()
   // d0 = 1m
   // PL(d0) = -37 dBm
   //
-  // fluctuate +- 10dBm
+  // fluctuate     +- 10dBm
+  // rssi accuracy +- 6dBm
 
   double d0 = 1.0;
   double pl0 = -37.0;
@@ -35,9 +36,8 @@ void RadioDriver::initialize()
   // expected Transmission range
   this->trRange = d0 * pow(10, (pl0 - RX_SENSITIVITY - signalFluctuate) / (10 * pathLossExponent));
 
-  // WSN expected Collision range
-  // this->coRange = d0 * pow(10, (pl0 - CCA_THRESHOLD  + rssiAccuracy) / (10 * pathLossExponent));
-  this->coRange = this->trRange;
+  // expected Collision range
+  this->coRange = d0 * pow(10, (pl0 - RSSI_SENSITIVITY - rssiAccuracy) / (10 * pathLossExponent));
 
   if (DEBUG)
     std::cout << "Radio " << this->trRange << " and " << this->coRange << endl;
@@ -45,8 +45,8 @@ void RadioDriver::initialize()
   this->par("trRange").setDoubleValue(trRange);
   this->par("coRange").setDoubleValue(coRange);
 
-  // Turn on in initializing phase
-  // listen();
+  // already turned on
+  this->status = IDLE;
 }
 
 void RadioDriver::handleMessage(cMessage* msg)
@@ -233,7 +233,8 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case CHANNEL_CCA_REQUEST: /* CCA request */
+        // WSN CCA request
+        case RDC_CCA_REQUEST: /* CCA request */
           selfTimer(intervalCCA(), PHY_END_CCA);
           break; /* CCA request */
 
