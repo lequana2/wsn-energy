@@ -148,7 +148,9 @@ enum ICMP_CODE {
  * 	MAC_CCA_REQUEST = 0; 
  * 	
  * 	MAC_ASK_SEND_FRAME 	 = 1; 
- * 	MAC_BEGIN_SEND_FRAME = 2; 
+ * 	
+ * 	MAC_BEGIN_SEND_TURN  = 2; 
+ * 	
  * 	MAC_END_SEND_FRAME   = 3; 
  * 	
  * 	MAC_EXPIRE_IFS		 = 4; 
@@ -158,7 +160,7 @@ enum ICMP_CODE {
 enum COMMAND_MAC {
     MAC_CCA_REQUEST = 0,
     MAC_ASK_SEND_FRAME = 1,
-    MAC_BEGIN_SEND_FRAME = 2,
+    MAC_BEGIN_SEND_TURN = 2,
     MAC_END_SEND_FRAME = 3,
     MAC_EXPIRE_IFS = 4
 };
@@ -226,23 +228,27 @@ enum COMMAND_RDC {
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum RESULT_RDC{
- * 	RDC_SEND_OK     = 0; 
- * 	RDC_SEND_NO_ACK = 1; 
- * 	RDC_SEND_FATAL  = 2; 
- * 	RDC_SEND_COL	= 3; 
- * 
- * 	RDC_READY_TRANS_PHASE = 4; 
- * 	RDC_STOP_TRANS_PHASE  = 5; 
+ * 	RDC_READY_TRANS_PHASE = 0; 
+ *     RDC_STOP_TRANS_PHASE  = 1; 
+ *     
+ *     RDC_BEGIN_TRANS_TURN  = 2; 
+ *     
+ *     
+ * 	RDC_SEND_OK     	  = 3; 
+ * 	RDC_SEND_NO_ACK 	  = 4; 
+ * 	RDC_SEND_FATAL        = 5; 
+ * 	RDC_SEND_COL	      = 6; 
  * };
  * </pre>
  */
 enum RESULT_RDC {
-    RDC_SEND_OK = 0,
-    RDC_SEND_NO_ACK = 1,
-    RDC_SEND_FATAL = 2,
-    RDC_SEND_COL = 3,
-    RDC_READY_TRANS_PHASE = 4,
-    RDC_STOP_TRANS_PHASE = 5
+    RDC_READY_TRANS_PHASE = 0,
+    RDC_STOP_TRANS_PHASE = 1,
+    RDC_BEGIN_TRANS_TURN = 2,
+    RDC_SEND_OK = 3,
+    RDC_SEND_NO_ACK = 4,
+    RDC_SEND_FATAL = 5,
+    RDC_SEND_COL = 6
 };
 
 /**
@@ -288,7 +294,6 @@ enum COMMAND_PHY {
  * 	
  * 	PHY_TX_OK		 	= 12; 
  * 	PHY_TX_ERR 		 	= 13; 
- * 	PHY_BUSY		 	= 14; 
  * };
  * </pre>
  */
@@ -296,8 +301,7 @@ enum RESULT_PHY {
     CHANNEL_CLEAR = 10,
     CHANNEL_BUSY = 11,
     PHY_TX_OK = 12,
-    PHY_TX_ERR = 13,
-    PHY_BUSY = 14
+    PHY_TX_ERR = 13
 };
 
 /**

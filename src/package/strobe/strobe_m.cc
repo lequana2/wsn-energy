@@ -99,7 +99,7 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_MAC"));
     e->insert(MAC_CCA_REQUEST, "MAC_CCA_REQUEST");
     e->insert(MAC_ASK_SEND_FRAME, "MAC_ASK_SEND_FRAME");
-    e->insert(MAC_BEGIN_SEND_FRAME, "MAC_BEGIN_SEND_FRAME");
+    e->insert(MAC_BEGIN_SEND_TURN, "MAC_BEGIN_SEND_TURN");
     e->insert(MAC_END_SEND_FRAME, "MAC_END_SEND_FRAME");
     e->insert(MAC_EXPIRE_IFS, "MAC_EXPIRE_IFS");
 );
@@ -135,12 +135,13 @@ EXECUTE_ON_STARTUP(
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::RESULT_RDC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_RDC"));
+    e->insert(RDC_READY_TRANS_PHASE, "RDC_READY_TRANS_PHASE");
+    e->insert(RDC_STOP_TRANS_PHASE, "RDC_STOP_TRANS_PHASE");
+    e->insert(RDC_BEGIN_TRANS_TURN, "RDC_BEGIN_TRANS_TURN");
     e->insert(RDC_SEND_OK, "RDC_SEND_OK");
     e->insert(RDC_SEND_NO_ACK, "RDC_SEND_NO_ACK");
     e->insert(RDC_SEND_FATAL, "RDC_SEND_FATAL");
     e->insert(RDC_SEND_COL, "RDC_SEND_COL");
-    e->insert(RDC_READY_TRANS_PHASE, "RDC_READY_TRANS_PHASE");
-    e->insert(RDC_STOP_TRANS_PHASE, "RDC_STOP_TRANS_PHASE");
 );
 
 EXECUTE_ON_STARTUP(
@@ -164,7 +165,6 @@ EXECUTE_ON_STARTUP(
     e->insert(CHANNEL_BUSY, "CHANNEL_BUSY");
     e->insert(PHY_TX_OK, "PHY_TX_OK");
     e->insert(PHY_TX_ERR, "PHY_TX_ERR");
-    e->insert(PHY_BUSY, "PHY_BUSY");
 );
 
 Register_Class(Command);

@@ -15,6 +15,16 @@ enum KIND{
 	RESULT  = 1; // GREEN  result from lower
 };
 
+// Command 
+packet Command{
+	int note;
+}
+
+// Result 
+packet Result{
+	int note;
+}
+
 // Manual event
 enum MANUAL_EVENT{
 	NODE_STARTUP  = 0; // turn on a mote
@@ -47,8 +57,8 @@ enum RESULT_NET{
 
 // ip packet type
 enum IP_PACKET_NEXT_HEADER{
-    NEXT_HEADER_UDP		= 0; // UDP packet follows
-    NEXT_HEADER_TCP		= 1; // TCP packet follows
+    NEXT_HEADER_UDP		= 0; // UDP  packet follows
+    NEXT_HEADER_TCP		= 1; // TCP  packet follows
     NEXT_HEADER_ICMP	= 2; // ICMP packet follows
 };
 
@@ -68,7 +78,9 @@ enum COMMAND_MAC{
 	MAC_CCA_REQUEST = 0; // request CCA, to PHY
 	
 	MAC_ASK_SEND_FRAME 	 = 1; // ask RDC to send a transmission phase of a frame
-	MAC_BEGIN_SEND_FRAME = 2; // start a transmission phase 
+	
+	MAC_BEGIN_SEND_TURN  = 2; // start 1 turn in a transmission phase 
+	
 	MAC_END_SEND_FRAME   = 3; // ends a session of sending a frame, enter IFS 
 	
 	MAC_EXPIRE_IFS		 = 4; // IFS has expired, ready for next frame
@@ -101,13 +113,16 @@ enum COMMAND_RDC{
 };
 
 enum RESULT_RDC{
-	RDC_SEND_OK     = 0; // send + receive ACK (if needed)
-	RDC_SEND_NO_ACK = 1; // sent + no ACK (if needed)
-	RDC_SEND_FATAL  = 2; // fatal error, abort message
-	RDC_SEND_COL	= 3; // collision with PHY
-
-	RDC_READY_TRANS_PHASE = 4; // begin transmission session, turn off periodical check
-	RDC_STOP_TRANS_PHASE  = 5; // stop transmission session, turn on periodical check
+	RDC_READY_TRANS_PHASE = 0; // begin transmission session, turn off periodical check
+    RDC_STOP_TRANS_PHASE  = 1; // stop transmission session,  turn on periodical check
+    
+    RDC_BEGIN_TRANS_TURN  = 2; // begin a transmission (in one turn 6 maximum CCA + 1 trans)
+    
+    // after 1 transmission turn (consists of one/many time(s))
+	RDC_SEND_OK     	  = 3; // send + receive ACK (if needed)
+	RDC_SEND_NO_ACK 	  = 4; // sent + no ACK (if needed)
+	RDC_SEND_FATAL        = 5; // fatal error, abort message
+	RDC_SEND_COL	      = 6; // collision with PHY
 };
 
 // PHY related
@@ -135,15 +150,4 @@ enum RESULT_PHY{
 	// transmission result
 	PHY_TX_OK		 	= 12; // send okay
 	PHY_TX_ERR 		 	= 13; // internal error, does not need to resend e.g: packet is too big
-	PHY_BUSY		 	= 14; // radio is transmitting or receiving
 };
-
-// Command 
-packet Command{
-	int note;
-}
-
-// Result 
-packet Result{
-	int note;
-}

@@ -75,13 +75,13 @@ class RadioDriver : public myModule
     void received(Raw*);
     void sleep();
 
+    // CCA return CCA interval
+    virtual double intervalCCA() = 0;
+
     // power
     virtual double getTxPower() = 0;
     virtual double getRxPower() = 0;
     virtual double getIdPower() = 0;
-
-    // CCA return CCA interval
-    virtual double intervalCCA() = 0;
 
   protected:
     void initialize();
@@ -99,7 +99,7 @@ class RadioDriver : public myModule
     double trRange; // simulated transmission range according to txPower
     double coRange; // simulated collission range according to txPower
 
-    void switchOscilatorMode(int mode);     // Switch oscilator mode, public for manipulated by battery, bytecount
+    void switchOscilatorMode(int mode);     // Switch oscilator mode, public for being manipulated by energest, bytecount
 };
 
 } /* namespace wsn_energy */

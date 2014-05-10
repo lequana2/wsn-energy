@@ -10,18 +10,27 @@
 #include "packet_m.h"
 #include "count.h"
 
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+
 namespace wsn_energy {
 
 void RDCdriver::initialize()
 {
   // intitialisation
-  isOnAnTranssmissionPhase = false;
-  isOnAnCheckingPhase = false;
+  isHavingPendingTransmission = false;
+
+  phase = FREE_PHASE;
   ccaCounter = 0;
 
   // start channel check timer
-  if (getParentModule()->getId() != simulation.getModuleByPath("server")->getId())
-    selfTimer(0, RDC_CHANNEL_CHECK);
+  // selfTimer(0, RDC_CHANNEL_CHECK);
+}
+
+void RDCdriver::finish()
+{
+  cancelAndDelete(buffer);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -34,35 +43,104 @@ void RDCdriver::processSelfMessage(cPacket* packet)
       {
         case RDC_CHANNEL_CHECK: /* channel check */
         {
-          if (ccaCounter == 0) // starting a new checking phase
+          switch (phase)
           {
-            // WSN consider is on old checking session
-            // WSN consider is on transmission session
+            case TRANSMITTING_PHASE: /* schedule but not perform checking phase */
+            {
+              // schedule next checking phase
+              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_CHANNEL_CHECK);
+              break;
+            } /* schedule but not perform checking phase */
 
-            // acquire checking phase
-            isOnAnCheckingPhase = true;
-            ccaCounter = CCA_COUNT_MAX;
+            case FREE_PHASE: /* begin a checking phase */
+            {
+              // acquire checking phase
+              phase = CHECKING_PHASE;
 
-            // start checking phase
-            selfTimer(0, RDC_CHANNEL_CHECK);
-          }
-          else // next cca
-          {
-            // decrease cca counter
-            ccaCounter--;
+              // reset cca counter
+              ccaCounter = CCA_COUNT_MAX;
 
-            // turn on radio
-            on();
+              // start checking phase
+              selfTimer(0, RDC_CHANNEL_CHECK);
 
-            // begin CCA indicator
-            sendCommand(RDC_CCA_REQUEST);
+              // schedule next checking phase
+              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_CHANNEL_CHECK);
+
+              break;
+            } /* begin a checking phase*/
+
+            case CHECKING_PHASE: /* is on checking phase */
+            {
+              // decrease cca counter
+              ccaCounter--;
+
+              // turn on radio
+              on();
+
+              // begin CCA indicator
+              ccaType = MAC_CCA;
+              sendCommand(RDC_CCA_REQUEST);
+
+              break;
+            } /* is on checking phase */
           }
           break;
         } /* channel check*/
 
+        case RDC_READY_TRANS_PHASE: /* enter transmission phase */
+        {
+          // release pending
+          isHavingPendingTransmission = false;
+
+          // acquire transmitting phase
+          phase = TRANSMITTING_PHASE;
+
+          // inform MAC RDC is free
+          sendResult(RDC_READY_TRANS_PHASE);
+
+          // starting timeout of transmitting phase
+          transmittingPhaseTimeout = simTime().dbl() + MAX_PHASE_STROBE;
+
+          if (DEBUG)
+            ev << "Enter transmission phase" << endl;
+
+          break;
+        } /* enter transmission phase*/
+
+        case RDC_BEGIN_TRANS_TURN: /* begin a transmission turn */
+        {
+          // check time out
+          if (simTime() > transmittingPhaseTimeout)
+          {
+            if (this->buffer->getAckRequired() == false) // if broadcast -> TX OK
+            {
+              selfTimer(0, RDC_STOP_TRANS_PHASE);
+            }
+            else // if unicast -> NO ACK
+            {
+              phase = FREE_PHASE;
+              sendResult(RDC_SEND_NO_ACK);
+            }
+          }
+          else
+          {
+            // RDC CCA
+            ccaType = RDC_CCA;
+            sendCommand(RDC_CCA_REQUEST);
+          }
+
+          break;
+        } /* begin a transmission turn */
+
+        case RDC_STOP_TRANS_PHASE: /* stop a transmission phase */
+        {
+          phase = FREE_PHASE;
+          sendResult(RDC_SEND_OK);
+        } /* stop a transmission phase */
+
         case RDC_SEND_FRAME: /* send frame */
         {
-          send();
+          sendFrame();
           break;
         } /* send frame */
 
@@ -86,22 +164,8 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      switch ((check_and_cast<Frame*>(packet))->getFrameType())
-      {
-        case FRAME_DATA:
-          // WSN begin a transmission phase
-          this->buffer = check_and_cast<Frame*>(packet->dup()); // write to buffer
-
-          // WSN acquire transmitting phases
-          isOnAnTranssmissionPhase = true;
-
-          // WSN begin transmission phase
-          // WSN acquire phase lock
-          // WSN cca
-          // WSN send frame
-
-          break;
-      }
+      cancelAndDelete(this->buffer);
+      this->buffer = check_and_cast<Frame*>(packet->dup());
       break;
     } /* Data */
 
@@ -109,8 +173,57 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
+        case MAC_ASK_SEND_FRAME: /* register a transmission phase */
+        {
+          // does not aquire transmission phase at this stage
+          if (this->phase == FREE_PHASE) // is free
+          {
+            selfTimer(0, RDC_READY_TRANS_PHASE);
+          }
+          else // wait
+          {
+            // wait CCA complete
+            isHavingPendingTransmission = true;
+          }
+          break;
+        } /* register a transmission phase */
+
+        case MAC_BEGIN_SEND_TURN: /* begin a turn in a transmission phase */
+        {
+          // acquire phase lock (if possible)
+          double phaseLock = 0;
+          int recverID = 0;
+
+          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+          {
+            // WSN compress using HC01
+          }
+          else
+          {
+            recverID = (check_and_cast<FrameDataStandard*>(buffer))->getDestinationMacAddress();
+          }
+
+          for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
+          {
+            if ((*it)->senderID == recverID)
+            {
+              phaseLock = (*it)->phaseOptimization;
+              break;
+            }
+          }
+
+          // reset number of cca
+          ccaInOneTurn = 0;
+
+          // phase lock wait
+          selfTimer(phaseLock, RDC_BEGIN_TRANS_TURN);
+
+          break;
+        } /* begin a transmission phase */
+
         case MAC_CCA_REQUEST: /* request CCA */
         {
+          ccaType = MAC_CCA;
           sendCommand(RDC_CCA_REQUEST);
           break;
         } /* request CCA */
@@ -133,75 +246,96 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 {
   switch (packet->getKind())
   {
-//    case DATA: /* Data */
-//    {
-//      Frame *frame = check_and_cast<Frame*>(packet);
-//
-//      // not an ACK, packet must be ICMP (broadcast) or data (unicast)
-//      if (!frame->getIsACK())
-//      {
-//        // Check MAC address
-//        int recverMacID = frame->getRecverMacAddress();
-//        int senderMacID = frame->getSenderMacAddress();
-//
-//        // unicast + wrong MAC address
-//        if (recverMacID != 0 && recverMacID != this->getParentModule()->getModuleByPath(".mac")->getId())
-//        {
-//          // lost packet (! broadcast and wrong mac address) dismiss
-//          delete packet;
-//        }
-//        else
-//        {
-//          // check if receiving duplicated package
-//          bool isFound = false;
-//
-//          // search through neighbor list
-//          for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
-//          {
-//            // if neighbor in MAC-IP table
-//            if ((*it)->senderID == senderMacID)
-//            {
-//              isFound = true;
-//
-//              // consider sequence number
-//              if ((*it)->sequence < frame->getSequenceNumber())
-//              {
-//                ((*it))->sequence = frame->getSequenceNumber();
-//                sendMessageToUpper(frame);
-//              }
-//              else
-//              {
-//                // duplicated message, dismiss
-//                delete packet;
-//              }
-//
-//              break;
-//            }
-//          }
-//
-//          // if neighbor not in MAC-IP table, create new
-//          if (!isFound)
-//          {
-//            Neighbor *neighbor = new Neighbor;
-//            neighbor->senderID = senderMacID;
-//            neighbor->sequence = frame->getSequenceNumber();
-//
-//            this->neighbors.push_back(neighbor);
-//
-//            sendMessageToUpper(frame);
-//          }
-//        }
-//      }
-//      // is ACK
-//      else
-//      {
-//        // WSN consider ACK, delete before cancel ?
-//        delete packet;
-//
-//        sendResult(RDC_SEND_OK); // send success
-//      }
-//      break;
-//    } /* Data */
+    case DATA: /* Data */
+    {
+      // consider is ACK
+      if (check_and_cast<Frame*>(packet)->getHeaderLength() == ACK_LENGTH)
+      {
+        // if unicast, stop transmission phase, success
+        selfTimer(0, RDC_STOP_TRANS_PHASE);
+
+        // WSN remember phase lock (minus ack transmission time, minus reception time -> wake up time)
+      }
+      else
+      {
+        switch (check_and_cast<Frame*>(packet)->getFrameType())
+        /* Frame type */
+        {
+          case FRAME_DATA: /* frame data */
+          {
+            if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+            {
+              // WSN compress using HC01
+            }
+            else
+            {
+              FrameDataStandard* frame = check_and_cast<FrameDataStandard*>(packet);
+
+              // consider right address
+              int sourceMacAddress = frame->getSourceMacAddress();
+              int destinationMacAddress = frame->getDestinationMacAddress();
+
+              // unicast + wrong MAC address
+              if (sourceMacAddress != 0
+                  && sourceMacAddress != this->getParentModule()->getModuleByPath(".mac")->getId())
+              {
+                // lost packet (! broadcast and wrong mac address) dismiss
+                delete packet;
+              }
+              else
+              {
+                // consider sequence number (duplicate)
+                bool isFound = false;
+
+                // search through neighbor list
+                for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
+                {
+                  // if neighbor in MAC-IP table
+                  if ((*it)->senderID == destinationMacAddress)
+                  {
+                    isFound = true;
+
+                    if ((*it)->sequence < frame->getDataSequenceNumber())
+                    {
+                      // not duplicated, send to upper
+                      ((*it))->sequence = frame->getDataSequenceNumber();
+                      sendMessageToUpper(frame);
+                    }
+                    else
+                    {
+                      // duplicated message, dismiss
+                      delete packet;
+                    }
+
+                    break;
+                  }
+                }
+
+                // if neighbor not in MAC-IP table, create new and send to upper
+                if (!isFound)
+                {
+                  Neighbor *neighbor = new Neighbor;
+                  neighbor->senderID = destinationMacAddress;
+                  neighbor->sequence = frame->getDataSequenceNumber();
+
+                  this->neighbors.push_back(neighbor);
+
+                  sendMessageToUpper(frame);
+                }
+              }
+            }
+
+            // WSN check ACK required
+            // WSN send ACK
+
+            break;
+          } /* frame data */
+
+        } /* Frame type */
+      }
+
+      break;
+    } /* Data */
 
     case RESULT: /* Result */
     {
@@ -209,126 +343,132 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       {
         case CHANNEL_CLEAR: /* Channel is clear */
         {
-          // consider is on checking phase/MAC request
-          if (isOnAnCheckingPhase)
+          switch (phase)
           {
-            // WSN is switch to transmission phase ?
-
-            // not seen
-            off();
-
-            // consider if last cca
-            if (ccaCounter == 0)
+            case TRANSMITTING_PHASE: /* CCA on transmitting */
             {
-              // release checking phase
-              isOnAnCheckingPhase = false;
+              // distingush MAC CCA and RDC CCA
+              switch (ccaType)
+              {
+                case MAC_CCA: /* MAC CCA */
+                {
+                  sendResult(CHANNEL_CLEAR);
+                  break;
+                } /* MAC CCA */
 
-              // schedule next checking phase
-              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_CHANNEL_CHECK);
-            }
-            else
+                case RDC_CCA: /* RDC CCA */
+                {
+                  // send
+                  sendFrame();
+                  break;
+                } /* RDC CCA */
+              }
+
+              break;
+            } /* CCA on transmitting */
+
+            case CHECKING_PHASE: /* CCA on checking*/
             {
-              // schedule next cca
-              selfTimer(CCA_SLEEP_TIME, RDC_CHANNEL_CHECK);
-            }
-          }
-          else if (isOnAnTranssmissionPhase)
-          {
-            // WSN clear
-            // WSN send
-          }
-          else
-          {
-            // send result back to MAC layer
-            sendResult(CHANNEL_CLEAR);
+              // not seen
+              off();
 
-            // turn off radio
-            off();
+              // switch to transmission phase ?
+              if (isHavingPendingTransmission)
+              {
+                // enter transmisson phase
+                selfTimer(0, RDC_READY_TRANS_PHASE);
+              }
+              // consider if last cca
+              else if (ccaCounter == 0)
+              {
+                // release checking phase
+                phase = FREE_PHASE;
+              }
+              else
+              {
+                // schedule next cca
+                selfTimer(CCA_SLEEP_TIME, RDC_CHANNEL_CHECK);
+              }
+
+              break;
+            } /* CCA on checking*/
+
           }
           break;
-        } /* Channel is busy */
+        } /* Channel is clear */
 
-        case CHANNEL_BUSY: /* Channel is clear */
+        case CHANNEL_BUSY: /* Channel is busy */
         {
-          // consider is on checking phase/MAC request
-          if (isOnAnCheckingPhase)
+          switch (phase)
           {
-            // WSN is switch to transmission phase ?
-            // WSN seen
-            // WSN continue listening
-            // WSN if listening to message, then receive and off and send ACK
-            // WSN if listening to noise, then after timeout then perform new interval
-          }
-          else if (isOnAnTranssmissionPhase)
-          {
-            // WSN seen
-            // WSN backoff
-          }
-          else
-          {
-            // send result back to MAC layer
-            sendResult(CHANNEL_BUSY);
+            case TRANSMITTING_PHASE: /* CCA on transmitting */
+            {
+              // distingush MAC CCA and RDC CCA
+              switch (ccaType)
+              {
+                case MAC_CCA: /* MAC CCA */
+                {
+                  sendResult(CHANNEL_BUSY);
+                  break;
+                } /* MAC CCA */
 
-            // turn off radio
-            off();
+                case RDC_CCA: /* RDC CCA */
+                {
+                  // is reaching maxium number of CCA
+                  if (++ccaInOneTurn > CCA_TRANS_MAX)
+                  {
+                    // release transmitting phase
+                    phase = FREE_PHASE;
+
+                    // inform busy
+                    sendResult(RDC_SEND_COL);
+                  }
+                  else
+                  {
+                    // wait sleep time and perform another CCA
+                    selfTimer(CCA_SLEEP_TIME, RDC_CCA_REQUEST);
+                  }
+                  break;
+                } /* RDC CCA */
+              }
+
+              break;
+            } /* CCA on transmitting */
+
+            case CHECKING_PHASE: /* CCA on checking*/
+            {
+              if (isHavingPendingTransmission)
+              {
+                // inform MAC that channel is busy
+                isHavingPendingTransmission = false;
+                sendResult(RDC_SEND_COL);
+              }
+
+              // WSN if listening to message, then receive it and consider sending ACK
+              // WSN if listening to noise, then after timeout then perform new interval
+
+              break;
+            } /* CCA on checking*/
           }
           break;
         }/* Channel is busy */
 
+        case PHY_TX_OK: /* callback after transmitting */
+        {
+          // WSN delay to next transmission
+          // WSN sleep for interval
+          // WSN if broadcast, sleep + continue transmitting
+          // WSN if unicast, listen + stop incase of ACK
+
+          break;
+        }/* callback after transmitting */
+
         case PHY_TX_ERR: /* Internal error */
         {
+          phase = FREE_PHASE;
           sendResult(RDC_SEND_FATAL);
           break;
         }/* Internal error */
-
-        case PHY_TX_OK: /* callback after transmitting */
-        {
-          // WSN consider just sends broadcast data
-          if (true)
-          {
-            // consider counter
-//            if (++selfSequenceNumber < CONTIKI_MAC_REDUNDANCY)
-//            {
-//              // WSN hack need implementing duty cycling here
-//              sendMessageToLower(buffer->dup());
-//              sendCommand(RDC_TRANSMIT);
-//            }
-//            // hack
-//            else
-//            {
-//              // broadcast message always succeed !!!
-//              sendResult(RDC_SEND_OK);
-//              // WSN intermediate switch to listen mode
-//              on();
-//              delete buffer;
-//            }
-          }
-          // WSN consider just send unicast (data/ack)
-          else
-          {
-//            if (++selfSequenceNumber < CONTIKI_MAC_REDUNDANCY)
-//            {
-//              // WSN hack need implementing duty cycling here
-//              sendMessageToLower(buffer->dup());
-//              sendCommand(RDC_TRANSMIT);
-//            }
-//            else
-//            {
-//              // WSN hack, given the TX range 100%, ACK only lost if the sender node energy is too low
-////              if (check_and_cast<Count*>(
-////                  simulation.getModule(
-////                      check_and_cast<IpPacket*>(this->buffer->getEncapsulatedPacket())->getRecverIpAddress())->getModuleByPath(
-////                      "^.count"))->residualEnergy == 0)
-////                sendResult(RDC_SEND_NO_ACK);
-////              else
-////                sendResult(RDC_SEND_OK);
-////
-////              on();
-//              delete buffer;
-//            }
-          }
-          break;
-        }/* callback after transmitting */
 
         default:
           ev << "Unknown result" << endl;
@@ -344,7 +484,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
   }
 }
 
-void RDCdriver::send()
+void RDCdriver::sendFrame()
 {
   sendMessageToLower(this->buffer->dup());
   sendCommand(RDC_TRANSMIT);

@@ -9,12 +9,18 @@
 #ifndef RDCDRIVER_H_
 #define RDCDRIVER_H_
 
-#ifndef WAIT_FOR_ACK_DURATION
-#define WAIT_FOR_ACK_DURATION 0.000864 // WSN 54 symbols ??? - nullRDC
-#endif
+//#ifndef WAIT_FOR_ACK_DURATION
+//#define WAIT_FOR_ACK_DURATION 0.000864 // wait time of nullRDC
+//#endif
 
-#ifndef CHANNEL_CHECK
-#define CHANNEL_CHECK
+#ifndef RDC
+#define RDC
+#define ACK_LENGTH          5
+#define RDC_CCA             0
+#define MAC_CCA             1
+#define CHECKING_PHASE      0
+#define TRANSMITTING_PHASE  1
+#define FREE_PHASE          2
 // check rate
 #define CHANNEL_CHECK_RATE       8        // Hertz
 #define CHANNEL_CHECK_INTERVAL   0.125    // second
@@ -22,13 +28,13 @@
 #define CCA_COUNT_MAX            2        // maximum number of CCA per check
 #define CCA_TRANS_MAX            6        // maximum number of CCA before transmitting
 #define CCA_CHECK_TIME           0.000122 // time to perform a CCA (20 symbols)
-#define CCA_SLEEP_TIME           0.005    // interval between each CCA
+#define CCA_SLEEP_TIME           0.0005   // interval between each CCA
 // reaction
 #define LISTEN_AFTER_DETECT      0.0125   // second, interval after detecting a strobe
 #define INTER_FRAME_INTERVAL     0.004    // second, interval between each frame in a transmission phases
 #define MAX_PHASE_STROBE         0.145488 // second, time for a transmission phases (1 check interval + 2 check phases)
 // packet size
-#define SHORTEST_PACKET_SIZE     43       // WSN need to recalculate, whatever :))
+#define SHORTEST_PACKET_SIZE     23       // octets
 #endif
 
 #include <myModule.h>
@@ -47,11 +53,19 @@ class Neighbor
 class RDCdriver : public myModule
 {
   private:
-    // contikimac controls
-    bool isOnAnTranssmissionPhase;
-    bool isOnAnCheckingPhase;
+    // working phase
+    int phase;
+
+    // MAC - RDC relation
+    bool isHavingPendingTransmission;
+    int ccaType;
+    double transmittingPhaseTimeout;
+
+    // CCA counter in 1 checking phase
     int ccaCounter;
-    double cumulativeSessionTime;
+
+    // CCA counter in 1 transmission turn
+    int ccaInOneTurn;
 
   protected:
     // For neighbor discovery protocol (NDP) - link-local aquire
@@ -62,13 +76,14 @@ class RDCdriver : public myModule
     Frame* buffer;
 
     void initialize();
+    void finish();
 
     void processSelfMessage(cPacket*);
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);
 
     /* demand radio layer*/
-    void send();
+    void sendFrame();
     void on();
     void off();
 

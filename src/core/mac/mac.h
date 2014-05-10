@@ -20,18 +20,20 @@ class MACdriver : public myModule
     Frame* buffer;
     int sequenceNumber;
 
-    virtual void processSelfMessage(cPacket*);
-    virtual void processUpperLayerMessage(cPacket*);
-    virtual void processLowerLayerMessage(cPacket*);
+    void finish();
+
+    void processSelfMessage(cPacket*);
+    void processUpperLayerMessage(cPacket*);
+    void processLowerLayerMessage(cPacket*);
 
     /* backoff transmitting, CCA is involved */
     virtual void deferPacket() = 0;
 
     /* send buffer packet */
-    virtual void sendPacket();
+    virtual void sendFrame();
 
     /* accept input from lowerlayer */
-    virtual void receivePacket(Frame*);
+    virtual void receiveFrame(Frame*);
 
   public:
     // 802.15.4 self address

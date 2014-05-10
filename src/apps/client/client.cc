@@ -12,14 +12,14 @@
 
 // define number of packet each sensor need to send
 //#define MAX 900
-#define MAX 2
+#define MAX 1
 
 #ifndef DEBUG
 #define DEBUG 0
 #endif
 
 // WSN set global address
-//
+
 // SELF ADDRESS
 // uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
 //  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
@@ -85,7 +85,7 @@ void Client::processSelfMessage(cPacket* packet)
       {
         case RPL_SET_UP_DELAY: /* set up delay */
         {
-          newData();
+          selfTimer(0, APP_SENSING_FLAG);
           break;
         }/* set up delay*/
 
@@ -108,9 +108,9 @@ void Client::processSelfMessage(cPacket* packet)
           if ((int) getModuleByPath("^.^")->par("scheme").doubleValue() == 2)
           {
 #ifdef MAX
-            if (this->packetOrder++ < MAX)  // control maximum number
+            if (++this->packetOrder < MAX)  // control maximum number
 #else
-            this->packetOrder++;
+            ++this->packetOrder;
 #endif
               newData();
           }
@@ -145,7 +145,7 @@ void Client::processLowerLayerMessage(cPacket*)
 
 void Client::newData()
 {
-  int sendInterval = 4; // second
+  int sendInterval = 60; // second
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
@@ -153,8 +153,7 @@ void Client::newData()
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
-//    time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
-    time = intuniform(0, 1000000) / 1000000.0 * sendInterval;
+    time = intuniform(0, 10000) / 10000.0 * sendInterval;
 
   if (DEBUG)
     this->getParentModule()->bubble("Data");

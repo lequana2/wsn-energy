@@ -23,6 +23,11 @@
 
 namespace wsn_energy {
 
+void MACdriver::finish()
+{
+  cancelAndDelete(buffer);
+}
+
 void MACdriver::processSelfMessage(cPacket* packet)
 {
   switch (packet->getKind())
@@ -103,11 +108,9 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
 
   buffer->encapsulate(packet);
 
-  /* backoff and CCA */
-  deferPacket();
-
-  if (DEBUG)
-    ev << "Frame length: " << buffer->getByteLength() << endl;
+  // prepare a transmission phase
+  sendMessageToLower(buffer->dup());
+  sendCommand(MAC_ASK_SEND_FRAME);
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -116,7 +119,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      receivePacket(check_and_cast<Frame*>(packet)); // received message
+      receiveFrame(check_and_cast<Frame*>(packet)); // received message
       break;
     } /* Data */
 
@@ -126,7 +129,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
       {
         case CHANNEL_CLEAR: /* channel is clear */
         {
-          sendPacket();
+          sendFrame();
           break;
         } /* channel is clear */
 
@@ -135,6 +138,12 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           deferPacket();
           break;
         } /* channel is busy */
+
+        case RDC_READY_TRANS_PHASE: /* successfully set up a transmission phase */
+        {
+          deferPacket();
+          break;
+        }/* successfully set up a transmission phase */
 
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
@@ -148,16 +157,16 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* successful transmitting and receive ACK if needed */
 
-        case RDC_SEND_NO_ACK: /* transmitting unicast but no ACK received */
+        case RDC_SEND_NO_ACK: /* unicast but no ACK received */
         {
-          // WSN need considering dead neighbor
+          // no ack is considered dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
           selfTimer(SIFS, MAC_EXPIRE_IFS);
 
           delete this->buffer;
           break;
-        } /* callback after sending */
+        } /* unicast but no ACK received */
 
         case RDC_SEND_FATAL: /* fatal error, abort message */
         {
@@ -165,15 +174,13 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
           delete this->buffer;
           break;
-        } /* callback after sending */
+        } /* fatal error, abort message */
 
-        case RDC_SEND_COL: /* busy radio, defer packet */
+        case RDC_SEND_COL: /* busy radio */
         {
-          if (DEBUG)
-            std::cout << "PHY busy" << endl;
           deferPacket();
           break;
-        } /* callback after sending */
+        } /* busy radio, defer packet */
 
         default:
           ev << "Missing note" << endl;
@@ -190,26 +197,27 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
   }
 }
 
-void MACdriver::sendPacket()
-{
-  // WSN prepare a transmission phase
-  // WSN wait until RDC is not busy then process
-  // WSN if RDC is busy (receiving) then defer
-
-  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
-
-  sendMessageToLower(buffer);
-}
-
-void MACdriver::receivePacket(Frame* frameMac)
+void MACdriver::sendFrame()
 {
   if (DEBUG)
-    ev << "RECEIVE (MAC)" << endl;
+    ev << "MAC: begin 1 transmitting turn" << endl;
+
+  /* begin a transmission turn */
+  sendCommand(MAC_BEGIN_SEND_TURN);
+
+  /* statistics */
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
+}
+
+void MACdriver::receiveFrame(Frame* frameMac)
+{
+  if (DEBUG)
+    ev << "MAC: received" << endl;
+
+  sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
 
   /* statistics */
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
-
-  sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
 
   delete frameMac;
 }
