@@ -13,40 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRDC.h"
-#include "packet_m.h"
+#ifndef CONTIKIMAC_H_
+#define CONTIKIMAC_H_
 
-#ifndef  DEBUG
-#define DEBUG 1
-#endif
+#include "rdc.h"
+#include "packet_m.h"
 
 namespace wsn_energy {
 
-Define_Module(nullRDC);
-
-void nullRDC::sendPacket(Frame* frame)
+class contikiMAC : public RDCdriver
 {
-  return;
-}
+  protected:
+    virtual void sendPacket(Frame*);
 
-void nullRDC::sendSuccess(Frame* frame)
-{
-  return;
-}
+    virtual void sendSuccess(Frame*);
+    virtual void sendFailure();
 
-void nullRDC::sendFailure()
-{
-  return;
-}
-
-void nullRDC::receiveSuccess(Frame* frame)
-{
-  return;
-}
-
-void nullRDC::receiveFailure()
-{
-  return;
-}
+    virtual void receiveSuccess(Frame*);
+    virtual void receiveFailure();
+};
 
 } /* namespace wsn_energy */
+
+#endif /* RDC_H_ */

@@ -16,10 +16,14 @@ namespace wsn_energy {
 
 class MACdriver : public myModule
 {
+  private:
+    bool isBufferClear;
+
   protected:
     Frame* buffer;
     int sequenceNumber;
 
+    void initialize();
     void finish();
 
     void processSelfMessage(cPacket*);

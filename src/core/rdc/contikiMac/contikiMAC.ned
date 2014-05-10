@@ -13,40 +13,23 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRDC.h"
-#include "packet_m.h"
+package wsn_energy.core.rdc.contikiMac;
 
-#ifndef  DEBUG
-#define DEBUG 1
-#endif
+import wsn_energy.core.rdc.iRDC;
 
-namespace wsn_energy {
-
-Define_Module(nullRDC);
-
-void nullRDC::sendPacket(Frame* frame)
+//
+// TODO auto-generated module
+//
+simple contikiMAC like iRDC
 {
-  return;
-}
+    parameters:
+        @class("contikiMAC");
+        @display("i=block/network");
 
-void nullRDC::sendSuccess(Frame* frame)
-{
-  return;
-}
+    gates:
+        input upperIn;
+        output upperOut;
 
-void nullRDC::sendFailure()
-{
-  return;
+        input lowerIn;
+        output lowerOut;
 }
-
-void nullRDC::receiveSuccess(Frame* frame)
-{
-  return;
-}
-
-void nullRDC::receiveFailure()
-{
-  return;
-}
-
-} /* namespace wsn_energy */

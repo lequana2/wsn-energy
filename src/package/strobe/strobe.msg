@@ -110,6 +110,8 @@ enum COMMAND_RDC{
 	
 	RDC_CHANNEL_CHECK = 4; // channel check
 	RDC_SEND_FRAME    = 5; // send frame
+	
+	RDC_CCA_TIME_OUT  = 6; // cca time out
 };
 
 enum RESULT_RDC{

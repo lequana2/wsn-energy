@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nullRDC.h"
+#include "contikiMAC.h"
 #include "packet_m.h"
 
 #ifndef  DEBUG
@@ -22,29 +22,29 @@
 
 namespace wsn_energy {
 
-Define_Module(nullRDC);
+Define_Module(contikiMAC);
 
-void nullRDC::sendPacket(Frame* frame)
+void contikiMAC::sendPacket(Frame* frame)
 {
   return;
 }
 
-void nullRDC::sendSuccess(Frame* frame)
+void contikiMAC::sendSuccess(Frame* frame)
 {
   return;
 }
 
-void nullRDC::sendFailure()
+void contikiMAC::sendFailure()
 {
   return;
 }
 
-void nullRDC::receiveSuccess(Frame* frame)
+void contikiMAC::receiveSuccess(Frame* frame)
 {
   return;
 }
 
-void nullRDC::receiveFailure()
+void contikiMAC::receiveFailure()
 {
   return;
 }

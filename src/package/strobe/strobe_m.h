@@ -212,6 +212,8 @@ enum RESULT_FROM_MAC {
  * 	
  * 	RDC_CHANNEL_CHECK = 4; 
  * 	RDC_SEND_FRAME    = 5; 
+ * 	
+ * 	RDC_CCA_TIME_OUT  = 6; 
  * };
  * </pre>
  */
@@ -221,7 +223,8 @@ enum COMMAND_RDC {
     RDC_IDLE = 2,
     RDC_CCA_REQUEST = 3,
     RDC_CHANNEL_CHECK = 4,
-    RDC_SEND_FRAME = 5
+    RDC_SEND_FRAME = 5,
+    RDC_CCA_TIME_OUT = 6
 };
 
 /**

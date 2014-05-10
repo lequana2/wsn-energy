@@ -53,6 +53,10 @@ class Neighbor
 class RDCdriver : public myModule
 {
   private:
+    bool isBufferClear;
+    bool isCCAtimeOutScheduled;
+    bool isJustSendACK;
+
     // working phase
     int phase;
 
@@ -72,6 +76,8 @@ class RDCdriver : public myModule
     // For sequence checker
     // For phase optimization
     std::list<Neighbor*> neighbors;
+
+    Command* ccaTimeOut;
 
     Frame* buffer;
 

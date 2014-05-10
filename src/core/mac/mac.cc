@@ -23,9 +23,15 @@
 
 namespace wsn_energy {
 
+void MACdriver::initialize()
+{
+  isBufferClear = true;
+}
+
 void MACdriver::finish()
 {
-  cancelAndDelete(buffer);
+  if (!isBufferClear)
+    delete this->buffer;
 }
 
 void MACdriver::processSelfMessage(cPacket* packet)
@@ -74,6 +80,8 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   else
   {
     // intialisation
+    isBufferClear = false;
+
     buffer = new FrameDataStandard;
     buffer->setKind(DATA);
     buffer->setByteLength(buffer->getHeaderLength());
@@ -99,9 +107,13 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
     else
     {
       // using default route
-      (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(
-          simulation.getModule(check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress())->getParentModule()->getModuleByPath(
-              ".mac")->getId());
+      // WSN what if NULL (= zero ???)
+      if (defaultRoute == 0)
+
+        (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(
+            simulation.getModule(check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress())->getParentModule()->getModuleByPath(
+                ".mac")->getId());
+
       buffer->setAckRequired(true);
     }
   }
@@ -153,6 +165,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
 
+          isBufferClear = true;
           delete this->buffer;
           break;
         } /* successful transmitting and receive ACK if needed */
@@ -164,6 +177,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
           selfTimer(SIFS, MAC_EXPIRE_IFS);
 
+          isBufferClear = true;
           delete this->buffer;
           break;
         } /* unicast but no ACK received */
@@ -172,6 +186,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         {
           selfTimer(0, MAC_EXPIRE_IFS);
 
+          isBufferClear = true;
           delete this->buffer;
           break;
         } /* fatal error, abort message */

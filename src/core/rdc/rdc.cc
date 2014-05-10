@@ -20,9 +20,15 @@ void RDCdriver::initialize()
 {
   // intitialisation
   isHavingPendingTransmission = false;
+  isBufferClear = true;
+  isJustSendACK = false;
 
   phase = FREE_PHASE;
   ccaCounter = 0;
+
+  ccaTimeOut = new Command;
+  ccaTimeOut->setKind(COMMAND);
+  ccaTimeOut->setNote(RDC_CCA_TIME_OUT);
 
   // start channel check timer
   // selfTimer(0, RDC_CHANNEL_CHECK);
@@ -30,7 +36,11 @@ void RDCdriver::initialize()
 
 void RDCdriver::finish()
 {
-  cancelAndDelete(buffer);
+  if (!isBufferClear)
+    cancelAndDelete(buffer);
+
+  if (ccaTimeOut->isScheduled())
+    cancelAndDelete(ccaTimeOut);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -144,6 +154,13 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           break;
         } /* send frame */
 
+        case RDC_CCA_TIME_OUT: /* cca time out */
+        {
+          // time out
+          phase = FREE_PHASE;
+          break;
+        }/* cca time out */
+
         default:
           ev << "Unknown command" << endl;
           break;
@@ -164,7 +181,10 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      cancelAndDelete(this->buffer);
+      if (!isBufferClear)
+        delete this->buffer;
+      isBufferClear = false;
+
       this->buffer = check_and_cast<Frame*>(packet->dup());
       break;
     } /* Data */
@@ -255,9 +275,16 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
         selfTimer(0, RDC_STOP_TRANS_PHASE);
 
         // WSN remember phase lock (minus ack transmission time, minus reception time -> wake up time)
+
+        // delete ack
+        delete packet;
       }
       else
       {
+        // cancel cca time out
+        if (ccaTimeOut->isScheduled())
+          cancelEvent(ccaTimeOut);
+
         switch (check_and_cast<Frame*>(packet)->getFrameType())
         /* Frame type */
         {
@@ -272,14 +299,13 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               FrameDataStandard* frame = check_and_cast<FrameDataStandard*>(packet);
 
               // consider right address
-              int sourceMacAddress = frame->getSourceMacAddress();
               int destinationMacAddress = frame->getDestinationMacAddress();
 
               // unicast + wrong MAC address
-              if (sourceMacAddress != 0
-                  && sourceMacAddress != this->getParentModule()->getModuleByPath(".mac")->getId())
+              if (destinationMacAddress != 0
+                  && destinationMacAddress != this->getParentModule()->getModuleByPath(".mac")->getId())
               {
-                // lost packet (! broadcast and wrong mac address) dismiss
+                // lost packet (not broadcast and wrong mac address) dismiss
                 delete packet;
               }
               else
@@ -299,6 +325,19 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                     {
                       // not duplicated, send to upper
                       ((*it))->sequence = frame->getDataSequenceNumber();
+
+                      // check ACK required
+                      if (frame->getAckRequired())
+                      {
+                        // send ACK
+                        FrameACK* ack = new FrameACK;
+                        ack->setKind(DATA);
+
+                        isJustSendACK = true;
+                        sendMessageToLower(ack);
+                        sendCommand(RDC_TRANSMIT);
+                      }
+
                       sendMessageToUpper(frame);
                     }
                     else
@@ -320,14 +359,22 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
                   this->neighbors.push_back(neighbor);
 
+                  // check ACK required
+                  if (frame->getAckRequired())
+                  {
+                    // send ACK
+                    FrameACK* ack = new FrameACK;
+                    ack->setKind(DATA);
+
+                    isJustSendACK = true;
+                    sendMessageToLower(ack);
+                    sendCommand(RDC_TRANSMIT);
+                  }
+
                   sendMessageToUpper(frame);
                 }
               }
             }
-
-            // WSN check ACK required
-            // WSN send ACK
-
             break;
           } /* frame data */
 
@@ -435,7 +482,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               break;
             } /* CCA on transmitting */
 
-            case CHECKING_PHASE: /* CCA on checking*/
+            case CHECKING_PHASE: /* CCA on checking */
             {
               if (isHavingPendingTransmission)
               {
@@ -444,8 +491,8 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                 sendResult(RDC_SEND_COL);
               }
 
-              // WSN if listening to message, then receive it and consider sending ACK
-              // WSN if listening to noise, then after timeout then perform new interval
+              // listen but have time out, dismiss in case of receiving
+              scheduleAt(simTime() + LISTEN_AFTER_DETECT, ccaTimeOut);
 
               break;
             } /* CCA on checking*/
@@ -455,11 +502,29 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
         case PHY_TX_OK: /* callback after transmitting */
         {
-          // WSN delay to next transmission
-          // WSN sleep for interval
-          // WSN if broadcast, sleep + continue transmitting
-          // WSN if unicast, listen + stop incase of ACK
-
+          if (isJustSendACK)
+          {
+            isJustSendACK = false;
+          }
+          else
+          {
+            if (this->buffer->getAckRequired())
+            {
+              // Unicast
+              // listen
+              on();
+              // if unicast, listen + stop incase of ACK
+              selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
+            }
+            else
+            {
+              // Broadcast
+              // sleep
+              off();
+              // if broadcast, sleep + continue transmitting
+              selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
+            }
+          }
           break;
         }/* callback after transmitting */
 
