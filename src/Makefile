@@ -78,6 +78,7 @@ OBJS = \
     $O/core/radio/cc2420/cc2420.o \
     $O/core/radio/nullradio/nullRadio.o \
     $O/core/rdc/rdc.o \
+    $O/core/rdc/contikiMac/contikiMAC.o \
     $O/core/rdc/nullrdc/nullRDC.o \
     $O/core/transport/udp/udp.o \
     $O/util/signal/mySignal.o \
@@ -340,6 +341,13 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/bytecount/count.h \
 	core/myModule.h \
+	core/rdc/rdc.h \
+	package/frame/frame_m.h \
+	package/packet/packet_m.h \
+	package/strobe/strobe_m.h
+$O/core/rdc/contikiMac/contikiMAC.o: core/rdc/contikiMac/contikiMAC.cc \
+	core/myModule.h \
+	core/rdc/contikiMac/contikiMAC.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \

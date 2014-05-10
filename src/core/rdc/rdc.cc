@@ -144,13 +144,19 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
         case RDC_STOP_TRANS_PHASE: /* stop a transmission phase */
         {
+          // end all transmission command
           phase = FREE_PHASE;
+
+          // turn off radio
+          off();
+
           sendResult(RDC_SEND_OK);
         } /* stop a transmission phase */
 
         case RDC_SEND_FRAME: /* send frame */
         {
-          sendFrame();
+          if (phase != FREE_PHASE) /* if timer does not stop */
+            sendFrame();
           break;
         } /* send frame */
 
