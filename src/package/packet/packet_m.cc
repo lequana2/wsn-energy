@@ -33,6 +33,27 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 namespace wsn_energy {
 
+EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::IP_PACKET_NEXT_HEADER");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::IP_PACKET_NEXT_HEADER"));
+    e->insert(NEXT_HEADER_UDP, "NEXT_HEADER_UDP");
+    e->insert(NEXT_HEADER_TCP, "NEXT_HEADER_TCP");
+    e->insert(NEXT_HEADER_ICMP, "NEXT_HEADER_ICMP");
+);
+
+EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::ICMP_TYPE");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::ICMP_TYPE"));
+    e->insert(ICMP_RPL, "ICMP_RPL");
+);
+
+EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::ICMP_CODE");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::ICMP_CODE"));
+    e->insert(RPL_DIO_CODE, "RPL_DIO_CODE");
+    e->insert(RPL_DIS_CODE, "RPL_DIS_CODE");
+);
+
 Register_Class(IpPacketInterface);
 
 IpPacketInterface::IpPacketInterface(const char *name, int kind) : cPacket(name,kind)
@@ -1321,11 +1342,19 @@ Register_Class(DIO);
 
 DIO::DIO(const char *name, int kind) : cPacket(name,kind)
 {
-    this->dodagID_var = 0;
+    this->senderID_var = 0;
+    this->instanceID_var = 0;
     this->version_var = 0;
     this->rank_var = 0;
-    this->selfEnergy_var = 0;
-    this->payloadLength_var = 25;
+    this->grounded_var = 0;
+    this->o_var = 0;
+    this->modeOfOperation_var = 0;
+    this->preference_var = 0;
+    this->dstn_var = 0;
+    this->flags_var = 0;
+    this->reserved_var = 0;
+    this->dodagID_var = 0;
+    this->payloadLength_var = 24;
 }
 
 DIO::DIO(const DIO& other) : cPacket(other)
@@ -1347,41 +1376,75 @@ DIO& DIO::operator=(const DIO& other)
 
 void DIO::copy(const DIO& other)
 {
-    this->dodagID_var = other.dodagID_var;
+    this->senderID_var = other.senderID_var;
+    this->instanceID_var = other.instanceID_var;
     this->version_var = other.version_var;
     this->rank_var = other.rank_var;
-    this->selfEnergy_var = other.selfEnergy_var;
+    this->grounded_var = other.grounded_var;
+    this->o_var = other.o_var;
+    this->modeOfOperation_var = other.modeOfOperation_var;
+    this->preference_var = other.preference_var;
+    this->dstn_var = other.dstn_var;
+    this->flags_var = other.flags_var;
+    this->reserved_var = other.reserved_var;
+    this->dodagID_var = other.dodagID_var;
     this->payloadLength_var = other.payloadLength_var;
 }
 
 void DIO::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
-    doPacking(b,this->dodagID_var);
+    doPacking(b,this->senderID_var);
+    doPacking(b,this->instanceID_var);
     doPacking(b,this->version_var);
     doPacking(b,this->rank_var);
-    doPacking(b,this->selfEnergy_var);
+    doPacking(b,this->grounded_var);
+    doPacking(b,this->o_var);
+    doPacking(b,this->modeOfOperation_var);
+    doPacking(b,this->preference_var);
+    doPacking(b,this->dstn_var);
+    doPacking(b,this->flags_var);
+    doPacking(b,this->reserved_var);
+    doPacking(b,this->dodagID_var);
     doPacking(b,this->payloadLength_var);
 }
 
 void DIO::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
-    doUnpacking(b,this->dodagID_var);
+    doUnpacking(b,this->senderID_var);
+    doUnpacking(b,this->instanceID_var);
     doUnpacking(b,this->version_var);
     doUnpacking(b,this->rank_var);
-    doUnpacking(b,this->selfEnergy_var);
+    doUnpacking(b,this->grounded_var);
+    doUnpacking(b,this->o_var);
+    doUnpacking(b,this->modeOfOperation_var);
+    doUnpacking(b,this->preference_var);
+    doUnpacking(b,this->dstn_var);
+    doUnpacking(b,this->flags_var);
+    doUnpacking(b,this->reserved_var);
+    doUnpacking(b,this->dodagID_var);
     doUnpacking(b,this->payloadLength_var);
 }
 
-int DIO::getDodagID() const
+int DIO::getSenderID() const
 {
-    return dodagID_var;
+    return senderID_var;
 }
 
-void DIO::setDodagID(int dodagID)
+void DIO::setSenderID(int senderID)
 {
-    this->dodagID_var = dodagID;
+    this->senderID_var = senderID;
+}
+
+int DIO::getInstanceID() const
+{
+    return instanceID_var;
+}
+
+void DIO::setInstanceID(int instanceID)
+{
+    this->instanceID_var = instanceID;
 }
 
 int DIO::getVersion() const
@@ -1394,24 +1457,94 @@ void DIO::setVersion(int version)
     this->version_var = version;
 }
 
-unsigned long DIO::getRank() const
+double DIO::getRank() const
 {
     return rank_var;
 }
 
-void DIO::setRank(unsigned long rank)
+void DIO::setRank(double rank)
 {
     this->rank_var = rank;
 }
 
-double DIO::getSelfEnergy() const
+bool DIO::getGrounded() const
 {
-    return selfEnergy_var;
+    return grounded_var;
 }
 
-void DIO::setSelfEnergy(double selfEnergy)
+void DIO::setGrounded(bool grounded)
 {
-    this->selfEnergy_var = selfEnergy;
+    this->grounded_var = grounded;
+}
+
+bool DIO::getO() const
+{
+    return o_var;
+}
+
+void DIO::setO(bool o)
+{
+    this->o_var = o;
+}
+
+int DIO::getModeOfOperation() const
+{
+    return modeOfOperation_var;
+}
+
+void DIO::setModeOfOperation(int modeOfOperation)
+{
+    this->modeOfOperation_var = modeOfOperation;
+}
+
+int DIO::getPreference() const
+{
+    return preference_var;
+}
+
+void DIO::setPreference(int preference)
+{
+    this->preference_var = preference;
+}
+
+int DIO::getDstn() const
+{
+    return dstn_var;
+}
+
+void DIO::setDstn(int dstn)
+{
+    this->dstn_var = dstn;
+}
+
+int DIO::getFlags() const
+{
+    return flags_var;
+}
+
+void DIO::setFlags(int flags)
+{
+    this->flags_var = flags;
+}
+
+int DIO::getReserved() const
+{
+    return reserved_var;
+}
+
+void DIO::setReserved(int reserved)
+{
+    this->reserved_var = reserved;
+}
+
+int DIO::getDodagID() const
+{
+    return dodagID_var;
+}
+
+void DIO::setDodagID(int dodagID)
+{
+    this->dodagID_var = dodagID;
 }
 
 int DIO::getPayloadLength() const
@@ -1471,7 +1604,7 @@ const char *DIODescriptor::getProperty(const char *propertyname) const
 int DIODescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
+    return basedesc ? 13+basedesc->getFieldCount(object) : 13;
 }
 
 unsigned int DIODescriptor::getFieldTypeFlags(void *object, int field) const
@@ -1488,8 +1621,16 @@ unsigned int DIODescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<13) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DIODescriptor::getFieldName(void *object, int field) const
@@ -1501,24 +1642,40 @@ const char *DIODescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "dodagID",
+        "senderID",
+        "instanceID",
         "version",
         "rank",
-        "selfEnergy",
+        "grounded",
+        "o",
+        "modeOfOperation",
+        "preference",
+        "dstn",
+        "flags",
+        "reserved",
+        "dodagID",
         "payloadLength",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : NULL;
+    return (field>=0 && field<13) ? fieldNames[field] : NULL;
 }
 
 int DIODescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='d' && strcmp(fieldName, "dodagID")==0) return base+0;
-    if (fieldName[0]=='v' && strcmp(fieldName, "version")==0) return base+1;
-    if (fieldName[0]=='r' && strcmp(fieldName, "rank")==0) return base+2;
-    if (fieldName[0]=='s' && strcmp(fieldName, "selfEnergy")==0) return base+3;
-    if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+4;
+    if (fieldName[0]=='s' && strcmp(fieldName, "senderID")==0) return base+0;
+    if (fieldName[0]=='i' && strcmp(fieldName, "instanceID")==0) return base+1;
+    if (fieldName[0]=='v' && strcmp(fieldName, "version")==0) return base+2;
+    if (fieldName[0]=='r' && strcmp(fieldName, "rank")==0) return base+3;
+    if (fieldName[0]=='g' && strcmp(fieldName, "grounded")==0) return base+4;
+    if (fieldName[0]=='o' && strcmp(fieldName, "o")==0) return base+5;
+    if (fieldName[0]=='m' && strcmp(fieldName, "modeOfOperation")==0) return base+6;
+    if (fieldName[0]=='p' && strcmp(fieldName, "preference")==0) return base+7;
+    if (fieldName[0]=='d' && strcmp(fieldName, "dstn")==0) return base+8;
+    if (fieldName[0]=='f' && strcmp(fieldName, "flags")==0) return base+9;
+    if (fieldName[0]=='r' && strcmp(fieldName, "reserved")==0) return base+10;
+    if (fieldName[0]=='d' && strcmp(fieldName, "dodagID")==0) return base+11;
+    if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+12;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1533,11 +1690,19 @@ const char *DIODescriptor::getFieldTypeString(void *object, int field) const
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
-        "unsigned long",
+        "int",
         "double",
+        "bool",
+        "bool",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
         "int",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<13) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DIODescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1577,11 +1742,19 @@ std::string DIODescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getDodagID());
-        case 1: return long2string(pp->getVersion());
-        case 2: return ulong2string(pp->getRank());
-        case 3: return double2string(pp->getSelfEnergy());
-        case 4: return long2string(pp->getPayloadLength());
+        case 0: return long2string(pp->getSenderID());
+        case 1: return long2string(pp->getInstanceID());
+        case 2: return long2string(pp->getVersion());
+        case 3: return double2string(pp->getRank());
+        case 4: return bool2string(pp->getGrounded());
+        case 5: return bool2string(pp->getO());
+        case 6: return long2string(pp->getModeOfOperation());
+        case 7: return long2string(pp->getPreference());
+        case 8: return long2string(pp->getDstn());
+        case 9: return long2string(pp->getFlags());
+        case 10: return long2string(pp->getReserved());
+        case 11: return long2string(pp->getDodagID());
+        case 12: return long2string(pp->getPayloadLength());
         default: return "";
     }
 }
@@ -1596,11 +1769,19 @@ bool DIODescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
-        case 0: pp->setDodagID(string2long(value)); return true;
-        case 1: pp->setVersion(string2long(value)); return true;
-        case 2: pp->setRank(string2ulong(value)); return true;
-        case 3: pp->setSelfEnergy(string2double(value)); return true;
-        case 4: pp->setPayloadLength(string2long(value)); return true;
+        case 0: pp->setSenderID(string2long(value)); return true;
+        case 1: pp->setInstanceID(string2long(value)); return true;
+        case 2: pp->setVersion(string2long(value)); return true;
+        case 3: pp->setRank(string2double(value)); return true;
+        case 4: pp->setGrounded(string2bool(value)); return true;
+        case 5: pp->setO(string2bool(value)); return true;
+        case 6: pp->setModeOfOperation(string2long(value)); return true;
+        case 7: pp->setPreference(string2long(value)); return true;
+        case 8: pp->setDstn(string2long(value)); return true;
+        case 9: pp->setFlags(string2long(value)); return true;
+        case 10: pp->setReserved(string2long(value)); return true;
+        case 11: pp->setDodagID(string2long(value)); return true;
+        case 12: pp->setPayloadLength(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1619,8 +1800,16 @@ const char *DIODescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<13) ? fieldStructNames[field] : NULL;
 }
 
 void *DIODescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1641,7 +1830,9 @@ Register_Class(DIS);
 
 DIS::DIS(const char *name, int kind) : cPacket(name,kind)
 {
-    this->payloadLength_var = 1;
+    this->payloadLength_var = 2;
+    this->flag_var = 0;
+    this->reserved_var = 0;
 }
 
 DIS::DIS(const DIS& other) : cPacket(other)
@@ -1664,18 +1855,24 @@ DIS& DIS::operator=(const DIS& other)
 void DIS::copy(const DIS& other)
 {
     this->payloadLength_var = other.payloadLength_var;
+    this->flag_var = other.flag_var;
+    this->reserved_var = other.reserved_var;
 }
 
 void DIS::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->payloadLength_var);
+    doPacking(b,this->flag_var);
+    doPacking(b,this->reserved_var);
 }
 
 void DIS::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->payloadLength_var);
+    doUnpacking(b,this->flag_var);
+    doUnpacking(b,this->reserved_var);
 }
 
 int DIS::getPayloadLength() const
@@ -1686,6 +1883,26 @@ int DIS::getPayloadLength() const
 void DIS::setPayloadLength(int payloadLength)
 {
     this->payloadLength_var = payloadLength;
+}
+
+int DIS::getFlag() const
+{
+    return flag_var;
+}
+
+void DIS::setFlag(int flag)
+{
+    this->flag_var = flag;
+}
+
+int DIS::getReserved() const
+{
+    return reserved_var;
+}
+
+void DIS::setReserved(int reserved)
+{
+    this->reserved_var = reserved;
 }
 
 class DISDescriptor : public cClassDescriptor
@@ -1735,7 +1952,7 @@ const char *DISDescriptor::getProperty(const char *propertyname) const
 int DISDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
 unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -1748,8 +1965,10 @@ unsigned int DISDescriptor::getFieldTypeFlags(void *object, int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DISDescriptor::getFieldName(void *object, int field) const
@@ -1762,8 +1981,10 @@ const char *DISDescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "payloadLength",
+        "flag",
+        "reserved",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
 int DISDescriptor::findField(void *object, const char *fieldName) const
@@ -1771,6 +1992,8 @@ int DISDescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+0;
+    if (fieldName[0]=='f' && strcmp(fieldName, "flag")==0) return base+1;
+    if (fieldName[0]=='r' && strcmp(fieldName, "reserved")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1784,8 +2007,10 @@ const char *DISDescriptor::getFieldTypeString(void *object, int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DISDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1826,6 +2051,8 @@ std::string DISDescriptor::getFieldAsString(void *object, int field, int i) cons
     DIS *pp = (DIS *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getPayloadLength());
+        case 1: return long2string(pp->getFlag());
+        case 2: return long2string(pp->getReserved());
         default: return "";
     }
 }
@@ -1841,6 +2068,8 @@ bool DISDescriptor::setFieldAsString(void *object, int field, int i, const char 
     DIS *pp = (DIS *)object; (void)pp;
     switch (field) {
         case 0: pp->setPayloadLength(string2long(value)); return true;
+        case 1: pp->setFlag(string2long(value)); return true;
+        case 2: pp->setReserved(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1855,8 +2084,10 @@ const char *DISDescriptor::getFieldStructName(void *object, int field) const
     }
     static const char *fieldStructNames[] = {
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const

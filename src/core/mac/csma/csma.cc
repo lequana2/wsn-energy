@@ -15,7 +15,7 @@
 #define MAX_BACKOFF_TRANSMISSION      3 // 3 tries per frame
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -27,8 +27,14 @@ void csma::deferPacket()
   /* dismiss + announce failure duty */
   if (buffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
-    // WSN self timer to considering dead neighbot or backoff or IFS expired smt
-    delete this->buffer;     // clear buffer
+    // consider IFS
+    if (this->buffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+      selfTimer(LIFS, MAC_EXPIRE_IFS);
+    else
+      selfTimer(SIFS, MAC_EXPIRE_IFS);
+
+    isBufferClear = true;
+    delete this->buffer;
   }
   /* unslotted csma */
   else

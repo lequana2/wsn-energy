@@ -17,6 +17,48 @@
 namespace wsn_energy {
 
 /**
+ * Enum generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum IP_PACKET_NEXT_HEADER{
+ *     NEXT_HEADER_UDP		= 0; 
+ *     NEXT_HEADER_TCP		= 1; 
+ *     NEXT_HEADER_ICMP	= 2; 
+ * };
+ * </pre>
+ */
+enum IP_PACKET_NEXT_HEADER {
+    NEXT_HEADER_UDP = 0,
+    NEXT_HEADER_TCP = 1,
+    NEXT_HEADER_ICMP = 2
+};
+
+/**
+ * Enum generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum ICMP_TYPE{
+ *     ICMP_RPL		= 155; 
+ * }
+ * </pre>
+ */
+enum ICMP_TYPE {
+    ICMP_RPL = 155
+};
+
+/**
+ * Enum generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
+ * <pre>
+ * enum ICMP_CODE{
+ * 	RPL_DIO_CODE   	  = 0;	
+ * 	RPL_DIS_CODE	  = 1;	
+ * }
+ * </pre>
+ */
+enum ICMP_CODE {
+    RPL_DIO_CODE = 0,
+    RPL_DIS_CODE = 1
+};
+
+/**
  * Class generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet IpPacketInterface{
@@ -301,26 +343,40 @@ inline void doUnpacking(cCommBuffer *b, IcmpPacket& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIO{
+ *     int senderID; 
  *     
- * 	int dodagID; 
+ * 	int instanceID;
  * 	int version; 
+ * 	double rank; 
+ * 	bool grounded;
+ * 	bool o;
+ * 	int modeOfOperation;
+ * 	int preference;
+ * 	int dstn;
+ * 	int flags;
+ * 	int reserved;
+ * 	int dodagID; 
+ * 		
  * 	
- * 	unsigned long rank; 
- * 	
- * 	double selfEnergy;   
- * 	
- * 	
- * 	int payloadLength = 25;
+ * 	int payloadLength = 24;
  * }
  * </pre>
  */
 class DIO : public ::cPacket
 {
   protected:
-    int dodagID_var;
+    int senderID_var;
+    int instanceID_var;
     int version_var;
-    unsigned long rank_var;
-    double selfEnergy_var;
+    double rank_var;
+    bool grounded_var;
+    bool o_var;
+    int modeOfOperation_var;
+    int preference_var;
+    int dstn_var;
+    int flags_var;
+    int reserved_var;
+    int dodagID_var;
     int payloadLength_var;
 
   private:
@@ -340,14 +396,30 @@ class DIO : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getDodagID() const;
-    virtual void setDodagID(int dodagID);
+    virtual int getSenderID() const;
+    virtual void setSenderID(int senderID);
+    virtual int getInstanceID() const;
+    virtual void setInstanceID(int instanceID);
     virtual int getVersion() const;
     virtual void setVersion(int version);
-    virtual unsigned long getRank() const;
-    virtual void setRank(unsigned long rank);
-    virtual double getSelfEnergy() const;
-    virtual void setSelfEnergy(double selfEnergy);
+    virtual double getRank() const;
+    virtual void setRank(double rank);
+    virtual bool getGrounded() const;
+    virtual void setGrounded(bool grounded);
+    virtual bool getO() const;
+    virtual void setO(bool o);
+    virtual int getModeOfOperation() const;
+    virtual void setModeOfOperation(int modeOfOperation);
+    virtual int getPreference() const;
+    virtual void setPreference(int preference);
+    virtual int getDstn() const;
+    virtual void setDstn(int dstn);
+    virtual int getFlags() const;
+    virtual void setFlags(int flags);
+    virtual int getReserved() const;
+    virtual void setReserved(int reserved);
+    virtual int getDodagID() const;
+    virtual void setDodagID(int dodagID);
     virtual int getPayloadLength() const;
     virtual void setPayloadLength(int payloadLength);
 };
@@ -359,8 +431,10 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS{
+ * 	int payloadLength = 2;
  * 	
- * 	int payloadLength = 1;
+ * 	int flag;
+ * 	int reserved;
  * }
  * </pre>
  */
@@ -368,6 +442,8 @@ class DIS : public ::cPacket
 {
   protected:
     int payloadLength_var;
+    int flag_var;
+    int reserved_var;
 
   private:
     void copy(const DIS& other);
@@ -388,6 +464,10 @@ class DIS : public ::cPacket
     // field getter/setter methods
     virtual int getPayloadLength() const;
     virtual void setPayloadLength(int payloadLength);
+    virtual int getFlag() const;
+    virtual void setFlag(int flag);
+    virtual int getReserved() const;
+    virtual void setReserved(int reserved);
 };
 
 inline void doPacking(cCommBuffer *b, DIS& obj) {obj.parsimPack(b);}

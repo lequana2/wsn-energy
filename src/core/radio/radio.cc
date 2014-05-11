@@ -77,7 +77,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         case PHY_END_CCA: /* ending of CCA */
         {
-          if (!this->ccaResult)
+          if (!this->ccaIsFreeChannel)
           {
             if (DEBUG)
               ev << "Channel is busy" << endl;
@@ -231,7 +231,6 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
       switch (check_and_cast<Command*>(packet)->getNote())
       {
         case RDC_CCA_REQUEST: /* CCA request */
-          this->ccaResult = true; // free channel
           selfTimer(intervalCCA(), PHY_END_CCA);
           break; /* CCA request */
 
@@ -294,7 +293,7 @@ void RadioDriver::transmit_end()
   if (DEBUG)
     ev << "PHY: end transmitting" << endl;
 
-  ((World*) simulation.getModuleByPath("world"))->releaseHost(this);
+  (check_and_cast<World*>(simulation.getModuleByPath("world")))->releaseHost(this);
 
   // switch mode
   switchOscilatorMode(IDLE);
@@ -311,6 +310,7 @@ void RadioDriver::listen()
   if (DEBUG)
     ev << "PHY: LISTEN" << endl;
 
+  (check_and_cast<World*>(simulation.getModuleByPath("world")))->beginListening(this);
   switchOscilatorMode(LISTENING);
 }
 
@@ -319,8 +319,8 @@ void RadioDriver::listen()
  */
 void RadioDriver::received(Raw* raw)
 {
-  if (true)   // WSN hack receive a complete message
-//    if (!raw->hasBitError())
+  // consider bit error
+//   if (!raw->hasBitError())
   {
     if (DEBUG)
       ev << "PHY: RECEIVED" << endl;
@@ -339,7 +339,7 @@ void RadioDriver::sleep()
   if (DEBUG)
     ev << "IDLE (PHY)" << endl;
 
-  ((World*) simulation.getModuleByPath("world"))->suddenStopListening(this);
+  ((World*) simulation.getModuleByPath("world"))->stopListening(this);
 
   switchOscilatorMode(IDLE);
 }
@@ -391,7 +391,6 @@ void RadioDriver::switchOscilatorMode(int type)
       this->status = POWER_DOWN;
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
 
-      // WSN switch to remove default route
       // remove preferred parent connection
       IPv6* net = check_and_cast<IPv6*>(getParentModule()->getSubmodule("net"));
       if (net->rpl->rplDag.preferredParent != NULL)

@@ -8,6 +8,24 @@
 
 namespace wsn_energy;
 
+// ip packet type
+enum IP_PACKET_NEXT_HEADER{
+    NEXT_HEADER_UDP		= 0; // UDP  packet follows
+    NEXT_HEADER_TCP		= 1; // TCP  packet follows
+    NEXT_HEADER_ICMP	= 2; // ICMP packet follows
+};
+
+// icmp packet type
+enum ICMP_TYPE{
+    ICMP_RPL		= 155; // ICMP RPL
+}
+
+// rpl icmp packet type
+enum ICMP_CODE{
+	RPL_DIO_CODE   	  = 0;	// RPL DIO message
+	RPL_DIS_CODE	  = 1;	// RPL DIS message
+}
+
 // Packet
 packet IpPacketInterface{
     double time;  			// meta-data: timestamp
@@ -112,19 +130,27 @@ packet IcmpPacket{
 }
 
 packet DIO{
-    // WSN ??? octets
-	int dodagID; // DODAGID
+    int senderID; // meta-data: sender IP address
+    
+	int instanceID;
 	int version; // version
-	
-	unsigned long rank; // rank 
-	
-	double selfEnergy;   // option: energy-history
-	
+	double rank; // rank 
+	bool grounded;
+	bool o;
+	int modeOfOperation;
+	int preference;
+	int dstn;
+	int flags;
+	int reserved;
+	int dodagID; // DODAGID
+		
 	// length
-	int payloadLength = 25;
+	int payloadLength = 24;
 }
 
 packet DIS{
-	// WSN ??? octets
-	int payloadLength = 1;
+	int payloadLength = 2;
+	
+	int flag;
+	int reserved;
 }

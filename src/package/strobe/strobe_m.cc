@@ -67,34 +67,6 @@ EXECUTE_ON_STARTUP(
 );
 
 EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::RESULT_NET");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_NET"));
-    e->insert(NET_DIO_SENT, "NET_DIO_SENT");
-    e->insert(NET_DIS_SENT, "NET_DIS_SENT");
-);
-
-EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::IP_PACKET_NEXT_HEADER");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::IP_PACKET_NEXT_HEADER"));
-    e->insert(NEXT_HEADER_UDP, "NEXT_HEADER_UDP");
-    e->insert(NEXT_HEADER_TCP, "NEXT_HEADER_TCP");
-    e->insert(NEXT_HEADER_ICMP, "NEXT_HEADER_ICMP");
-);
-
-EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::ICMP_TYPE");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::ICMP_TYPE"));
-    e->insert(ICMP_RPL, "ICMP_RPL");
-);
-
-EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::ICMP_CODE");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::ICMP_CODE"));
-    e->insert(RPL_DIO_CODE, "RPL_DIO_CODE");
-    e->insert(RPL_DIS_CODE, "RPL_DIS_CODE");
-);
-
-EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_MAC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_MAC"));
     e->insert(MAC_CCA_REQUEST, "MAC_CCA_REQUEST");
@@ -119,6 +91,8 @@ EXECUTE_ON_STARTUP(
     e->insert(MAC_SEND_DEAD_NEIGHBOR, "MAC_SEND_DEAD_NEIGHBOR");
     e->insert(MAC_FINISH_PHASE, "MAC_FINISH_PHASE");
     e->insert(MAC_SEND_END_TRANSMIT, "MAC_SEND_END_TRANSMIT");
+    e->insert(NET_DIO_SENT, "NET_DIO_SENT");
+    e->insert(NET_DIS_SENT, "NET_DIS_SENT");
 );
 
 EXECUTE_ON_STARTUP(

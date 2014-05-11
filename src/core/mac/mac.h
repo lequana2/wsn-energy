@@ -12,14 +12,19 @@
 #include "myModule.h"
 #include <frame_m.h>
 
+#ifndef IFS
+#define IFS
+#define MAX_SIFS_FRAME_SIZE 18 // octets
+#define SIFS 0.000192          // 12 symbols
+#define LIFS 0.00064           // 40 symbols
+#endif
+
 namespace wsn_energy {
 
 class MACdriver : public myModule
 {
-  private:
-    bool isBufferClear;
-
   protected:
+    bool isBufferClear;
     Frame* buffer;
     int sequenceNumber;
 

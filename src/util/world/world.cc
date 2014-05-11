@@ -15,11 +15,11 @@
 #include <string>
 
 #ifndef ANNOTATE
-#define ANNOTATE 1
+#define ANNOTATE 0
 #endif
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -273,6 +273,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
     considerSignal(signal);
 
     // insert into signal manager list
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal++;
     this->signals.push_front(signal);
   }
 
@@ -281,6 +282,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
       it != host->moteIDWithinCollisionRange.end(); it++)
   {
     // only increase incoming signal
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal++;
     mySignal *signal = new mySignal(senderID, (*it));
     considerSignal(signal);
   }
@@ -322,7 +324,7 @@ void World::releaseHost(RadioDriver* mote)
     {
       // check success
       Raw* raw = host->onAir->dup();
-      if ((*it)->isSuccess())
+      if ((*it)->getIsCorrupted())
         raw->setBitError(false); // no error
       else
         raw->setBitError(true);  // error
@@ -338,14 +340,14 @@ void World::releaseHost(RadioDriver* mote)
   // decrease count of in-transmission-range signal
   for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
       it != host->moteIDWithinTransmissionRange.end(); it++)
-    // WSN consider host incoming signal
-    ;
+    // consider host incoming signal
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
 
   // decrease count of only-in-collision-range signal
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
-    // WSN consider host incoming signal
-    ;
+    // consider host incoming signal
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
 
   // draw range
   if (ANNOTATE)
@@ -355,17 +357,28 @@ void World::releaseHost(RadioDriver* mote)
 }
 
 /*
- * WSN a mote sudden listens
+ * a mote sudden listens
  */
-void World::suddenBeginListening(RadioDriver *mote)
+void World::beginListening(RadioDriver *mote)
 {
+  // Receiver ID
+  int recverID = mote->getId();
+
+  mote->ccaIsFreeChannel = true;
+
   // consider all incoming message to note incomplete
+  for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
+    if ((*it)->radioRecverID == recverID)
+    {
+      mote->ccaIsFreeChannel = false;
+      (*it)->corrupt();
+    }
 }
 
 /*
  * a mote stop listening
  */
-void World::suddenStopListening(RadioDriver* mote)
+void World::stopListening(RadioDriver* mote)
 {
   // Receiver ID
   int recverID = mote->getId();
@@ -373,7 +386,7 @@ void World::suddenStopListening(RadioDriver* mote)
   // consider incomplete signal
   for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
     if ((*it)->radioRecverID == recverID)
-      (*it)->setIncompleted();
+      (*it)->corrupt();
 }
 
 /*
@@ -385,26 +398,19 @@ void World::considerSignal(mySignal* signal)
   int recverID = signal->radioRecverID;
 
   // increase incoming signal
-  // WSN consider host incoming signal
-  ;
-
-  // Incomplete message
-  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->status != LISTENING)
-    signal->setIncompleted();
-
-  // consider interfere signal at receiver
-  // WSN consider host incoming signal
-  ;
-  if (true)
+  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal != 0)
   {
-    // from this host signal
-    signal->setInterferred();
+    signal->corrupt();
 
     // from other host signal
     for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
       if ((*it)->radioRecverID == recverID)
-        (*it)->setInterferred();
+        (*it)->corrupt();
   }
+
+  // Incomplete message
+  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->status != LISTENING)
+    signal->corrupt();
 }
 
 /*

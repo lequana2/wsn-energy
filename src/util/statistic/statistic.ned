@@ -36,7 +36,7 @@ simple Statistic
 
         @signal[totalDelayApp](type="double");
         @statistic[totalDelayApp](title="Total delay (app): "; record=last);
-		@signal[totalDelayNet](type="double");
+        @signal[totalDelayNet](type="double");
         @statistic[totalDelayNet](title="Total delay (net): "; record=last);
 
         @signal[appSend](type="int");
@@ -55,7 +55,7 @@ simple Statistic
         @statistic[macRecv](title="Number of mac layer recv: "; record=last);
         @statistic[radioSend](title="Number of radio layer send: "; record=last);
         @statistic[radioRecv](title="Number of radio layer recv: "; record=last);
-        
+
         @signal[timeIdle](type="double");
         @signal[timeTrans](type="double");
         @signal[timeListen](type="double");
@@ -63,8 +63,8 @@ simple Statistic
         @statistic[timeTrans](title="Time transmitting: "; record=last);
         @statistic[timeListen](title="Time listening: "; record=last);
 
-		@signal[dioSent](type="int");
-		@signal[disSent](type="int");
+        @signal[dioSent](type="int");
+        @signal[disSent](type="int");
         @signal[ipInter](type="int");
         @signal[ipTrans](type="int");
         @statistic[dioSent](title="Number of DIO  send       : "; record=last);
@@ -72,10 +72,12 @@ simple Statistic
         @statistic[ipInter](title="Number of ip forwarding   : "; record=last);
         @statistic[ipTrans](title="Number of ip transmitting : "; record=last);
 
-		@signal[lifeTime](type="double");
+        @signal[lifeTime](type="double");
         @signal[lifeTimePercentage](type="double");
+        @signal[lifeTimeFirst](type="double");
         @statistic[lifeTimeRoute](title="Network life time (route): "; record=last);
         @statistic[lifeTimePercentage](title="Network life time (percentage): "; record=last);
+        @statistic[lifeTimeFirst](title="Network life time (first): "; record=last);
 
         @display("p=-10,40;i=block/table2");
 }

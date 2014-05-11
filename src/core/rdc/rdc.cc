@@ -220,25 +220,24 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
         {
           // acquire phase lock (if possible)
           double phaseLock = 0;
-          int recverID = 0;
 
-          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
-          {
-            // WSN compress using HC01
-          }
-          else
-          {
-            recverID = (check_and_cast<FrameDataStandard*>(buffer))->getDestinationMacAddress();
-          }
-
-          for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
-          {
-            if ((*it)->senderID == recverID)
-            {
-              phaseLock = (*it)->phaseOptimization;
-              break;
-            }
-          }
+//          int recverID = 0;
+//          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+//          {
+//            // compress using HC01
+//          }
+//          else
+//          {
+//            recverID = (check_and_cast<FrameDataStandard*>(buffer))->getDestinationMacAddress();
+//          }
+//          for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
+//          {
+//            if ((*it)->senderID == recverID)
+//            {
+//              phaseLock = (*it)->phaseOptimization;
+//              break;
+//            }
+//          }
 
           // reset number of cca
           ccaInOneTurn = 0;
@@ -282,7 +281,8 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
         // if unicast, stop transmission phase, success
         selfTimer(0, RDC_STOP_TRANS_PHASE);
 
-        // WSN remember phase lock (minus ack transmission time, minus reception time -> wake up time)
+        // remember phase lock (minus ack transmission time, minus reception time -> wake up time)
+        // place holder
 
         // delete ack
         delete packet;

@@ -31,9 +31,11 @@ void IPv6::initialize()
 {
   this->rpl = new RPL(this);
   this->pendingPacket = NULL;
+  this->defaultRoute = 0;
 
-  // WSN If server then create RPL DODAG
-  //  this->rpl->rpl_set_root();
+  // If server then create RPL DODAG
+  if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+    this->rpl->rpl_set_root();
 }
 
 void IPv6::finish()
@@ -149,69 +151,103 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
         if (DEBUG)
           std::cout << "RECV (NET)" << endl;
 
-//      switch (check_and_cast<IpPacket*>(packet)->getMessageCode())
-//      {
-//        case NET_DATA: /* forward data */
-//        {
-//          (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_RECV); // statistics
-//
-//          if (check_and_cast<IpPacket*>(packet)->getRecverIpAddress() != 0
-//              && check_and_cast<IpPacket*>(packet)->getRecverIpAddress() != this->getId())
-//          {
-//            /* wrong IP address in unicast, drop message or overhear ??? */
-//            if (DEBUG)
-//              if (DEBUG)
-//                std::cout << "Wrong IP message" << endl;
-//          }
-//          else
-//          {
-//            // Energy calculated by counting bits
-//            // WSN what if dead while receiving ???
-//            if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
-//            {
-//              check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
-//                  check_and_cast<IpPacket*>(packet)->getBitLength());
-//              check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
-//                  simTime().dbl() - check_and_cast<IpPacket*>(packet)->getTime()); // statistics
-//            }
-//
-//            sendMessageToUpper(packet->decapsulate()); // Forward to upper layer
-//          }
-//
-//          delete packet;
-//          break;
-//        } /* forward data */
-//
-//        case NET_ICMP_RPL:
-//          /* RPL ICMP */
-//        {
-//          // Energy calculated by counting bits
-//          if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
-//            check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
-//                check_and_cast<IpPacket*>(packet)->getBitLength());
-//
-//          this->rpl->processICMP(check_and_cast<IpPacket*>(packet));
-//
-//          break;
-//        } /* RPL ICMP */
-//
-//        default:
-//          if (DEBUG)
-//            if (DEBUG)
-//              std::cout << "Missing resolution" << endl;
-//          break;
-//      }
+      if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+      {
+        // WSN compress using HC01
+      }
+      else
+      {
+        switch (check_and_cast<IpPacketStandard*>(packet)->getNextHeader())
+        {
+          case NEXT_HEADER_UDP: /* UDP */
+          {
+            (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_RECV); // statistics
+
+            if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != 0
+                && check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != this->getId())
+            {
+              // hop limit !!!
+              if (check_and_cast<IpPacketStandard*>(packet)->getHopLimit() == 1)
+                delete packet;
+              else
+              {
+                check_and_cast<IpPacketStandard*>(packet)->setHopLimit(
+                    check_and_cast<IpPacketStandard*>(packet)->getHopLimit() - 1);
+
+                // wrong IP address in unicast, keep forwarding using default route !!!
+                putIntoQueue(check_and_cast<IpPacketStandard*>(packet));
+              }
+            }
+            else
+            {
+              // Energy calculated by counting bits
+              // what if dead while receiving <- nonsense due to critical level
+              if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
+              {
+                check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
+                    check_and_cast<IpPacketStandard*>(packet)->getBitLength());
+                check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
+                    simTime().dbl() - check_and_cast<IpPacketStandard*>(packet)->getTime()); // statistics
+              }
+
+              sendMessageToUpper(packet->decapsulate()); // Forward to upper layer
+
+              delete packet;
+            }
+            break;
+          } /* UDP */
+
+          case NEXT_HEADER_ICMP: /* ICMP */
+          {
+            // Energy calculated by counting bits
+            if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
+              check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
+                  check_and_cast<IpPacketStandard*>(packet)->getBitLength());
+
+            IcmpPacket* icmpPacket = check_and_cast<IcmpPacket*>(packet->decapsulate());
+
+            if (icmpPacket->getType() == ICMP_RPL)
+              this->rpl->processICMP(icmpPacket);
+
+            delete packet;
+
+            break;
+          } /* ICMP */
+
+          default:
+            if (DEBUG)
+              if (DEBUG)
+                std::cout << "Missing resolution" << endl;
+            break;
+        }
+      }
+
       break;
     } /* Data */
 
-    case RESULT:
-      /* Result */
+    case RESULT: /* Result */
     {
       switch (check_and_cast<Result*>(packet)->getNote())
       {
         case MAC_FINISH_PHASE: /* MAC layer finish a transmitting phase */
         {
-          // WSN consider if just send a DIO
+          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+          {
+            // WSN compress using HC01
+          }
+          else
+          {
+            if (check_and_cast<IpPacketStandard*>(pendingPacket)->getNextHeader() == NEXT_HEADER_ICMP)
+            {
+              if (check_and_cast<IcmpPacket*>(pendingPacket->getEncapsulatedPacket())->getType() == ICMP_RPL)
+              {
+                if (check_and_cast<IcmpPacket*>(pendingPacket->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                  this->rpl->hasSentDIO();
+                else if (check_and_cast<IcmpPacket*>(pendingPacket->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                  this->rpl->hasSentDIS();
+              }
+            }
+          }
 
           // check buffer
           this->ipPacketQueue.remove(pendingPacket);
@@ -222,7 +258,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           break;
         }/* MAC layer finish a transmitting phase */
 
-        case MAC_SEND_DEAD_NEIGHBOR: /* dead neighbor handling */
+        case MAC_SEND_DEAD_NEIGHBOR:
+          /* dead neighbor handling */
         {
           if (DEBUG)
             std::cout << "NET DEAD NEIGHBOR" << endl;
@@ -235,13 +272,15 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           break;
         } /* dead neighbor handling */
 
-        case NET_DIO_SENT: /* just send DIO */
+        case NET_DIO_SENT:
+          /* just send DIO */
         {
           this->rpl->hasSentDIO();
           break;
         } /* just send DIO*/
 
-        case NET_DIS_SENT: /* just send DIS */
+        case NET_DIS_SENT:
+          /* just send DIS */
         {
           this->rpl->hasSentDIS();
           break;
@@ -267,55 +306,6 @@ void IPv6::preparePacketToBeSent()
 {
   // get first packet from queue
   pendingPacket = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
-
-//  WSN what the fuck is these shitties ?!?!?
-//  if (pendingPacket->getMessageCode() == NET_ICMP_RPL)
-//  {
-//    // Energy calculated by counting bits
-//    if (pendingPacket->getIcmpCode() == NET_ICMP_DIO)
-//    {
-//      if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
-//      {
-//        if (getModuleByPath("^.^")->par("usingELB").boolValue())
-//          check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength() + 8);
-//        else
-//          check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength());
-//      }
-//    }
-//    else if (pendingPacket->getIcmpCode() == NET_ICMP_DIO)
-//    {
-//      check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength());
-//    }
-//  }
-//  else if (pendingPacket->getMessageCode() == NET_DATA)
-//  {
-//    // WSN just for test
-////    pendingPacket->setRecverIpAddress(simulation.getModuleByPath("server.net")->getId());
-//    return;
-//
-//    // if data, consider parent
-//    if (this->rpl->rplDag.preferredParent == NULL)
-//    {
-//      // if no parent found, wait
-//      // if (DEBUG)
-//      std::cout << "NET: no parent found, wait" << endl;
-//      this->pendingPacket = NULL;
-//    }
-//    else
-//    {
-//      (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(NET_SEND));
-//
-//      // Energy calculated by counting bits
-//      if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
-//        check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->transmit(pendingPacket->getBitLength());
-//
-//      // if not, change IP address submit
-//      pendingPacket->setRecverIpAddress(this->rpl->rplDag.preferredParent->neighborID);
-//
-//      // WSN hack is neccesary ? /update every round/net-ack
-//      // this->rpl->updatePrefferredParent();
-//    }
-//  }
 }
 
 void IPv6::putIntoQueue(IpPacketInterface* ipPacket)
@@ -337,13 +327,12 @@ void IPv6::multicast(IcmpPacket *icmpPacket)
   }
   else
   {
-    // WSN set up ICMP
     // initialisation
     ipPacket = new IpPacketStandard;
     ipPacket->setKind(DATA);
     ipPacket->setByteLength(ipPacket->getHeaderLength());
 
-    (check_and_cast<IpPacketStandard*>(ipPacket))->setNextHeader(NEXT_HEADER_UDP);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setNextHeader(NEXT_HEADER_ICMP);
     (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(HOP_LIMIT);
     (check_and_cast<IpPacketStandard*>(ipPacket))->setSourceIpAddress(this->getId());
     (check_and_cast<IpPacketStandard*>(ipPacket))->setDestinationIpAddress(0);

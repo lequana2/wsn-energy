@@ -26,7 +26,13 @@ void Energest::initialize()
     this->capsuleStartTime[i] = 0;
     this->power[i] = 0;
   }
-  this->energestRemaining = MAXPOWER;
+
+  // MCU always on
+  this->power[ENERGEST_TYPE_CPU] = MSP430_POWER;
+  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
+
+  // total energy remaining
+  this->energestRemaining = MAX_POWER;
 }
 
 void Energest::handleMessage(cMessage *msg)
@@ -64,7 +70,7 @@ void Energest::energestOff(int type)
 
     // residual energy
     // Turn off if below critical mode
-    if (this->energestRemaining < MAXPOWER * CRITICAL)
+    if (this->energestRemaining < MAX_POWER * CRITICAL)
       ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
   }
 }
@@ -80,5 +86,8 @@ void Energest::update()
     if (resume)
       energestOn(i, this->power[i]);
   }
+
+  // MCU always on
+  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
 }
 } /* namespace wsn_energy */

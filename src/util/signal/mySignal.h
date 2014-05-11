@@ -14,9 +14,7 @@ namespace wsn_energy {
 class mySignal
 {
   private:
-    bool interferred;
-    bool incompleted;
-    bool success;
+    bool isCorrupted;
 
     int rssi;        // 8 bit RSSI offset
 
@@ -27,12 +25,9 @@ class mySignal
     mySignal();
     mySignal(int radioSenderID, int radioRecverID);
 
-    void setInterferred();
-    void setIncompleted();
+    void corrupt();
 
-    bool isInterferred();
-    bool isIncomplete();
-    bool isSuccess();
+    bool getIsCorrupted();
 };
 
 } /* namespace wsn_energy */

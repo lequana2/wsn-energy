@@ -9,16 +9,10 @@
 #include <mac.h>
 #include "packet_m.h"
 #include "statistic.h"
+#include "ipv6.h"
 
 #ifndef DEBUG
 #define DEBUG 1
-#endif
-
-#ifndef IFS
-#define IFS
-#define MAX_SIFS_FRAME_SIZE 18 // octets
-#define SIFS 0.000192          // 12 symbols
-#define LIFS 0.00064           // 40 symbols
 #endif
 
 namespace wsn_energy {
@@ -26,6 +20,7 @@ namespace wsn_energy {
 void MACdriver::initialize()
 {
   isBufferClear = true;
+  defaultRoute = 0;
 }
 
 void MACdriver::finish()
@@ -51,6 +46,12 @@ void MACdriver::processSelfMessage(cPacket* packet)
         case MAC_EXPIRE_IFS: /* expire IFS */
         {
           sendResult(MAC_FINISH_PHASE);
+
+          if (!isBufferClear)
+            delete this->buffer;
+
+          isBufferClear = true;
+
           break;
         } /* expire IFS*/
 
@@ -107,12 +108,18 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
     else
     {
       // using default route
-      // WSN what if NULL (= zero ???)
-      if (defaultRoute == 0)
+      int netDefaultRoute = (check_and_cast<IPv6*>(getModuleByPath("^.net")))->defaultRoute;
 
-        (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(
-            simulation.getModule(check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress())->getParentModule()->getModuleByPath(
-                ".mac")->getId());
+      if (netDefaultRoute == 0)
+      {
+        selfTimer(0, RDC_SEND_FATAL);
+      }
+      else
+      {
+        // using address resolution
+        defaultRoute = simulation.getModule(netDefaultRoute)->getModuleByPath("^.mac")->getId();
+        (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(defaultRoute);
+      }
 
       buffer->setAckRequired(true);
     }
@@ -165,8 +172,6 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
 
-          isBufferClear = true;
-          delete this->buffer;
           break;
         } /* successful transmitting and receive ACK if needed */
 
@@ -175,10 +180,12 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           // no ack is considered dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
-          selfTimer(SIFS, MAC_EXPIRE_IFS);
+          // consider IFS
+          if (this->buffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+            selfTimer(LIFS, MAC_EXPIRE_IFS);
+          else
+            selfTimer(SIFS, MAC_EXPIRE_IFS);
 
-          isBufferClear = true;
-          delete this->buffer;
           break;
         } /* unicast but no ACK received */
 
@@ -186,8 +193,6 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         {
           selfTimer(0, MAC_EXPIRE_IFS);
 
-          isBufferClear = true;
-          delete this->buffer;
           break;
         } /* fatal error, abort message */
 
@@ -229,11 +234,19 @@ void MACdriver::receiveFrame(Frame* frameMac)
   if (DEBUG)
     ev << "MAC: received" << endl;
 
-  sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
+  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+  {
+    // WSN compress using HC01
+  }
+  else
+  {
+    if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == 0
+        || check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
+      sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
 
-  /* statistics */
-  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
-
+    /* statistics */
+    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
+  }
   delete frameMac;
 }
 

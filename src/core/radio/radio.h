@@ -93,13 +93,14 @@ class RadioDriver : public myModule
     void processLowerLayerMessage(cPacket*);
 
   public:
-    bool ccaResult; // cca result
+    int incomingSignal;        // number of sensing signal (tranmitting + sensing)
+    bool ccaIsFreeChannel; // cca result
     int status;     // sleep, transmitting, listening, receiving
     double txPower; // transmit power
     double trRange; // simulated transmission range according to txPower
     double coRange; // simulated collission range according to txPower
 
-    void switchOscilatorMode(int mode);     // Switch oscilator mode, public for being manipulated by energest, bytecount
+    void switchOscilatorMode(int mode);    // Switch oscilator mode, public for being manipulated by energest, bytecount
 };
 
 } /* namespace wsn_energy */

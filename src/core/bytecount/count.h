@@ -3,7 +3,7 @@
  *      author : Mr.Quan LE
  *      email  : lequana2@gmail.com
  *
- *  functioning: net-layer energy
+ *  functioning: net-layer energy, however, does not using this scheme anymore
  */
 
 #ifndef __WSN_ENERGY_COUNT_H_

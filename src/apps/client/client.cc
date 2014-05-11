@@ -11,14 +11,14 @@
 #include "statistic.h"
 
 // define number of packet each sensor need to send
-//#define MAX 900
-#define MAX 1
+#define MAX 60
+//#define MAX 1
 
 #ifndef DEBUG
 #define DEBUG 0
 #endif
 
-// WSN set global address
+// set global address
 
 // SELF ADDRESS
 // uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);

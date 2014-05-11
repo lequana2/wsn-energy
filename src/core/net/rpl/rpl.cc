@@ -14,6 +14,7 @@
 #include "energest.h"
 #include "hopEnergy.h"
 #include "statistic.h"
+#include "packet_m.h"
 
 #ifndef DODAG_PAR
 #define DODAG_PAR
@@ -87,21 +88,28 @@ void RPL::finish()
 
 void RPL::sendDIO()
 {
-  ev << "Broadcast DIO" << endl;
+  if (DEBUG)
+    ev << "Broadcast DIO" << endl;
 
-  DIO *dio = new DIO();
+  DIO *dio = new DIO;
+  dio->setKind(DATA);
+  dio->setByteLength(dio->getPayloadLength());
+  dio->setSenderID(this->net->getId());
 
-  // WSN
-//  dio->setMessageCode(NET_ICMP_RPL);
-//  dio->setIcmpCode(NET_ICMP_DIO);
+  dio->setDodagID(this->rplDag.dodagID);
   dio->setVersion(this->rplDag.version);
   dio->setRank(this->rplDag.rank);
-//  dio->setByteLength(DIO_LEN);
 
-  dio->setSelfEnergy(
-      (check_and_cast<Energest*>(this->net->getParentModule()->getModuleByPath(".energest")))->energestRemaining);
+  IcmpPacket *icmpPacket = new IcmpPacket;
+  icmpPacket->setKind(DATA);
+  icmpPacket->setByteLength(icmpPacket->getHeaderLength());
 
-//  net->multicast(dio);
+  icmpPacket->setType(ICMP_RPL);
+  icmpPacket->setCode(RPL_DIO_CODE);
+
+  icmpPacket->encapsulate(dio);
+
+  net->multicast(icmpPacket);
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
 
@@ -113,14 +121,20 @@ void RPL::sendDIS()
   if (DEBUG)
     ev << "Broadcast DIS" << endl;
 
-  DIS *dis = new DIS();
+  DIS* dis = new DIS;
+  dis->setKind(DATA);
+  dis->setByteLength(dis->getPayloadLength());
 
-  // WSN
-//  dis->setMessageCode(NET_ICMP_RPL);
-//  dis->setIcmpCode(NET_ICMP_DIS);
-//  dis->setByteLength(DIS_LEN);
-//
-//  net->multicast(dis);
+  IcmpPacket *icmpPacket = new IcmpPacket;
+  icmpPacket->setKind(DATA);
+  icmpPacket->setByteLength(icmpPacket->getHeaderLength());
+
+  icmpPacket->setType(ICMP_RPL);
+  icmpPacket->setCode(RPL_DIO_CODE);
+
+  icmpPacket->encapsulate(dis);
+
+  net->multicast(icmpPacket);
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIS_SENT));
 
@@ -225,31 +239,31 @@ void RPL::handleDISTimer()
 
 void RPL::processICMP(IcmpPacket *icmpPacket)
 {
-//  switch (packet->getIcmpCode())
-//  {
-//    case NET_ICMP_DIO: /* receiving DIO */
-//    {
-//      this->processDIO(check_and_cast<DIO*>(packet));
-//      /* consider preferred parent is un-nultified under behavior of DIO */
-//      if (this->rplDag.preferredParent != NULL)
-//        this->net->selfTimer(0, NET_CHECK_BUFFER); // prepare to send data again
-//
-//      delete packet;
-//      break;
-//    } /* receiving DIO */
-//
-//    case NET_ICMP_DIS: /* receiving DIS */
-//    {
-//      this->processDIS(check_and_cast<DIS*>(packet));
-//      delete packet;
-//      break;
-//    } /* receiving DIS */
-//
-//    default:
-//      if (DEBUG)
-//        ev << "Missing resolution" << endl;
-//      break;
-//  }
+  switch (icmpPacket->getCode())
+  {
+    case RPL_DIO_CODE: /* receiving DIO */
+    {
+      this->processDIO(check_and_cast<DIO*>(icmpPacket->decapsulate()));
+      /* consider preferred parent is un-nultified under behavior of DIO */
+      if (this->rplDag.preferredParent != NULL)
+        this->net->selfTimer(0, NET_CHECK_BUFFER); // prepare to send data again
+
+      delete icmpPacket;
+      break;
+    } /* receiving DIO */
+
+    case RPL_DIS_CODE: /* receiving DIS */
+    {
+      this->processDIS(check_and_cast<DIS*>(icmpPacket->decapsulate()));
+      delete icmpPacket;
+      break;
+    } /* receiving DIS */
+
+    default:
+      if (DEBUG)
+        ev << "Missing resolution" << endl;
+      break;
+  }
 }
 
 void RPL::processDIO(DIO* dio)
@@ -259,10 +273,10 @@ void RPL::processDIO(DIO* dio)
 
   // Consider neighborID
   RPL_neighbor *neighbor = new RPL_neighbor();
-  // WSN
-//  neighbor->neighborID = dio->getSenderIpAddress();
+
+  // process DIO
+  neighbor->neighborID = dio->getSenderID();
   neighbor->neighborRank = dio->getRank();
-  neighbor->nodeQuality.energy = dio->getSelfEnergy();
 
   if (!this->rplDag.joined)
   {
@@ -404,23 +418,28 @@ void RPL::processDIO(DIO* dio)
         {
           (*oldParent)->neighborRank = neighbor->neighborRank;  // update rank
 
-          (*oldParent)->nodeQuality.energy = neighbor->nodeQuality.energy; // update note quality
-
           this->updatePrefferredParent(); // Update preferred parent
         }
         // same rank, update quality
         else if ((*oldParent)->neighborRank == neighbor->neighborRank)
         {
-          (*oldParent)->nodeQuality.energy = neighbor->nodeQuality.energy; // Update node quality
-
           this->updatePrefferredParent(); // Update preferred parent
         }
         // worse rank
         else
         {
-          // WSN is sole parent ?
-          // WSN if yes, update
-          // WSN else, remove this parent
+          // is sole parent ?
+          if (this->rplDag.parentList.size() == 1)
+          {
+            // if yes, update
+            (*oldParent)->neighborRank = neighbor->neighborRank;
+          }
+          else
+          {
+            // else, remove this parent
+            this->rplDag.parentList.remove(*oldParent);
+            this->updatePrefferredParent();
+          }
         }
         return;
       }
@@ -443,9 +462,7 @@ void RPL::processDIS(DIS* msg)
 
   // currently in DAG, then broadcast DIS
   if (this->rplDag.joined)
-  {
     this->resetDIOTimer();
-  }
 }
 
 void RPL::purgeRoute()
@@ -501,5 +518,11 @@ void RPL::updatePrefferredParent()
     simulation.getModule(this->rplDag.preferredParent->neighborID)->getParentModule()->getId());
     simulation.getModule(this->net->getParentModule()->getId())->gate(channelParent)->setDisplayString("ls=purple,1");
   }
+
+  // update default route
+  if (this->rplDag.preferredParent != NULL)
+    this->net->defaultRoute = this->rplDag.preferredParent->neighborID;
+  else
+    this->net->defaultRoute = 0;
 }
 }/* namespace wsn_energy */

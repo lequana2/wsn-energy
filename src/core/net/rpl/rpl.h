@@ -25,7 +25,6 @@ class NodeQuality
 {
   public:
     int hopCount; // hop count from base station to this neighbor
-    double energy; // energy of this neighbor
 };
 
 class LinkQuality
@@ -38,7 +37,7 @@ class RPL_neighbor
 {
   public:
     int neighborID; // IPv6 of neighbor
-    unsigned long neighborRank; // rank of this neighbor
+    double neighborRank; // rank of this neighbor
 
     NodeQuality nodeQuality; // quality of this neighbor
     LinkQuality linkQuality; // quality of link between this neighbor and ownner mote
@@ -76,10 +75,10 @@ class RPL
     Command *dioTimer;
     Command *disTimer;
 
-    void processDIO(DIO*);
     void resetDIOTimer();
     void newDIOinterval();
 
+    void processDIO(DIO*);
     void processDIS(DIS*);
 
   public:

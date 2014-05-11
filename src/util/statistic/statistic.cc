@@ -47,6 +47,7 @@ void Statistic::initialize()
   numIPinter = 0;
   numIPtrans = 0;
   numLiveNode = getParentModule()->par("numberClient").doubleValue();
+  firstDead = false;
 
   // register signal
   sigNetworkEnergyCount = registerSignal("networkEnergyCount");
@@ -73,6 +74,7 @@ void Statistic::initialize()
   signumIPtrans = registerSignal("ipTrans");
   sigLifeTimeRoute = registerSignal("lifeTimeRoute");
   sigLifeTimePercentage = registerSignal("lifeTimePercentage");
+  sigLifeTimeFirst = registerSignal("lifeTimeFirst");
 
   // start polling
   if (getParentModule()->par("isPolling").boolValue())
@@ -110,7 +112,6 @@ void Statistic::finish()
   // Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("^");
   int numberClient = wsn->par("numberClient").longValue();
-  int shitRemainingInBuffer = 0;
 
   for (int i = 0; i < numberClient; i++)
   {
@@ -132,19 +133,12 @@ void Statistic::finish()
     numSensorEnergyCount =
         check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
     emit(sigSensorEnergyCount, numSensorEnergyCount);
-
-    shitRemainingInBuffer +=
-        (check_and_cast<IPv6*>(wsn->getSubmodule("client", i)->getSubmodule("net")))->ipPacketQueue.size();
   }
 
   emit(sigTimeIdle, timeIdle);
   emit(sigTimeTrans, timeTrans);
   emit(sigTimeListen, timeListen);
   emit(sigTotalEnergy, numTotalEnergy);
-
-  // WSN debug
-  emit(sigRadioRecv, shitRemainingInBuffer);
-  emit(sigRadioSend, timeIdle + timeTrans + timeListen);
 
   cancelAndDelete(polling);
   cancelAndDelete(pollingCount);
@@ -232,17 +226,23 @@ void Statistic::registerStatistic(int type)
       break;
     case LIFE_TIME_DECREASE_SERVER_NEIGHBOR:
       this->numServerNeighbor--;
-//      std::cout << "Dead neighbor: " << numServerNeighbor << endl;
       if (this->numServerNeighbor == 0)
         emit(sigLifeTimeRoute, simTime().dbl());
       break;
     case LIFE_TIME_PERCENTAGE_DEAD_NODE:
       this->numLiveNode--;
-      // WSN hack
-      if (this->numLiveNode < 137 && this->numLiveNode > -1) // 70 % deadnode -> life time
+      // Hard coded number
+      if (this->numLiveNode < 137 && this->numLiveNode > -1) // 70 % deadnode -> life time, -1 to unregister
       {
         emit(sigLifeTimePercentage, simTime().dbl());
         this->numLiveNode = -1;
+      }
+      break;
+    case LIFE_TIME_FIRST_DEAD_NODE:
+      if (!firstDead)
+      {
+        firstDead = true;
+        emit(sigLifeTimeFirst, simTime().dbl());
       }
       break;
   }

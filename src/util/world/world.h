@@ -12,7 +12,6 @@
 #include <omnetpp.h>
 #include "mySignal.h"
 #include "radio.h"
-#include "packet_m.h"
 
 #ifndef CONNECTION_STATUS
 #define CONNECTION_STATUS
@@ -40,8 +39,6 @@ class Mote
     Raw* onAir; // on air packet
     std::list<int> moteIDWithinTransmissionRange; // mote in transmission range
     std::list<int> moteIDWithinCollisionRange;    // mote out of transmission range, but in collision range
-
-    int incomingSignal;        // number of sensing signal (tranmitting + sensing)
 };
 
 class World : public cSimpleModule
@@ -69,8 +66,8 @@ class World : public cSimpleModule
     void registerHost(RadioDriver*, Raw*);    // register transmitting mote
     void releaseHost(RadioDriver*);           // unregister transmitting mote
 
-    void suddenBeginListening(RadioDriver*); // recver begin listening
-    void suddenStopListening(RadioDriver*);   // recver stop listening
+    void beginListening(RadioDriver*);  // recver begin listening
+    void stopListening(RadioDriver*);   // recver stop listening
 
     double calculateDistance(RadioDriver*, RadioDriver*);  // calculate distance between 2 motes
     double calculateDistance(int, int, int, int);        // calculate distance according to 2D coordinate

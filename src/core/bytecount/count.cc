@@ -28,11 +28,11 @@ void Count::initialize()
     if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
       this->residualEnergy = 999999;
 
-    // WSN hack
+    // hack
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[97]")->getId())
 //    this->residualEnergy = POWER / 2;
-    if (this->getParentModule()->getId() == simulation.getModuleByPath("client[110]")->getId())
-      this->residualEnergy = POWER / 2;
+//    if (this->getParentModule()->getId() == simulation.getModuleByPath("client[110]")->getId())
+//      this->residualEnergy = POWER / 2;
 //  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[111]")->getId())
 //    this->residualEnergy = POWER / 2;
   }
@@ -46,7 +46,7 @@ void Count::transmit(int numberOfBit)
 
     if (this->residualEnergy <= 0)
     {
-      // WSN remove out-going connect
+      // remove out-going connect
       this->residualEnergy = 0;
 
       check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(
@@ -80,7 +80,7 @@ void Count::receive(int numberOfBit)
 
     if (this->residualEnergy <= 0)
     {
-      // WSN remove out-going connect
+      // remove out-going connect
       this->residualEnergy = 0;
 
       check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(

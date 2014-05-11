@@ -32,6 +32,8 @@ class IPv6 : public myModule
     void processLowerLayerMessage(cPacket*);
 
   public:
+    int defaultRoute;
+
     std::list<IpPacketInterface*> ipPacketQueue; // Buffer message to send, public scope for debugging
 
     RPL *rpl; // using RPL as routing protocol

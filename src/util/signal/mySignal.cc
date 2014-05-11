@@ -6,16 +6,13 @@
  *  functioning: refer to mySignal.h
  */
 
-
 #include "mySignal.h"
 
 namespace wsn_energy {
 
 mySignal::mySignal()
 {
-  this->incompleted = false;
-  this->interferred = false;
-  this->success = true;
+  this->isCorrupted = false;
 }
 
 mySignal::mySignal(int radioSenderID, int radioRecverID)
@@ -25,31 +22,14 @@ mySignal::mySignal(int radioSenderID, int radioRecverID)
   this->radioRecverID = radioRecverID;
 }
 
-void mySignal::setInterferred()
+void mySignal::corrupt()
 {
-  this->interferred = true;
-  this->success = false;
+  this->isCorrupted = true;
 }
 
-void mySignal::setIncompleted()
+bool mySignal::getIsCorrupted()
 {
-  this->incompleted = true;
-  this->success = false;
-}
-
-bool mySignal::isInterferred()
-{
-  return this->interferred;
-}
-
-bool mySignal::isIncomplete()
-{
-  return this->incompleted;
-}
-
-bool mySignal::isSuccess()
-{
-  return this->success;
+  return this->isCorrupted;
 }
 
 } /* namespace wsn_energy */

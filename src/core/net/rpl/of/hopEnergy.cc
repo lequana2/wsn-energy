@@ -8,6 +8,7 @@
 
 #include <of/hopEnergy.h>
 #include "count.h"
+#include "energest.h"
 
 namespace wsn_energy {
 
@@ -23,7 +24,6 @@ RPL_neighbor* hopEnergy::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2
   else if (parent1->neighborRank > parent2->neighborRank)
     return parent2;
 
-  // WSN hack
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
     if (check_and_cast<Count*>(simulation.getModule(parent1->neighborID)->getParentModule()->getSubmodule("count"))->residualEnergy
@@ -33,17 +33,21 @@ RPL_neighbor* hopEnergy::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2
       return parent2;
   }
 
-//  if (parent1->nodeQuality.energy > parent2->nodeQuality.energy)
-//    return parent1;
-//  if (parent1->nodeQuality.energy < parent2->nodeQuality.energy)
-//    return parent2;
-
   return parent1;
 }
 
-unsigned long hopEnergy::calculateRank(RPL_neighbor* parent)
+double hopEnergy::calculateRank(RPL_neighbor* parent)
 {
-  return parent->neighborRank + 1;
+  if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
+  {
+    double percentRemaining = check_and_cast<Energest*>(
+    simulation.getModule(parent->neighborID))->energestRemaining / MAX_POWER;
+    return parent->neighborRank + 1 + percentRemaining;
+  }
+  else
+  {
+    return parent->neighborRank + 1;
+  }
 }
 
 RPL_neighbor* hopEnergy::updatePreferredParent(std::list<RPL_neighbor*> parentList)

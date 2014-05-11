@@ -80,7 +80,7 @@ void UDP::processLowerLayerMessage(cPacket* packet)
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    // WSN uncompress using HC01
+    // WSN compress using HC01
   }
   else
   {

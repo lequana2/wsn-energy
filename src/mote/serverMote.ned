@@ -40,7 +40,7 @@ module ServerMote
         int axisX @unit(m);
         int axisY @unit(m);
 
-        @display("p=$axisX,$axisY;i=device/server2;is=l");
+        @display("p=$axisX,$axisY;i=device/server2;is=vl");
 
     submodules:
         app: <appType> like iApp {

@@ -28,7 +28,7 @@
 #define LIFE_TIME_INCREASE_SERVER_NEIGHBOR  12
 #define LIFE_TIME_DECREASE_SERVER_NEIGHBOR  13
 #define LIFE_TIME_PERCENTAGE_DEAD_NODE      14
-#define LIFE_TIME_FIRST_DEAD_NODE           15 // WSN need to implement
+#define LIFE_TIME_FIRST_DEAD_NODE           15
 #define DELAY_APP_LAYER 16
 #define DELAY_NET_LAYER 17
 #endif
@@ -111,9 +111,11 @@ class Statistic : public cSimpleModule
     /* network life time*/
     int numServerNeighbor;
     int numLiveNode;
+    bool firstDead;
 
     simsignal_t sigLifeTimeRoute;
     simsignal_t sigLifeTimePercentage;
+    simsignal_t sigLifeTimeFirst;
 
     /* polling for energy */
     void pollTotalSensorEnergy();

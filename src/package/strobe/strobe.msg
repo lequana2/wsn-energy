@@ -50,29 +50,6 @@ enum COMMAND_NET{
 	NET_CHECK_BUFFER    = 3; // check packet buffer
 };
 
-enum RESULT_NET{
-	NET_DIO_SENT	= 10; // has sent dio
-	NET_DIS_SENT    = 11; // has sent dis
-}
-
-// ip packet type
-enum IP_PACKET_NEXT_HEADER{
-    NEXT_HEADER_UDP		= 0; // UDP  packet follows
-    NEXT_HEADER_TCP		= 1; // TCP  packet follows
-    NEXT_HEADER_ICMP	= 2; // ICMP packet follows
-};
-
-// icmp packet type
-enum ICMP_TYPE{
-    ICMP_RPL		= 0; // ICMP RPL
-}
-
-// rpl icmp packet type
-enum ICMP_CODE{
-	RPL_DIO_CODE   	  = 0;	// RPL DIO message
-	RPL_DIS_CODE	  = 1;	// RPL DIS message
-}
-
 // MAC related
 enum COMMAND_MAC{
 	MAC_CCA_REQUEST = 0; // request CCA, to PHY
@@ -98,6 +75,9 @@ enum RESULT_FROM_MAC{
 	
 	MAC_FINISH_PHASE       = 1; // finish 1 transmitting phase    
 	MAC_SEND_END_TRANSMIT  = 2; // sent + receive ACK (if needed)
+	
+	NET_DIO_SENT	= 3; // has sent dio
+	NET_DIS_SENT    = 4; // has sent dis
 };
 
 // RDC related

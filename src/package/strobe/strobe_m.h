@@ -88,62 +88,6 @@ enum COMMAND_NET {
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
- * enum RESULT_NET{
- * 	NET_DIO_SENT	= 10; 
- * 	NET_DIS_SENT    = 11; 
- * }
- * </pre>
- */
-enum RESULT_NET {
-    NET_DIO_SENT = 10,
-    NET_DIS_SENT = 11
-};
-
-/**
- * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
- * <pre>
- * enum IP_PACKET_NEXT_HEADER{
- *     NEXT_HEADER_UDP		= 0; 
- *     NEXT_HEADER_TCP		= 1; 
- *     NEXT_HEADER_ICMP	= 2; 
- * };
- * </pre>
- */
-enum IP_PACKET_NEXT_HEADER {
-    NEXT_HEADER_UDP = 0,
-    NEXT_HEADER_TCP = 1,
-    NEXT_HEADER_ICMP = 2
-};
-
-/**
- * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
- * <pre>
- * enum ICMP_TYPE{
- *     ICMP_RPL		= 0; 
- * }
- * </pre>
- */
-enum ICMP_TYPE {
-    ICMP_RPL = 0
-};
-
-/**
- * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
- * <pre>
- * enum ICMP_CODE{
- * 	RPL_DIO_CODE   	  = 0;	
- * 	RPL_DIS_CODE	  = 1;	
- * }
- * </pre>
- */
-enum ICMP_CODE {
-    RPL_DIO_CODE = 0,
-    RPL_DIS_CODE = 1
-};
-
-/**
- * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
- * <pre>
  * enum COMMAND_MAC{
  * 	MAC_CCA_REQUEST = 0; 
  * 	
@@ -191,13 +135,18 @@ enum FRAME_TYPE {
  * 	
  * 	MAC_FINISH_PHASE       = 1; 
  * 	MAC_SEND_END_TRANSMIT  = 2; 
+ * 	
+ * 	NET_DIO_SENT	= 3; 
+ * 	NET_DIS_SENT    = 4; 
  * };
  * </pre>
  */
 enum RESULT_FROM_MAC {
     MAC_SEND_DEAD_NEIGHBOR = 0,
     MAC_FINISH_PHASE = 1,
-    MAC_SEND_END_TRANSMIT = 2
+    MAC_SEND_END_TRANSMIT = 2,
+    NET_DIO_SENT = 3,
+    NET_DIS_SENT = 4
 };
 
 /**

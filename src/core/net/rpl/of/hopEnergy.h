@@ -17,7 +17,7 @@ class hopEnergy : public ObjectiveFunction
 {
   public:
     RPL_neighbor* bestParent(RPL_neighbor*, RPL_neighbor*);
-    unsigned long calculateRank(RPL_neighbor*);
+    double calculateRank(RPL_neighbor*);
     RPL_neighbor* updatePreferredParent(std::list<RPL_neighbor*>);
 };
 
