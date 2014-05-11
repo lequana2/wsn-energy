@@ -26,7 +26,7 @@ void Energest::initialize()
     this->capsuleStartTime[i] = 0;
     this->power[i] = 0;
   }
-  this->energestRemaining = OPERATION_POWER * OPERATION_VOLTAGE;
+  this->energestRemaining = MAXPOWER;
 }
 
 void Energest::handleMessage(cMessage *msg)
@@ -59,11 +59,12 @@ void Energest::energestOff(int type)
     // turn off capsule
     this->capsuleIsActivated[type] = false;
 
-    // consume energy, in term off hour not second
+    // consume energy, in term off hour not second, because power is mAh
     this->energestRemaining -= consumeTime * power[type] / 3600.0;
 
     // residual energy
-    if(this->energestRemaining < 0)
+    // Turn off if below critical mode
+    if (this->energestRemaining < MAXPOWER * CRITICAL)
       ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
   }
 }

@@ -12,8 +12,13 @@
 #include <omnetpp.h>
 
 // Power unit = Watts (mWh)
+#define BATTERY_NUMBER                1 // should use 2 batteries
 #define OPERATION_POWER          1000.0 // mAh
 #define OPERATION_VOLTAGE           1.5 // Voltage
+#define CRITICAL                    0.1 // 10 %
+#define MAXPOWER    OPERATION_POWER * OPERATION_VOLTAGE * BATTERY_NUMBER
+
+// WSN CPU power
 
 enum ENERGEST_TYPE
 {

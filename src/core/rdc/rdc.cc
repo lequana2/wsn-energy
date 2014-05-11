@@ -31,7 +31,7 @@ void RDCdriver::initialize()
   ccaTimeOut->setNote(RDC_CCA_TIME_OUT);
 
   // start channel check timer
-  // selfTimer(0, RDC_CHANNEL_CHECK);
+  selfTimer(0, RDC_CHANNEL_CHECK);
 }
 
 void RDCdriver::finish()
@@ -119,26 +119,28 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
         case RDC_BEGIN_TRANS_TURN: /* begin a transmission turn */
         {
-          // check time out
-          if (simTime() > transmittingPhaseTimeout)
+          if (phase == TRANSMITTING_PHASE)
           {
-            if (this->buffer->getAckRequired() == false) // if broadcast -> TX OK
+            // check time out
+            if (simTime() > transmittingPhaseTimeout)
             {
-              selfTimer(0, RDC_STOP_TRANS_PHASE);
+              if (this->buffer->getAckRequired() == false) // if broadcast -> TX OK
+              {
+                selfTimer(0, RDC_STOP_TRANS_PHASE);
+              }
+              else // if unicast -> NO ACK
+              {
+                phase = FREE_PHASE;
+                sendResult(RDC_SEND_NO_ACK);
+              }
             }
-            else // if unicast -> NO ACK
+            else
             {
-              phase = FREE_PHASE;
-              sendResult(RDC_SEND_NO_ACK);
+              // RDC CCA
+              ccaType = RDC_CCA;
+              sendCommand(RDC_CCA_REQUEST);
             }
           }
-          else
-          {
-            // RDC CCA
-            ccaType = RDC_CCA;
-            sendCommand(RDC_CCA_REQUEST);
-          }
-
           break;
         } /* begin a transmission turn */
 
@@ -338,6 +340,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                         // send ACK
                         FrameACK* ack = new FrameACK;
                         ack->setKind(DATA);
+                        ack->setByteLength(ack->getHeaderLength());
 
                         isJustSendACK = true;
                         sendMessageToLower(ack);
@@ -371,6 +374,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                     // send ACK
                     FrameACK* ack = new FrameACK;
                     ack->setKind(DATA);
+                    ack->setByteLength(ack->getHeaderLength());
 
                     isJustSendACK = true;
                     sendMessageToLower(ack);
@@ -517,8 +521,10 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
             if (this->buffer->getAckRequired())
             {
               // Unicast
+
               // listen
               on();
+
               // if unicast, listen + stop incase of ACK
               selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
             }

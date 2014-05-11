@@ -103,7 +103,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
             ev << "Radio length " << bufferTXFIFO->getByteLength() << endl;
 
           /* check packet length (127 + 6 bytes) */
-          if (bufferTXFIFO->getByteLength() > 127 + 6)
+          if (bufferTXFIFO->getByteLength() > bufferTXFIFO->getHeaderLength() + bufferTXFIFO->getMaxPayloadLength())
           {
             if (DEBUG)
               ev << "Packet is too large" << endl;
@@ -220,7 +220,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
     {
       this->bufferTXFIFO = new Raw;
       this->bufferTXFIFO->setKind(DATA);
-      this->bufferTXFIFO->setByteLength(this->bufferTXFIFO->getByteLength());
+      this->bufferTXFIFO->setByteLength(this->bufferTXFIFO->getHeaderLength());
 
       this->bufferTXFIFO->encapsulate(packet);
       break;
