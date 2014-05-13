@@ -32,9 +32,6 @@ void csma::deferPacket()
       selfTimer(LIFS, MAC_EXPIRE_IFS);
     else
       selfTimer(SIFS, MAC_EXPIRE_IFS);
-
-    isBufferClear = true;
-    delete this->buffer;
   }
   /* unslotted csma */
   else

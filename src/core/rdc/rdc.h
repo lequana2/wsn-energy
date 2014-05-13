@@ -53,17 +53,17 @@ class Neighbor
 class RDCdriver : public myModule
 {
   private:
-    bool isBufferClear;
-    bool isCCAtimeOutScheduled;
+    // just send ACK <-- distinguish with data sending
     bool isJustSendACK;
 
     // working phase
     int phase;
 
-    // MAC - RDC relation
+    // MAC is waiting for nearly done CCA
     bool isHavingPendingTransmission;
+
+    // MAC CCA or RDC CCA
     int ccaType;
-    double transmittingPhaseTimeout;
 
     // CCA counter in 1 checking phase
     int ccaCounter;
@@ -77,9 +77,10 @@ class RDCdriver : public myModule
     // For phase optimization
     std::list<Neighbor*> neighbors;
 
-    Command* ccaTimeOut;
+    Command *ccaTimeOut;
+    Command *phaseTimeOut;
 
-    Frame* buffer;
+    Frame *buffer;
 
     void initialize();
     void finish();

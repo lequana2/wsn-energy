@@ -37,8 +37,8 @@ class Mote
     std::list<NeighborInformation> moteNeighborDistance; // neighbor information
 
     Raw* onAir; // on air packet
-    std::list<int> moteIDWithinTransmissionRange; // mote in transmission range
-    std::list<int> moteIDWithinCollisionRange;    // mote out of transmission range, but in collision range
+    std::list<int> moteIDWithinTransmissionRange; // mote in transmission range, create signal
+    std::list<int> moteIDWithinCollisionRange;    // mote out of transmission range, increase incoming signal
 };
 
 class World : public cSimpleModule

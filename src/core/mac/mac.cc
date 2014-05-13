@@ -19,14 +19,19 @@ namespace wsn_energy {
 
 void MACdriver::initialize()
 {
-  isBufferClear = true;
+  this->buffer = NULL;
+  this->sequenceNumber = 0;
+
   defaultRoute = 0;
 }
 
 void MACdriver::finish()
 {
-  if (!isBufferClear)
+  if (this->buffer != NULL)
+  {
     delete this->buffer;
+    this->buffer = NULL;
+  }
 }
 
 void MACdriver::processSelfMessage(cPacket* packet)
@@ -47,10 +52,15 @@ void MACdriver::processSelfMessage(cPacket* packet)
         {
           sendResult(MAC_FINISH_PHASE);
 
-          if (!isBufferClear)
+          // clear buffer
+          if (this->buffer != NULL)
+          {
             delete this->buffer;
+            this->buffer = NULL;
+          }
 
-          isBufferClear = true;
+          // increase sequence number
+          this->sequenceNumber++;
 
           break;
         } /* expire IFS*/
@@ -81,8 +91,6 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   else
   {
     // intialisation
-    isBufferClear = false;
-
     buffer = new FrameDataStandard;
     buffer->setKind(DATA);
     buffer->setByteLength(buffer->getHeaderLength());
@@ -95,13 +103,12 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
     buffer->setPanIdCompression(false);
 
     // sequence number
-    (check_and_cast<FrameDataStandard*>(buffer))->setDataSequenceNumber(this->sequenceNumber++);
+    (check_and_cast<FrameDataStandard*>(buffer))->setDataSequenceNumber(this->sequenceNumber);
 
     // address fields
-    (check_and_cast<FrameDataStandard*>(buffer))->setSourceMacAddress(this->getId());
-
     if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() == 0)
     {
+      (check_and_cast<FrameDataStandard*>(buffer))->setSourceMacAddress(this->getId());
       (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(0);
       buffer->setAckRequired(false);
     }
@@ -112,12 +119,16 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
 
       if (netDefaultRoute == 0)
       {
-        selfTimer(0, RDC_SEND_FATAL);
+        // fatal error, abort message
+        selfTimer(0, MAC_EXPIRE_IFS);
+        return;
       }
       else
       {
-        // using address resolution
+        // using ARP
         defaultRoute = simulation.getModule(netDefaultRoute)->getModuleByPath("^.mac")->getId();
+
+        (check_and_cast<FrameDataStandard*>(buffer))->setSourceMacAddress(this->getId());
         (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(defaultRoute);
       }
 
@@ -130,6 +141,10 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   // prepare a transmission phase
   sendMessageToLower(buffer->dup());
   sendCommand(MAC_ASK_SEND_FRAME);
+
+  /* statistics */
+  if (buffer->getAckRequired())
+    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -224,9 +239,6 @@ void MACdriver::sendFrame()
 
   /* begin a transmission turn */
   sendCommand(MAC_BEGIN_SEND_TURN);
-
-  /* statistics */
-  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
 }
 
 void MACdriver::receiveFrame(Frame* frameMac)

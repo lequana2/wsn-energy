@@ -75,9 +75,6 @@ enum RESULT_FROM_MAC{
 	
 	MAC_FINISH_PHASE       = 1; // finish 1 transmitting phase    
 	MAC_SEND_END_TRANSMIT  = 2; // sent + receive ACK (if needed)
-	
-	NET_DIO_SENT	= 3; // has sent dio
-	NET_DIS_SENT    = 4; // has sent dis
 };
 
 // RDC related
@@ -91,7 +88,8 @@ enum COMMAND_RDC{
 	RDC_CHANNEL_CHECK = 4; // channel check
 	RDC_SEND_FRAME    = 5; // send frame
 	
-	RDC_CCA_TIME_OUT  = 6; // cca time out
+	RDC_CCA_TIME_OUT   = 6; // cca time out
+	RDC_PHASE_TIME_OUT = 7; // phase time out
 };
 
 enum RESULT_RDC{

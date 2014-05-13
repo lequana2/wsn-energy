@@ -65,9 +65,9 @@ module ClientMote
         energest: Energest {
             @display("p=50,50");
         }
-        count: Count {
-            @display("p=50,125");
-        }
+//        count: Count {
+//            @display("p=50,125");
+//        }
     connections allowunconnected:
         app.lowerOut --> tra.upperIn;
         app.lowerIn <-- tra.upperOut;

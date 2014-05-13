@@ -85,7 +85,7 @@ void Client::processSelfMessage(cPacket* packet)
       {
         case RPL_SET_UP_DELAY: /* set up delay */
         {
-          selfTimer(0, APP_SENSING_FLAG);
+          newData();
           break;
         }/* set up delay*/
 
@@ -93,7 +93,7 @@ void Client::processSelfMessage(cPacket* packet)
         {
           // create data to send
           char buf[30];
-          int len = sprintf(buf, "Hello %d from %d", packetOrder, this->getId());
+          int len = sprintf(buf, "Hello %d from %s", packetOrder, getParentModule()->getFullName());
 
           // hack port, address
           int destinationPort = UDP_SERVER_PORT;
@@ -155,8 +155,8 @@ void Client::newData()
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
     time = intuniform(0, 10000) / 10000.0 * sendInterval;
 
-  if (DEBUG)
-    this->getParentModule()->bubble("Data");
+//  if (DEBUG)
+//    this->getParentModule()->bubble("Data");
 
   selfTimer(time, APP_SENSING_FLAG);
 }

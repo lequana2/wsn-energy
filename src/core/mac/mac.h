@@ -24,9 +24,7 @@ namespace wsn_energy {
 class MACdriver : public myModule
 {
   protected:
-    bool isBufferClear;
     Frame* buffer;
-    int sequenceNumber;
 
     void initialize();
     void finish();
@@ -45,6 +43,9 @@ class MACdriver : public myModule
     virtual void receiveFrame(Frame*);
 
   public:
+    // checking wrong/duplicated ACK in RDC
+    int sequenceNumber;
+
     // 802.15.4 self address
     int linkLocalAddress;
 

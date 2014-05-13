@@ -299,7 +299,11 @@ void RadioDriver::transmit_end()
   switchOscilatorMode(IDLE);
 
   // clear buffer
-  delete this->bufferTXFIFO;
+  if (this->bufferTXFIFO != NULL)
+  {
+    delete this->bufferTXFIFO;
+    this->bufferTXFIFO = NULL;
+  }
 }
 
 /*

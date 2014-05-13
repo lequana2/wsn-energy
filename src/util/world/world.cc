@@ -159,6 +159,7 @@ void World::deployConnection(RadioDriver* mote)
   {
     case WITHIN_TRANS:
       host->moteIDWithinTransmissionRange.push_front(bs->getId());
+      host->moteIDWithinCollisionRange.push_front(bs->getId());
       break;
 
     case WITHIN_COLLI:
@@ -176,9 +177,6 @@ void World::deployConnection(RadioDriver* mote)
     sprintf(modulePath, "client[%d].radio", i);
     RadioDriver *otherMote = (RadioDriver*) simulation.getModuleByPath(modulePath);
 
-    if (mote->getId() == otherMote->getId())
-      continue;
-
     switch (this->validateConnection(mote, otherMote))
     {
       case WITHIN_TRANS:
@@ -189,7 +187,9 @@ void World::deployConnection(RadioDriver* mote)
             check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(
             LIFE_TIME_INCREASE_SERVER_NEIGHBOR);
         }
+
         host->moteIDWithinTransmissionRange.push_front(otherMote->getId());
+        host->moteIDWithinCollisionRange.push_front(otherMote->getId());
         break;
 
       case WITHIN_COLLI:
@@ -209,9 +209,12 @@ void World::deployConnection(RadioDriver* mote)
  */
 int World::validateConnection(RadioDriver* host, RadioDriver* client)
 {
+  if (host->getId() == client->getId())
+    return NO_CONNECTION;
+
   int distance = calculateDistance(host, client);
 
-  if (distance > host->coRange || host->getId() == client->getId())
+  if (distance > host->coRange)
     return NO_CONNECTION;
 
   if (distance > host->trRange)
@@ -269,23 +272,21 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
   for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
       it != host->moteIDWithinTransmissionRange.end(); it++)
   {
+    // create signal
     mySignal *signal = new mySignal(senderID, (*it));
-    considerSignal(signal);
 
     // insert into signal manager list
-    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal++;
     this->signals.push_front(signal);
+
+    // consider validation of signal
+    considerSignal(signal);
   }
 
   // consider all only-in-collision-range signal
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
-  {
-    // only increase incoming signal
+    // increase incoming signal
     check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal++;
-    mySignal *signal = new mySignal(senderID, (*it));
-    considerSignal(signal);
-  }
 
   // draw range
   if (ANNOTATE)
@@ -303,7 +304,7 @@ void World::releaseHost(RadioDriver* mote)
 {
   // Search host by id
   int senderID = mote->getId();
-  Mote *host;
+  Mote* host = NULL;
 
   for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
   {
@@ -320,6 +321,7 @@ void World::releaseHost(RadioDriver* mote)
 
   // release this host signal
   for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
+  {
     if ((*it)->radioSenderID == senderID)
     {
       // check success
@@ -328,6 +330,7 @@ void World::releaseHost(RadioDriver* mote)
         raw->setBitError(false); // no error
       else
         raw->setBitError(true);  // error
+
       // send message
       (check_and_cast<RadioDriver*>(simulation.getModule(senderID)))->sendDirect(raw,
       simulation.getModule((*it)->radioRecverID)->gate("radioIn"));
@@ -335,21 +338,22 @@ void World::releaseHost(RadioDriver* mote)
       // remove signal
       signals.remove((*it--));
     }
-  delete host->onAir;
+  }
 
-  // decrease count of in-transmission-range signal
-  for (std::list<int>::iterator it = host->moteIDWithinTransmissionRange.begin();
-      it != host->moteIDWithinTransmissionRange.end(); it++)
-    // consider host incoming signal
-    check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+  // clear buffer
+  if (host->onAir != NULL)
+  {
+    delete host->onAir;
+    host->onAir = NULL;
+  }
 
-  // decrease count of only-in-collision-range signal
+// decrease count of only-in-collision-range signal
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
-    // consider host incoming signal
+// consider host incoming signal
     check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
 
-  // draw range
+// draw range
   if (ANNOTATE)
   {
     (&mote->getParentModule()->getDisplayString())->setTagArg("r", 0, "0");
@@ -361,12 +365,12 @@ void World::releaseHost(RadioDriver* mote)
  */
 void World::beginListening(RadioDriver *mote)
 {
-  // Receiver ID
+// Receiver ID
   int recverID = mote->getId();
 
   mote->ccaIsFreeChannel = true;
 
-  // consider all incoming message to note incomplete
+// consider all incoming message to note incomplete
   for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
     if ((*it)->radioRecverID == recverID)
     {
@@ -380,10 +384,10 @@ void World::beginListening(RadioDriver *mote)
  */
 void World::stopListening(RadioDriver* mote)
 {
-  // Receiver ID
+// Receiver ID
   int recverID = mote->getId();
 
-  // consider incomplete signal
+// consider incomplete signal
   for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
     if ((*it)->radioRecverID == recverID)
       (*it)->corrupt();
@@ -394,23 +398,19 @@ void World::stopListening(RadioDriver* mote)
  */
 void World::considerSignal(mySignal* signal)
 {
-  // Receiver ID
+// Receiver ID
   int recverID = signal->radioRecverID;
-
-  // increase incoming signal
-  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal != 0)
-  {
-    signal->corrupt();
-
-    // from other host signal
-    for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
-      if ((*it)->radioRecverID == recverID)
-        (*it)->corrupt();
-  }
 
   // Incomplete message
   if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->status != LISTENING)
     signal->corrupt();
+
+// is this singal interferenced
+  if ((check_and_cast<RadioDriver*>(simulation.getModule(recverID)))->incomingSignal != 0)
+    // interfere others signal
+    for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
+      if ((*it)->radioRecverID == recverID)
+        (*it)->corrupt();
 }
 
 /*

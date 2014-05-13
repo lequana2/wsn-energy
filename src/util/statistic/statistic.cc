@@ -130,8 +130,9 @@ void Statistic::finish()
     emit(sigSensorEnergy, numSensorEnergy);
 
     // residual energy
-    numSensorEnergyCount =
-        check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
+    if (getParentModule()->par("isPollingCount").boolValue())
+      numSensorEnergyCount =
+          check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
     emit(sigSensorEnergyCount, numSensorEnergyCount);
   }
 

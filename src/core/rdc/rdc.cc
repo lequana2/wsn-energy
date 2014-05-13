@@ -7,7 +7,9 @@
  */
 
 #include <rdc.h>
+#include "mac.h"
 #include "packet_m.h"
+#include "signal_m.h"
 #include "count.h"
 
 #ifndef DEBUG
@@ -19,16 +21,20 @@ namespace wsn_energy {
 void RDCdriver::initialize()
 {
   // intitialisation
-  isHavingPendingTransmission = false;
-  isBufferClear = true;
-  isJustSendACK = false;
+  this->buffer = NULL;
+  this->isHavingPendingTransmission = false;
+  this->isJustSendACK = false;
 
-  phase = FREE_PHASE;
-  ccaCounter = 0;
+  this->phase = FREE_PHASE;
+  this->ccaCounter = 0;
 
   ccaTimeOut = new Command;
   ccaTimeOut->setKind(COMMAND);
   ccaTimeOut->setNote(RDC_CCA_TIME_OUT);
+
+  phaseTimeOut = new Command;
+  phaseTimeOut->setKind(COMMAND);
+  phaseTimeOut->setNote(RDC_PHASE_TIME_OUT);
 
   // start channel check timer
   selfTimer(0, RDC_CHANNEL_CHECK);
@@ -36,11 +42,14 @@ void RDCdriver::initialize()
 
 void RDCdriver::finish()
 {
-  if (!isBufferClear)
-    cancelAndDelete(buffer);
+  if (this->buffer != NULL)
+  {
+    delete buffer;
+    this->buffer = NULL;
+  }
 
-  if (ccaTimeOut->isScheduled())
-    cancelAndDelete(ccaTimeOut);
+  cancelAndDelete(ccaTimeOut);
+  cancelAndDelete(phaseTimeOut);
 }
 
 void RDCdriver::processSelfMessage(cPacket* packet)
@@ -108,8 +117,9 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           // inform MAC RDC is free
           sendResult(RDC_READY_TRANS_PHASE);
 
-          // starting timeout of transmitting phase
-          transmittingPhaseTimeout = simTime().dbl() + MAX_PHASE_STROBE;
+          // WSN FUCK ME !!!
+          // create time out
+          scheduleAt(simTime().dbl() + MAX_PHASE_STROBE, phaseTimeOut);
 
           if (DEBUG)
             ev << "Enter transmission phase" << endl;
@@ -121,44 +131,57 @@ void RDCdriver::processSelfMessage(cPacket* packet)
         {
           if (phase == TRANSMITTING_PHASE)
           {
-            // check time out
-            if (simTime() > transmittingPhaseTimeout)
-            {
-              if (this->buffer->getAckRequired() == false) // if broadcast -> TX OK
-              {
-                selfTimer(0, RDC_STOP_TRANS_PHASE);
-              }
-              else // if unicast -> NO ACK
-              {
-                phase = FREE_PHASE;
-                sendResult(RDC_SEND_NO_ACK);
-              }
-            }
-            else
-            {
-              // RDC CCA
-              ccaType = RDC_CCA;
-              sendCommand(RDC_CCA_REQUEST);
-            }
+            // RDC CCA
+            ccaType = RDC_CCA;
+            sendCommand(RDC_CCA_REQUEST);
           }
           break;
         } /* begin a transmission turn */
 
+        case RDC_PHASE_TIME_OUT: /* phase time out */
+        {
+          // Release
+          phase = FREE_PHASE;
+
+          if (!buffer->getAckRequired()) // broadcast is always success
+          {
+            // stop transmission
+            selfTimer(0, RDC_STOP_TRANS_PHASE);
+
+            // inform success
+            sendResult(RDC_SEND_OK);
+          }
+          else // if unicast + NO ACK
+          {
+            // stop transmission
+            selfTimer(0, RDC_STOP_TRANS_PHASE);
+
+            // inform failure
+            sendResult(RDC_SEND_NO_ACK);
+          }
+
+          break;
+        } /* phase time out  */
+
         case RDC_STOP_TRANS_PHASE: /* stop a transmission phase */
         {
+          // stop timeout transmission phase
+          cancelEvent(phaseTimeOut);
+
           // end all transmission command
           phase = FREE_PHASE;
 
           // turn off radio
           off();
 
-          sendResult(RDC_SEND_OK);
+          break;
         } /* stop a transmission phase */
 
         case RDC_SEND_FRAME: /* send frame */
         {
-          if (phase != FREE_PHASE) /* if timer does not stop */
+          if (phase != FREE_PHASE && phaseTimeOut->isScheduled()) /* if timer does not stop */
             sendFrame();
+
           break;
         } /* send frame */
 
@@ -189,11 +212,13 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      if (!isBufferClear)
+      // clear old buffer
+      if (buffer != NULL)
         delete this->buffer;
-      isBufferClear = false;
 
-      this->buffer = check_and_cast<Frame*>(packet->dup());
+      // assign new frame
+      this->buffer = check_and_cast<Frame*>(packet);
+
       break;
     } /* Data */
 
@@ -210,7 +235,7 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
           }
           else // wait
           {
-            // wait CCA complete
+            // wait this CCA complete
             isHavingPendingTransmission = true;
           }
           break;
@@ -278,11 +303,29 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       // consider is ACK
       if (check_and_cast<Frame*>(packet)->getHeaderLength() == ACK_LENGTH)
       {
-        // if unicast, stop transmission phase, success
-        selfTimer(0, RDC_STOP_TRANS_PHASE);
 
-        // remember phase lock (minus ack transmission time, minus reception time -> wake up time)
-        // place holder
+        // only consider in case of unicast transmission
+        if (buffer->getAckRequired())
+        {
+          // not itself ACK
+          if (check_and_cast<FrameACK*>(packet)->getDataSequenceNumber()
+              != check_and_cast<MACdriver*>(getModuleByPath("^.mac"))->sequenceNumber)
+          {
+            delete packet;
+            return;
+          }
+
+          // cancel phase timeout
+          cancelEvent(phaseTimeOut);
+
+          // stop transmission
+          selfTimer(0, RDC_STOP_TRANS_PHASE);
+
+          // inform success
+          sendResult(RDC_SEND_OK);
+
+          // remember phase lock (minus ack transmission time, minus reception time -> wake up time)
+        }
 
         // delete ack
         delete packet;
@@ -290,8 +333,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       else
       {
         // cancel cca time out
-        if (ccaTimeOut->isScheduled())
-          cancelEvent(ccaTimeOut);
+        cancelEvent(ccaTimeOut);
 
         switch (check_and_cast<Frame*>(packet)->getFrameType())
         /* Frame type */
@@ -341,10 +383,19 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                         FrameACK* ack = new FrameACK;
                         ack->setKind(DATA);
                         ack->setByteLength(ack->getHeaderLength());
+                        ack->setDataSequenceNumber(frame->getDataSequenceNumber());
 
                         isJustSendACK = true;
-                        sendMessageToLower(ack);
-                        sendCommand(RDC_TRANSMIT);
+
+                        // Simulate AUTO-ACK
+                        Raw* ackRaw = new Raw;
+                        ackRaw->setKind(DATA);
+                        ackRaw->setByteLength(ackRaw->getHeaderLength());
+                        ackRaw->encapsulate(ack);
+
+                        sendDirect(ackRaw,
+                            simulation.getModule(frame->getSourceMacAddress())->getModuleByPath("^.radio")->gate(
+                                "radioIn"));
                       }
 
                       sendMessageToUpper(frame);
@@ -376,15 +427,21 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                     ack->setKind(DATA);
                     ack->setByteLength(ack->getHeaderLength());
 
-                    isJustSendACK = true;
-                    sendMessageToLower(ack);
-                    sendCommand(RDC_TRANSMIT);
+                    // Simulate AUTO-ACK
+                    Raw* ackRaw = new Raw;
+                    ackRaw->setKind(DATA);
+                    ackRaw->setByteLength(ackRaw->getHeaderLength());
+                    ackRaw->encapsulate(ack);
+
+                    sendDirect(ackRaw,
+                    simulation.getModule(frame->getSourceMacAddress())->getModuleByPath("^.radio")->gate("radioIn"));
                   }
 
                   sendMessageToUpper(frame);
                 }
               }
             }
+
             break;
           } /* frame data */
 
@@ -502,6 +559,9 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               }
 
               // listen but have time out, dismiss in case of receiving
+              if (ccaTimeOut->isScheduled())
+                cancelEvent(ccaTimeOut);
+
               scheduleAt(simTime() + LISTEN_AFTER_DETECT, ccaTimeOut);
 
               break;
@@ -525,16 +585,20 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               // listen
               on();
 
-              // if unicast, listen + stop incase of ACK
-              selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
+              // check time-out
+              if (phaseTimeOut->isScheduled())
+                selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
             }
             else
             {
               // Broadcast
+
               // sleep
               off();
-              // if broadcast, sleep + continue transmitting
-              selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
+
+              // check-time out
+              if (phaseTimeOut->isScheduled())
+                selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
             }
           }
           break;
@@ -542,7 +606,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
         case PHY_TX_ERR: /* Internal error */
         {
-          phase = FREE_PHASE;
+          selfTimer(0, RDC_STOP_TRANS_PHASE);
           sendResult(RDC_SEND_FATAL);
           break;
         }/* Internal error */
@@ -563,7 +627,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
 void RDCdriver::sendFrame()
 {
-  sendMessageToLower(this->buffer->dup());
+  sendMessageToLower(buffer->dup());
   sendCommand(RDC_TRANSMIT);
 }
 

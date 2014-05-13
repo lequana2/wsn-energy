@@ -343,10 +343,12 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/bytecount/count.h \
+	core/mac/mac.h \
 	core/myModule.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \
+	package/signal/signal_m.h \
 	package/strobe/strobe_m.h
 $O/core/rdc/contikiMac/contikiMAC.o: core/rdc/contikiMac/contikiMAC.cc \
 	core/myModule.h \

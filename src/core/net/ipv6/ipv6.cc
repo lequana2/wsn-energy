@@ -30,22 +30,24 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
-  this->pendingPacket = NULL;
+  this->buffer = NULL;
   this->defaultRoute = 0;
 
   // If server then create RPL DODAG
   if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
     this->rpl->rpl_set_root();
+
+//  this->defaultRoute = simulation.getModuleByPath("server.net")->getId();
 }
 
 void IPv6::finish()
 {
-  if (DEBUG)
-    std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName() << endl;
+//  if (DEBUG)
+  std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName() << endl;
 
   // Clear queue !!!
   for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
-    cancelAndDelete(*it);
+    delete *it;
 
   this->ipPacketQueue.clear();
 
@@ -70,26 +72,22 @@ void IPv6::processSelfMessage(cPacket* packet)
       {
         case NET_CHECK_BUFFER: /* Check buffer */
         {
-          if (ipPacketQueue.size() == 0) // empty, do nothing, assign pending packet equals NULL
+          if (ipPacketQueue.size() == 0) // successful send all packet in queue
           {
-            pendingPacket = NULL;
           }
-          else if (pendingPacket == NULL) // do not have any pending packet
+          else if (buffer == NULL) // do not have any pending packet
           {
             // prepare a packet to be sent
             preparePacketToBeSent();
 
-            if (pendingPacket == NULL)
-            {
-              // unsuccessful dequeue, just ignore and wait for another check
-            }
-            else
-            {
-              // successful dequeue, create a duplicate ?!?
-              sendMessageToLower(pendingPacket->dup());
-            }
+            // send duplicated packet to MAC layer
+            sendMessageToLower(buffer->dup());
           }
-          delete packet;
+          else // or still in phase of another packet
+          {
+          }
+
+          delete packet; // done command
           break;
         } /* Check buffer */
 
@@ -163,6 +161,16 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           {
             (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_RECV); // statistics
 
+            // Energy calculated by counting bits
+            // what if dead while receiving <- nonsense due to critical level
+            if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
+            {
+              check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
+                  check_and_cast<IpPacketStandard*>(packet)->getBitLength());
+              check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
+                  simTime().dbl() - check_and_cast<IpPacketStandard*>(packet)->getTime()); // statistics
+            }
+
             if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != 0
                 && check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != this->getId())
             {
@@ -180,16 +188,6 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             }
             else
             {
-              // Energy calculated by counting bits
-              // what if dead while receiving <- nonsense due to critical level
-              if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
-              {
-                check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
-                    check_and_cast<IpPacketStandard*>(packet)->getBitLength());
-                check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
-                    simTime().dbl() - check_and_cast<IpPacketStandard*>(packet)->getTime()); // statistics
-              }
-
               sendMessageToUpper(packet->decapsulate()); // Forward to upper layer
 
               delete packet;
@@ -237,22 +235,23 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           }
           else
           {
-            if (check_and_cast<IpPacketStandard*>(pendingPacket)->getNextHeader() == NEXT_HEADER_ICMP)
+            if (check_and_cast<IpPacketStandard*>(buffer)->getNextHeader() == NEXT_HEADER_ICMP)
             {
-              if (check_and_cast<IcmpPacket*>(pendingPacket->getEncapsulatedPacket())->getType() == ICMP_RPL)
+              if (check_and_cast<IcmpPacket*>(buffer->getEncapsulatedPacket())->getType() == ICMP_RPL)
               {
-                if (check_and_cast<IcmpPacket*>(pendingPacket->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                if (check_and_cast<IcmpPacket*>(buffer->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
                   this->rpl->hasSentDIO();
-                else if (check_and_cast<IcmpPacket*>(pendingPacket->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                else if (check_and_cast<IcmpPacket*>(buffer->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
                   this->rpl->hasSentDIS();
               }
             }
           }
 
           // check buffer
-          this->ipPacketQueue.remove(pendingPacket);
-          cancelAndDelete(pendingPacket);
-          pendingPacket = NULL;
+          this->ipPacketQueue.remove(buffer);
+
+          delete buffer;
+          buffer = NULL;
 
           selfTimer(0, NET_CHECK_BUFFER);
           break;
@@ -271,20 +270,6 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
           break;
         } /* dead neighbor handling */
-
-        case NET_DIO_SENT:
-          /* just send DIO */
-        {
-          this->rpl->hasSentDIO();
-          break;
-        } /* just send DIO*/
-
-        case NET_DIS_SENT:
-          /* just send DIS */
-        {
-          this->rpl->hasSentDIS();
-          break;
-        } /* just send DIS*/
 
         default:
           if (DEBUG)
@@ -305,7 +290,17 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 void IPv6::preparePacketToBeSent()
 {
   // get first packet from queue
-  pendingPacket = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
+  buffer = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
+
+  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+  {
+    // WSN compress using HC01
+  }
+  else
+  {
+    if (check_and_cast<IpPacketStandard*>(buffer)->getNextHeader() == NEXT_HEADER_UDP)
+      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND); // statistics
+  }
 }
 
 void IPv6::putIntoQueue(IpPacketInterface* ipPacket)

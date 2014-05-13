@@ -20,7 +20,7 @@ namespace wsn_energy {
 class IPv6 : public myModule
 {
   private:
-    IpPacketInterface *pendingPacket;
+    IpPacketInterface* buffer;
     void preparePacketToBeSent();
 
   protected:

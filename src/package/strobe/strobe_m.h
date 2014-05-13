@@ -135,18 +135,13 @@ enum FRAME_TYPE {
  * 	
  * 	MAC_FINISH_PHASE       = 1; 
  * 	MAC_SEND_END_TRANSMIT  = 2; 
- * 	
- * 	NET_DIO_SENT	= 3; 
- * 	NET_DIS_SENT    = 4; 
  * };
  * </pre>
  */
 enum RESULT_FROM_MAC {
     MAC_SEND_DEAD_NEIGHBOR = 0,
     MAC_FINISH_PHASE = 1,
-    MAC_SEND_END_TRANSMIT = 2,
-    NET_DIO_SENT = 3,
-    NET_DIS_SENT = 4
+    MAC_SEND_END_TRANSMIT = 2
 };
 
 /**
@@ -162,7 +157,8 @@ enum RESULT_FROM_MAC {
  * 	RDC_CHANNEL_CHECK = 4; 
  * 	RDC_SEND_FRAME    = 5; 
  * 	
- * 	RDC_CCA_TIME_OUT  = 6; 
+ * 	RDC_CCA_TIME_OUT   = 6; 
+ * 	RDC_PHASE_TIME_OUT = 7; 
  * };
  * </pre>
  */
@@ -173,7 +169,8 @@ enum COMMAND_RDC {
     RDC_CCA_REQUEST = 3,
     RDC_CHANNEL_CHECK = 4,
     RDC_SEND_FRAME = 5,
-    RDC_CCA_TIME_OUT = 6
+    RDC_CCA_TIME_OUT = 6,
+    RDC_PHASE_TIME_OUT = 7
 };
 
 /**

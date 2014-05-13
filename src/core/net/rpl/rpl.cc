@@ -80,10 +80,11 @@ void RPL::rpl_set_root()
 
 void RPL::finish()
 {
-  if (dioTimer->isSelfMessage())
-    this->net->cancelAndDelete(dioTimer);
-  if (disTimer->isSelfMessage())
-    this->net->cancelAndDelete(disTimer);
+  // WSN how to release those thing ???
+//  if (dioTimer->isSelfMessage())
+//    this->net->cancelAndDelete(dioTimer);
+//  if (disTimer->isSelfMessage())
+//    this->net->cancelAndDelete(disTimer);
 }
 
 void RPL::sendDIO()
@@ -130,7 +131,7 @@ void RPL::sendDIS()
   icmpPacket->setByteLength(icmpPacket->getHeaderLength());
 
   icmpPacket->setType(ICMP_RPL);
-  icmpPacket->setCode(RPL_DIO_CODE);
+  icmpPacket->setCode(RPL_DIS_CODE);
 
   icmpPacket->encapsulate(dis);
 
