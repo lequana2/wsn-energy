@@ -110,7 +110,6 @@ EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::RESULT_RDC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_RDC"));
     e->insert(RDC_READY_TRANS_PHASE, "RDC_READY_TRANS_PHASE");
-    e->insert(RDC_STOP_TRANS_PHASE, "RDC_STOP_TRANS_PHASE");
     e->insert(RDC_BEGIN_TRANS_TURN, "RDC_BEGIN_TRANS_TURN");
     e->insert(RDC_SEND_OK, "RDC_SEND_OK");
     e->insert(RDC_SEND_NO_ACK, "RDC_SEND_NO_ACK");

@@ -178,7 +178,6 @@ enum COMMAND_RDC {
  * <pre>
  * enum RESULT_RDC{
  * 	RDC_READY_TRANS_PHASE = 0; 
- *     RDC_STOP_TRANS_PHASE  = 1; 
  *     
  *     RDC_BEGIN_TRANS_TURN  = 2; 
  *     
@@ -192,7 +191,6 @@ enum COMMAND_RDC {
  */
 enum RESULT_RDC {
     RDC_READY_TRANS_PHASE = 0,
-    RDC_STOP_TRANS_PHASE = 1,
     RDC_BEGIN_TRANS_TURN = 2,
     RDC_SEND_OK = 3,
     RDC_SEND_NO_ACK = 4,

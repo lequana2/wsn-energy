@@ -25,10 +25,12 @@ Define_Module(csma);
 void csma::deferPacket()
 {
   /* dismiss + announce failure duty */
-  if (buffer->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
+  if (bufferMAC->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
+    // failure, abort this message
+
     // consider IFS
-    if (this->buffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+    if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
       selfTimer(LIFS, MAC_EXPIRE_IFS);
     else
       selfTimer(SIFS, MAC_EXPIRE_IFS);
@@ -40,8 +42,8 @@ void csma::deferPacket()
     int backoff_transmission, backoff_exponent;
 
     backoff_exponent =
-    MAC_MAX_BE < buffer->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE :
-        buffer->getNumberTransmission() + MAC_MIN_BE; // truncate
+    MAC_MAX_BE < bufferMAC->getNumberTransmission() + MAC_MIN_BE ? MAC_MAX_BE :
+        bufferMAC->getNumberTransmission() + MAC_MIN_BE; // truncate
 
     backoff_transmission = 1 << backoff_exponent;
 
@@ -60,7 +62,7 @@ void csma::deferPacket()
       std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
     }
 
-    buffer->setNumberTransmission(buffer->getNumberTransmission() + 1);
+    bufferMAC->setNumberTransmission(bufferMAC->getNumberTransmission() + 1);
 
     /* request to perform CCA */
     selfTimer(backoff, MAC_CCA_REQUEST);

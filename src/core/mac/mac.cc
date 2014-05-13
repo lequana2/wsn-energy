@@ -19,7 +19,7 @@ namespace wsn_energy {
 
 void MACdriver::initialize()
 {
-  this->buffer = NULL;
+  this->bufferMAC = NULL;
   this->sequenceNumber = 0;
 
   defaultRoute = 0;
@@ -27,10 +27,10 @@ void MACdriver::initialize()
 
 void MACdriver::finish()
 {
-  if (this->buffer != NULL)
+  if (this->bufferMAC != NULL)
   {
-    delete this->buffer;
-    this->buffer = NULL;
+    delete this->bufferMAC;
+    this->bufferMAC = NULL;
   }
 }
 
@@ -53,14 +53,11 @@ void MACdriver::processSelfMessage(cPacket* packet)
           sendResult(MAC_FINISH_PHASE);
 
           // clear buffer
-          if (this->buffer != NULL)
+          if (this->bufferMAC != NULL)
           {
-            delete this->buffer;
-            this->buffer = NULL;
+            delete this->bufferMAC;
+            this->bufferMAC = NULL;
           }
-
-          // increase sequence number
-          this->sequenceNumber++;
 
           break;
         } /* expire IFS*/
@@ -91,26 +88,29 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   else
   {
     // intialisation
-    buffer = new FrameDataStandard;
-    buffer->setKind(DATA);
-    buffer->setByteLength(buffer->getHeaderLength());
+    bufferMAC = new FrameDataStandard;
+    bufferMAC->setKind(DATA);
+    bufferMAC->setByteLength(bufferMAC->getHeaderLength());
 
     /*  meta data */
-    buffer->setNumberTransmission(0);
+    bufferMAC->setNumberTransmission(0);
 
     // FCF
-    buffer->setFrameType(FRAME_DATA);
-    buffer->setPanIdCompression(false);
+    bufferMAC->setFrameType(FRAME_DATA);
+    bufferMAC->setPanIdCompression(false);
+
+    // increase sequence number
+    this->sequenceNumber++;
 
     // sequence number
-    (check_and_cast<FrameDataStandard*>(buffer))->setDataSequenceNumber(this->sequenceNumber);
+    (check_and_cast<FrameDataStandard*>(bufferMAC))->setDataSequenceNumber(this->sequenceNumber);
 
     // address fields
     if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() == 0)
     {
-      (check_and_cast<FrameDataStandard*>(buffer))->setSourceMacAddress(this->getId());
-      (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(0);
-      buffer->setAckRequired(false);
+      (check_and_cast<FrameDataStandard*>(bufferMAC))->setSourceMacAddress(this->getId());
+      (check_and_cast<FrameDataStandard*>(bufferMAC))->setDestinationMacAddress(0);
+      bufferMAC->setAckRequired(false);
     }
     else
     {
@@ -128,22 +128,22 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
         // using ARP
         defaultRoute = simulation.getModule(netDefaultRoute)->getModuleByPath("^.mac")->getId();
 
-        (check_and_cast<FrameDataStandard*>(buffer))->setSourceMacAddress(this->getId());
-        (check_and_cast<FrameDataStandard*>(buffer))->setDestinationMacAddress(defaultRoute);
+        (check_and_cast<FrameDataStandard*>(bufferMAC))->setSourceMacAddress(this->getId());
+        (check_and_cast<FrameDataStandard*>(bufferMAC))->setDestinationMacAddress(defaultRoute);
       }
 
-      buffer->setAckRequired(true);
+      bufferMAC->setAckRequired(true);
     }
   }
 
-  buffer->encapsulate(packet);
+  bufferMAC->encapsulate(packet);
 
   // prepare a transmission phase
-  sendMessageToLower(buffer->dup());
+  sendMessageToLower(bufferMAC->dup());
   sendCommand(MAC_ASK_SEND_FRAME);
 
   /* statistics */
-  if (buffer->getAckRequired())
+  if (bufferMAC->getAckRequired())
     (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
 }
 
@@ -182,7 +182,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
           // consider IFS
-          if (this->buffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+
+          // WSN null pointer, what the fuck FUCK FUCK FUCK !!!
+          if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
             selfTimer(LIFS, MAC_EXPIRE_IFS);
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
@@ -196,7 +198,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
           // consider IFS
-          if (this->buffer->getByteLength() > MAX_SIFS_FRAME_SIZE)
+          if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
             selfTimer(LIFS, MAC_EXPIRE_IFS);
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
@@ -204,14 +206,16 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* unicast but no ACK received */
 
-        case RDC_SEND_FATAL: /* fatal error, abort message */
+        case RDC_SEND_FATAL:
+          /* fatal error, abort message */
         {
           selfTimer(0, MAC_EXPIRE_IFS);
 
           break;
         } /* fatal error, abort message */
 
-        case RDC_SEND_COL: /* busy radio */
+        case RDC_SEND_COL:
+          /* busy radio */
         {
           deferPacket();
           break;

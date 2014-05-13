@@ -24,7 +24,7 @@ namespace wsn_energy {
 class MACdriver : public myModule
 {
   protected:
-    Frame* buffer;
+    Frame* bufferMAC;
 
     void initialize();
     void finish();

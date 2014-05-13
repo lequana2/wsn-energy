@@ -25,8 +25,8 @@
 #define CHANNEL_CHECK_RATE       8        // Hertz
 #define CHANNEL_CHECK_INTERVAL   0.125    // second
 // CCA configuration
-#define CCA_COUNT_MAX            2        // maximum number of CCA per check
 #define CCA_TRANS_MAX            6        // maximum number of CCA before transmitting
+#define CCA_COUNT_MAX            2        // maximum number of CCA per check
 #define CCA_CHECK_TIME           0.000122 // time to perform a CCA (20 symbols)
 #define CCA_SLEEP_TIME           0.0005   // interval between each CCA
 // reaction
@@ -80,7 +80,7 @@ class RDCdriver : public myModule
     Command *ccaTimeOut;
     Command *phaseTimeOut;
 
-    Frame *buffer;
+    Frame *bufferRDC;
 
     void initialize();
     void finish();
@@ -91,6 +91,7 @@ class RDCdriver : public myModule
 
     /* demand radio layer*/
     void sendFrame();
+    void stopFrame();
     void on();
     void off();
 

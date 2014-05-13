@@ -94,7 +94,6 @@ enum COMMAND_RDC{
 
 enum RESULT_RDC{
 	RDC_READY_TRANS_PHASE = 0; // begin transmission session, turn off periodical check
-    RDC_STOP_TRANS_PHASE  = 1; // stop transmission session,  turn on periodical check
     
     RDC_BEGIN_TRANS_TURN  = 2; // begin a transmission (in one turn 6 maximum CCA + 1 trans)
     
