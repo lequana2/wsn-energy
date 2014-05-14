@@ -15,9 +15,12 @@
 
 #ifndef RDC
 #define RDC
+// value of ACK length header
 #define ACK_LENGTH          5
+// CCA type
 #define RDC_CCA             0
 #define MAC_CCA             1
+// working phase
 #define CHECKING_PHASE      0
 #define TRANSMITTING_PHASE  1
 #define FREE_PHASE          2

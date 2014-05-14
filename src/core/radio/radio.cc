@@ -31,13 +31,14 @@ void RadioDriver::initialize()
   double pl0 = -37.0; // fixed
   double pathLossExponent = 2.8;
   int signalFluctuate = 10;
-  int rssiAccuracy = 6;
+//  int rssiAccuracy = 6;
 
   // expected Transmission range
   this->trRange = d0 * pow(10, (pl0 - (RX_SENSITIVITY + signalFluctuate)) / (10 * pathLossExponent));
 
   // expected Collision range
-  this->coRange = d0 * pow(10, (pl0 - (RSSI_SENSITIVITY + rssiAccuracy)) / (10 * pathLossExponent));
+//  this->coRange = d0 * pow(10, (pl0 - (RSSI_SENSITIVITY + rssiAccuracy)) / (10 * pathLossExponent));
+  this->coRange = this->trRange;
 
   if (DEBUG)
     std::cout << "Transmission range: " << this->trRange << " and Collision range: " << this->coRange << endl;
@@ -77,7 +78,10 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         case PHY_END_CCA: /* ending of CCA */
         {
-          if (!this->ccaIsFreeChannel)
+          // WSN hack
+//          if (false)
+//          if (!this->ccaIsFreeChannel)
+          if (this->incomingSignal > 0)
           {
             if (DEBUG)
               ev << "Channel is busy" << endl;
@@ -223,6 +227,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
     } /* Command */
 
     default:
+      delete packet;
       ev << "Unknown kind" << endl;
       break;
   }
@@ -239,6 +244,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
       this->bufferTXFIFO->setByteLength(this->bufferTXFIFO->getHeaderLength());
 
       this->bufferTXFIFO->encapsulate(packet);
+
       break;
     } /* Data */
 
@@ -247,20 +253,32 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
       switch (check_and_cast<Command*>(packet)->getNote())
       {
         case RDC_CCA_REQUEST: /* CCA request */
+        {
           selfTimer(intervalCCA(), PHY_END_CCA);
-          break; /* CCA request */
+
+          break;
+        } /* CCA request */
 
         case RDC_TRANSMIT: /* transmitting */
+        {
           selfTimer(0, PHY_SWITCH_TRANSMIT);
-          break; /* transmitting */
+
+          break;
+        }/* transmitting */
 
         case RDC_LISTEN:/* turn on listening */
+        {
           selfTimer(0, PHY_SWITCH_LISTEN);
-          break; /* turn on listening */
+
+          break;
+        } /* turn on listening */
 
         case RDC_IDLE: /* turn off listening */
+        {
           selfTimer(0, PHY_SWITCH_IDLE);
-          break; /* turn off listening */
+
+          break;
+        }/* turn off listening */
 
         default:
           ev << "Unknown command" << endl;
@@ -271,6 +289,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
     } /* Command */
 
     default:
+      delete packet;
       ev << "Unknown kind" << endl;
       break;
   }
@@ -290,7 +309,7 @@ void RadioDriver::transmit_begin()
     ev << "PHY: begin transmitting" << endl;
 
   // register
-  check_and_cast<World*>(simulation.getModuleByPath("world"))->registerHost(this, bufferTXFIFO);
+  check_and_cast<World*>(simulation.getModuleByPath("world"))->registerHost(this, this->bufferTXFIFO);
 
   // switch mode
   switchOscilatorMode(TRANSMITTING);

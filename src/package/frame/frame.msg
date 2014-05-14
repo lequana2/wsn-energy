@@ -8,6 +8,13 @@
 
 namespace wsn_energy;
 
+enum FRAME_TYPE{
+    FRAME_BEACON  	= 0; // frame beacon
+    FRAME_COMMAND 	= 1; // frame command
+	FRAME_DATA 		= 2; // frame data
+	FRAME_ACK  		= 3; // frame ack
+}
+
 // Frame
 packet Frame{
     int numberTransmission = 0; // meta-data: number transmission

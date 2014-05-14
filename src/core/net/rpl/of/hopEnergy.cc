@@ -24,15 +24,6 @@ RPL_neighbor* hopEnergy::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2
   else if (parent1->neighborRank > parent2->neighborRank)
     return parent2;
 
-  if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
-  {
-    if (check_and_cast<Count*>(simulation.getModule(parent1->neighborID)->getParentModule()->getSubmodule("count"))->residualEnergy
-        < check_and_cast<Count*>(simulation.getModule(parent2->neighborID)->getParentModule()->getSubmodule("count"))->residualEnergy)
-      return parent1;
-    else
-      return parent2;
-  }
-
   return parent1;
 }
 
@@ -42,7 +33,8 @@ double hopEnergy::calculateRank(RPL_neighbor* parent)
   {
     double percentRemaining = check_and_cast<Energest*>(
     simulation.getModule(parent->neighborID))->energestRemaining / MAX_POWER;
-    return parent->neighborRank + 1 + percentRemaining;
+
+    return parent->neighborRank + 1 + percentRemaining; // 1 hop + residual energy percentage
   }
   else
   {

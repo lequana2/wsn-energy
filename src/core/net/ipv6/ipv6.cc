@@ -30,7 +30,7 @@ Define_Module(IPv6);
 void IPv6::initialize()
 {
   this->rpl = new RPL(this);
-  this->buffer = NULL;
+  this->bufferNET = NULL;
   this->defaultRoute = 0;
 
   // If server then create RPL DODAG
@@ -75,19 +75,20 @@ void IPv6::processSelfMessage(cPacket* packet)
           if (ipPacketQueue.size() == 0) // successful send all packet in queue
           {
           }
-          else if (buffer == NULL) // do not have any pending packet
+          else if (bufferNET != NULL) // have any pending packet
+          {
+          }
+          else
           {
             // prepare a packet to be sent
             preparePacketToBeSent();
 
             // send duplicated packet to MAC layer
-            sendMessageToLower(buffer->dup());
-          }
-          else // or still in phase of another packet
-          {
+            sendMessageToLower(bufferNET->dup());
           }
 
           delete packet; // done command
+
           break;
         } /* Check buffer */
 
@@ -95,6 +96,7 @@ void IPv6::processSelfMessage(cPacket* packet)
         {
           if (this->rpl->rplDag.joined)
             this->rpl->handleDIOTimer();
+
           break;
         } /* DIO timer*/
 
@@ -102,6 +104,7 @@ void IPv6::processSelfMessage(cPacket* packet)
         {
           if (!this->rpl->rplDag.joined)
             this->rpl->handleDISTimer();
+
           break;
         } /* Solicit DODAG information */
 
@@ -115,6 +118,7 @@ void IPv6::processSelfMessage(cPacket* packet)
     } /* Command */
 
     default:
+      delete packet;
       if (DEBUG)
         std::cout << "Unknown kind" << endl;
       break;
@@ -133,6 +137,7 @@ void IPv6::processUpperLayerMessage(cPacket* packet)
     } /* Data */
 
     default:
+      delete packet;
       if (DEBUG)
         std::cout << "Unknown kind" << endl;
       break;
@@ -146,8 +151,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
     case DATA: /* Data */
     {
       if (DEBUG)
-        if (DEBUG)
-          std::cout << "RECV (NET)" << endl;
+        std::cout << "NET: received" << endl;
 
       if (getModuleByPath("^.^")->par("usingHDC").boolValue())
       {
@@ -176,7 +180,9 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             {
               // hop limit !!!
               if (check_and_cast<IpPacketStandard*>(packet)->getHopLimit() == 1)
+              {
                 delete packet;
+              }
               else
               {
                 check_and_cast<IpPacketStandard*>(packet)->setHopLimit(
@@ -188,6 +194,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             }
             else
             {
+              // arrive right IP destination
               sendMessageToUpper(packet->decapsulate()); // Forward to upper layer
 
               delete packet;
@@ -203,19 +210,18 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
                   check_and_cast<IpPacketStandard*>(packet)->getBitLength());
 
             IcmpPacket* icmpPacket = check_and_cast<IcmpPacket*>(packet->decapsulate());
+            delete packet;
 
             if (icmpPacket->getType() == ICMP_RPL)
               this->rpl->processICMP(icmpPacket);
-
-            delete packet;
 
             break;
           } /* ICMP */
 
           default:
+            delete packet;
             if (DEBUG)
-              if (DEBUG)
-                std::cout << "Missing resolution" << endl;
+              std::cout << "Missing resolution" << endl;
             break;
         }
       }
@@ -229,42 +235,47 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
       {
         case MAC_FINISH_PHASE: /* MAC layer finish a transmitting phase */
         {
+          // Consider has sent ICMP or not !!!
           if (getModuleByPath("^.^")->par("usingHDC").boolValue())
           {
             // WSN compress using HC01
           }
           else
           {
-            if (check_and_cast<IpPacketStandard*>(buffer)->getNextHeader() == NEXT_HEADER_ICMP)
+            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
             {
-              if (check_and_cast<IcmpPacket*>(buffer->getEncapsulatedPacket())->getType() == ICMP_RPL)
+              if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
               {
-                if (check_and_cast<IcmpPacket*>(buffer->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
                   this->rpl->hasSentDIO();
-                else if (check_and_cast<IcmpPacket*>(buffer->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
                   this->rpl->hasSentDIS();
               }
             }
           }
 
-          // check buffer
-          this->ipPacketQueue.remove(buffer);
+          // remove pending packet from buffer
+          this->ipPacketQueue.remove(bufferNET);
 
-          delete buffer;
-          buffer = NULL;
+          if (bufferNET != NULL)
+          {
+            delete bufferNET;
+            bufferNET = NULL;
+          }
 
           selfTimer(0, NET_CHECK_BUFFER);
+
           break;
         }/* MAC layer finish a transmitting phase */
 
-        case MAC_SEND_DEAD_NEIGHBOR:
-          /* dead neighbor handling */
+        case MAC_SEND_DEAD_NEIGHBOR: /* dead neighbor handling */
         {
           if (DEBUG)
             std::cout << "NET DEAD NEIGHBOR" << endl;
 
           // RPL purge default route
           this->rpl->purgeRoute();
+
           if (DEBUG)
             std::cout << "Purge route" << endl;
 
@@ -276,11 +287,13 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             std::cout << "Unknown result" << endl;
           break;
       }
+
       delete packet; // done result
       break;
     } /* Result */
 
     default:
+      delete packet;
       if (DEBUG)
         std::cout << "Unknown kind" << endl;
       break;
@@ -290,7 +303,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 void IPv6::preparePacketToBeSent()
 {
   // get first packet from queue
-  buffer = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
+  bufferNET = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
@@ -298,16 +311,18 @@ void IPv6::preparePacketToBeSent()
   }
   else
   {
-    if (check_and_cast<IpPacketStandard*>(buffer)->getNextHeader() == NEXT_HEADER_UDP)
-      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND); // statistics
+    // statistics
+    if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
   }
 }
 
 void IPv6::putIntoQueue(IpPacketInterface* ipPacket)
 {
-//  insert into buffer and check
+  // insert into buffer
   this->ipPacketQueue.push_back(ipPacket);
 
+  // check buffer
   selfTimer(0, NET_CHECK_BUFFER);
 }
 

@@ -105,7 +105,7 @@ void World::arrangeMotes()
       {
         step++;
         x = 240;
-        y = 30;
+        y = 30 * step;
         break;
       } /* Line */
     }
@@ -266,6 +266,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
     return;
   }
 
+  // WSN why why why TwT
   host->onAir = onAir->dup();
 
   // create all in-transmission-range signal
@@ -285,8 +286,11 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
   // consider all only-in-collision-range signal
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
-    // increase incoming signal
+  // increase incoming signal
+  {
     check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal++;
+    check_and_cast<RadioDriver*>(simulation.getModule(*it))->ccaIsFreeChannel = false;
+  }
 
   // draw range
   if (ANNOTATE)
@@ -350,8 +354,12 @@ void World::releaseHost(RadioDriver* mote)
 // decrease count of only-in-collision-range signal
   for (std::list<int>::iterator it = host->moteIDWithinCollisionRange.begin();
       it != host->moteIDWithinCollisionRange.end(); it++)
+  {
 // consider host incoming signal
     check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal--;
+    if (check_and_cast<RadioDriver*>(simulation.getModule(*it))->incomingSignal == 0)
+      check_and_cast<RadioDriver*>(simulation.getModule(*it))->ccaIsFreeChannel = true;
+  }
 
 // draw range
   if (ANNOTATE)
@@ -391,6 +399,8 @@ void World::stopListening(RadioDriver* mote)
   for (std::list<mySignal*>::iterator it = signals.begin(); it != signals.end(); it++)
     if ((*it)->radioRecverID == recverID)
       (*it)->corrupt();
+
+  mote->ccaIsFreeChannel = true;
 }
 
 /*

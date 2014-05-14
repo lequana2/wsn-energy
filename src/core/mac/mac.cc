@@ -63,7 +63,8 @@ void MACdriver::processSelfMessage(cPacket* packet)
         } /* expire IFS*/
 
         default:
-          ev << "Unknown command" << endl;
+          if (DEBUG)
+            ev << "Unknown command" << endl;
           break;
       }
       delete packet; // done command
@@ -72,7 +73,9 @@ void MACdriver::processSelfMessage(cPacket* packet)
     }
 
     default:
-      ev << "Unknown kind" << endl;
+      delete packet;
+      if (DEBUG)
+        ev << "Unknown kind" << endl;
       break;
   }
 }
@@ -260,11 +263,15 @@ void MACdriver::receiveFrame(Frame* frameMac)
   {
     if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == 0
         || check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
+    {
+      // right MAC destination
       sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
 
-    /* statistics */
-    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
+      /* statistics */
+      (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
+    }
   }
+
   delete frameMac;
 }
 

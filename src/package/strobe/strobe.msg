@@ -42,12 +42,10 @@ enum COMMAND_APP{
 
 // Net related
 enum COMMAND_NET{
-    RPL_CONSTRUCT 	 	= 0; // base station ignitation
-    
-    NET_TIMER_DIO       = 1; // handle self-command handle DIO timer
-    NET_TIMER_DIS       = 2; // handle self-command handle DIS timer
+    NET_TIMER_DIO       = 0; // handle self-command handle DIO timer
+    NET_TIMER_DIS       = 1; // handle self-command handle DIS timer
 	
-	NET_CHECK_BUFFER    = 3; // check packet buffer
+	NET_CHECK_BUFFER    = 2; // check packet buffer
 };
 
 // MAC related
@@ -55,47 +53,40 @@ enum COMMAND_MAC{
 	MAC_CCA_REQUEST = 0; // request CCA, to PHY
 	
 	MAC_ASK_SEND_FRAME 	 = 1; // ask RDC to send a transmission phase of a frame
-	
 	MAC_BEGIN_SEND_TURN  = 2; // start 1 turn in a transmission phase 
-	
 	MAC_END_SEND_FRAME   = 3; // ends a session of sending a frame, enter IFS 
-	
 	MAC_EXPIRE_IFS		 = 4; // IFS has expired, ready for next frame
 };
 
-enum FRAME_TYPE{
-    FRAME_BEACON  	= 0; // frame beacon
-    FRAME_COMMAND 	= 1; // frame command
-	FRAME_DATA 		= 2; // frame data
-	FRAME_ACK  		= 3; // frame ack
-}
-
 enum RESULT_FROM_MAC{
-    MAC_SEND_DEAD_NEIGHBOR = 0; // inform a dead neighbor
-	
-	MAC_FINISH_PHASE       = 1; // finish 1 transmitting phase    
-	MAC_SEND_END_TRANSMIT  = 2; // sent + receive ACK (if needed)
+	MAC_FINISH_PHASE       = 0; // finish 1 transmitting phase
+    MAC_SEND_DEAD_NEIGHBOR = 1; // inform a dead neighbor
 };
 
 // RDC related
 enum COMMAND_RDC{
+    // command to radio
 	RDC_TRANSMIT = 0; // transmit
 	RDC_LISTEN 	 = 1; // listen
 	RDC_IDLE     = 2; // idle
 	
-	RDC_CCA_REQUEST = 3; // cca -> listening and then checking result, does not turn off radio
+	// cca -> listening and then checking result, does not turn off radio	
+	RDC_CCA_REQUEST = 3; 
 	
 	RDC_CHANNEL_CHECK = 4; // channel check
 	RDC_SEND_FRAME    = 5; // send frame
 	
+	// self timer
 	RDC_CCA_TIME_OUT   = 6; // cca time out
 	RDC_PHASE_TIME_OUT = 7; // phase time out
+
+	// begin a transmission (in one turn 6 maximum CCA + 1 trans)
+	RDC_BEGIN_TRANS_TURN  = 8; 
 };
 
 enum RESULT_RDC{
+	// inform RDC is free	
 	RDC_READY_TRANS_PHASE = 0; // begin transmission session, turn off periodical check
-    
-    RDC_BEGIN_TRANS_TURN  = 2; // begin a transmission (in one turn 6 maximum CCA + 1 trans)
     
     // after 1 transmission turn (consists of one/many time(s))
 	RDC_SEND_OK     	  = 3; // send + receive ACK (if needed)
@@ -106,19 +97,18 @@ enum RESULT_RDC{
 
 // PHY related
 enum COMMAND_PHY{
-	PHY_BEGIN_CCA       = 10; // radio begin CCA
-	PHY_END_CCA         = 11; // radio end CCA
+	PHY_BEGIN_CCA       = 0; // radio begin CCA
+	PHY_END_CCA         = 1; // radio end CCA
 	
- 	PHY_SWITCH_TRANSMIT	= 12; // switch to transmit mode
- 	PHY_SWITCH_LISTEN	= 13; // switch to listening mode
- 	PHY_SWITCH_IDLE     = 14; // switch to sleep mode
- 	
- 	PHY_BEGIN_TRANSMIT  = 15; // begin transmitting
-	PHY_END_TRANSMIT	= 16; // ending transmitting
+ 	PHY_SWITCH_TRANSMIT	= 2; // switch to transmit mode
+ 	PHY_BEGIN_TRANSMIT  = 3; // begin transmitting
+	PHY_END_TRANSMIT	= 4; // ending transmitting
 
- 	PHY_LISTENING    	= 17; // begin listening
- 	
- 	PHY_IDLING  	 	= 18; // begin idling
+	PHY_SWITCH_LISTEN	= 5; // switch to listening mode
+ 	PHY_LISTENING    	= 6; // begin listening
+
+	PHY_SWITCH_IDLE     = 7; // switch to sleep mode 	
+ 	PHY_IDLING  	 	= 8; // begin idling
 };
 
 enum RESULT_PHY{

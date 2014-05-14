@@ -17,6 +17,24 @@
 namespace wsn_energy {
 
 /**
+ * Enum generated from <tt>package/frame/frame.msg</tt> by opp_msgc.
+ * <pre>
+ * enum FRAME_TYPE{
+ *     FRAME_BEACON  	= 0; 
+ *     FRAME_COMMAND 	= 1; 
+ * 	FRAME_DATA 		= 2; 
+ * 	FRAME_ACK  		= 3; 
+ * }
+ * </pre>
+ */
+enum FRAME_TYPE {
+    FRAME_BEACON = 0,
+    FRAME_COMMAND = 1,
+    FRAME_DATA = 2,
+    FRAME_ACK = 3
+};
+
+/**
  * Class generated from <tt>package/frame/frame.msg</tt> by opp_msgc.
  * <pre>
  * packet Frame{

@@ -33,6 +33,15 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 namespace wsn_energy {
 
+EXECUTE_ON_STARTUP(
+    cEnum *e = cEnum::find("wsn_energy::FRAME_TYPE");
+    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::FRAME_TYPE"));
+    e->insert(FRAME_BEACON, "FRAME_BEACON");
+    e->insert(FRAME_COMMAND, "FRAME_COMMAND");
+    e->insert(FRAME_DATA, "FRAME_DATA");
+    e->insert(FRAME_ACK, "FRAME_ACK");
+);
+
 Register_Class(Frame);
 
 Frame::Frame(const char *name, int kind) : cPacket(name,kind)

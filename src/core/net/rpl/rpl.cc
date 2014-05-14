@@ -46,10 +46,12 @@ RPL::RPL(IPv6 *net)
   this->net = net;
   this->rpl_init();
 
+  // Self timer
   this->dioTimer = new Command;
   this->dioTimer->setKind(COMMAND);
   this->dioTimer->setNote(NET_TIMER_DIO);
 
+  // Self timer
   this->disTimer = new Command;
   this->disTimer->setKind(COMMAND);
   this->disTimer->setNote(NET_TIMER_DIS);
@@ -80,11 +82,8 @@ void RPL::rpl_set_root()
 
 void RPL::finish()
 {
-  // WSN how to release those thing ???
-//  if (dioTimer->isSelfMessage())
-//    this->net->cancelAndDelete(dioTimer);
-//  if (disTimer->isSelfMessage())
-//    this->net->cancelAndDelete(disTimer);
+  this->net->cancelAndDelete(dioTimer);
+  this->net->cancelAndDelete(disTimer);
 }
 
 void RPL::sendDIO()
@@ -244,23 +243,28 @@ void RPL::processICMP(IcmpPacket *icmpPacket)
   {
     case RPL_DIO_CODE: /* receiving DIO */
     {
-      this->processDIO(check_and_cast<DIO*>(icmpPacket->decapsulate()));
+      this->processDIO(check_and_cast<DIO*>(icmpPacket->getEncapsulatedPacket()));
+
       /* consider preferred parent is un-nultified under behavior of DIO */
       if (this->rplDag.preferredParent != NULL)
         this->net->selfTimer(0, NET_CHECK_BUFFER); // prepare to send data again
 
       delete icmpPacket;
+
       break;
     } /* receiving DIO */
 
     case RPL_DIS_CODE: /* receiving DIS */
     {
-      this->processDIS(check_and_cast<DIS*>(icmpPacket->decapsulate()));
+      this->processDIS(check_and_cast<DIS*>(icmpPacket->getEncapsulatedPacket()));
+
       delete icmpPacket;
+
       break;
     } /* receiving DIS */
 
     default:
+      delete icmpPacket;
       if (DEBUG)
         ev << "Missing resolution" << endl;
       break;
@@ -340,7 +344,6 @@ void RPL::processDIO(DIO* dio)
       // Different
       this->resetDIOTimer();
     }
-
     // obsolete/maintenace DIO
     else if (this->rplDag.version >= dio->getVersion())
     {
@@ -362,7 +365,9 @@ void RPL::processDIO(DIO* dio)
         // better rank
         if (this->rplDag.rank > dio->getRank())
         {
-          ev << "new neighbor" << endl;
+          if (DEBUG)
+            ev << "new neighbor" << endl;
+
           // Update new neighbor
           this->rplDag.parentList.push_back(neighbor);
 

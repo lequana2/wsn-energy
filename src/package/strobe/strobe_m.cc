@@ -60,7 +60,6 @@ EXECUTE_ON_STARTUP(
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_NET");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_NET"));
-    e->insert(RPL_CONSTRUCT, "RPL_CONSTRUCT");
     e->insert(NET_TIMER_DIO, "NET_TIMER_DIO");
     e->insert(NET_TIMER_DIS, "NET_TIMER_DIS");
     e->insert(NET_CHECK_BUFFER, "NET_CHECK_BUFFER");
@@ -77,20 +76,10 @@ EXECUTE_ON_STARTUP(
 );
 
 EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("wsn_energy::FRAME_TYPE");
-    if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::FRAME_TYPE"));
-    e->insert(FRAME_BEACON, "FRAME_BEACON");
-    e->insert(FRAME_COMMAND, "FRAME_COMMAND");
-    e->insert(FRAME_DATA, "FRAME_DATA");
-    e->insert(FRAME_ACK, "FRAME_ACK");
-);
-
-EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::RESULT_FROM_MAC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_FROM_MAC"));
-    e->insert(MAC_SEND_DEAD_NEIGHBOR, "MAC_SEND_DEAD_NEIGHBOR");
     e->insert(MAC_FINISH_PHASE, "MAC_FINISH_PHASE");
-    e->insert(MAC_SEND_END_TRANSMIT, "MAC_SEND_END_TRANSMIT");
+    e->insert(MAC_SEND_DEAD_NEIGHBOR, "MAC_SEND_DEAD_NEIGHBOR");
 );
 
 EXECUTE_ON_STARTUP(
@@ -104,13 +93,13 @@ EXECUTE_ON_STARTUP(
     e->insert(RDC_SEND_FRAME, "RDC_SEND_FRAME");
     e->insert(RDC_CCA_TIME_OUT, "RDC_CCA_TIME_OUT");
     e->insert(RDC_PHASE_TIME_OUT, "RDC_PHASE_TIME_OUT");
+    e->insert(RDC_BEGIN_TRANS_TURN, "RDC_BEGIN_TRANS_TURN");
 );
 
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::RESULT_RDC");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_RDC"));
     e->insert(RDC_READY_TRANS_PHASE, "RDC_READY_TRANS_PHASE");
-    e->insert(RDC_BEGIN_TRANS_TURN, "RDC_BEGIN_TRANS_TURN");
     e->insert(RDC_SEND_OK, "RDC_SEND_OK");
     e->insert(RDC_SEND_NO_ACK, "RDC_SEND_NO_ACK");
     e->insert(RDC_SEND_FATAL, "RDC_SEND_FATAL");
@@ -123,11 +112,11 @@ EXECUTE_ON_STARTUP(
     e->insert(PHY_BEGIN_CCA, "PHY_BEGIN_CCA");
     e->insert(PHY_END_CCA, "PHY_END_CCA");
     e->insert(PHY_SWITCH_TRANSMIT, "PHY_SWITCH_TRANSMIT");
-    e->insert(PHY_SWITCH_LISTEN, "PHY_SWITCH_LISTEN");
-    e->insert(PHY_SWITCH_IDLE, "PHY_SWITCH_IDLE");
     e->insert(PHY_BEGIN_TRANSMIT, "PHY_BEGIN_TRANSMIT");
     e->insert(PHY_END_TRANSMIT, "PHY_END_TRANSMIT");
+    e->insert(PHY_SWITCH_LISTEN, "PHY_SWITCH_LISTEN");
     e->insert(PHY_LISTENING, "PHY_LISTENING");
+    e->insert(PHY_SWITCH_IDLE, "PHY_SWITCH_IDLE");
     e->insert(PHY_IDLING, "PHY_IDLING");
 );
 
