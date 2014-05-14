@@ -196,7 +196,7 @@ void RPL::handleDIOTimer()
     }
     else
     {
-      this->net->cancelAndDelete(dioTimer);
+      this->net->cancelEvent(dioTimer);
       return;
     }
   }

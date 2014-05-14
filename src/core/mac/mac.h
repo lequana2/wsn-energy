@@ -37,7 +37,10 @@ class MACdriver : public myModule
     virtual void deferPacket() = 0;
 
     /* send buffer packet */
-    virtual void sendFrame();
+    void igniteRDCphase();
+
+    /* tell RDC stop transmission phase */
+    void endMACphase();
 
     /* accept input from lowerlayer */
     virtual void receiveFrame(Frame*);

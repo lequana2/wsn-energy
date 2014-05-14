@@ -279,7 +279,9 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
+	core/rdc/rdc.h \
 	package/data/data_m.h \
+	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/segment/segment_m.h \
 	package/signal/signal_m.h \
@@ -345,6 +347,7 @@ $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/bytecount/count.h \
 	core/mac/mac.h \
 	core/myModule.h \
+	core/radio/radio.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \

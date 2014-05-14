@@ -153,11 +153,10 @@ void Client::newData()
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
-//    time = sendInterval / 2 + intuniform(0, 1000000) / 2000000.0 * sendInterval;
-      time = intuniform(0, 100000) / 100000.0 * sendInterval;
+    time = intuniform(0, 10000) / 10000.0 * sendInterval;
 
-//  if (DEBUG)
-//    this->getParentModule()->bubble("Data");
+  if (DEBUG)
+    this->getParentModule()->bubble("Data");
 
   selfTimer(time, APP_SENSING_FLAG);
 }

@@ -89,18 +89,20 @@ enum COMMAND_NET {
  * 	MAC_CCA_REQUEST = 0; 
  * 	
  * 	MAC_ASK_SEND_FRAME 	 = 1; 
- * 	MAC_BEGIN_SEND_TURN  = 2; 
- * 	MAC_END_SEND_FRAME   = 3; 
- * 	MAC_EXPIRE_IFS		 = 4; 
+ * 	MAC_END_SEND_FRAME   = 2; 
+ * 	
+ * 	MAC_IGNITE_RDC  	 = 3; 
+ * 	
+ * 	MAC_EXPIRE_IFS		 = 5; 
  * };
  * </pre>
  */
 enum COMMAND_MAC {
     MAC_CCA_REQUEST = 0,
     MAC_ASK_SEND_FRAME = 1,
-    MAC_BEGIN_SEND_TURN = 2,
-    MAC_END_SEND_FRAME = 3,
-    MAC_EXPIRE_IFS = 4
+    MAC_END_SEND_FRAME = 2,
+    MAC_IGNITE_RDC = 3,
+    MAC_EXPIRE_IFS = 5
 };
 
 /**
@@ -129,13 +131,15 @@ enum RESULT_FROM_MAC {
  * 	
  * 	RDC_CCA_REQUEST = 3; 
  * 	
- * 	RDC_CHANNEL_CHECK = 4; 
- * 	RDC_SEND_FRAME    = 5; 
+ * 	
+ * 	RDC_PERIODICAL_CHECK = 4; 
  * 	
  * 	
+ * 	RDC_CCA_RESULT	   = 5; 
  * 	RDC_CCA_TIME_OUT   = 6; 
  * 	RDC_PHASE_TIME_OUT = 7; 
  * 
+ * 	
  * 	
  * 	RDC_BEGIN_TRANS_TURN  = 8; 
  * };
@@ -146,8 +150,8 @@ enum COMMAND_RDC {
     RDC_LISTEN = 1,
     RDC_IDLE = 2,
     RDC_CCA_REQUEST = 3,
-    RDC_CHANNEL_CHECK = 4,
-    RDC_SEND_FRAME = 5,
+    RDC_PERIODICAL_CHECK = 4,
+    RDC_CCA_RESULT = 5,
     RDC_CCA_TIME_OUT = 6,
     RDC_PHASE_TIME_OUT = 7,
     RDC_BEGIN_TRANS_TURN = 8
@@ -165,6 +169,10 @@ enum COMMAND_RDC {
  * 	RDC_SEND_NO_ACK 	  = 4; 
  * 	RDC_SEND_FATAL        = 5; 
  * 	RDC_SEND_COL	      = 6; 
+ * 	
+ * 	
+ * 	CHANNEL_CLEAR   	= 7; 
+ * 	CHANNEL_BUSY    	= 8; 
  * };
  * </pre>
  */
@@ -173,16 +181,15 @@ enum RESULT_RDC {
     RDC_SEND_OK = 3,
     RDC_SEND_NO_ACK = 4,
     RDC_SEND_FATAL = 5,
-    RDC_SEND_COL = 6
+    RDC_SEND_COL = 6,
+    CHANNEL_CLEAR = 7,
+    CHANNEL_BUSY = 8
 };
 
 /**
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_PHY{
- * 	PHY_BEGIN_CCA       = 0; 
- * 	PHY_END_CCA         = 1; 
- * 	
  *  	PHY_SWITCH_TRANSMIT	= 2; 
  *  	PHY_BEGIN_TRANSMIT  = 3; 
  * 	PHY_END_TRANSMIT	= 4; 
@@ -196,8 +203,6 @@ enum RESULT_RDC {
  * </pre>
  */
 enum COMMAND_PHY {
-    PHY_BEGIN_CCA = 0,
-    PHY_END_CCA = 1,
     PHY_SWITCH_TRANSMIT = 2,
     PHY_BEGIN_TRANSMIT = 3,
     PHY_END_TRANSMIT = 4,
@@ -211,10 +216,6 @@ enum COMMAND_PHY {
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum RESULT_PHY{
- *     
- * 	CHANNEL_CLEAR   	= 10; 
- * 	CHANNEL_BUSY    	= 11; 
- * 	
  * 	
  * 	PHY_TX_OK		 	= 12; 
  * 	PHY_TX_ERR 		 	= 13; 
@@ -222,8 +223,6 @@ enum COMMAND_PHY {
  * </pre>
  */
 enum RESULT_PHY {
-    CHANNEL_CLEAR = 10,
-    CHANNEL_BUSY = 11,
     PHY_TX_OK = 12,
     PHY_TX_ERR = 13
 };

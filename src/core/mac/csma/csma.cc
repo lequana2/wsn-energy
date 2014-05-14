@@ -27,13 +27,13 @@ void csma::deferPacket()
   /* dismiss + announce failure duty */
   if (bufferMAC->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
-    // failure, abort this message
-
     // consider IFS
     if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
       selfTimer(LIFS, MAC_EXPIRE_IFS);
     else
       selfTimer(SIFS, MAC_EXPIRE_IFS);
+
+    endMACphase();
   }
   /* unslotted csma */
   else

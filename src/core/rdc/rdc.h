@@ -59,9 +59,6 @@ class RDCdriver : public myModule
     // just send ACK <-- distinguish with data sending
     bool isJustSendACK;
 
-    // working phase
-    int phase;
-
     // MAC is waiting for nearly done CCA
     bool isHavingPendingTransmission;
 
@@ -80,6 +77,7 @@ class RDCdriver : public myModule
     // For phase optimization
     std::list<Neighbor*> neighbors;
 
+    Command *ccaResult;
     Command *ccaTimeOut;
     Command *phaseTimeOut;
 
@@ -92,9 +90,16 @@ class RDCdriver : public myModule
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);
 
+    /* MAC call-back */
+    void enterMACtransmissonPhase();
+    void quitMACtransmissonPhase();
+
+    /* RDC transmission turn */
+    void enterRDCtransmissionPhase();
+    void quitRDCtransmissionPhase(int result);
+
     /* demand radio layer*/
     void sendFrame();
-    void stopFrame();
     void on();
     void off();
 
@@ -108,6 +113,10 @@ class RDCdriver : public myModule
     /* after a listening phase */
     virtual void receiveSuccess(Frame*) = 0;
     virtual void receiveFailure() = 0;
+
+  public:
+    // working phase
+    int phase;
 };
 
 } /* namespace wsn_energy */

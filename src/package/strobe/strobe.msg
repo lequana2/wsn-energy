@@ -53,9 +53,11 @@ enum COMMAND_MAC{
 	MAC_CCA_REQUEST = 0; // request CCA, to PHY
 	
 	MAC_ASK_SEND_FRAME 	 = 1; // ask RDC to send a transmission phase of a frame
-	MAC_BEGIN_SEND_TURN  = 2; // start 1 turn in a transmission phase 
-	MAC_END_SEND_FRAME   = 3; // ends a session of sending a frame, enter IFS 
-	MAC_EXPIRE_IFS		 = 4; // IFS has expired, ready for next frame
+	MAC_END_SEND_FRAME   = 2; // tell RDC to stop a transmission phase
+	
+	MAC_IGNITE_RDC  	 = 3; // start 1 duty in a transmission phase 
+	
+	MAC_EXPIRE_IFS		 = 5; // IFS has expired, ready for next frame
 };
 
 enum RESULT_FROM_MAC{
@@ -73,14 +75,16 @@ enum COMMAND_RDC{
 	// cca -> listening and then checking result, does not turn off radio	
 	RDC_CCA_REQUEST = 3; 
 	
-	RDC_CHANNEL_CHECK = 4; // channel check
-	RDC_SEND_FRAME    = 5; // send frame
+	// channel check
+	RDC_PERIODICAL_CHECK = 4; 
 	
 	// self timer
+	RDC_CCA_RESULT	   = 5; // cca result
 	RDC_CCA_TIME_OUT   = 6; // cca time out
 	RDC_PHASE_TIME_OUT = 7; // phase time out
 
-	// begin a transmission (in one turn 6 maximum CCA + 1 trans)
+	// future message because of phase lock wait
+	// begin a transmission turn (in one turn 6 maximum CCA + 1 trans)
 	RDC_BEGIN_TRANS_TURN  = 8; 
 };
 
@@ -93,13 +97,14 @@ enum RESULT_RDC{
 	RDC_SEND_NO_ACK 	  = 4; // sent + no ACK (if needed)
 	RDC_SEND_FATAL        = 5; // fatal error, abort message
 	RDC_SEND_COL	      = 6; // collision with PHY
+	
+	// CCA result
+	CHANNEL_CLEAR   	= 7; // CCA clear
+	CHANNEL_BUSY    	= 8; // CCA busy
 };
 
 // PHY related
 enum COMMAND_PHY{
-	PHY_BEGIN_CCA       = 0; // radio begin CCA
-	PHY_END_CCA         = 1; // radio end CCA
-	
  	PHY_SWITCH_TRANSMIT	= 2; // switch to transmit mode
  	PHY_BEGIN_TRANSMIT  = 3; // begin transmitting
 	PHY_END_TRANSMIT	= 4; // ending transmitting
@@ -112,10 +117,6 @@ enum COMMAND_PHY{
 };
 
 enum RESULT_PHY{
-    // CCA result
-	CHANNEL_CLEAR   	= 10; // CCA clear
-	CHANNEL_BUSY    	= 11; // CCA busy
-	
 	// transmission result
 	PHY_TX_OK		 	= 12; // send okay
 	PHY_TX_ERR 		 	= 13; // internal error, does not need to resend e.g: packet is too big

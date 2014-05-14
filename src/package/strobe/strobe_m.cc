@@ -70,8 +70,8 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_MAC"));
     e->insert(MAC_CCA_REQUEST, "MAC_CCA_REQUEST");
     e->insert(MAC_ASK_SEND_FRAME, "MAC_ASK_SEND_FRAME");
-    e->insert(MAC_BEGIN_SEND_TURN, "MAC_BEGIN_SEND_TURN");
     e->insert(MAC_END_SEND_FRAME, "MAC_END_SEND_FRAME");
+    e->insert(MAC_IGNITE_RDC, "MAC_IGNITE_RDC");
     e->insert(MAC_EXPIRE_IFS, "MAC_EXPIRE_IFS");
 );
 
@@ -89,8 +89,8 @@ EXECUTE_ON_STARTUP(
     e->insert(RDC_LISTEN, "RDC_LISTEN");
     e->insert(RDC_IDLE, "RDC_IDLE");
     e->insert(RDC_CCA_REQUEST, "RDC_CCA_REQUEST");
-    e->insert(RDC_CHANNEL_CHECK, "RDC_CHANNEL_CHECK");
-    e->insert(RDC_SEND_FRAME, "RDC_SEND_FRAME");
+    e->insert(RDC_PERIODICAL_CHECK, "RDC_PERIODICAL_CHECK");
+    e->insert(RDC_CCA_RESULT, "RDC_CCA_RESULT");
     e->insert(RDC_CCA_TIME_OUT, "RDC_CCA_TIME_OUT");
     e->insert(RDC_PHASE_TIME_OUT, "RDC_PHASE_TIME_OUT");
     e->insert(RDC_BEGIN_TRANS_TURN, "RDC_BEGIN_TRANS_TURN");
@@ -104,13 +104,13 @@ EXECUTE_ON_STARTUP(
     e->insert(RDC_SEND_NO_ACK, "RDC_SEND_NO_ACK");
     e->insert(RDC_SEND_FATAL, "RDC_SEND_FATAL");
     e->insert(RDC_SEND_COL, "RDC_SEND_COL");
+    e->insert(CHANNEL_CLEAR, "CHANNEL_CLEAR");
+    e->insert(CHANNEL_BUSY, "CHANNEL_BUSY");
 );
 
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::COMMAND_PHY");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_PHY"));
-    e->insert(PHY_BEGIN_CCA, "PHY_BEGIN_CCA");
-    e->insert(PHY_END_CCA, "PHY_END_CCA");
     e->insert(PHY_SWITCH_TRANSMIT, "PHY_SWITCH_TRANSMIT");
     e->insert(PHY_BEGIN_TRANSMIT, "PHY_BEGIN_TRANSMIT");
     e->insert(PHY_END_TRANSMIT, "PHY_END_TRANSMIT");
@@ -123,8 +123,6 @@ EXECUTE_ON_STARTUP(
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::RESULT_PHY");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_PHY"));
-    e->insert(CHANNEL_CLEAR, "CHANNEL_CLEAR");
-    e->insert(CHANNEL_BUSY, "CHANNEL_BUSY");
     e->insert(PHY_TX_OK, "PHY_TX_OK");
     e->insert(PHY_TX_ERR, "PHY_TX_ERR");
 );

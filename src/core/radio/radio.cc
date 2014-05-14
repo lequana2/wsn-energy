@@ -76,31 +76,6 @@ void RadioDriver::processSelfMessage(cPacket* packet)
     {
       switch (check_and_cast<Command*>(packet)->getNote())
       {
-        case PHY_END_CCA: /* ending of CCA */
-        {
-          // WSN hack
-//          if (false)
-//          if (!this->ccaIsFreeChannel)
-          if (this->incomingSignal > 0)
-          {
-            if (DEBUG)
-              ev << "Channel is busy" << endl;
-
-            /* Feedback to RDC */
-            sendResult(CHANNEL_BUSY);
-          } /* Channel not free*/
-          else /* Channel clear */
-          {
-            if (DEBUG)
-              ev << "Channel is clear" << endl;
-
-            /* Feedback to RDC */
-            sendResult(CHANNEL_CLEAR);
-          } /* Channel clear */
-
-          break;
-        }/* ending of CCA */
-
         case PHY_SWITCH_TRANSMIT: /* switch to transmit */
         {
           /* show packet length (bytes) */
@@ -254,7 +229,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
       {
         case RDC_CCA_REQUEST: /* CCA request */
         {
-          selfTimer(intervalCCA(), PHY_END_CCA);
+          selfTimer(0, PHY_SWITCH_LISTEN);
 
           break;
         } /* CCA request */

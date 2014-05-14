@@ -12,7 +12,7 @@
 #include "ipv6.h"
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 namespace wsn_energy {
@@ -21,8 +21,8 @@ void MACdriver::initialize()
 {
   this->bufferMAC = NULL;
   this->sequenceNumber = 0;
-
-  defaultRoute = 0;
+  this->linkLocalAddress = 0;
+  this->defaultRoute = 0;
 }
 
 void MACdriver::finish()
@@ -64,20 +64,20 @@ void MACdriver::processSelfMessage(cPacket* packet)
 
         default:
           if (DEBUG)
-            ev << "Unknown command" << endl;
+            std::cout << "Unknown command" << endl;
           break;
       }
-      delete packet; // done command
       break;
       /* Command */
     }
 
     default:
-      delete packet;
       if (DEBUG)
-        ev << "Unknown kind" << endl;
+        std::cout << "Unknown kind" << endl;
       break;
   }
+
+  delete packet;
 }
 
 void MACdriver::processUpperLayerMessage(cPacket* packet)
@@ -143,13 +143,13 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
 
   bufferMAC->encapsulate(packet);
 
-  // prepare a transmission phase
-  sendMessageToLower(bufferMAC->dup());
-  sendCommand(MAC_ASK_SEND_FRAME);
-
   /* statistics */
   if (bufferMAC->getAckRequired())
     (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_SEND));
+
+  // prepare a MAC transmission phase
+  sendMessageToLower(bufferMAC->dup());
+  sendCommand(MAC_ASK_SEND_FRAME);
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -166,29 +166,35 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Result*>(packet)->getNote())
       {
-        case RDC_READY_TRANS_PHASE: /* successfully set up a transmission phase */
-        {
-          deferPacket();
-
-          break;
-        }/* successfully set up a transmission phase */
-
         case CHANNEL_CLEAR: /* channel is clear */
         {
-          sendFrame();
+          // ready to enter a RDC phase
+          igniteRDCphase();
 
           break;
         } /* channel is clear */
 
         case CHANNEL_BUSY: /* channel is busy */
         {
+          // not ready enter a RDC phase
           deferPacket();
 
           break;
         } /* channel is busy */
 
+        case RDC_READY_TRANS_PHASE: /* successfully set up a transmission phase */
+        {
+          // success enter a transmission phase, start by deferring packet
+          deferPacket();
+
+          break;
+        }/* successfully set up a transmission phase */
+
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
+          // end MAC phase
+          endMACphase();
+
           // consider IFS
           if (bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
             selfTimer(LIFS, MAC_EXPIRE_IFS);
@@ -200,8 +206,13 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_NO_ACK: /* unicast but no ACK received */
         {
+          // should ignite another phase ???
+
           // no ack is considered dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
+
+          // end MAC phase
+          endMACphase();
 
           // consider IFS
           if (bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
@@ -214,6 +225,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_FATAL: /* fatal error, abort message */
         {
+          // end MAC phase
+          endMACphase();
+
           selfTimer(0, MAC_EXPIRE_IFS);
 
           break;
@@ -221,13 +235,16 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_COL: /* busy radio */
         {
+          // radio/channel is busy, defer packet
           deferPacket();
 
           break;
-        } /* busy radio, defer packet */
+        } /* busy radio */
 
         default:
-          ev << "Missing note" << endl;
+          delete packet;
+          if (DEBUG)
+            std::cout << "Missing note" << endl;
           break;
       }
 
@@ -236,24 +253,35 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
     } /* Result */
 
     default:
-      ev << "Unknown kind" << endl;
+      delete packet;
+      if (DEBUG)
+        std::cout << "Unknown kind" << endl;
       break;
   }
 }
 
-void MACdriver::sendFrame()
+void MACdriver::igniteRDCphase()
 {
   if (DEBUG)
-    ev << "MAC: begin 1 transmitting turn" << endl;
+    std::cout << "MAC: ignite RDC" << endl;
 
   /* begin a transmission turn */
-  sendCommand(MAC_BEGIN_SEND_TURN);
+  sendCommand(MAC_IGNITE_RDC);
+}
+
+void MACdriver::endMACphase()
+{
+  if (DEBUG)
+    std::cout << "MAC: end transmission phase" << endl;
+
+  /* told RDC end a transmission phase */
+  sendCommand(MAC_END_SEND_FRAME);
 }
 
 void MACdriver::receiveFrame(Frame* frameMac)
 {
   if (DEBUG)
-    ev << "MAC: received" << endl;
+    std::cout << "MAC: received" << endl;
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
@@ -268,7 +296,8 @@ void MACdriver::receiveFrame(Frame* frameMac)
       sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
 
       /* statistics */
-      (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
+      if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
+        (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
     }
   }
 
