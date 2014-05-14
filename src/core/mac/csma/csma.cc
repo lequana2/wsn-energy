@@ -27,12 +27,14 @@ void csma::deferPacket()
   /* dismiss + announce failure duty */
   if (bufferMAC->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
+    sendResult(MAC_RELIABLE);
+
     // consider IFS
     if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
       selfTimer(LIFS, MAC_EXPIRE_IFS);
     else
       selfTimer(SIFS, MAC_EXPIRE_IFS);
-
+std::cout << "RELIABLE " << endl;
     endMACphase();
   }
   /* unslotted csma */
@@ -54,7 +56,8 @@ void csma::deferPacket()
     else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
       backoffUnit = (intuniform(0, backoff_transmission));
 
-    backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 100000000.0;
+    // create unsynchronization
+    backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 10000000000.0;
 
     if (DEBUG)
     {

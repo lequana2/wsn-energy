@@ -63,6 +63,7 @@ enum COMMAND_MAC{
 enum RESULT_FROM_MAC{
 	MAC_FINISH_PHASE       = 0; // finish 1 transmitting phase
     MAC_SEND_DEAD_NEIGHBOR = 1; // inform a dead neighbor
+    MAC_RELIABLE		   = 2; // resend a failure message
 };
 
 // RDC related

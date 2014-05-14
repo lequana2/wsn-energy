@@ -249,7 +249,6 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             {
               if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
               {
-                // WSN marker
                 if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
                   this->rpl->hasSentDIO();
                 else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
@@ -285,6 +284,12 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
           break;
         } /* dead neighbor handling */
+
+        case MAC_RELIABLE: /* resend */
+        {
+          putIntoQueue(bufferNET->dup());
+          break;
+        } /* resend */
 
         default:
           if (DEBUG)

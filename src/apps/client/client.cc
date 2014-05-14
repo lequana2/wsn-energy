@@ -11,8 +11,8 @@
 #include "statistic.h"
 
 // define number of packet each sensor need to send
-#define MAX 60
-//#define MAX 1
+//#define MAX 60
+#define MAX 1
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -145,7 +145,7 @@ void Client::processLowerLayerMessage(cPacket*)
 
 void Client::newData()
 {
-  int sendInterval = 60; // second
+  int sendInterval = 150; // second
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
@@ -153,7 +153,7 @@ void Client::newData()
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
-    time = intuniform(0, 10000) / 10000.0 * sendInterval;
+    time = intuniform(0, 100000) / 100000.0 * sendInterval;
 
   if (DEBUG)
     this->getParentModule()->bubble("Data");

@@ -206,12 +206,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 
         case RDC_SEND_NO_ACK: /* unicast but no ACK received */
         {
-          // WSN what the hell ???
-          std::cout << "No ack" << endl;
-
           // no ack is considered dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
-
+std::cout << "NO ACK !!!" << endl;
           // end MAC phase
           endMACphase();
 
@@ -228,7 +225,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         {
           // end MAC phase
           endMACphase();
-
+std::cout << "FATAL ERROR" << endl;
           selfTimer(0, MAC_EXPIRE_IFS);
 
           break;

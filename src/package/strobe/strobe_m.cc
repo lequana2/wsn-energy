@@ -80,6 +80,7 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::RESULT_FROM_MAC"));
     e->insert(MAC_FINISH_PHASE, "MAC_FINISH_PHASE");
     e->insert(MAC_SEND_DEAD_NEIGHBOR, "MAC_SEND_DEAD_NEIGHBOR");
+    e->insert(MAC_RELIABLE, "MAC_RELIABLE");
 );
 
 EXECUTE_ON_STARTUP(

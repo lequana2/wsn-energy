@@ -73,6 +73,8 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           // inform tranceiver
           sendCommand(RDC_CCA_REQUEST);
 
+          // overlap CCA
+          cancelEvent(ccaResult);
           scheduleAt(simTime().dbl() + CCA_CHECK_TIME, ccaResult);
 
           delete packet;
@@ -84,7 +86,7 @@ void RDCdriver::processSelfMessage(cPacket* packet)
         {
           // hack
           if (false)
-          //          if (!this->ccaIsFreeChannel)
+//          if (!this->ccaIsFreeChannel)
 //          if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0) /* Channel busy*/
           {
             if (DEBUG)
