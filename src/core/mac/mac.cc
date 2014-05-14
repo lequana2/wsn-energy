@@ -50,14 +50,14 @@ void MACdriver::processSelfMessage(cPacket* packet)
 
         case MAC_EXPIRE_IFS: /* expire IFS */
         {
-          sendResult(MAC_FINISH_PHASE);
-
           // clear buffer
           if (this->bufferMAC != NULL)
           {
             delete this->bufferMAC;
             this->bufferMAC = NULL;
           }
+
+          sendResult(MAC_FINISH_PHASE);
 
           break;
         } /* expire IFS*/
@@ -110,6 +110,7 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
     {
       (check_and_cast<FrameDataStandard*>(bufferMAC))->setSourceMacAddress(this->getId());
       (check_and_cast<FrameDataStandard*>(bufferMAC))->setDestinationMacAddress(0);
+
       bufferMAC->setAckRequired(false);
     }
     else
@@ -121,6 +122,7 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
       {
         // fatal error, abort message
         selfTimer(0, MAC_EXPIRE_IFS);
+
         return;
       }
       else
@@ -161,30 +163,31 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
     {
       switch (check_and_cast<Result*>(packet)->getNote())
       {
+        case RDC_READY_TRANS_PHASE: /* successfully set up a transmission phase */
+        {
+          deferPacket();
+
+          break;
+        }/* successfully set up a transmission phase */
+
         case CHANNEL_CLEAR: /* channel is clear */
         {
           sendFrame();
+
           break;
         } /* channel is clear */
 
         case CHANNEL_BUSY: /* channel is busy */
         {
           deferPacket();
+
           break;
         } /* channel is busy */
-
-        case RDC_READY_TRANS_PHASE: /* successfully set up a transmission phase */
-        {
-          deferPacket();
-          break;
-        }/* successfully set up a transmission phase */
 
         case RDC_SEND_OK: /* successful transmitting and receive ACK if needed */
         {
           // consider IFS
-
-          // WSN null pointer, what the fuck FUCK FUCK FUCK !!!
-          if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
+          if (bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
             selfTimer(LIFS, MAC_EXPIRE_IFS);
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
@@ -198,7 +201,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
           // consider IFS
-          if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
+          if (bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
             selfTimer(LIFS, MAC_EXPIRE_IFS);
           else
             selfTimer(SIFS, MAC_EXPIRE_IFS);
@@ -206,18 +209,17 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           break;
         } /* unicast but no ACK received */
 
-        case RDC_SEND_FATAL:
-          /* fatal error, abort message */
+        case RDC_SEND_FATAL: /* fatal error, abort message */
         {
           selfTimer(0, MAC_EXPIRE_IFS);
 
           break;
         } /* fatal error, abort message */
 
-        case RDC_SEND_COL:
-          /* busy radio */
+        case RDC_SEND_COL: /* busy radio */
         {
           deferPacket();
+
           break;
         } /* busy radio, defer packet */
 

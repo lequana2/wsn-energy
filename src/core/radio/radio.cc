@@ -93,6 +93,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
             /* Feedback to RDC */
             sendResult(CHANNEL_CLEAR);
           } /* Channel clear */
+
           break;
         }/* ending of CCA */
 
@@ -110,6 +111,13 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
             /* Feedback to RDC */
             sendResult(PHY_TX_ERR);
+
+            // clear buffer
+            if (this->bufferTXFIFO != NULL)
+            {
+              delete this->bufferTXFIFO;
+              this->bufferTXFIFO = NULL;
+            }
           }
           /* Prepare transmitting */
           else
@@ -129,6 +137,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
                 break;
             }
           }
+
           break;
         } /* switch to transmit */
 
@@ -148,6 +157,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
               selfTimer(0, PHY_LISTENING);
               break;
           }
+
           break;
         }/* switch to listen */
 
@@ -167,12 +177,14 @@ void RadioDriver::processSelfMessage(cPacket* packet)
               selfTimer(SWITCH_MODE_DELAY_LISTEN_TO_IDLE, PHY_IDLING);
               break;
           }
+
           break;
         }/* switch to sleep */
 
         case PHY_BEGIN_TRANSMIT: /* begin transmitting*/
         {
           transmit_begin();
+
           break;
         }/* begin transmit */
 
@@ -182,18 +194,21 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
           // Feedback to RDC
           sendResult(PHY_TX_OK);
+
           break;
         } /* end transmitting*/
 
         case PHY_LISTENING: /* begin listening*/
         {
           listen();
+
           break;
         }/* begin listening */
 
         case PHY_IDLING: /* idling */
         {
           sleep();
+
           break;
         }/* idling */
 
@@ -203,6 +218,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       }
 
       delete packet; // done command
+
       break;
     } /* Command */
 

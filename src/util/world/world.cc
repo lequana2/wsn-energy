@@ -251,7 +251,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
 
   // Search host by id
   int senderID = mote->getId();
-  Mote *host;
+  Mote *host = NULL;
 
   for (std::list<Mote*>::iterator it = this->hosts.begin(); it != this->hosts.end(); it++)
   {
