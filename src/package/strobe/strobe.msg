@@ -76,16 +76,17 @@ enum COMMAND_RDC{
 	RDC_CCA_REQUEST = 3; 
 	
 	// channel check
-	RDC_PERIODICAL_CHECK = 4; 
+	RDC_PERIODICAL_MAJOR_CHECK = 4; 
+	RDC_PERIODICAL_MINOR_CHECK = 5;
 	
 	// self timer
-	RDC_CCA_RESULT	   = 5; // cca result
-	RDC_CCA_TIME_OUT   = 6; // cca time out
-	RDC_PHASE_TIME_OUT = 7; // phase time out
+	RDC_CCA_RESULT	   = 6; // cca result
+	RDC_CCA_TIME_OUT   = 7; // cca time out
+	RDC_PHASE_TIME_OUT = 8; // phase time out
 
 	// future message because of phase lock wait
 	// begin a transmission turn (in one turn 6 maximum CCA + 1 trans)
-	RDC_BEGIN_TRANS_TURN  = 8; 
+	RDC_BEGIN_TRANS_TURN  = 9; 
 };
 
 enum RESULT_RDC{

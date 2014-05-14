@@ -18,8 +18,9 @@
 // value of ACK length header
 #define ACK_LENGTH          5
 // CCA type
-#define RDC_CCA             0
-#define MAC_CCA             1
+#define RDC_CHECK_CCA       0
+#define RDC_TRANS_CCA       1
+#define MAC_CCA             2
 // working phase
 #define CHECKING_PHASE      0
 #define TRANSMITTING_PHASE  1

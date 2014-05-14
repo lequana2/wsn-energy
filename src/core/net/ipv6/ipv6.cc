@@ -14,7 +14,7 @@
 #include "rpl.h"
 #include "energest.h"
 #include "count.h"
-#include "rdc.h"
+//#include "rdc.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -35,17 +35,18 @@ void IPv6::initialize()
   this->defaultRoute = 0;
 
   // If server then create RPL DODAG
-//  if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
-//    this->rpl->rpl_set_root();
+  if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+    this->rpl->rpl_set_root();
 
-  this->defaultRoute = simulation.getModuleByPath("server.net")->getId();
+//  this->defaultRoute = simulation.getModuleByPath("server.net")->getId();
 }
 
 void IPv6::finish()
 {
 //  if (DEBUG)
-  std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName() << " _ "
-      << check_and_cast<RDCdriver*>(getModuleByPath("^.rdc"))->phase << endl;
+  std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName()
+//      << " _ " << check_and_cast<RDCdriver*>(getModuleByPath("^.rdc"))->phase
+      << endl;
 
   // Clear queue !!!
   for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
@@ -249,10 +250,10 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
               if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
               {
                 // WSN marker
-//                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
-//                  this->rpl->hasSentDIO();
-//                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
-//                  this->rpl->hasSentDIS();
+                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                  this->rpl->hasSentDIO();
+                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                  this->rpl->hasSentDIS();
               }
             }
           }

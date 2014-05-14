@@ -97,12 +97,16 @@ void RadioDriver::processSelfMessage(cPacket* packet)
               delete this->bufferTXFIFO;
               this->bufferTXFIFO = NULL;
             }
+
+            switchOscilatorMode(IDLE);
           }
           /* Prepare transmitting */
           else
           {
             switch (this->status)
             {
+              switchOscilatorMode(TRANSMITTING);
+
               case IDLE:
                 selfTimer(SWITCH_MODE_DELAY_IDLE_TO_TRANS, PHY_BEGIN_TRANSMIT);
                 break;
@@ -122,6 +126,8 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
         case PHY_SWITCH_LISTEN: /* switch to listen */
         {
+          switchOscilatorMode(LISTENING);
+
           switch (this->status)
           {
             case IDLE:
@@ -142,6 +148,8 @@ void RadioDriver::processSelfMessage(cPacket* packet)
 
         case PHY_SWITCH_IDLE: /* switch to sleep */
         {
+          switchOscilatorMode(IDLE);
+
           switch (this->status)
           {
             case IDLE:
@@ -325,7 +333,6 @@ void RadioDriver::listen()
     ev << "PHY: LISTEN" << endl;
 
   (check_and_cast<World*>(simulation.getModuleByPath("world")))->beginListening(this);
-  switchOscilatorMode(LISTENING);
 }
 
 /*
@@ -354,8 +361,6 @@ void RadioDriver::sleep()
     ev << "IDLE (PHY)" << endl;
 
   ((World*) simulation.getModuleByPath("world"))->stopListening(this);
-
-  switchOscilatorMode(IDLE);
 }
 
 /*
@@ -383,14 +388,14 @@ void RadioDriver::switchOscilatorMode(int type)
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, LISTEN_COLOR);
       break;
 
-    case RECEIVING:
-      this->status = RECEIVING;
-      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_IDLE);
-      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
-      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOn(ENERGEST_TYPE_LISTEN,
-          getRxPower());
-      (&getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVING_COLOR);
-      break;
+//    case RECEIVING:
+//      this->status = RECEIVING;
+//      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_IDLE);
+//      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOff(ENERGEST_TYPE_TRANSMIT);
+//      (check_and_cast<Energest*>(getParentModule()->getSubmodule("energest")))->energestOn(ENERGEST_TYPE_LISTEN,
+//          getRxPower());
+//      (&getParentModule()->getDisplayString())->setTagArg("i", 1, RECEIVING_COLOR);
+//      break;
 
     case TRANSMITTING:
       this->status = TRANSMITTING;

@@ -53,12 +53,12 @@
 #define IDLE            1 // do nothing (free)
 #define TRANSMITTING    2 // transmitting (busy)
 #define LISTENING       3 // listening to nothing (free)
-#define RECEIVING       4 // listening to something (busy)
+//#define RECEIVING       4 // listening to something (busy)
 #define OFF_COLOR       "black"
 #define IDLE_COLOR      "brown"
 #define TRANSMIT_COLOR  "blue"
 #define LISTEN_COLOR    "yellow"
-#define RECEIVING_COLOR "orange"
+//#define RECEIVING_COLOR "orange"
 #endif
 
 namespace wsn_energy {
