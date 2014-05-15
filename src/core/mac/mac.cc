@@ -56,8 +56,11 @@ void MACdriver::processSelfMessage(cPacket* packet)
             delete this->bufferMAC;
             this->bufferMAC = NULL;
           }
-//          std::cout << this->getFullPath() << " end mac " << simTime().dbl()
-//              << " " << check_and_cast<IPv6*>(getModuleByPath("^.net"))->ipPacketQueue.size() << endl;
+
+          if (DEBUG)
+            std::cout << this->getFullPath() << " end mac " << simTime().dbl() << " "
+                << check_and_cast<IPv6*>(getModuleByPath("^.net"))->ipPacketQueue.size() << endl;
+
           sendResult(MAC_FINISH_PHASE);
 
           break;
@@ -151,7 +154,9 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   // prepare a MAC transmission phase
   sendMessageToLower(bufferMAC->dup());
   sendCommand(MAC_ASK_SEND_FRAME);
-//  std::cout << this->getFullPath() << " begin mac" << simTime().dbl() << endl;
+
+  if (DEBUG)
+    std::cout << this->getFullPath() << " begin mac" << simTime().dbl() << endl;
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -265,7 +270,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
 void MACdriver::igniteRDCphase()
 {
   if (DEBUG)
-    std::cout << "MAC: ignite RDC" << endl;
+    ev << "MAC: ignite RDC" << endl;
 
   /* begin a transmission turn */
   sendCommand(MAC_IGNITE_RDC);
@@ -274,7 +279,7 @@ void MACdriver::igniteRDCphase()
 void MACdriver::endMACphase()
 {
   if (DEBUG)
-    std::cout << "MAC: end transmission phase" << endl;
+    ev << "MAC: end transmission phase" << endl;
 
   /* told RDC end a transmission phase */
   sendCommand(MAC_END_SEND_FRAME);
@@ -283,7 +288,7 @@ void MACdriver::endMACphase()
 void MACdriver::receiveFrame(Frame* frameMac)
 {
   if (DEBUG)
-    std::cout << "MAC: received" << endl;
+    ev << "MAC: received" << endl;
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {

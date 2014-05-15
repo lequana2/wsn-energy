@@ -17,14 +17,14 @@
 #define RDC
 // value of ACK length header
 #define ACK_LENGTH          5
-// CCA type
-#define RDC_CHECK_CCA       0
-#define RDC_TRANS_CCA       1
-#define MAC_CCA             2
 // working phase
 #define CHECKING_PHASE      0
 #define TRANSMITTING_PHASE  1
 #define FREE_PHASE          2
+// CCA type in checking phase
+#define RDC_CHECK_CCA       0
+#define RDC_TRANS_CCA       1
+#define MAC_CCA             2
 // check rate
 #define CHANNEL_CHECK_RATE       8        // Hertz
 #define CHANNEL_CHECK_INTERVAL   0.125    // second

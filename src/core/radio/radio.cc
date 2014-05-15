@@ -47,7 +47,7 @@ void RadioDriver::initialize()
   this->par("coRange").setDoubleValue(coRange);
 
   // already turned on
-  this->status = IDLE;
+  switchOscilatorMode(IDLE);
 }
 
 void RadioDriver::handleMessage(cMessage* msg)
@@ -107,17 +107,17 @@ void RadioDriver::processSelfMessage(cPacket* packet)
             {
               switchOscilatorMode(TRANSMITTING);
 
-              case IDLE:
-                selfTimer(SWITCH_MODE_DELAY_IDLE_TO_TRANS, PHY_BEGIN_TRANSMIT);
-                break;
+            case IDLE:
+              selfTimer(SWITCH_MODE_DELAY_IDLE_TO_TRANS, PHY_BEGIN_TRANSMIT);
+              break;
 
-              case LISTENING:
-                selfTimer(SWITCH_MODE_DELAY_LISTEN_TO_TRANS, PHY_BEGIN_TRANSMIT);
-                break;
+            case LISTENING:
+              selfTimer(SWITCH_MODE_DELAY_LISTEN_TO_TRANS, PHY_BEGIN_TRANSMIT);
+              break;
 
-              case TRANSMITTING:
-                selfTimer(0, PHY_BEGIN_TRANSMIT);
-                break;
+            case TRANSMITTING:
+              selfTimer(0, PHY_BEGIN_TRANSMIT);
+              break;
             }
           }
 

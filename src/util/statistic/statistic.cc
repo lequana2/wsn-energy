@@ -108,6 +108,7 @@ void Statistic::finish()
 {
   // poll last time
   pollTotalSensorEnergy();
+  pollTotalSensorEnergyCount();
 
   // Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("^");
@@ -147,35 +148,43 @@ void Statistic::finish()
 
 void Statistic::pollTotalSensorEnergyCount()
 {
-  cModule *wsn = getModuleByPath("WSN");
-  int numberClient = wsn->par("numberClient").longValue();
-
-  numNetworkEnergyCount = 0.0;
-
-  for (int i = 0; i < numberClient; i++)
+  if (getParentModule()->par("isPollingCount").boolValue())
   {
-    numNetworkEnergyCount +=
-        (check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count")))->residualEnergy;
-  }
 
-  emit(sigNetworkEnergyCount, numNetworkEnergyCount);
+    cModule *wsn = getModuleByPath("WSN");
+    int numberClient = wsn->par("numberClient").longValue();
+
+    numNetworkEnergyCount = 0.0;
+
+    for (int i = 0; i < numberClient; i++)
+    {
+      numNetworkEnergyCount +=
+          (check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count")))->residualEnergy;
+    }
+
+    emit(sigNetworkEnergyCount, numNetworkEnergyCount);
+  }
 }
 
 void Statistic::pollTotalSensorEnergy()
 {
-  cModule *wsn = getModuleByPath("WSN");
-  int numberClient = wsn->par("numberClient").longValue();
-
-  numNetworkEnergy = 0.0;
-
-  for (int i = 0; i < numberClient; i++)
+  if (getParentModule()->par("isPolling").boolValue())
   {
-    (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->update();
-    numNetworkEnergy +=
-        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->energestRemaining;
-  }
 
-  emit(sigNetworkEnergy, numNetworkEnergy);
+    cModule *wsn = getModuleByPath("WSN");
+    int numberClient = wsn->par("numberClient").longValue();
+
+    numNetworkEnergy = 0.0;
+
+    for (int i = 0; i < numberClient; i++)
+    {
+      (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->update();
+      numNetworkEnergy +=
+          (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->energestRemaining;
+    }
+
+    emit(sigNetworkEnergy, numNetworkEnergy);
+  }
 }
 
 void Statistic::registerStatistic(int type)

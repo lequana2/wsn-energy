@@ -289,7 +289,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
         case MAC_RELIABLE: /* resend */
         {
-//          putIntoQueue(bufferNET->dup());
+          if (bufferNET != NULL)
+            putIntoQueue(bufferNET->dup());
           break;
         } /* resend */
 

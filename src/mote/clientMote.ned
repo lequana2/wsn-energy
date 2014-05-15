@@ -43,6 +43,12 @@ module ClientMote
         @display("p=$axisX,$axisY;i=misc/node2;is=l");
 
     submodules:
+        energest: Energest {
+            @display("p=50,50");
+        }
+        count: Count {
+            @display("p=50,125");
+        }
         app: <appType> like iApp {
             @display("p=150,50");
         }
@@ -62,12 +68,6 @@ module ClientMote
             parameters:
                 @display("p=150,550");
         }
-        energest: Energest {
-            @display("p=50,50");
-        }
-//        count: Count {
-//            @display("p=50,125");
-//        }
     connections allowunconnected:
         app.lowerOut --> tra.upperIn;
         app.lowerIn <-- tra.upperOut;

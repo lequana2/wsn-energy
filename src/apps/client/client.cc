@@ -138,13 +138,15 @@ void Client::processLowerLayerMessage(cPacket*)
 
 void Client::newData()
 {
-  int sendInterval = 300; // seconds
+  int sendInterval = 60; // seconds
+  int randomness   = 00; // seconds
+//  int sendInterval = 300; // seconds
 //  int randomness = 40;  // seconds
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-  selfTimer(sendInterval, APP_SENSING_FLAG);
+  selfTimer(sendInterval + randomness, APP_SENSING_FLAG);
 
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;

@@ -28,8 +28,8 @@ void Energest::initialize()
   }
 
   // MCU always on
-  this->power[ENERGEST_TYPE_CPU] = MSP430_POWER;
-  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
+//  this->power[ENERGEST_TYPE_CPU] = MSP430_POWER;
+//  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
 
   // total energy remaining
   this->energestRemaining = MAX_POWER;
@@ -45,6 +45,8 @@ void Energest::finish()
 
 void Energest::energestOn(int type, double power)
 {
+  energestOff(type);
+
   this->capsuleStartTime[type] = simTime().dbl();
   this->capsuleIsActivated[type] = true;
   this->power[type] = power;
@@ -54,6 +56,9 @@ void Energest::energestOff(int type)
 {
   if (this->capsuleIsActivated[type])
   {
+    // turn off capsule
+    this->capsuleIsActivated[type] = false;
+
     double consumeTime = simTime().dbl() - this->capsuleStartTime[type];
 
     if (DEBUG)
@@ -62,16 +67,16 @@ void Energest::energestOff(int type)
     // increase total time
     this->capsuleTotalTime[type] += consumeTime;
 
-    // turn off capsule
-    this->capsuleIsActivated[type] = false;
-
     // consume energy, in term off hour not second, because power is mAh
     this->energestRemaining -= consumeTime * power[type] / 3600.0;
+  }
 
-    // residual energy
-    // Turn off if below critical mode
-    if (this->energestRemaining < MAX_POWER * CRITICAL)
-      ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
+  // residual energy
+  // Turn off if below critical mode
+  if (this->energestRemaining < MAX_POWER * CRITICAL)
+  {
+    std::cout << getParentModule()->getFullName() << " DOWN" << endl;
+    ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
   }
 }
 
