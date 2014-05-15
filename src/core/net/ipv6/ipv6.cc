@@ -78,7 +78,7 @@ void IPv6::processSelfMessage(cPacket* packet)
           if (ipPacketQueue.size() == 0) // successful send all packet in queue
           {
           }
-          else if (bufferNET != NULL) // have any pending packet
+          else if (bufferNET != NULL) // have pending packet
           {
           }
           else
@@ -181,6 +181,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != 0
                 && check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != this->getId())
             {
+              (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(IP_TRANS);
+
               // hop limit !!!
               if (check_and_cast<IpPacketStandard*>(packet)->getHopLimit() == 1)
               {
@@ -287,7 +289,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
         case MAC_RELIABLE: /* resend */
         {
-          putIntoQueue(bufferNET->dup());
+//          putIntoQueue(bufferNET->dup());
           break;
         } /* resend */
 

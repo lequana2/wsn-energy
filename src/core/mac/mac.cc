@@ -56,7 +56,8 @@ void MACdriver::processSelfMessage(cPacket* packet)
             delete this->bufferMAC;
             this->bufferMAC = NULL;
           }
-
+//          std::cout << this->getFullPath() << " end mac " << simTime().dbl()
+//              << " " << check_and_cast<IPv6*>(getModuleByPath("^.net"))->ipPacketQueue.size() << endl;
           sendResult(MAC_FINISH_PHASE);
 
           break;
@@ -124,8 +125,8 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
       if (netDefaultRoute == 0)
       {
         // fatal error, abort message
+        std::cout << "FATAL NET ERROR" << endl;
         selfTimer(0, MAC_EXPIRE_IFS);
-
         return;
       }
       else
@@ -150,6 +151,7 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
   // prepare a MAC transmission phase
   sendMessageToLower(bufferMAC->dup());
   sendCommand(MAC_ASK_SEND_FRAME);
+//  std::cout << this->getFullPath() << " begin mac" << simTime().dbl() << endl;
 }
 
 void MACdriver::processLowerLayerMessage(cPacket* packet)
@@ -208,7 +210,9 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         {
           // no ack is considered dead neighbor
           sendResult(MAC_SEND_DEAD_NEIGHBOR);
-std::cout << "NO ACK !!!" << endl;
+
+          //std::cout << "NO ACK !!!" << endl;
+
           // end MAC phase
           endMACphase();
 
@@ -225,7 +229,7 @@ std::cout << "NO ACK !!!" << endl;
         {
           // end MAC phase
           endMACphase();
-std::cout << "FATAL ERROR" << endl;
+          std::cout << "FATAL ERROR" << endl;
           selfTimer(0, MAC_EXPIRE_IFS);
 
           break;

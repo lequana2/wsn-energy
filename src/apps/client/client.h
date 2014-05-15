@@ -24,7 +24,8 @@ class Client : public myModule
 {
   private:
     int packetOrder;
-    virtual void newData();
+    void sendData();
+    void newData();
 
   protected:
     void initialize();

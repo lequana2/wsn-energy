@@ -12,7 +12,7 @@
 
 // define number of packet each sensor need to send
 //#define MAX 60
-#define MAX 1
+//#define MAX 1
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -91,19 +91,6 @@ void Client::processSelfMessage(cPacket* packet)
 
         case APP_SENSING_FLAG: /* new data */
         {
-          // create data to send
-          char buf[30];
-          int len = sprintf(buf, "Hello %d from %s", packetOrder, getParentModule()->getFullName());
-
-          // hack port, address
-          int destinationPort = UDP_SERVER_PORT;
-          int destinationAddress = simulation.getModuleByPath("server.net")->getId();
-
-          sendMessage(buf, len, destinationPort, destinationAddress);
-
-          /* End to end statistics */
-          (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(APP_SEND));
-
           // Timer for next message
           if ((int) getModuleByPath("^.^")->par("scheme").doubleValue() == 2)
           {
@@ -112,11 +99,17 @@ void Client::processSelfMessage(cPacket* packet)
 #else
             ++this->packetOrder;
 #endif
-              newData();
+            newData();
           }
 
           break; /* new data */
         }
+
+        case APP_READY_TO_SEND: /* ready to send */
+        {
+          sendData();
+          break;
+        } /* ready to send */
 
         default:
           ev << "Unknown command" << endl;
@@ -145,20 +138,40 @@ void Client::processLowerLayerMessage(cPacket*)
 
 void Client::newData()
 {
-  int sendInterval = 150; // second
+  int sendInterval = 300; // seconds
+//  int randomness = 40;  // seconds
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
+  selfTimer(sendInterval, APP_SENSING_FLAG);
+
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
-    time = intuniform(0, 100000) / 100000.0 * sendInterval;
+    time = intuniform(0, 10000) / 10000.0 * sendInterval;
 
   if (DEBUG)
     this->getParentModule()->bubble("Data");
 
-  selfTimer(time, APP_SENSING_FLAG);
+  if (simTime().dbl() + sendInterval < getModuleByPath("^.^")->par("timeLimit").doubleValue())
+    selfTimer(time, APP_READY_TO_SEND);
+}
+
+void Client::sendData()
+{
+  // create data to send
+  char buf[30];
+  int len = sprintf(buf, "Hello %d from %s", packetOrder, getParentModule()->getFullName());
+
+  // hack port, address
+  int destinationPort = UDP_SERVER_PORT;
+  int destinationAddress = simulation.getModuleByPath("server.net")->getId();
+
+  sendMessage(buf, len, destinationPort, destinationAddress);
+
+  /* End to end statistics */
+  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(APP_SEND));
 }
 
 void Client::sendMessage(char *value, int len, int destinationPort, int destinationAddress)

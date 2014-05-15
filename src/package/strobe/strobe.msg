@@ -34,10 +34,11 @@ enum MANUAL_EVENT{
 
 // App related
 enum COMMAND_APP{
-	APP_ENVIRON_FLAG = 0; // data from enviroment, to sensor
-	APP_SENSING_FLAG = 1; // data from sensor, to apps
+	APP_ENVIRON_FLAG  = 0; // data from enviroment, to sensor
+	APP_SENSING_FLAG  = 1; // data from sensor, to apps
+	APP_READY_TO_SEND = 2; // data from apps, to trans
 	
-	RPL_SET_UP_DELAY = 2; // flag for delaying for setting up
+	RPL_SET_UP_DELAY  = 3; // flag for delaying for setting up
 };
 
 // Net related

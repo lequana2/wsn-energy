@@ -27,14 +27,14 @@ void csma::deferPacket()
   /* dismiss + announce failure duty */
   if (bufferMAC->getNumberTransmission() > MAX_BACKOFF_TRANSMISSION)
   {
-    sendResult(MAC_RELIABLE);
-
     // consider IFS
     if (this->bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
       selfTimer(LIFS, MAC_EXPIRE_IFS);
     else
       selfTimer(SIFS, MAC_EXPIRE_IFS);
-std::cout << "RELIABLE " << endl;
+
+    sendResult(MAC_RELIABLE);
+
     endMACphase();
   }
   /* unslotted csma */

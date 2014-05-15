@@ -52,17 +52,19 @@ enum MANUAL_EVENT {
  * Enum generated from <tt>package/strobe/strobe.msg</tt> by opp_msgc.
  * <pre>
  * enum COMMAND_APP{
- * 	APP_ENVIRON_FLAG = 0; 
- * 	APP_SENSING_FLAG = 1; 
+ * 	APP_ENVIRON_FLAG  = 0; 
+ * 	APP_SENSING_FLAG  = 1; 
+ * 	APP_READY_TO_SEND = 2; 
  * 	
- * 	RPL_SET_UP_DELAY = 2; 
+ * 	RPL_SET_UP_DELAY  = 3; 
  * };
  * </pre>
  */
 enum COMMAND_APP {
     APP_ENVIRON_FLAG = 0,
     APP_SENSING_FLAG = 1,
-    RPL_SET_UP_DELAY = 2
+    APP_READY_TO_SEND = 2,
+    RPL_SET_UP_DELAY = 3
 };
 
 /**

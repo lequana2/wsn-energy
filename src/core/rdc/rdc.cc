@@ -73,7 +73,9 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           // inform tranceiver
           sendCommand(RDC_CCA_REQUEST);
 
-          // overlap CCA
+          ev << "TYPE" << ccaType << endl;
+
+          // need to consider overlap CCA ???
           cancelEvent(ccaResult);
           scheduleAt(simTime().dbl() + CCA_CHECK_TIME, ccaResult);
 
@@ -84,10 +86,7 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
         case RDC_CCA_RESULT: /* check cca result */
         {
-          // hack
-          if (false)
-//          if (!this->ccaIsFreeChannel)
-//          if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0) /* Channel busy*/
+          if (cca()) /* Channel busy*/
           {
             if (DEBUG)
               ev << "Channel is busy" << endl;
@@ -112,7 +111,7 @@ void RDCdriver::processSelfMessage(cPacket* packet)
                   case RDC_TRANS_CCA: // cca on trans
                   {
                     // is reaching maxium number of CCA
-                    if (++ccaInOneTurn > CCA_TRANS_MAX)
+                    if (--ccaInOneTurn < 0)
                     {
                       // stop transmission phase
                       // inform busy channel
@@ -146,8 +145,15 @@ void RDCdriver::processSelfMessage(cPacket* packet)
                 // listen for a period of time
                 scheduleAt(simTime().dbl() + LISTEN_AFTER_DETECT, ccaTimeOut);
 
+                // if has pending phase, wait for cca time out cancel it
+
                 break;
               } /* CCA on checking*/
+
+              case FREE_PHASE: // ???
+              {
+                break;
+              }
 
             }
           } /* Channel busy */
@@ -177,6 +183,9 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
                   case RDC_TRANS_CCA: // cca on trans
                   {
+                    // reset cca in one turn
+                    ccaInOneTurn = CCA_TRANS_MAX;
+
                     // transmitting
                     sendFrame();
 
@@ -197,15 +206,9 @@ void RDCdriver::processSelfMessage(cPacket* packet)
                 // decrease cca counter
                 ccaCounter--;
 
-                // not seen
-                off();
-
                 // has pending transmission phase
                 if (isHavingPendingTransmission)
                 {
-                  // release pending
-                  isHavingPendingTransmission = false;
-
                   // enter transmission phase
                   enterMACtransmissonPhase();
                 }
@@ -214,16 +217,27 @@ void RDCdriver::processSelfMessage(cPacket* packet)
                 {
                   // release checking phase
                   phase = FREE_PHASE;
+
+                  // not seen
+                  off();
                 }
                 else
                 {
                   // schedule next cca
                   selfTimer(CCA_SLEEP_TIME, RDC_PERIODICAL_MINOR_CHECK);
+
+                  // not seen
+                  off();
                 }
 
                 break;
               } /* CCA on checking*/
 
+              case FREE_PHASE: // free phase
+              {
+                // WSN sometimes receive while transmit !!!
+                break;
+              }
             }
           } /* Channel clear */
 
@@ -234,12 +248,16 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
         case RDC_PERIODICAL_MINOR_CHECK: /* minor channel check */
         {
-          if (!ccaTimeOut->isScheduled() && !ccaResult->isScheduled() && phase == CHECKING_PHASE)
+          if (!ccaTimeOut->isScheduled() && !ccaResult->isScheduled() && !isHavingPendingTransmission)
           {
             // begin CCA indicator
             ccaCounter--;
             ccaType = RDC_CHECK_CCA;
             selfTimer(0, RDC_CCA_REQUEST);
+          }
+          else if (isHavingPendingTransmission)
+          {
+            enterMACtransmissonPhase();
           }
 
           delete packet; // done command
@@ -249,40 +267,41 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
         case RDC_PERIODICAL_MAJOR_CHECK: /* major channel check */
         {
+          // schedule next checking phase
+          selfTimer(CHANNEL_CHECK_INTERVAL, RDC_PERIODICAL_MAJOR_CHECK);
+
           switch (phase)
           {
             case TRANSMITTING_PHASE: /* schedule but not perform checking phase */
             {
-              // schedule next checking phase
-              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_PERIODICAL_MAJOR_CHECK);
-
               break;
             } /* schedule but not perform checking phase */
 
+            case CHECKING_PHASE: /* is on checking phase */
+            {
+              break;
+            } /* is on checking phase */
+
             case FREE_PHASE: /* begin a checking phase */
             {
-              // acquire checking phase
-              phase = CHECKING_PHASE;
+              if (!isHavingPendingTransmission)
+              {
+                enterMACtransmissonPhase();
+              }
+              else
+              {
+                // acquire checking phase
+                phase = CHECKING_PHASE;
 
-              // reset cca counter
-              ccaCounter = CCA_COUNT_MAX;
+                // reset cca counter
+                ccaCounter = CCA_COUNT_MAX;
 
-              // schedule next checking phase
-              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_PERIODICAL_MAJOR_CHECK);
-
-              // begin CCA indicator
-              selfTimer(0, RDC_PERIODICAL_MINOR_CHECK);
+                // begin CCA indicator
+                selfTimer(0, RDC_PERIODICAL_MINOR_CHECK);
+              }
 
               break;
             } /* begin a checking phase*/
-
-            case CHECKING_PHASE: /* is on checking phase */
-            {
-              // already in checking phase
-              selfTimer(CHANNEL_CHECK_INTERVAL, RDC_PERIODICAL_MAJOR_CHECK);
-
-              break;
-            } /* is on checking phase */
           }
 
           delete packet; // done command
@@ -290,7 +309,8 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           break;
         } /* major channel check*/
 
-        case RDC_BEGIN_TRANS_TURN: /* begin a transmission turn */
+        case RDC_BEGIN_TRANS_TURN:
+          /* begin a transmission turn */
         {
           enterRDCtransmissionPhase();
 
@@ -299,7 +319,8 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           break;
         } /* begin a transmission turn */
 
-        case RDC_PHASE_TIME_OUT: /* phase time out */
+        case RDC_PHASE_TIME_OUT:
+          /* phase time out */
         {
           if (bufferRDC->getAckRequired()) // if unicast + NO ACK
           {
@@ -319,7 +340,8 @@ void RDCdriver::processSelfMessage(cPacket* packet)
           break;
         } /* phase time out  */
 
-        case RDC_CCA_TIME_OUT: /* cca time out */
+        case RDC_CCA_TIME_OUT:
+          /* cca time out */
         {
           // time out
           phase = FREE_PHASE;
@@ -329,12 +351,7 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
           // if pending, ready for next phase
           if (isHavingPendingTransmission)
-          {
-            // release pending
-            isHavingPendingTransmission = false;
-
             enterMACtransmissonPhase();
-          }
 
           // do not delete cca time out for later reuse
 
@@ -385,16 +402,26 @@ void RDCdriver::processUpperLayerMessage(cPacket* packet)
           // does not aquire transmission phase at this stage
           if (this->phase == FREE_PHASE) // is free
           {
-            // release pending
-            isHavingPendingTransmission = false;
-
+            isHavingPendingTransmission = true;
             enterMACtransmissonPhase();
           }
-          else // in checking phase
+          // cancel if on checking cca
+          else if (ccaResult->isScheduled())
           {
-            // wait this CCA complete
+            cancelEvent(ccaResult);
+            isHavingPendingTransmission = true;
+            enterMACtransmissonPhase();
+          }
+          // place holder in case of cca
+          else if (ccaTimeOut->isScheduled())
+          {
             isHavingPendingTransmission = true;
           }
+          else
+          {
+            std::cout << "unhandled phase " << phase << endl;
+          }
+
           break;
         } /* register a transmission phase */
 
@@ -443,8 +470,9 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      // cancel cca timeout
+      // cancel cca
       cancelEvent(ccaTimeOut);
+      cancelEvent(ccaResult);
 
       // consider is ACK
       if (check_and_cast<Frame*>(packet)->getHeaderLength() == ACK_LENGTH)
@@ -452,20 +480,18 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
         // only consider in case of unicast transmission
         if (bufferRDC->getAckRequired())
         {
-          // not itself ACK ?
+          // not itself ACK / false positive
           if (check_and_cast<FrameACK*>(packet)->getDataSequenceNumber()
               != (check_and_cast<MACdriver*>(getModuleByPath("^.mac"))->sequenceNumber))
           {
-            if (DEBUG)
-              std::cout << "WRONG ACK ?" << endl;
-
-            delete packet;
-            return;
+            // dismiss
           }
-
-          // stop transmission
-          // inform success
-          quitRDCtransmissionPhase(RDC_SEND_OK);
+          else
+          {
+            // stop transmission
+            // inform success
+            quitRDCtransmissionPhase(RDC_SEND_OK);
+          }
 
           // remember phase lock (minus ack transmission time, minus reception time -> wake up time)
         }
@@ -475,22 +501,12 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       }
       else
       {
-        // cancel cca time out
-        cancelEvent(ccaTimeOut);
-
         // time out
-        phase = FREE_PHASE;
+        if (phase == CHECKING_PHASE)
+          phase = FREE_PHASE;
 
         // turn off radio
         off();
-
-        // if pending, ready for next phase
-        if (isHavingPendingTransmission)
-        {
-          isHavingPendingTransmission = false;
-
-          enterMACtransmissonPhase();
-        }
 
         switch (check_and_cast<Frame*>(packet)->getFrameType())
         /* Frame type */
@@ -507,6 +523,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
               // consider right address
               int destinationMacAddress = frame->getDestinationMacAddress();
+              int sourceMacAddress = frame->getSourceMacAddress();
 
               // unicast + wrong MAC address
               if (destinationMacAddress != 0
@@ -518,8 +535,6 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               else
               {
                 // consider sequence number (duplicate)
-                int sourceMacAddress = frame->getSourceMacAddress();
-
                 bool isFound = false;
 
                 // search through neighbor list
@@ -572,7 +587,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                 // if neighbor not in MAC-IP table, create new and send to upper
                 if (!isFound)
                 {
-                  Neighbor *neighbor = new Neighbor;
+                  Neighbor* neighbor = new Neighbor;
                   neighbor->senderID = sourceMacAddress;
                   neighbor->sequence = frame->getDataSequenceNumber();
 
@@ -585,6 +600,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                     FrameACK* ack = new FrameACK;
                     ack->setKind(DATA);
                     ack->setByteLength(ack->getHeaderLength());
+                    ack->setDataSequenceNumber(frame->getDataSequenceNumber());
 
                     // Simulate AUTO-ACK
                     Raw* ackRaw = new Raw;
@@ -610,6 +626,10 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
         } /* Frame type */
       }
 
+      // if pending, ready for next phase
+      if (isHavingPendingTransmission)
+        enterMACtransmissonPhase();
+
       break;
     } /* Data */
 
@@ -632,8 +652,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               on();
 
               // check time-out
-              if (phase == TRANSMITTING_PHASE && phaseTimeOut->isScheduled())
-                selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
+              selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
             }
             else
             {
@@ -641,8 +660,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               off();
 
               // check-time out
-              if (phase == TRANSMITTING_PHASE && phaseTimeOut->isScheduled())
-                selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
+              selfTimer(INTER_FRAME_INTERVAL, RDC_BEGIN_TRANS_TURN);
             }
           }
           break;
@@ -672,17 +690,29 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
   }
 }
 
+void RDCdriver::sendFrame()
+{
+  if (phase == TRANSMITTING_PHASE && phaseTimeOut->isScheduled() && bufferRDC != NULL)
+  {
+    sendMessageToLower(bufferRDC->dup());
+    sendCommand(RDC_TRANSMIT);
+  }
+}
+
 void RDCdriver::enterMACtransmissonPhase()
 {
-  if (!ccaTimeOut->isScheduled() && !ccaResult->isScheduled())
+//  if (!ccaTimeOut->isScheduled() && !ccaResult->isScheduled())
+  if (isHavingPendingTransmission)
   {
     if (DEBUG)
       ev << "RDC: Enter transmission phase" << endl;
 
+    // release pending
+    isHavingPendingTransmission = false;
+
     // acquire transmitting phase
     phase = TRANSMITTING_PHASE;
 
-    // inform MAC RDC is free
     sendResult(RDC_READY_TRANS_PHASE);
   }
 }
@@ -692,20 +722,13 @@ void RDCdriver::quitMACtransmissonPhase()
   // release lock
   phase = FREE_PHASE;
 
+  cancelEvent(phaseTimeOut);
+
   // clear last buffer
   if (this->bufferRDC != NULL)
   {
     delete this->bufferRDC;
     this->bufferRDC = NULL;
-  }
-}
-
-void RDCdriver::sendFrame()
-{
-  if (phase == TRANSMITTING_PHASE && phaseTimeOut->isScheduled() && bufferRDC != NULL)
-  {
-    sendMessageToLower(bufferRDC->dup());
-    sendCommand(RDC_TRANSMIT);
   }
 }
 
@@ -730,8 +753,9 @@ void RDCdriver::quitRDCtransmissionPhase(int result)
 
   // stop another turn
   cancelEvent(ccaResult);
+  cancelEvent(ccaTimeOut);
 
-  // turn off radio
+  // turn off radio, just in case
   off();
 
   sendResult(result);
@@ -749,6 +773,13 @@ void RDCdriver::off()
     return;
 
   sendCommand(RDC_IDLE);
+}
+
+bool RDCdriver::cca()
+{
+  //          if (!this->ccaIsFreeChannel)
+  //          if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0
+  return false;
 }
 
 } /* namespace wsn_energy */

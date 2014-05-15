@@ -87,6 +87,8 @@ class RDCdriver : public myModule
     void initialize();
     void finish();
 
+    bool cca();
+
     void processSelfMessage(cPacket*);
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);

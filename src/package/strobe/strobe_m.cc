@@ -54,6 +54,7 @@ EXECUTE_ON_STARTUP(
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::COMMAND_APP"));
     e->insert(APP_ENVIRON_FLAG, "APP_ENVIRON_FLAG");
     e->insert(APP_SENSING_FLAG, "APP_SENSING_FLAG");
+    e->insert(APP_READY_TO_SEND, "APP_READY_TO_SEND");
     e->insert(RPL_SET_UP_DELAY, "RPL_SET_UP_DELAY");
 );
 
