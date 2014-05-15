@@ -240,24 +240,24 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
       {
         case MAC_FINISH_PHASE: /* MAC layer finish a transmitting phase */
         {
-          // Consider has sent ICMP or not !!!
-          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
-          {
-            // WSN compress using HC01
-          }
-          else
-          {
-            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
-            {
-              if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
-              {
-                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
-                  this->rpl->hasSentDIO();
-                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
-                  this->rpl->hasSentDIS();
-              }
-            }
-          }
+          // Consider has sent ICMP or not !!! ! nonsense-delete !!!
+//          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+//          {
+//            // compress using HC01
+//          }
+//          else
+//          {
+//            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+//            {
+//              if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
+//              {
+//                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+//                  this->rpl->hasSentDIO();
+//                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+//                  this->rpl->hasSentDIS();
+//              }
+//            }
+//          }
 
           // remove pending packet from buffer
           this->ipPacketQueue.remove(bufferNET);

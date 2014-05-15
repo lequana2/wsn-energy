@@ -24,7 +24,7 @@ void RDCdriver::initialize()
   // intitialisation
   this->bufferRDC = NULL;
   this->isHavingPendingTransmission = false;
-  this->isJustSendACK = false;
+  this->isSentACK = false;
   this->phase = FREE_PHASE;
   this->ccaCounter = 0;
 
@@ -77,6 +77,7 @@ void RDCdriver::processSelfMessage(cPacket* packet)
             std::cout << getFullPath() << "cca: " << ccaType << " @ " << simTime().dbl() << endl;
 
           // need to consider overlap CCA ???
+          cancelEvent(ccaResult);
           scheduleAt(simTime().dbl() + CCA_CHECK_TIME, ccaResult);
 
           delete packet;
@@ -110,21 +111,25 @@ void RDCdriver::processSelfMessage(cPacket* packet)
 
                   case RDC_TRANS_CCA: // cca on trans
                   {
-                    // is reaching maxium number of CCA
-                    if (--ccaInOneTurn < 0)
-                    {
-                      // stop transmission phase
-                      // inform busy channel
-                      quitRDCtransmissionPhase(RDC_SEND_COL);
-                    }
-                    else
-                    {
-                      // turn off radio
-                      off();
+                    ccaInOneTurn--;
 
-                      // wait sleep time and perform another CCA
-                      ccaType = RDC_TRANS_CCA;
-                      selfTimer(CCA_SLEEP_TIME, RDC_CCA_REQUEST);
+                    // is reaching maxium number of CCA
+                    if (phaseTimeOut->isScheduled())
+                    {
+                      if (ccaInOneTurn < 0)
+                      {
+                        // stop transmission phase
+                        // inform busy channel
+                        quitRDCtransmissionPhase(RDC_SEND_COL);
+                      }
+                      else
+                      {
+                        // turn off radio
+                        off();
+
+                        // wait sleep time and perform another CCA
+                        selfTimer(CCA_SLEEP_TIME, RDC_BEGIN_TRANS_TURN);
+                      }
                     }
                     break;
                   }
@@ -644,15 +649,15 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
       {
         case PHY_TX_OK: /* callback after transmitting */
         {
-          if (isJustSendACK)
+          if (isSentACK)
           {
-            isJustSendACK = false;
+            isSentACK = false;
           }
           else if (phaseTimeOut->isScheduled())
           {
             if (this->bufferRDC->getAckRequired())
             {
-              // listen
+              // listen to ACK
               on();
 
               // refresh CCA in one turn

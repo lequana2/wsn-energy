@@ -113,7 +113,7 @@ void RPL::sendDIO()
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
 
-  this->isDIOsent = false; // keep track of lastest DIO
+//  this->isDIOsent = false; // keep track of lastest DIO
 }
 
 void RPL::sendDIS()
@@ -138,7 +138,7 @@ void RPL::sendDIS()
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIS_SENT));
 
-  this->isDISsent = false; // keep track of lastest DIS
+//  this->isDISsent = false; // keep track of lastest DIS
 }
 
 void RPL::hasSentDIO()

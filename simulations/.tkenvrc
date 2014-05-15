@@ -1,5 +1,4 @@
 # Partial Tkenv config file -- see $HOME/.tkenvrc as well
 inspector "WSN" "WSN" "2" "820x572+191+247:normal"
-inspector "WSN.client[143]" "ClientMote" "2" "505x832+447+40:normal"
 inspector "WSN.global" "Global" "2" "607x337+495+282:normal"
 

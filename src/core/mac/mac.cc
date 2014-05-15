@@ -214,19 +214,25 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         case RDC_SEND_NO_ACK: /* unicast but no ACK received */
         {
           // no ack is considered dead neighbor
-          sendResult(MAC_SEND_DEAD_NEIGHBOR);
+          if (this->bufferMAC->getNumberTransmission() > 3)
+          {
+            sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
-          //std::cout << "NO ACK !!!" << endl;
+            //std::cout << "NO ACK !!!" << endl;
 
-          // end MAC phase
-          endMACphase();
+            // end MAC phase
+            endMACphase();
 
-          // consider IFS
-          if (bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
-            selfTimer(LIFS, MAC_EXPIRE_IFS);
+            // consider IFS
+            if (bufferMAC->getByteLength() > MAX_SIFS_FRAME_SIZE)
+              selfTimer(LIFS, MAC_EXPIRE_IFS);
+            else
+              selfTimer(SIFS, MAC_EXPIRE_IFS);
+          }
           else
-            selfTimer(SIFS, MAC_EXPIRE_IFS);
-
+          {
+            deferPacket();
+          }
           break;
         } /* unicast but no ACK received */
 

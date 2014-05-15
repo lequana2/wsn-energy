@@ -58,7 +58,7 @@ class RDCdriver : public myModule
 {
   private:
     // just send ACK <-- distinguish with data sending
-    bool isJustSendACK;
+    bool isSentACK;
 
     // MAC is waiting for nearly done CCA
     bool isHavingPendingTransmission;

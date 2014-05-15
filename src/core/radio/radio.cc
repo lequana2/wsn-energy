@@ -222,6 +222,12 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
+      if (this->bufferTXFIFO != NULL)
+      {
+        delete this->bufferTXFIFO;
+        this->bufferTXFIFO = NULL;
+      }
+
       this->bufferTXFIFO = new Raw;
       this->bufferTXFIFO->setKind(DATA);
       this->bufferTXFIFO->setByteLength(this->bufferTXFIFO->getHeaderLength());
@@ -317,11 +323,11 @@ void RadioDriver::transmit_end()
   switchOscilatorMode(IDLE);
 
   // clear buffer
-  if (this->bufferTXFIFO != NULL)
-  {
-    delete this->bufferTXFIFO;
-    this->bufferTXFIFO = NULL;
-  }
+//  if (this->bufferTXFIFO != NULL)
+//  {
+//    delete this->bufferTXFIFO;
+//    this->bufferTXFIFO = NULL;
+//  }
 }
 
 /*
@@ -406,7 +412,8 @@ void RadioDriver::switchOscilatorMode(int type)
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, TRANSMIT_COLOR);
       break;
 
-    case POWER_DOWN: {
+    case POWER_DOWN: // Turn off
+    {
       this->status = POWER_DOWN;
       (&getParentModule()->getDisplayString())->setTagArg("i", 1, OFF_COLOR);
 
