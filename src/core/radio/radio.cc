@@ -14,6 +14,8 @@ namespace wsn_energy {
 
 void RadioDriver::initialize()
 {
+  this->bufferTXFIFO = NULL;
+
   // Transmission power, programabble
   this->txPower = TXPOWER_MAX;
 
@@ -65,6 +67,14 @@ void RadioDriver::handleMessage(cMessage* msg)
     if (DEBUG)
       ev << this->getFullName() << " received message from outside world" << endl;
     this->received(check_and_cast<Raw*>(msg));
+  }
+}
+
+void RadioDriver::finish()
+{
+  if (this->bufferTXFIFO != NULL){
+    delete this->bufferTXFIFO;
+    this->bufferTXFIFO = NULL;
   }
 }
 

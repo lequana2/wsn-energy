@@ -32,7 +32,10 @@ void IPv6::initialize()
 
   // If server then create RPL DODAG
   if (getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
+  {
     this->rpl->rpl_set_root();
+    this->defaultRoute = this->getId();
+  }
 
 //  this->defaultRoute = simulation.getModuleByPath("server.net")->getId();
 }
@@ -46,12 +49,23 @@ void IPv6::finish()
 
   // Clear queue !!!
   for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
+  {
+//    if (this->bufferNET == *it)
+//      this->bufferNET = NULL;
+
     delete *it;
+  }
 
   this->ipPacketQueue.clear();
 
   // clear RPL
   this->rpl->finish();
+
+//  if (this->bufferNET != NULL)
+//  {
+//    delete this->bufferNET;
+//    this->bufferNET = NULL;
+//  }
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
@@ -82,8 +96,10 @@ void IPv6::processSelfMessage(cPacket* packet)
             // prepare a packet to be sent
             preparePacketToBeSent();
 
-            // send duplicated packet to MAC layer
-            sendMessageToLower(bufferNET->dup());
+            // successful prepare a packet
+            if (this->bufferNET != NULL)
+              // send duplicated packet to MAC layer
+              sendMessageToLower(bufferNET->dup());
           }
 
           delete packet; // done command
@@ -176,9 +192,10 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
               if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
               {
                 check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
-                    check_and_cast<IpPacketCompressed*>(packet)->getBitLength());
+                    check_and_cast<IpPacketCompressed*>(ipPacket)->getBitLength());
+
                 check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
-                    simTime().dbl() - check_and_cast<IpPacketCompressed*>(packet)->getTime()); // statistics
+                    simTime().dbl() - check_and_cast<IpPacketCompressed*>(ipPacket)->getTime()); // statistics
               }
 
               // arrive right IP destination
@@ -193,13 +210,15 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
               // Energy calculated by counting bits
               if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
                 check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
-                    check_and_cast<IpPacketCompressed*>(packet)->getBitLength());
+                    check_and_cast<IpPacketCompressed*>(ipPacket)->getBitLength());
 
-              IcmpPacket* icmpPacket = check_and_cast<IcmpPacket*>(packet->decapsulate());
-              delete packet;
+              IcmpPacket* icmpPacket = check_and_cast<IcmpPacket*>(ipPacket->decapsulate());
+              delete ipPacket;
 
               if (icmpPacket->getType() == ICMP_RPL)
                 this->rpl->processICMP(icmpPacket);
+              else
+                delete icmpPacket;
 
               break;
             } /* ICMP */
@@ -213,9 +232,11 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
         }
         else
         {
-          if (frame->getHopLeft() == 1)
+          if (frame->getHopLeft() == 0)
           {
             // reach maximum hop left
+            std::cout << "Delete circular packet" << endl;
+            delete ipPacket;
           }
           else
           {
@@ -244,6 +265,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             {
               check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
                   check_and_cast<IpPacketStandard*>(packet)->getBitLength());
+
               check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
                   simTime().dbl() - check_and_cast<IpPacketStandard*>(packet)->getTime()); // statistics
             }
@@ -290,6 +312,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
             if (icmpPacket->getType() == ICMP_RPL)
               this->rpl->processICMP(icmpPacket);
+            else
+              delete icmpPacket;
 
             break;
           } /* ICMP */
@@ -396,21 +420,62 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 void IPv6::preparePacketToBeSent()
 {
   // get first packet from queue
-  bufferNET = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
-
-  // WSN check DIS
-
-  if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+  if (this->defaultRoute != 0)
   {
-    // compress using HC01
-    if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
-      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
+    bufferNET = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
   }
   else
   {
-    // statistics
-    if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
-      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
+    // search for DIS
+    for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end();
+        it++)
+    {
+      if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+      {
+        // compress using HC01
+        if (check_and_cast<IpPacketCompressed*>(*it)->getNextHeader() == NEXT_HEADER_ICMP)
+        {
+          if (check_and_cast<IcmpPacket*>((*it)->getEncapsulatedPacket())->getType() == ICMP_RPL)
+          {
+            if (check_and_cast<IcmpPacket*>((*it)->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+            {
+              this->bufferNET = *it;
+              break;
+            }
+          }
+        }
+      }
+      else
+      {
+        if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+        {
+          if (check_and_cast<IcmpPacket*>((*it)->getEncapsulatedPacket())->getType() == ICMP_RPL)
+          {
+            if (check_and_cast<IcmpPacket*>((*it)->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+            {
+              this->bufferNET = *it;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (bufferNET != NULL)
+  {
+    if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+    {
+      // compress using HC01
+      if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+        (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
+    }
+    else
+    {
+      // statistics
+      if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+        (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
+    }
   }
 }
 

@@ -116,18 +116,27 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
     (check_and_cast<FrameDataCompressed*>(bufferMAC))->setOrginatorMacAddress(
         simulation.getModule(check_and_cast<IpPacketCompressed*>(packet)->getMetaSourceIpAddress())->getModuleByPath(
             "^.mac")->getId());
-    (check_and_cast<FrameDataCompressed*>(bufferMAC))->setFinalDestinationMacAddress(
-        simulation.getModule(check_and_cast<IpPacketCompressed*>(packet)->getMetaDestinationIpAddress())->getModuleByPath(
-            "^.mac")->getId());
+
+    if (check_and_cast<IpPacketCompressed*>(packet)->getMetaDestinationIpAddress() != 0)
+      (check_and_cast<FrameDataCompressed*>(bufferMAC))->setFinalDestinationMacAddress(
+          simulation.getModule(check_and_cast<IpPacketCompressed*>(packet)->getMetaDestinationIpAddress())->getModuleByPath(
+              "^.mac")->getId());
+    else
+      (check_and_cast<FrameDataCompressed*>(bufferMAC))->setFinalDestinationMacAddress(0);
 
     // hop count
     switch (check_and_cast<IpPacketCompressed*>(packet)->getHopLimit())
     {
       case HOP_LIMIT_COMPRESSED_1:
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(1);
+        break;
+
       case HOP_LIMIT_COMPRESSED_64:
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(64);
+        break;
+
       case HOP_LIMIT_COMPRESSED_128:
-        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(
-            check_and_cast<IpPacketCompressed*>(packet)->getHopLimit());
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(128);
         break;
 
       case HOP_LIMIT_NON_COMPRESSED:
@@ -203,7 +212,9 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
       if (netDefaultRoute == 0)
       {
         // fatal error, abort message
-//        std::cout << "FATAL NET ERROR" << endl;
+        if (DEBUG)
+          std::cout << "FATAL NET ERROR" << endl;
+
         selfTimer(0, MAC_EXPIRE_IFS);
         return;
       }
@@ -315,7 +326,8 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
         {
           // end MAC phase
           endMACphase();
-          std::cout << "FATAL ERROR" << endl;
+          if (DEBUG)
+            std::cout << "FATAL ERROR" << endl;
           selfTimer(0, MAC_EXPIRE_IFS);
 
           break;
@@ -380,14 +392,16 @@ void MACdriver::receiveFrame(Frame* frameMac)
         || check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == getId())
     {
       // right MAC destination
-      sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
+      sendMessageToUpper(frameMac);
 
       /* statistics */
-      if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
+      if (check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == getId())
         (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
     }
-
-    delete frameMac;
+    else
+    {
+      delete frameMac;
+    }
   }
   else
   {
@@ -395,7 +409,7 @@ void MACdriver::receiveFrame(Frame* frameMac)
         || check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
     {
       // right MAC destination
-      sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
+      sendMessageToUpper(frameMac->decapsulate());
 
       /* statistics */
       if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())

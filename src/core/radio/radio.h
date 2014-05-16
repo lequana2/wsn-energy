@@ -86,6 +86,7 @@ class RadioDriver : public myModule
   protected:
     void initialize();
     void handleMessage(cMessage*);
+    void finish();
 
     // processing
     void processSelfMessage(cPacket*);

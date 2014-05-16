@@ -528,8 +528,109 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
           {
             if (getModuleByPath("^.^")->par("usingHDC").boolValue())
             {
-              // WSN compress using HC01
+              // compress using HC01
+
+              FrameDataCompressed* frame = check_and_cast<FrameDataCompressed*>(packet);
+
+              // consider right address
+              int destinationMacAddress = frame->getDestinationMacAddress();
+              int sourceMacAddress = frame->getSourceMacAddress();
+
+              // unicast + wrong MAC address
+              if (destinationMacAddress != 0
+                  && destinationMacAddress != this->getParentModule()->getModuleByPath(".mac")->getId())
+              {
+                // lost packet (not broadcast and wrong mac address) dismiss
+                delete packet;
+              }
+              else
+              {
+                // consider sequence number (duplicate)
+                bool isFound = false;
+
+                // search through neighbor list
+                for (std::list<Neighbor*>::iterator it = this->neighbors.begin(); it != this->neighbors.end(); it++)
+                {
+                  // if neighbor in ARP table
+                  if ((*it)->senderID == sourceMacAddress)
+                  {
+                    isFound = true;
+
+                    if ((*it)->sequence < frame->getDataSequenceNumber())
+                    {
+                      // not duplicated, send to upper
+                      ((*it))->sequence = frame->getDataSequenceNumber();
+
+                      // check ACK required
+                      if (frame->getAckRequired())
+                      {
+                        // send ACK
+                        FrameACK* ack = new FrameACK;
+                        ack->setKind(DATA);
+                        ack->setByteLength(ack->getHeaderLength());
+                        ack->setDataSequenceNumber(frame->getDataSequenceNumber());
+
+                        // Simulate AUTO-ACK
+                        Raw* ackRaw = new Raw;
+                        ackRaw->setKind(DATA);
+                        ackRaw->setByteLength(ackRaw->getHeaderLength());
+
+                        ackRaw->encapsulate(ack);
+
+                        sendDirect(ackRaw,
+                        simulation.getModule(sourceMacAddress)->getModuleByPath("^.radio")->gate("radioIn"));
+
+                        //                        isJustSendACK = true;
+                      }
+
+                      sendMessageToUpper(frame);
+                    }
+                    else
+                    {
+                      // duplicated message, dismiss
+                      delete packet;
+                    }
+
+                    break;
+                  }
+                }
+
+                // if neighbor not in MAC-IP table, create new and send to upper
+                if (!isFound)
+                {
+                  Neighbor* neighbor = new Neighbor;
+                  neighbor->senderID = sourceMacAddress;
+                  neighbor->sequence = frame->getDataSequenceNumber();
+
+                  this->neighbors.push_back(neighbor);
+
+                  // check ACK required
+                  if (frame->getAckRequired())
+                  {
+                    // send ACK
+                    FrameACK* ack = new FrameACK;
+                    ack->setKind(DATA);
+                    ack->setByteLength(ack->getHeaderLength());
+                    ack->setDataSequenceNumber(frame->getDataSequenceNumber());
+
+                    // Simulate AUTO-ACK
+                    Raw* ackRaw = new Raw;
+                    ackRaw->setKind(DATA);
+                    ackRaw->setByteLength(ackRaw->getHeaderLength());
+
+                    ackRaw->encapsulate(ack);
+
+                    sendDirect(ackRaw,
+                    simulation.getModule(sourceMacAddress)->getModuleByPath("^.radio")->gate("radioIn"));
+
+                    //                    isJustSendACK = true;
+                  }
+
+                  sendMessageToUpper(frame);
+                }
+              }
             }
+            // Normal mode
             else
             {
               FrameDataStandard* frame = check_and_cast<FrameDataStandard*>(packet);
@@ -802,7 +903,7 @@ bool RDCdriver::cca()
 //  if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0)
 //    return true;
 //  else
-    return false;
+  return false;
 }
 
 } /* namespace wsn_energy */
