@@ -90,7 +90,82 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    // WSN compress using HC01
+    // compress using HC01
+
+    // intialisation
+    bufferMAC = new FrameDataCompressed;
+    bufferMAC->setKind(DATA);
+    bufferMAC->setByteLength(bufferMAC->getHeaderLength());
+
+    /*  meta data */
+    bufferMAC->setNumberTransmission(0);
+
+    // FCF
+    bufferMAC->setFrameType(FRAME_DATA);
+    bufferMAC->setPanIdCompression(true);
+
+    // increase sequence number
+    this->sequenceNumber++;
+
+    // sequence number
+    (check_and_cast<FrameDataCompressed*>(bufferMAC))->setDataSequenceNumber(this->sequenceNumber);
+
+    // address fields
+
+    // originator - final destination
+    (check_and_cast<FrameDataCompressed*>(bufferMAC))->setOrginatorMacAddress(
+        simulation.getModule(check_and_cast<IpPacketCompressed*>(packet)->getMetaSourceIpAddress())->getModuleByPath(
+            "^.mac")->getId());
+    (check_and_cast<FrameDataCompressed*>(bufferMAC))->setFinalDestinationMacAddress(
+        simulation.getModule(check_and_cast<IpPacketCompressed*>(packet)->getMetaDestinationIpAddress())->getModuleByPath(
+            "^.mac")->getId());
+
+    // hop count
+    switch (check_and_cast<IpPacketCompressed*>(packet)->getHopLimit())
+    {
+      case HOP_LIMIT_COMPRESSED_1:
+      case HOP_LIMIT_COMPRESSED_64:
+      case HOP_LIMIT_COMPRESSED_128:
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(
+            check_and_cast<IpPacketCompressed*>(packet)->getHopLimit());
+        break;
+
+      case HOP_LIMIT_NON_COMPRESSED:
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(
+            check_and_cast<IpPacketCompressed*>(packet)->getMetaHopLimit());
+        break;
+    }
+
+    // next hop
+    if (check_and_cast<IpPacketCompressed*>(packet)->getMetaDestinationIpAddress() == 0)
+    {
+      (check_and_cast<FrameDataCompressed*>(bufferMAC))->setSourceMacAddress(this->getId());
+      (check_and_cast<FrameDataCompressed*>(bufferMAC))->setDestinationMacAddress(0);
+
+      bufferMAC->setAckRequired(false);
+    }
+    else
+    {
+      // using default route
+      if (defaultRoute == 0)
+      {
+        // fatal error, abort message
+        if (DEBUG)
+          std::cout << "FATAL NET ERROR" << endl;
+
+        selfTimer(0, MAC_EXPIRE_IFS);
+
+        return;
+      }
+      else
+      {
+        // using NDP
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setSourceMacAddress(this->getId());
+        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setDestinationMacAddress(defaultRoute);
+      }
+
+      bufferMAC->setAckRequired(true);
+    }
   }
   else
   {
@@ -128,7 +203,7 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
       if (netDefaultRoute == 0)
       {
         // fatal error, abort message
-        std::cout << "FATAL NET ERROR" << endl;
+//        std::cout << "FATAL NET ERROR" << endl;
         selfTimer(0, MAC_EXPIRE_IFS);
         return;
       }
@@ -298,7 +373,21 @@ void MACdriver::receiveFrame(Frame* frameMac)
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    // WSN compress using HC01
+    // compress using HC01
+
+    // check right hop
+    if (check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == 0
+        || check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == getId())
+    {
+      // right MAC destination
+      sendMessageToUpper(check_and_cast<IpPacketInterface*>(frameMac->decapsulate()));
+
+      /* statistics */
+      if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
+        (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
+    }
+
+    delete frameMac;
   }
   else
   {
@@ -312,9 +401,9 @@ void MACdriver::receiveFrame(Frame* frameMac)
       if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
         (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
     }
-  }
 
-  delete frameMac;
+    delete frameMac;
+  }
 }
 
 } /* namespace wsn_energy */

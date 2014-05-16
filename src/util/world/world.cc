@@ -266,7 +266,7 @@ void World::registerHost(RadioDriver* mote, Raw* onAir)
     return;
   }
 
-  // WSN why why why TwT
+  // checking point
   host->onAir = onAir->dup();
 
   // create all in-transmission-range signal

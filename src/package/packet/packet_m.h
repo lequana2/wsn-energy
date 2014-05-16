@@ -230,22 +230,32 @@ inline void doUnpacking(cCommBuffer *b, IpPacketStandard& obj) {obj.parsimUnpack
  * 
  * 
  * 
- * 	int sourceIPAddress; 			
- * 	int destinationIPAddress; 		
+ * 	int sourceIpAddress; 			
+ * 	int destinationIpAddress; 		
  * 	int trafficClassAndFlowLabel; 	
  * 	int nextHeader;					
  * 	int hc2encoding;				
+ * 	
+ * 	int hopLimit; 					
+ * 	
+ * 	int metaHopLimit;			  
+ * 	int metaSourceIpAddress;	  
+ * 	int metaDestinationIpAddress; 
  * }
  * </pre>
  */
 class IpPacketCompressed : public ::wsn_energy::IpPacketInterface
 {
   protected:
-    int sourceIPAddress_var;
-    int destinationIPAddress_var;
+    int sourceIpAddress_var;
+    int destinationIpAddress_var;
     int trafficClassAndFlowLabel_var;
     int nextHeader_var;
     int hc2encoding_var;
+    int hopLimit_var;
+    int metaHopLimit_var;
+    int metaSourceIpAddress_var;
+    int metaDestinationIpAddress_var;
 
   private:
     void copy(const IpPacketCompressed& other);
@@ -264,16 +274,24 @@ class IpPacketCompressed : public ::wsn_energy::IpPacketInterface
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getSourceIPAddress() const;
-    virtual void setSourceIPAddress(int sourceIPAddress);
-    virtual int getDestinationIPAddress() const;
-    virtual void setDestinationIPAddress(int destinationIPAddress);
+    virtual int getSourceIpAddress() const;
+    virtual void setSourceIpAddress(int sourceIpAddress);
+    virtual int getDestinationIpAddress() const;
+    virtual void setDestinationIpAddress(int destinationIpAddress);
     virtual int getTrafficClassAndFlowLabel() const;
     virtual void setTrafficClassAndFlowLabel(int trafficClassAndFlowLabel);
     virtual int getNextHeader() const;
     virtual void setNextHeader(int nextHeader);
     virtual int getHc2encoding() const;
     virtual void setHc2encoding(int hc2encoding);
+    virtual int getHopLimit() const;
+    virtual void setHopLimit(int hopLimit);
+    virtual int getMetaHopLimit() const;
+    virtual void setMetaHopLimit(int metaHopLimit);
+    virtual int getMetaSourceIpAddress() const;
+    virtual void setMetaSourceIpAddress(int metaSourceIpAddress);
+    virtual int getMetaDestinationIpAddress() const;
+    virtual void setMetaDestinationIpAddress(int metaDestinationIpAddress);
 };
 
 inline void doPacking(cCommBuffer *b, IpPacketCompressed& obj) {obj.parsimPack(b);}
@@ -344,6 +362,7 @@ inline void doUnpacking(cCommBuffer *b, IcmpPacket& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet DIO{
  *     int senderID; 
+ * 	int payloadLength = 24; 
  *     
  * 	int instanceID;
  * 	int version; 
@@ -356,9 +375,6 @@ inline void doUnpacking(cCommBuffer *b, IcmpPacket& obj) {obj.parsimUnpack(b);}
  * 	int flags;
  * 	int reserved;
  * 	int dodagID; 
- * 		
- * 	
- * 	int payloadLength = 24;
  * }
  * </pre>
  */
@@ -366,6 +382,7 @@ class DIO : public ::cPacket
 {
   protected:
     int senderID_var;
+    int payloadLength_var;
     int instanceID_var;
     int version_var;
     double rank_var;
@@ -377,7 +394,6 @@ class DIO : public ::cPacket
     int flags_var;
     int reserved_var;
     int dodagID_var;
-    int payloadLength_var;
 
   private:
     void copy(const DIO& other);
@@ -398,6 +414,8 @@ class DIO : public ::cPacket
     // field getter/setter methods
     virtual int getSenderID() const;
     virtual void setSenderID(int senderID);
+    virtual int getPayloadLength() const;
+    virtual void setPayloadLength(int payloadLength);
     virtual int getInstanceID() const;
     virtual void setInstanceID(int instanceID);
     virtual int getVersion() const;
@@ -420,8 +438,6 @@ class DIO : public ::cPacket
     virtual void setReserved(int reserved);
     virtual int getDodagID() const;
     virtual void setDodagID(int dodagID);
-    virtual int getPayloadLength() const;
-    virtual void setPayloadLength(int payloadLength);
 };
 
 inline void doPacking(cCommBuffer *b, DIO& obj) {obj.parsimPack(b);}
@@ -431,7 +447,10 @@ inline void doUnpacking(cCommBuffer *b, DIO& obj) {obj.parsimUnpack(b);}
  * Class generated from <tt>package/packet/packet.msg</tt> by opp_msgc.
  * <pre>
  * packet DIS{
- * 	int payloadLength = 2;
+ * 	int payloadLength = 2; 
+ * 	
+ * 	
+ * 	
  * 	
  * 	int flag;
  * 	int reserved;

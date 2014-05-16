@@ -23,7 +23,7 @@ namespace wsn_energy {
 class Client : public myModule
 {
   private:
-    int packetOrder;
+    int packetNumber;
     void sendData();
     void newData();
 

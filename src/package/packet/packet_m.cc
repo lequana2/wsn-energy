@@ -702,11 +702,15 @@ IpPacketCompressed::IpPacketCompressed(const char *name, int kind) : wsn_energy:
 {
     this->setHeaderLength(2);
 
-    this->sourceIPAddress_var = 0;
-    this->destinationIPAddress_var = 0;
+    this->sourceIpAddress_var = 0;
+    this->destinationIpAddress_var = 0;
     this->trafficClassAndFlowLabel_var = 0;
     this->nextHeader_var = 0;
     this->hc2encoding_var = 0;
+    this->hopLimit_var = 0;
+    this->metaHopLimit_var = 0;
+    this->metaSourceIpAddress_var = 0;
+    this->metaDestinationIpAddress_var = 0;
 }
 
 IpPacketCompressed::IpPacketCompressed(const IpPacketCompressed& other) : wsn_energy::IpPacketInterface(other)
@@ -728,51 +732,63 @@ IpPacketCompressed& IpPacketCompressed::operator=(const IpPacketCompressed& othe
 
 void IpPacketCompressed::copy(const IpPacketCompressed& other)
 {
-    this->sourceIPAddress_var = other.sourceIPAddress_var;
-    this->destinationIPAddress_var = other.destinationIPAddress_var;
+    this->sourceIpAddress_var = other.sourceIpAddress_var;
+    this->destinationIpAddress_var = other.destinationIpAddress_var;
     this->trafficClassAndFlowLabel_var = other.trafficClassAndFlowLabel_var;
     this->nextHeader_var = other.nextHeader_var;
     this->hc2encoding_var = other.hc2encoding_var;
+    this->hopLimit_var = other.hopLimit_var;
+    this->metaHopLimit_var = other.metaHopLimit_var;
+    this->metaSourceIpAddress_var = other.metaSourceIpAddress_var;
+    this->metaDestinationIpAddress_var = other.metaDestinationIpAddress_var;
 }
 
 void IpPacketCompressed::parsimPack(cCommBuffer *b)
 {
     wsn_energy::IpPacketInterface::parsimPack(b);
-    doPacking(b,this->sourceIPAddress_var);
-    doPacking(b,this->destinationIPAddress_var);
+    doPacking(b,this->sourceIpAddress_var);
+    doPacking(b,this->destinationIpAddress_var);
     doPacking(b,this->trafficClassAndFlowLabel_var);
     doPacking(b,this->nextHeader_var);
     doPacking(b,this->hc2encoding_var);
+    doPacking(b,this->hopLimit_var);
+    doPacking(b,this->metaHopLimit_var);
+    doPacking(b,this->metaSourceIpAddress_var);
+    doPacking(b,this->metaDestinationIpAddress_var);
 }
 
 void IpPacketCompressed::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::IpPacketInterface::parsimUnpack(b);
-    doUnpacking(b,this->sourceIPAddress_var);
-    doUnpacking(b,this->destinationIPAddress_var);
+    doUnpacking(b,this->sourceIpAddress_var);
+    doUnpacking(b,this->destinationIpAddress_var);
     doUnpacking(b,this->trafficClassAndFlowLabel_var);
     doUnpacking(b,this->nextHeader_var);
     doUnpacking(b,this->hc2encoding_var);
+    doUnpacking(b,this->hopLimit_var);
+    doUnpacking(b,this->metaHopLimit_var);
+    doUnpacking(b,this->metaSourceIpAddress_var);
+    doUnpacking(b,this->metaDestinationIpAddress_var);
 }
 
-int IpPacketCompressed::getSourceIPAddress() const
+int IpPacketCompressed::getSourceIpAddress() const
 {
-    return sourceIPAddress_var;
+    return sourceIpAddress_var;
 }
 
-void IpPacketCompressed::setSourceIPAddress(int sourceIPAddress)
+void IpPacketCompressed::setSourceIpAddress(int sourceIpAddress)
 {
-    this->sourceIPAddress_var = sourceIPAddress;
+    this->sourceIpAddress_var = sourceIpAddress;
 }
 
-int IpPacketCompressed::getDestinationIPAddress() const
+int IpPacketCompressed::getDestinationIpAddress() const
 {
-    return destinationIPAddress_var;
+    return destinationIpAddress_var;
 }
 
-void IpPacketCompressed::setDestinationIPAddress(int destinationIPAddress)
+void IpPacketCompressed::setDestinationIpAddress(int destinationIpAddress)
 {
-    this->destinationIPAddress_var = destinationIPAddress;
+    this->destinationIpAddress_var = destinationIpAddress;
 }
 
 int IpPacketCompressed::getTrafficClassAndFlowLabel() const
@@ -803,6 +819,46 @@ int IpPacketCompressed::getHc2encoding() const
 void IpPacketCompressed::setHc2encoding(int hc2encoding)
 {
     this->hc2encoding_var = hc2encoding;
+}
+
+int IpPacketCompressed::getHopLimit() const
+{
+    return hopLimit_var;
+}
+
+void IpPacketCompressed::setHopLimit(int hopLimit)
+{
+    this->hopLimit_var = hopLimit;
+}
+
+int IpPacketCompressed::getMetaHopLimit() const
+{
+    return metaHopLimit_var;
+}
+
+void IpPacketCompressed::setMetaHopLimit(int metaHopLimit)
+{
+    this->metaHopLimit_var = metaHopLimit;
+}
+
+int IpPacketCompressed::getMetaSourceIpAddress() const
+{
+    return metaSourceIpAddress_var;
+}
+
+void IpPacketCompressed::setMetaSourceIpAddress(int metaSourceIpAddress)
+{
+    this->metaSourceIpAddress_var = metaSourceIpAddress;
+}
+
+int IpPacketCompressed::getMetaDestinationIpAddress() const
+{
+    return metaDestinationIpAddress_var;
+}
+
+void IpPacketCompressed::setMetaDestinationIpAddress(int metaDestinationIpAddress)
+{
+    this->metaDestinationIpAddress_var = metaDestinationIpAddress;
 }
 
 class IpPacketCompressedDescriptor : public cClassDescriptor
@@ -852,7 +908,7 @@ const char *IpPacketCompressedDescriptor::getProperty(const char *propertyname) 
 int IpPacketCompressedDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
+    return basedesc ? 9+basedesc->getFieldCount(object) : 9;
 }
 
 unsigned int IpPacketCompressedDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -869,8 +925,12 @@ unsigned int IpPacketCompressedDescriptor::getFieldTypeFlags(void *object, int f
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketCompressedDescriptor::getFieldName(void *object, int field) const
@@ -882,24 +942,32 @@ const char *IpPacketCompressedDescriptor::getFieldName(void *object, int field) 
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "sourceIPAddress",
-        "destinationIPAddress",
+        "sourceIpAddress",
+        "destinationIpAddress",
         "trafficClassAndFlowLabel",
         "nextHeader",
         "hc2encoding",
+        "hopLimit",
+        "metaHopLimit",
+        "metaSourceIpAddress",
+        "metaDestinationIpAddress",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : NULL;
+    return (field>=0 && field<9) ? fieldNames[field] : NULL;
 }
 
 int IpPacketCompressedDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIPAddress")==0) return base+0;
-    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIPAddress")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIpAddress")==0) return base+0;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIpAddress")==0) return base+1;
     if (fieldName[0]=='t' && strcmp(fieldName, "trafficClassAndFlowLabel")==0) return base+2;
     if (fieldName[0]=='n' && strcmp(fieldName, "nextHeader")==0) return base+3;
     if (fieldName[0]=='h' && strcmp(fieldName, "hc2encoding")==0) return base+4;
+    if (fieldName[0]=='h' && strcmp(fieldName, "hopLimit")==0) return base+5;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaHopLimit")==0) return base+6;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaSourceIpAddress")==0) return base+7;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaDestinationIpAddress")==0) return base+8;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -917,8 +985,12 @@ const char *IpPacketCompressedDescriptor::getFieldTypeString(void *object, int f
         "int",
         "int",
         "int",
+        "int",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<9) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketCompressedDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -958,11 +1030,15 @@ std::string IpPacketCompressedDescriptor::getFieldAsString(void *object, int fie
     }
     IpPacketCompressed *pp = (IpPacketCompressed *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getSourceIPAddress());
-        case 1: return long2string(pp->getDestinationIPAddress());
+        case 0: return long2string(pp->getSourceIpAddress());
+        case 1: return long2string(pp->getDestinationIpAddress());
         case 2: return long2string(pp->getTrafficClassAndFlowLabel());
         case 3: return long2string(pp->getNextHeader());
         case 4: return long2string(pp->getHc2encoding());
+        case 5: return long2string(pp->getHopLimit());
+        case 6: return long2string(pp->getMetaHopLimit());
+        case 7: return long2string(pp->getMetaSourceIpAddress());
+        case 8: return long2string(pp->getMetaDestinationIpAddress());
         default: return "";
     }
 }
@@ -977,11 +1053,15 @@ bool IpPacketCompressedDescriptor::setFieldAsString(void *object, int field, int
     }
     IpPacketCompressed *pp = (IpPacketCompressed *)object; (void)pp;
     switch (field) {
-        case 0: pp->setSourceIPAddress(string2long(value)); return true;
-        case 1: pp->setDestinationIPAddress(string2long(value)); return true;
+        case 0: pp->setSourceIpAddress(string2long(value)); return true;
+        case 1: pp->setDestinationIpAddress(string2long(value)); return true;
         case 2: pp->setTrafficClassAndFlowLabel(string2long(value)); return true;
         case 3: pp->setNextHeader(string2long(value)); return true;
         case 4: pp->setHc2encoding(string2long(value)); return true;
+        case 5: pp->setHopLimit(string2long(value)); return true;
+        case 6: pp->setMetaHopLimit(string2long(value)); return true;
+        case 7: pp->setMetaSourceIpAddress(string2long(value)); return true;
+        case 8: pp->setMetaDestinationIpAddress(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1000,8 +1080,12 @@ const char *IpPacketCompressedDescriptor::getFieldStructName(void *object, int f
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<9) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1343,6 +1427,7 @@ Register_Class(DIO);
 DIO::DIO(const char *name, int kind) : cPacket(name,kind)
 {
     this->senderID_var = 0;
+    this->payloadLength_var = 24;
     this->instanceID_var = 0;
     this->version_var = 0;
     this->rank_var = 0;
@@ -1354,7 +1439,6 @@ DIO::DIO(const char *name, int kind) : cPacket(name,kind)
     this->flags_var = 0;
     this->reserved_var = 0;
     this->dodagID_var = 0;
-    this->payloadLength_var = 24;
 }
 
 DIO::DIO(const DIO& other) : cPacket(other)
@@ -1377,6 +1461,7 @@ DIO& DIO::operator=(const DIO& other)
 void DIO::copy(const DIO& other)
 {
     this->senderID_var = other.senderID_var;
+    this->payloadLength_var = other.payloadLength_var;
     this->instanceID_var = other.instanceID_var;
     this->version_var = other.version_var;
     this->rank_var = other.rank_var;
@@ -1388,13 +1473,13 @@ void DIO::copy(const DIO& other)
     this->flags_var = other.flags_var;
     this->reserved_var = other.reserved_var;
     this->dodagID_var = other.dodagID_var;
-    this->payloadLength_var = other.payloadLength_var;
 }
 
 void DIO::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
     doPacking(b,this->senderID_var);
+    doPacking(b,this->payloadLength_var);
     doPacking(b,this->instanceID_var);
     doPacking(b,this->version_var);
     doPacking(b,this->rank_var);
@@ -1406,13 +1491,13 @@ void DIO::parsimPack(cCommBuffer *b)
     doPacking(b,this->flags_var);
     doPacking(b,this->reserved_var);
     doPacking(b,this->dodagID_var);
-    doPacking(b,this->payloadLength_var);
 }
 
 void DIO::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
     doUnpacking(b,this->senderID_var);
+    doUnpacking(b,this->payloadLength_var);
     doUnpacking(b,this->instanceID_var);
     doUnpacking(b,this->version_var);
     doUnpacking(b,this->rank_var);
@@ -1424,7 +1509,6 @@ void DIO::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->flags_var);
     doUnpacking(b,this->reserved_var);
     doUnpacking(b,this->dodagID_var);
-    doUnpacking(b,this->payloadLength_var);
 }
 
 int DIO::getSenderID() const
@@ -1435,6 +1519,16 @@ int DIO::getSenderID() const
 void DIO::setSenderID(int senderID)
 {
     this->senderID_var = senderID;
+}
+
+int DIO::getPayloadLength() const
+{
+    return payloadLength_var;
+}
+
+void DIO::setPayloadLength(int payloadLength)
+{
+    this->payloadLength_var = payloadLength;
 }
 
 int DIO::getInstanceID() const
@@ -1547,16 +1641,6 @@ void DIO::setDodagID(int dodagID)
     this->dodagID_var = dodagID;
 }
 
-int DIO::getPayloadLength() const
-{
-    return payloadLength_var;
-}
-
-void DIO::setPayloadLength(int payloadLength)
-{
-    this->payloadLength_var = payloadLength;
-}
-
 class DIODescriptor : public cClassDescriptor
 {
   public:
@@ -1643,6 +1727,7 @@ const char *DIODescriptor::getFieldName(void *object, int field) const
     }
     static const char *fieldNames[] = {
         "senderID",
+        "payloadLength",
         "instanceID",
         "version",
         "rank",
@@ -1654,7 +1739,6 @@ const char *DIODescriptor::getFieldName(void *object, int field) const
         "flags",
         "reserved",
         "dodagID",
-        "payloadLength",
     };
     return (field>=0 && field<13) ? fieldNames[field] : NULL;
 }
@@ -1664,18 +1748,18 @@ int DIODescriptor::findField(void *object, const char *fieldName) const
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='s' && strcmp(fieldName, "senderID")==0) return base+0;
-    if (fieldName[0]=='i' && strcmp(fieldName, "instanceID")==0) return base+1;
-    if (fieldName[0]=='v' && strcmp(fieldName, "version")==0) return base+2;
-    if (fieldName[0]=='r' && strcmp(fieldName, "rank")==0) return base+3;
-    if (fieldName[0]=='g' && strcmp(fieldName, "grounded")==0) return base+4;
-    if (fieldName[0]=='o' && strcmp(fieldName, "o")==0) return base+5;
-    if (fieldName[0]=='m' && strcmp(fieldName, "modeOfOperation")==0) return base+6;
-    if (fieldName[0]=='p' && strcmp(fieldName, "preference")==0) return base+7;
-    if (fieldName[0]=='d' && strcmp(fieldName, "dstn")==0) return base+8;
-    if (fieldName[0]=='f' && strcmp(fieldName, "flags")==0) return base+9;
-    if (fieldName[0]=='r' && strcmp(fieldName, "reserved")==0) return base+10;
-    if (fieldName[0]=='d' && strcmp(fieldName, "dodagID")==0) return base+11;
-    if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+12;
+    if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+1;
+    if (fieldName[0]=='i' && strcmp(fieldName, "instanceID")==0) return base+2;
+    if (fieldName[0]=='v' && strcmp(fieldName, "version")==0) return base+3;
+    if (fieldName[0]=='r' && strcmp(fieldName, "rank")==0) return base+4;
+    if (fieldName[0]=='g' && strcmp(fieldName, "grounded")==0) return base+5;
+    if (fieldName[0]=='o' && strcmp(fieldName, "o")==0) return base+6;
+    if (fieldName[0]=='m' && strcmp(fieldName, "modeOfOperation")==0) return base+7;
+    if (fieldName[0]=='p' && strcmp(fieldName, "preference")==0) return base+8;
+    if (fieldName[0]=='d' && strcmp(fieldName, "dstn")==0) return base+9;
+    if (fieldName[0]=='f' && strcmp(fieldName, "flags")==0) return base+10;
+    if (fieldName[0]=='r' && strcmp(fieldName, "reserved")==0) return base+11;
+    if (fieldName[0]=='d' && strcmp(fieldName, "dodagID")==0) return base+12;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -1691,10 +1775,10 @@ const char *DIODescriptor::getFieldTypeString(void *object, int field) const
         "int",
         "int",
         "int",
+        "int",
         "double",
         "bool",
         "bool",
-        "int",
         "int",
         "int",
         "int",
@@ -1743,18 +1827,18 @@ std::string DIODescriptor::getFieldAsString(void *object, int field, int i) cons
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getSenderID());
-        case 1: return long2string(pp->getInstanceID());
-        case 2: return long2string(pp->getVersion());
-        case 3: return double2string(pp->getRank());
-        case 4: return bool2string(pp->getGrounded());
-        case 5: return bool2string(pp->getO());
-        case 6: return long2string(pp->getModeOfOperation());
-        case 7: return long2string(pp->getPreference());
-        case 8: return long2string(pp->getDstn());
-        case 9: return long2string(pp->getFlags());
-        case 10: return long2string(pp->getReserved());
-        case 11: return long2string(pp->getDodagID());
-        case 12: return long2string(pp->getPayloadLength());
+        case 1: return long2string(pp->getPayloadLength());
+        case 2: return long2string(pp->getInstanceID());
+        case 3: return long2string(pp->getVersion());
+        case 4: return double2string(pp->getRank());
+        case 5: return bool2string(pp->getGrounded());
+        case 6: return bool2string(pp->getO());
+        case 7: return long2string(pp->getModeOfOperation());
+        case 8: return long2string(pp->getPreference());
+        case 9: return long2string(pp->getDstn());
+        case 10: return long2string(pp->getFlags());
+        case 11: return long2string(pp->getReserved());
+        case 12: return long2string(pp->getDodagID());
         default: return "";
     }
 }
@@ -1770,18 +1854,18 @@ bool DIODescriptor::setFieldAsString(void *object, int field, int i, const char 
     DIO *pp = (DIO *)object; (void)pp;
     switch (field) {
         case 0: pp->setSenderID(string2long(value)); return true;
-        case 1: pp->setInstanceID(string2long(value)); return true;
-        case 2: pp->setVersion(string2long(value)); return true;
-        case 3: pp->setRank(string2double(value)); return true;
-        case 4: pp->setGrounded(string2bool(value)); return true;
-        case 5: pp->setO(string2bool(value)); return true;
-        case 6: pp->setModeOfOperation(string2long(value)); return true;
-        case 7: pp->setPreference(string2long(value)); return true;
-        case 8: pp->setDstn(string2long(value)); return true;
-        case 9: pp->setFlags(string2long(value)); return true;
-        case 10: pp->setReserved(string2long(value)); return true;
-        case 11: pp->setDodagID(string2long(value)); return true;
-        case 12: pp->setPayloadLength(string2long(value)); return true;
+        case 1: pp->setPayloadLength(string2long(value)); return true;
+        case 2: pp->setInstanceID(string2long(value)); return true;
+        case 3: pp->setVersion(string2long(value)); return true;
+        case 4: pp->setRank(string2double(value)); return true;
+        case 5: pp->setGrounded(string2bool(value)); return true;
+        case 6: pp->setO(string2bool(value)); return true;
+        case 7: pp->setModeOfOperation(string2long(value)); return true;
+        case 8: pp->setPreference(string2long(value)); return true;
+        case 9: pp->setDstn(string2long(value)); return true;
+        case 10: pp->setFlags(string2long(value)); return true;
+        case 11: pp->setReserved(string2long(value)); return true;
+        case 12: pp->setDodagID(string2long(value)); return true;
         default: return false;
     }
 }

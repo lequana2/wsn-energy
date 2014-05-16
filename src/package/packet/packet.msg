@@ -17,13 +17,13 @@ enum IP_PACKET_NEXT_HEADER{
 
 // icmp packet type
 enum ICMP_TYPE{
-    ICMP_RPL		= 155; // ICMP RPL
+    ICMP_RPL		= 155; // ICMP RPL, 0x9b confirmed by IANA (1 octet)
 }
 
 // rpl icmp packet type
 enum ICMP_CODE{
-	RPL_DIO_CODE   	  = 0;	// RPL DIO message
-	RPL_DIS_CODE	  = 1;	// RPL DIS message
+	RPL_DIO_CODE   	  = 0;	// RPL DIO message, 0x00 confirmed by IANA (1 octet)
+	RPL_DIS_CODE	  = 1;	// RPL DIS message, 0x01 confirmed by IANA (1 octet)
 }
 
 // Packet
@@ -106,11 +106,17 @@ packet IpPacketCompressed extends IpPacketInterface{
 //     		of the possible HC2 encodings apply (e.g., UDP, ICMP or TCP
 //     		encodings).
 
-	int sourceIPAddress; 			// 2 bits + 0 bit compressed/ 128 bits non-compressed
-	int destinationIPAddress; 		// 2 bits + 0 bit compressed/ 128 bits non-compressed
+	int sourceIpAddress; 			// 2 bits + 0 bit compressed/ 128 bits non-compressed
+	int destinationIpAddress; 		// 2 bits + 0 bit compressed/ 128 bits non-compressed
 	int trafficClassAndFlowLabel; 	// 1 bit + 0 bit compressed/  28 bits non-compressed
 	int nextHeader;					// 2 bits + 0 bit compressed/ 8 bits non-compressed
 	int hc2encoding;				// 1 bit (determines whether any header compression bits)
+	
+	int hopLimit; 					// 1 octet NEVER COMPRESSED
+	
+	int metaHopLimit;			  // in-line: hop limit
+	int metaSourceIpAddress;	  // meta-data: source Ip address
+	int metaDestinationIpAddress; // meta-data: destination ip address
 }
 
 // ICMP Packet
@@ -131,6 +137,7 @@ packet IcmpPacket{
 
 packet DIO{
     int senderID; // meta-data: sender IP address
+	int payloadLength = 24; // meta-data: length of DIO 
     
 	int instanceID;
 	int version; // version
@@ -143,13 +150,13 @@ packet DIO{
 	int flags;
 	int reserved;
 	int dodagID; // DODAGID
-		
-	// length
-	int payloadLength = 24;
 }
 
 packet DIS{
-	int payloadLength = 2;
+	int payloadLength = 2; // meta-data: length of DIO
+	
+	// 1 octet flag
+	// 1 octet reserved
 	
 	int flag;
 	int reserved;

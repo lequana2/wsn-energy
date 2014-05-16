@@ -26,8 +26,7 @@ packet UdpPacketStandard extends UdpPacketInterface{
 
 packet UdpPacketCompressed extends UdpPacketInterface{
 // 	compressed HC1 = 3 octets RFC 4944
-
-	headerLength = 3; // meta-data: header length, carried in-line
+	headerLength = 4; // meta-data: header length (3) + data in-line (1)
 
 //	The UDP header's checksum field is not compressed and is therefore carried in full.
 //
@@ -63,8 +62,15 @@ packet UdpPacketCompressed extends UdpPacketInterface{
 //
 //  Reserved (bit 3 through 7)
 	
-	bool udpSourcePort;			// 1 bit + 4 bit compressed/ 16 bits non-compressed 
-	bool udpDestinationPort;	// 1 bit + 4 bit compressed/ 16 bits non-compressed
-	short length;				// 1 bit + 0 bit compressed/ 16 bits non-compressed
-	short checksum; 			// 2 octets ALWAYS non-compressed
+	bool udpSourcePortCompressed;			// 1 bit 
+	bool udpDestinationPortCompressed;		// 1 bit
+	bool lengthCompressed;				    // 1 bit
+	// 5 bit reserved
+	
+	// in-line fields
+	short checksum; 			// 2 octets ALWAYS NON-COMPRESSED
+
+	int inlineLength;				 // 0 bit compressed/ 16 bits non-compressed
+	int inlineUdpSourcePort;      // 4 bit compressed/ 16 bits non-compressed 
+	int inlineUdpDestinationPort; // 4 bit compressed/ 16 bits non-compressed
 }

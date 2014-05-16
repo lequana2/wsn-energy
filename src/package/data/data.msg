@@ -12,8 +12,8 @@ namespace wsn_energy;
 packet Data{
     double time;  		// meta-data: timestamp upon sending
     
-    int destinationPort; 	  // control-data: destination port
-    int destinationIPAddress; // control-data: destination IP Address
+    int destinationPort; 	  // meta-data: destination port
+    int destinationIPAddress; // meta-data: destination IP Address
     
 	string value; 		// undefined length, data to be sent to server
 }

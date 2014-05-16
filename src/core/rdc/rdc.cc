@@ -518,7 +518,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
         // receive DATA in checking period
 
         // turn off radio
-        if (!ccaResult->isScheduled())
+        if (!ccaResult->isScheduled() && phase != TRANSMITTING_PHASE)
           off();
 
         switch (check_and_cast<Frame*>(packet)->getFrameType())
@@ -799,9 +799,9 @@ void RDCdriver::off()
 bool RDCdriver::cca()
 {
   //          if (!this->ccaIsFreeChannel)
-  if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0)
-    return true;
-  else
+//  if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0)
+//    return true;
+//  else
     return false;
 }
 

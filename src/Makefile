@@ -275,11 +275,13 @@ $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/bytecount/count.h \
 	core/energest/energest.h \
+	core/mac/mac.h \
 	core/myModule.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
 	package/data/data_m.h \
+	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/segment/segment_m.h \
 	package/signal/signal_m.h \
@@ -289,12 +291,14 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	util/world/world.h
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/energest/energest.h \
+	core/mac/mac.h \
 	core/myModule.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
 	core/net/rpl/rpl.h \
 	package/data/data_m.h \
+	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/segment/segment_m.h \
 	package/strobe/strobe_m.h \

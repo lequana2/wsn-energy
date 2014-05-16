@@ -14,14 +14,10 @@
 #include "rpl.h"
 #include "energest.h"
 #include "count.h"
-//#include "rdc.h"
+#include "mac.h"
 
 #ifndef DEBUG
 #define DEBUG 0
-#endif
-
-#ifndef HOP_LIMIT
-#define HOP_LIMIT 64
 #endif
 
 namespace wsn_energy {
@@ -158,10 +154,84 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
       if (getModuleByPath("^.^")->par("usingHDC").boolValue())
       {
-        // WSN compress using HC01
+        // compress using HC01
+
+        // received MAC !!!
+        FrameDataCompressed* frame = check_and_cast<FrameDataCompressed*>(packet);
+        IpPacketCompressed* ipPacket = check_and_cast<IpPacketCompressed*>(frame->decapsulate());
+
+        // check right final destination
+        if (frame->getFinalDestinationMacAddress() == 0
+            || frame->getFinalDestinationMacAddress() == this->getModuleByPath("^.mac")->getId())
+        {
+          // process
+          switch (ipPacket->getNextHeader())
+          {
+            case NEXT_HEADER_UDP: /* UDP */
+            {
+              (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_RECV); // statistics
+
+              // Energy calculated by counting bits
+              // what if dead while receiving <- nonsense due to critical level
+              if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
+              {
+                check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
+                    check_and_cast<IpPacketCompressed*>(packet)->getBitLength());
+                check_and_cast<Statistic*>(getModuleByPath("^.^.statistic"))->registerStatisticDelay(DELAY_NET_LAYER,
+                    simTime().dbl() - check_and_cast<IpPacketCompressed*>(packet)->getTime()); // statistics
+              }
+
+              // arrive right IP destination
+              sendMessageToUpper(ipPacket->decapsulate()); // Forward to upper layer
+
+              delete ipPacket;
+              break;
+            } /* UDP */
+
+            case NEXT_HEADER_ICMP: /* ICMP */
+            {
+              // Energy calculated by counting bits
+              if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
+                check_and_cast<Count*>(getParentModule()->getSubmodule("count"))->receive(
+                    check_and_cast<IpPacketCompressed*>(packet)->getBitLength());
+
+              IcmpPacket* icmpPacket = check_and_cast<IcmpPacket*>(packet->decapsulate());
+              delete packet;
+
+              if (icmpPacket->getType() == ICMP_RPL)
+                this->rpl->processICMP(icmpPacket);
+
+              break;
+            } /* ICMP */
+
+            default:
+              delete packet;
+              if (DEBUG)
+                std::cout << "Missing resolution" << endl;
+              break;
+          }
+        }
+        else
+        {
+          if (frame->getHopLeft() == 1)
+          {
+            // reach maximum hop left
+          }
+          else
+          {
+            // decrease hop left
+            ipPacket->setHopLimit(HOP_LIMIT_NON_COMPRESSED);
+            ipPacket->setMetaHopLimit(frame->getHopLeft() - 1);
+
+            putIntoQueue(ipPacket);
+          }
+        }
+
+        delete frame;
       }
       else
       {
+        // normal mode
         switch (check_and_cast<IpPacketStandard*>(packet)->getNextHeader())
         {
           case NEXT_HEADER_UDP: /* UDP */
@@ -190,6 +260,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
               }
               else
               {
+                // decrease hop limit
                 check_and_cast<IpPacketStandard*>(packet)->setHopLimit(
                     check_and_cast<IpPacketStandard*>(packet)->getHopLimit() - 1);
 
@@ -240,24 +311,34 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
       {
         case MAC_FINISH_PHASE: /* MAC layer finish a transmitting phase */
         {
-          // Consider has sent ICMP or not !!! ! nonsense-delete !!!
-//          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
-//          {
-//            // compress using HC01
-//          }
-//          else
-//          {
-//            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
-//            {
-//              if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
-//              {
-//                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
-//                  this->rpl->hasSentDIO();
-//                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
-//                  this->rpl->hasSentDIS();
-//              }
-//            }
-//          }
+          // Consider has sent ICMP or not !!!
+          if (getModuleByPath("^.^")->par("usingHDC").boolValue())
+          {
+            // compress using HC01
+            if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+            {
+              if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
+              {
+                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                  this->rpl->hasSentDIO();
+                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                  this->rpl->hasSentDIS();
+              }
+            }
+          }
+          else
+          {
+            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+            {
+              if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
+              {
+                if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                  this->rpl->hasSentDIO();
+                else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                  this->rpl->hasSentDIS();
+              }
+            }
+          }
 
           // remove pending packet from buffer
           this->ipPacketQueue.remove(bufferNET);
@@ -317,9 +398,13 @@ void IPv6::preparePacketToBeSent()
   // get first packet from queue
   bufferNET = check_and_cast<IpPacketInterface*>(this->ipPacketQueue.front());
 
+  // WSN check DIS
+
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    // WSN compress using HC01
+    // compress using HC01
+    if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
   }
   else
   {
@@ -345,7 +430,21 @@ void IPv6::multicast(IcmpPacket *icmpPacket)
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    // WSN compress using HC01
+    // compress using HC01
+
+    // initialisation
+    ipPacket = new IpPacketCompressed;
+    ipPacket->setKind(DATA);
+    ipPacket->setByteLength(ipPacket->getHeaderLength());
+
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setNextHeader(NEXT_HEADER_ICMP);
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setHopLimit(HOP_LIMIT_COMPRESSED_64);
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setSourceIpAddress(3); // Ox11: PC, IC
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setDestinationIpAddress(3); // 0x11: PC, IC
+
+    // meta-data as arguments for mac functions
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaSourceIpAddress(this->getId());
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaDestinationIpAddress(0);
   }
   else
   {
@@ -355,7 +454,7 @@ void IPv6::multicast(IcmpPacket *icmpPacket)
     ipPacket->setByteLength(ipPacket->getHeaderLength());
 
     (check_and_cast<IpPacketStandard*>(ipPacket))->setNextHeader(NEXT_HEADER_ICMP);
-    (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(HOP_LIMIT);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(DEFAULT_HOP_LIMIT);
     (check_and_cast<IpPacketStandard*>(ipPacket))->setSourceIpAddress(this->getId());
     (check_and_cast<IpPacketStandard*>(ipPacket))->setDestinationIpAddress(0);
   }
@@ -372,7 +471,22 @@ void IPv6::unicast(UdpPacketInterface *udpPacket)
 
   if (getModuleByPath("^.^")->par("usingHDC").boolValue())
   {
-    // WSN compress using HC01
+    // compress using HC01
+
+    // initialisation
+    ipPacket = new IpPacketCompressed;
+    ipPacket->setKind(DATA);
+    ipPacket->setByteLength(ipPacket->getHeaderLength());
+
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setNextHeader(NEXT_HEADER_UDP);
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setHopLimit(HOP_LIMIT_COMPRESSED_64);
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setSourceIpAddress(3); // Ox11: PC, IC
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setDestinationIpAddress(3); // 0x11: PC, IC
+
+    // meta-data as arguments for mac functions
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaSourceIpAddress(this->getId());
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaDestinationIpAddress(
+        check_and_cast<Data*>(udpPacket->getEncapsulatedPacket())->getDestinationIPAddress());
   }
   else
   {
@@ -382,7 +496,7 @@ void IPv6::unicast(UdpPacketInterface *udpPacket)
     ipPacket->setByteLength(ipPacket->getHeaderLength());
 
     (check_and_cast<IpPacketStandard*>(ipPacket))->setNextHeader(NEXT_HEADER_UDP);
-    (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(HOP_LIMIT);
+    (check_and_cast<IpPacketStandard*>(ipPacket))->setHopLimit(DEFAULT_HOP_LIMIT);
     (check_and_cast<IpPacketStandard*>(ipPacket))->setSourceIpAddress(this->getId());
     (check_and_cast<IpPacketStandard*>(ipPacket))->setDestinationIpAddress(
         (check_and_cast<Data*>(udpPacket->getEncapsulatedPacket()))->getDestinationIPAddress());

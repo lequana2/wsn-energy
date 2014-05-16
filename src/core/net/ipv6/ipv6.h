@@ -15,6 +15,14 @@
 #include <data_m.h>
 #include "rpl.h"
 
+#ifndef HOP_LIMIT
+#define DEFAULT_HOP_LIMIT        64
+#define HOP_LIMIT_COMPRESSED_1    1 // x01
+#define HOP_LIMIT_COMPRESSED_64   2 // x10
+#define HOP_LIMIT_COMPRESSED_128  3 // x11
+#define HOP_LIMIT_NON_COMPRESSED  0 // carried in-line
+#endif
+
 namespace wsn_energy {
 
 class IPv6 : public myModule

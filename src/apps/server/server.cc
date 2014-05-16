@@ -43,6 +43,7 @@ void Server::processLowerLayerMessage(cPacket* packet)
 {
   Data* data = check_and_cast<Data*>(packet);
 
+  // Write value to file
   std::ofstream myfile;
   myfile.open("data.txt", std::ios::app);
   myfile << "\n" << data->getValue();

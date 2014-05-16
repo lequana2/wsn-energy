@@ -238,6 +238,28 @@ inline void doUnpacking(cCommBuffer *b, FrameDataStandard& obj) {obj.parsimUnpac
  * 
  * 
  * 
+ * 
+ * 	
+ * 	int  codeBit;						
+ * 	bool isOrignatorCompressed;			
+ * 	bool isFinalDestinationCompressed;	
+ * 	int hopLeft;						
+ * 
+ * 	int hcDispatch;						
+ * 	
+ * 	int broadcastHeader;				
+ * 	int fragmentationHeader;			
+ * 
+ * 	int orginatorMacAddress; 			
+ * 	int finalDestinationMacAddress;		
+ * 	
+ * 	
+ * 	int dataSequenceNumber;		
+ *   	
+ * 	int sourcePanID;	  		
+ * 	int destinationPanID; 		
+ * 	int sourceMacAddress; 		
+ * 	int destinationMacAddress;  
  * }
  * </pre>
  */
@@ -245,6 +267,20 @@ class FrameDataCompressed : public ::wsn_energy::Frame
 {
   protected:
     int headerLength_var;
+    int codeBit_var;
+    bool isOrignatorCompressed_var;
+    bool isFinalDestinationCompressed_var;
+    int hopLeft_var;
+    int hcDispatch_var;
+    int broadcastHeader_var;
+    int fragmentationHeader_var;
+    int orginatorMacAddress_var;
+    int finalDestinationMacAddress_var;
+    int dataSequenceNumber_var;
+    int sourcePanID_var;
+    int destinationPanID_var;
+    int sourceMacAddress_var;
+    int destinationMacAddress_var;
 
   private:
     void copy(const FrameDataCompressed& other);
@@ -265,6 +301,34 @@ class FrameDataCompressed : public ::wsn_energy::Frame
     // field getter/setter methods
     virtual int getHeaderLength() const;
     virtual void setHeaderLength(int headerLength);
+    virtual int getCodeBit() const;
+    virtual void setCodeBit(int codeBit);
+    virtual bool getIsOrignatorCompressed() const;
+    virtual void setIsOrignatorCompressed(bool isOrignatorCompressed);
+    virtual bool getIsFinalDestinationCompressed() const;
+    virtual void setIsFinalDestinationCompressed(bool isFinalDestinationCompressed);
+    virtual int getHopLeft() const;
+    virtual void setHopLeft(int hopLeft);
+    virtual int getHcDispatch() const;
+    virtual void setHcDispatch(int hcDispatch);
+    virtual int getBroadcastHeader() const;
+    virtual void setBroadcastHeader(int broadcastHeader);
+    virtual int getFragmentationHeader() const;
+    virtual void setFragmentationHeader(int fragmentationHeader);
+    virtual int getOrginatorMacAddress() const;
+    virtual void setOrginatorMacAddress(int orginatorMacAddress);
+    virtual int getFinalDestinationMacAddress() const;
+    virtual void setFinalDestinationMacAddress(int finalDestinationMacAddress);
+    virtual int getDataSequenceNumber() const;
+    virtual void setDataSequenceNumber(int dataSequenceNumber);
+    virtual int getSourcePanID() const;
+    virtual void setSourcePanID(int sourcePanID);
+    virtual int getDestinationPanID() const;
+    virtual void setDestinationPanID(int destinationPanID);
+    virtual int getSourceMacAddress() const;
+    virtual void setSourceMacAddress(int sourceMacAddress);
+    virtual int getDestinationMacAddress() const;
+    virtual void setDestinationMacAddress(int destinationMacAddress);
 };
 
 inline void doPacking(cCommBuffer *b, FrameDataCompressed& obj) {obj.parsimPack(b);}

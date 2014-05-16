@@ -111,8 +111,7 @@ inline void doUnpacking(cCommBuffer *b, UdpPacketStandard& obj) {obj.parsimUnpac
  * <pre>
  * packet UdpPacketCompressed extends UdpPacketInterface{
  * 
- * 
- * 	headerLength = 3; 
+ * 	headerLength = 4; 
  * 
  * 
  * 
@@ -148,20 +147,30 @@ inline void doUnpacking(cCommBuffer *b, UdpPacketStandard& obj) {obj.parsimUnpac
  * 
  * 
  * 	
- * 	bool udpSourcePort;			
- * 	bool udpDestinationPort;	
- * 	short length;				
+ * 	bool udpSourcePortCompressed;			
+ * 	bool udpDestinationPortCompressed;		
+ * 	bool lengthCompressed;				    
+ * 	
+ * 	
+ * 	
  * 	short checksum; 			
+ * 
+ * 	int inlineLength;				 
+ * 	int inlineUdpSourcePort;      
+ * 	int inlineUdpDestinationPort; 
  * }
  * </pre>
  */
 class UdpPacketCompressed : public ::wsn_energy::UdpPacketInterface
 {
   protected:
-    bool udpSourcePort_var;
-    bool udpDestinationPort_var;
-    short length_var;
+    bool udpSourcePortCompressed_var;
+    bool udpDestinationPortCompressed_var;
+    bool lengthCompressed_var;
     short checksum_var;
+    int inlineLength_var;
+    int inlineUdpSourcePort_var;
+    int inlineUdpDestinationPort_var;
 
   private:
     void copy(const UdpPacketCompressed& other);
@@ -180,14 +189,20 @@ class UdpPacketCompressed : public ::wsn_energy::UdpPacketInterface
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual bool getUdpSourcePort() const;
-    virtual void setUdpSourcePort(bool udpSourcePort);
-    virtual bool getUdpDestinationPort() const;
-    virtual void setUdpDestinationPort(bool udpDestinationPort);
-    virtual short getLength() const;
-    virtual void setLength(short length);
+    virtual bool getUdpSourcePortCompressed() const;
+    virtual void setUdpSourcePortCompressed(bool udpSourcePortCompressed);
+    virtual bool getUdpDestinationPortCompressed() const;
+    virtual void setUdpDestinationPortCompressed(bool udpDestinationPortCompressed);
+    virtual bool getLengthCompressed() const;
+    virtual void setLengthCompressed(bool lengthCompressed);
     virtual short getChecksum() const;
     virtual void setChecksum(short checksum);
+    virtual int getInlineLength() const;
+    virtual void setInlineLength(int inlineLength);
+    virtual int getInlineUdpSourcePort() const;
+    virtual void setInlineUdpSourcePort(int inlineUdpSourcePort);
+    virtual int getInlineUdpDestinationPort() const;
+    virtual void setInlineUdpDestinationPort(int inlineUdpDestinationPort);
 };
 
 inline void doPacking(cCommBuffer *b, UdpPacketCompressed& obj) {obj.parsimPack(b);}

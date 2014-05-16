@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include "mac.h"
 #include "ipv6.h"
 #include "energest.h"
 #include "hopEnergy.h"
@@ -58,6 +59,12 @@ RPL::RPL(IPv6 *net)
 
   this->isDIOsent = true; // 0 to sent ~ success !!!
   this->isDISsent = true; // 0 to sent ~ success !!!
+
+  // create DIO timer
+  resetDIOTimer();
+
+  // create DIS timer
+  this->net->scheduleAt(this->net->getModuleByPath("^.^")->par("setupDelay").doubleValue(), disTimer);
 }
 
 void RPL::rpl_init()
@@ -77,7 +84,7 @@ void RPL::rpl_set_root()
   this->rplDag.joined = true;
   this->rplDag.rank = 1;
 
-  sendDIO();
+//  sendDIO();
 }
 
 void RPL::finish()
@@ -138,7 +145,7 @@ void RPL::sendDIS()
 
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIS_SENT));
 
-//  this->isDISsent = false; // keep track of lastest DIS
+  this->isDISsent = false; // keep track of lastest DIS
 }
 
 void RPL::hasSentDIO()
@@ -527,8 +534,24 @@ void RPL::updatePrefferredParent()
 
   // update default route
   if (this->rplDag.preferredParent != NULL)
+  {
     this->net->defaultRoute = this->rplDag.preferredParent->neighborID;
+
+    // mac default route in case of mesh-routing / IPv6
+    if (this->net->getModuleByPath("^.^")->par("usingHDC"))
+      (check_and_cast<MACdriver*>(this->net->getModuleByPath("^.mac")))->defaultRoute = simulation.getModule(
+          this->net->defaultRoute)->getModuleByPath("^.mac")->getId();
+
+    // route is repaired, ready to send
+    this->net->selfTimer(0, NET_CHECK_BUFFER);
+  }
   else
+  {
     this->net->defaultRoute = 0;
+
+    // mac default route in case of mesh-routing / IPv6
+    if (this->net->getModuleByPath("^.^")->par("usingHDC"))
+      (check_and_cast<MACdriver*>(this->net->getModuleByPath("^.mac")))->defaultRoute = 0;
+  }
 }
 }/* namespace wsn_energy */

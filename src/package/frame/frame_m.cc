@@ -836,6 +836,20 @@ Register_Class(FrameDataCompressed);
 FrameDataCompressed::FrameDataCompressed(const char *name, int kind) : wsn_energy::Frame(name,kind)
 {
     this->headerLength_var = 32;
+    this->codeBit_var = 0;
+    this->isOrignatorCompressed_var = 0;
+    this->isFinalDestinationCompressed_var = 0;
+    this->hopLeft_var = 0;
+    this->hcDispatch_var = 0;
+    this->broadcastHeader_var = 0;
+    this->fragmentationHeader_var = 0;
+    this->orginatorMacAddress_var = 0;
+    this->finalDestinationMacAddress_var = 0;
+    this->dataSequenceNumber_var = 0;
+    this->sourcePanID_var = 0;
+    this->destinationPanID_var = 0;
+    this->sourceMacAddress_var = 0;
+    this->destinationMacAddress_var = 0;
 }
 
 FrameDataCompressed::FrameDataCompressed(const FrameDataCompressed& other) : wsn_energy::Frame(other)
@@ -858,18 +872,60 @@ FrameDataCompressed& FrameDataCompressed::operator=(const FrameDataCompressed& o
 void FrameDataCompressed::copy(const FrameDataCompressed& other)
 {
     this->headerLength_var = other.headerLength_var;
+    this->codeBit_var = other.codeBit_var;
+    this->isOrignatorCompressed_var = other.isOrignatorCompressed_var;
+    this->isFinalDestinationCompressed_var = other.isFinalDestinationCompressed_var;
+    this->hopLeft_var = other.hopLeft_var;
+    this->hcDispatch_var = other.hcDispatch_var;
+    this->broadcastHeader_var = other.broadcastHeader_var;
+    this->fragmentationHeader_var = other.fragmentationHeader_var;
+    this->orginatorMacAddress_var = other.orginatorMacAddress_var;
+    this->finalDestinationMacAddress_var = other.finalDestinationMacAddress_var;
+    this->dataSequenceNumber_var = other.dataSequenceNumber_var;
+    this->sourcePanID_var = other.sourcePanID_var;
+    this->destinationPanID_var = other.destinationPanID_var;
+    this->sourceMacAddress_var = other.sourceMacAddress_var;
+    this->destinationMacAddress_var = other.destinationMacAddress_var;
 }
 
 void FrameDataCompressed::parsimPack(cCommBuffer *b)
 {
     wsn_energy::Frame::parsimPack(b);
     doPacking(b,this->headerLength_var);
+    doPacking(b,this->codeBit_var);
+    doPacking(b,this->isOrignatorCompressed_var);
+    doPacking(b,this->isFinalDestinationCompressed_var);
+    doPacking(b,this->hopLeft_var);
+    doPacking(b,this->hcDispatch_var);
+    doPacking(b,this->broadcastHeader_var);
+    doPacking(b,this->fragmentationHeader_var);
+    doPacking(b,this->orginatorMacAddress_var);
+    doPacking(b,this->finalDestinationMacAddress_var);
+    doPacking(b,this->dataSequenceNumber_var);
+    doPacking(b,this->sourcePanID_var);
+    doPacking(b,this->destinationPanID_var);
+    doPacking(b,this->sourceMacAddress_var);
+    doPacking(b,this->destinationMacAddress_var);
 }
 
 void FrameDataCompressed::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::Frame::parsimUnpack(b);
     doUnpacking(b,this->headerLength_var);
+    doUnpacking(b,this->codeBit_var);
+    doUnpacking(b,this->isOrignatorCompressed_var);
+    doUnpacking(b,this->isFinalDestinationCompressed_var);
+    doUnpacking(b,this->hopLeft_var);
+    doUnpacking(b,this->hcDispatch_var);
+    doUnpacking(b,this->broadcastHeader_var);
+    doUnpacking(b,this->fragmentationHeader_var);
+    doUnpacking(b,this->orginatorMacAddress_var);
+    doUnpacking(b,this->finalDestinationMacAddress_var);
+    doUnpacking(b,this->dataSequenceNumber_var);
+    doUnpacking(b,this->sourcePanID_var);
+    doUnpacking(b,this->destinationPanID_var);
+    doUnpacking(b,this->sourceMacAddress_var);
+    doUnpacking(b,this->destinationMacAddress_var);
 }
 
 int FrameDataCompressed::getHeaderLength() const
@@ -880,6 +936,146 @@ int FrameDataCompressed::getHeaderLength() const
 void FrameDataCompressed::setHeaderLength(int headerLength)
 {
     this->headerLength_var = headerLength;
+}
+
+int FrameDataCompressed::getCodeBit() const
+{
+    return codeBit_var;
+}
+
+void FrameDataCompressed::setCodeBit(int codeBit)
+{
+    this->codeBit_var = codeBit;
+}
+
+bool FrameDataCompressed::getIsOrignatorCompressed() const
+{
+    return isOrignatorCompressed_var;
+}
+
+void FrameDataCompressed::setIsOrignatorCompressed(bool isOrignatorCompressed)
+{
+    this->isOrignatorCompressed_var = isOrignatorCompressed;
+}
+
+bool FrameDataCompressed::getIsFinalDestinationCompressed() const
+{
+    return isFinalDestinationCompressed_var;
+}
+
+void FrameDataCompressed::setIsFinalDestinationCompressed(bool isFinalDestinationCompressed)
+{
+    this->isFinalDestinationCompressed_var = isFinalDestinationCompressed;
+}
+
+int FrameDataCompressed::getHopLeft() const
+{
+    return hopLeft_var;
+}
+
+void FrameDataCompressed::setHopLeft(int hopLeft)
+{
+    this->hopLeft_var = hopLeft;
+}
+
+int FrameDataCompressed::getHcDispatch() const
+{
+    return hcDispatch_var;
+}
+
+void FrameDataCompressed::setHcDispatch(int hcDispatch)
+{
+    this->hcDispatch_var = hcDispatch;
+}
+
+int FrameDataCompressed::getBroadcastHeader() const
+{
+    return broadcastHeader_var;
+}
+
+void FrameDataCompressed::setBroadcastHeader(int broadcastHeader)
+{
+    this->broadcastHeader_var = broadcastHeader;
+}
+
+int FrameDataCompressed::getFragmentationHeader() const
+{
+    return fragmentationHeader_var;
+}
+
+void FrameDataCompressed::setFragmentationHeader(int fragmentationHeader)
+{
+    this->fragmentationHeader_var = fragmentationHeader;
+}
+
+int FrameDataCompressed::getOrginatorMacAddress() const
+{
+    return orginatorMacAddress_var;
+}
+
+void FrameDataCompressed::setOrginatorMacAddress(int orginatorMacAddress)
+{
+    this->orginatorMacAddress_var = orginatorMacAddress;
+}
+
+int FrameDataCompressed::getFinalDestinationMacAddress() const
+{
+    return finalDestinationMacAddress_var;
+}
+
+void FrameDataCompressed::setFinalDestinationMacAddress(int finalDestinationMacAddress)
+{
+    this->finalDestinationMacAddress_var = finalDestinationMacAddress;
+}
+
+int FrameDataCompressed::getDataSequenceNumber() const
+{
+    return dataSequenceNumber_var;
+}
+
+void FrameDataCompressed::setDataSequenceNumber(int dataSequenceNumber)
+{
+    this->dataSequenceNumber_var = dataSequenceNumber;
+}
+
+int FrameDataCompressed::getSourcePanID() const
+{
+    return sourcePanID_var;
+}
+
+void FrameDataCompressed::setSourcePanID(int sourcePanID)
+{
+    this->sourcePanID_var = sourcePanID;
+}
+
+int FrameDataCompressed::getDestinationPanID() const
+{
+    return destinationPanID_var;
+}
+
+void FrameDataCompressed::setDestinationPanID(int destinationPanID)
+{
+    this->destinationPanID_var = destinationPanID;
+}
+
+int FrameDataCompressed::getSourceMacAddress() const
+{
+    return sourceMacAddress_var;
+}
+
+void FrameDataCompressed::setSourceMacAddress(int sourceMacAddress)
+{
+    this->sourceMacAddress_var = sourceMacAddress;
+}
+
+int FrameDataCompressed::getDestinationMacAddress() const
+{
+    return destinationMacAddress_var;
+}
+
+void FrameDataCompressed::setDestinationMacAddress(int destinationMacAddress)
+{
+    this->destinationMacAddress_var = destinationMacAddress;
 }
 
 class FrameDataCompressedDescriptor : public cClassDescriptor
@@ -929,7 +1125,7 @@ const char *FrameDataCompressedDescriptor::getProperty(const char *propertyname)
 int FrameDataCompressedDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount(object) : 1;
+    return basedesc ? 15+basedesc->getFieldCount(object) : 15;
 }
 
 unsigned int FrameDataCompressedDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -942,8 +1138,22 @@ unsigned int FrameDataCompressedDescriptor::getFieldTypeFlags(void *object, int 
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<15) ? fieldTypeFlags[field] : 0;
 }
 
 const char *FrameDataCompressedDescriptor::getFieldName(void *object, int field) const
@@ -956,8 +1166,22 @@ const char *FrameDataCompressedDescriptor::getFieldName(void *object, int field)
     }
     static const char *fieldNames[] = {
         "headerLength",
+        "codeBit",
+        "isOrignatorCompressed",
+        "isFinalDestinationCompressed",
+        "hopLeft",
+        "hcDispatch",
+        "broadcastHeader",
+        "fragmentationHeader",
+        "orginatorMacAddress",
+        "finalDestinationMacAddress",
+        "dataSequenceNumber",
+        "sourcePanID",
+        "destinationPanID",
+        "sourceMacAddress",
+        "destinationMacAddress",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : NULL;
+    return (field>=0 && field<15) ? fieldNames[field] : NULL;
 }
 
 int FrameDataCompressedDescriptor::findField(void *object, const char *fieldName) const
@@ -965,6 +1189,20 @@ int FrameDataCompressedDescriptor::findField(void *object, const char *fieldName
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
     if (fieldName[0]=='h' && strcmp(fieldName, "headerLength")==0) return base+0;
+    if (fieldName[0]=='c' && strcmp(fieldName, "codeBit")==0) return base+1;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isOrignatorCompressed")==0) return base+2;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isFinalDestinationCompressed")==0) return base+3;
+    if (fieldName[0]=='h' && strcmp(fieldName, "hopLeft")==0) return base+4;
+    if (fieldName[0]=='h' && strcmp(fieldName, "hcDispatch")==0) return base+5;
+    if (fieldName[0]=='b' && strcmp(fieldName, "broadcastHeader")==0) return base+6;
+    if (fieldName[0]=='f' && strcmp(fieldName, "fragmentationHeader")==0) return base+7;
+    if (fieldName[0]=='o' && strcmp(fieldName, "orginatorMacAddress")==0) return base+8;
+    if (fieldName[0]=='f' && strcmp(fieldName, "finalDestinationMacAddress")==0) return base+9;
+    if (fieldName[0]=='d' && strcmp(fieldName, "dataSequenceNumber")==0) return base+10;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourcePanID")==0) return base+11;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationPanID")==0) return base+12;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourceMacAddress")==0) return base+13;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationMacAddress")==0) return base+14;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -978,8 +1216,22 @@ const char *FrameDataCompressedDescriptor::getFieldTypeString(void *object, int 
     }
     static const char *fieldTypeStrings[] = {
         "int",
+        "int",
+        "bool",
+        "bool",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<15) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *FrameDataCompressedDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1020,6 +1272,20 @@ std::string FrameDataCompressedDescriptor::getFieldAsString(void *object, int fi
     FrameDataCompressed *pp = (FrameDataCompressed *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getHeaderLength());
+        case 1: return long2string(pp->getCodeBit());
+        case 2: return bool2string(pp->getIsOrignatorCompressed());
+        case 3: return bool2string(pp->getIsFinalDestinationCompressed());
+        case 4: return long2string(pp->getHopLeft());
+        case 5: return long2string(pp->getHcDispatch());
+        case 6: return long2string(pp->getBroadcastHeader());
+        case 7: return long2string(pp->getFragmentationHeader());
+        case 8: return long2string(pp->getOrginatorMacAddress());
+        case 9: return long2string(pp->getFinalDestinationMacAddress());
+        case 10: return long2string(pp->getDataSequenceNumber());
+        case 11: return long2string(pp->getSourcePanID());
+        case 12: return long2string(pp->getDestinationPanID());
+        case 13: return long2string(pp->getSourceMacAddress());
+        case 14: return long2string(pp->getDestinationMacAddress());
         default: return "";
     }
 }
@@ -1035,6 +1301,20 @@ bool FrameDataCompressedDescriptor::setFieldAsString(void *object, int field, in
     FrameDataCompressed *pp = (FrameDataCompressed *)object; (void)pp;
     switch (field) {
         case 0: pp->setHeaderLength(string2long(value)); return true;
+        case 1: pp->setCodeBit(string2long(value)); return true;
+        case 2: pp->setIsOrignatorCompressed(string2bool(value)); return true;
+        case 3: pp->setIsFinalDestinationCompressed(string2bool(value)); return true;
+        case 4: pp->setHopLeft(string2long(value)); return true;
+        case 5: pp->setHcDispatch(string2long(value)); return true;
+        case 6: pp->setBroadcastHeader(string2long(value)); return true;
+        case 7: pp->setFragmentationHeader(string2long(value)); return true;
+        case 8: pp->setOrginatorMacAddress(string2long(value)); return true;
+        case 9: pp->setFinalDestinationMacAddress(string2long(value)); return true;
+        case 10: pp->setDataSequenceNumber(string2long(value)); return true;
+        case 11: pp->setSourcePanID(string2long(value)); return true;
+        case 12: pp->setDestinationPanID(string2long(value)); return true;
+        case 13: pp->setSourceMacAddress(string2long(value)); return true;
+        case 14: pp->setDestinationMacAddress(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1049,8 +1329,22 @@ const char *FrameDataCompressedDescriptor::getFieldStructName(void *object, int 
     }
     static const char *fieldStructNames[] = {
         NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<15) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameDataCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const

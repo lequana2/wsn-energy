@@ -44,8 +44,8 @@ packet FrameDataStandard extends Frame{
     
   	int dataSequenceNumber;	// 1 octet. Sequence number
   	
-	int sourcePanID;	  		// 0/2   octets PANID
-	int destinationPanID; 		// 0/2   octets PANID
+	int sourcePanID;	  		// 0/2   octets PANID - hard coded
+	int destinationPanID; 		// 0/2   octets PANID - hard coded
 	int sourceMacAddress; 		// 0/2/8 octets link-layer address address
 	int destinationMacAddress;  // 0/2/8 octets link-layer addressaddress
 }
@@ -61,6 +61,7 @@ packet FrameDataCompressed extends Frame{
 // 		Header Compressed Header (dispatch)
 //
 // 		4 octets minimum Mesh header 4944
+//
 // 		0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 //      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //      |1 0|O|F|HopsLft| originator address, final address
@@ -107,6 +108,27 @@ packet FrameDataCompressed extends Frame{
 //        | 01  010000 | LOWPAN_BC0 - LOWPAN_BC0 broadcast   <-- ATTENTION          
 //        |   ...      | reserved   - Reserved for future use          
 //        | 01  111111 | ESC        - Additional Dispatch octet follows 
+	
+	int  codeBit;						// 2 bits
+	bool isOrignatorCompressed;			// 1 bit
+	bool isFinalDestinationCompressed;	// 1 bit
+	int hopLeft;						// 4 bits
+
+	int hcDispatch;						// 1 octet
+	
+	int broadcastHeader;				// 1 octet
+	int fragmentationHeader;			// 1 octet
+
+	int orginatorMacAddress; 			// 2/8 octects
+	int finalDestinationMacAddress;		// 2/8 octects
+	
+	// normal MAC header
+	int dataSequenceNumber;		// 1 octet. Sequence number
+  	
+	int sourcePanID;	  		// 0/2   octets PANID - hard-coded
+	int destinationPanID; 		// 0/2   octets PANID - hard-coded
+	int sourceMacAddress; 		// 0/2/8 octets link-layer address address
+	int destinationMacAddress;  // 0/2/8 octets link-layer addressaddress
 }
 
 // ACK Frame

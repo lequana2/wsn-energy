@@ -23,18 +23,6 @@ void Count::initialize()
   if (getModuleByPath("^.^")->par("isPollingCount").boolValue())
   {
     this->residualEnergy = POWER;
-
-    // server has unlimited energy
-    if (this->getParentModule()->getId() == simulation.getModuleByPath("server")->getId())
-      this->residualEnergy = 999999;
-
-    // hack
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[97]")->getId())
-//    this->residualEnergy = POWER / 2;
-//    if (this->getParentModule()->getId() == simulation.getModuleByPath("client[110]")->getId())
-//      this->residualEnergy = POWER / 2;
-//  if (this->getParentModule()->getId() == simulation.getModuleByPath("client[111]")->getId())
-//    this->residualEnergy = POWER / 2;
   }
 }
 

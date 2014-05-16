@@ -19,7 +19,8 @@
 #endif
 
 // set global address
-
+// simulate the pseudo-assigned MAC and IPv6 address creation
+//
 // SELF ADDRESS
 // uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
 //  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
@@ -43,12 +44,12 @@ Define_Module(Client);
 
 void Client::initialize()
 {
-  this->packetOrder = 0;
+  this->packetNumber = 0;
 
   /* Contiki test scheme */
   switch ((int) getModuleByPath("^.^")->par("scheme").doubleValue())
   {
-    case 1: /* one event */
+    case 1: /* one manual event */
     {
       if (this->getParentModule()->getId() == simulation.getModuleByPath("client[54]")->getId())
         selfTimer(getModuleByPath("^.^")->par("setupDelay").doubleValue() + 10, APP_SENSING_FLAG);
@@ -95,9 +96,9 @@ void Client::processSelfMessage(cPacket* packet)
           if ((int) getModuleByPath("^.^")->par("scheme").doubleValue() == 2)
           {
 #ifdef MAX
-            if (++this->packetOrder < MAX)  // control maximum number
+            if (++this->packetNumber < MAX)  // control maximum number
 #else
-            ++this->packetOrder;
+            ++this->packetNumber;
 #endif
             newData();
           }
@@ -107,6 +108,7 @@ void Client::processSelfMessage(cPacket* packet)
 
         case APP_READY_TO_SEND: /* ready to send */
         {
+          // begin send data
           sendData();
           break;
         } /* ready to send */
@@ -121,6 +123,7 @@ void Client::processSelfMessage(cPacket* packet)
     }
 
     default:
+      delete packet;
       ev << "Unknown kind" << endl;
       break;
   }
@@ -136,10 +139,13 @@ void Client::processLowerLayerMessage(cPacket*)
 {
 }
 
+/*
+ * Start timer to begin to collect data
+ */
 void Client::newData()
 {
   int sendInterval = 60; // seconds
-  int randomness   = 00; // seconds
+  int randomness = 00; // seconds
 //  int sendInterval = 300; // seconds
 //  int randomness = 40;  // seconds
 
@@ -160,11 +166,14 @@ void Client::newData()
     selfTimer(time, APP_READY_TO_SEND);
 }
 
+/*
+ * Collect data from outside world and send toward server
+ */
 void Client::sendData()
 {
   // create data to send
   char buf[30];
-  int len = sprintf(buf, "Hello %d from %s", packetOrder, getParentModule()->getFullName());
+  int len = sprintf(buf, "Hello %d from %s", packetNumber, getParentModule()->getFullName());
 
   // hack port, address
   int destinationPort = UDP_SERVER_PORT;
@@ -176,6 +185,9 @@ void Client::sendData()
   (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(APP_SEND));
 }
 
+/*
+ * Send messge API
+ */
 void Client::sendMessage(char *value, int len, int destinationPort, int destinationAddress)
 {
   // intialisation

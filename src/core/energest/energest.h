@@ -19,6 +19,7 @@
 #define MAX_POWER    OPERATION_POWER * OPERATION_VOLTAGE * BATTERY_NUMBER
 
 // CPU power
+// is this really need if using Sky mote with intergrated cc2420 coupled with msp430 ?
 #define MSP430_CURRENT 0.5 // mA
 #define MSP430_VOLTAGE   3 // Vcc
 #define MSP430_POWER   MSP430_CURRENT*MSP430_VOLTAGE

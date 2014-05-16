@@ -574,12 +574,15 @@ Register_Class(UdpPacketCompressed);
 
 UdpPacketCompressed::UdpPacketCompressed(const char *name, int kind) : wsn_energy::UdpPacketInterface(name,kind)
 {
-    this->setHeaderLength(3);
+    this->setHeaderLength(4);
 
-    this->udpSourcePort_var = 0;
-    this->udpDestinationPort_var = 0;
-    this->length_var = 0;
+    this->udpSourcePortCompressed_var = 0;
+    this->udpDestinationPortCompressed_var = 0;
+    this->lengthCompressed_var = 0;
     this->checksum_var = 0;
+    this->inlineLength_var = 0;
+    this->inlineUdpSourcePort_var = 0;
+    this->inlineUdpDestinationPort_var = 0;
 }
 
 UdpPacketCompressed::UdpPacketCompressed(const UdpPacketCompressed& other) : wsn_energy::UdpPacketInterface(other)
@@ -601,58 +604,67 @@ UdpPacketCompressed& UdpPacketCompressed::operator=(const UdpPacketCompressed& o
 
 void UdpPacketCompressed::copy(const UdpPacketCompressed& other)
 {
-    this->udpSourcePort_var = other.udpSourcePort_var;
-    this->udpDestinationPort_var = other.udpDestinationPort_var;
-    this->length_var = other.length_var;
+    this->udpSourcePortCompressed_var = other.udpSourcePortCompressed_var;
+    this->udpDestinationPortCompressed_var = other.udpDestinationPortCompressed_var;
+    this->lengthCompressed_var = other.lengthCompressed_var;
     this->checksum_var = other.checksum_var;
+    this->inlineLength_var = other.inlineLength_var;
+    this->inlineUdpSourcePort_var = other.inlineUdpSourcePort_var;
+    this->inlineUdpDestinationPort_var = other.inlineUdpDestinationPort_var;
 }
 
 void UdpPacketCompressed::parsimPack(cCommBuffer *b)
 {
     wsn_energy::UdpPacketInterface::parsimPack(b);
-    doPacking(b,this->udpSourcePort_var);
-    doPacking(b,this->udpDestinationPort_var);
-    doPacking(b,this->length_var);
+    doPacking(b,this->udpSourcePortCompressed_var);
+    doPacking(b,this->udpDestinationPortCompressed_var);
+    doPacking(b,this->lengthCompressed_var);
     doPacking(b,this->checksum_var);
+    doPacking(b,this->inlineLength_var);
+    doPacking(b,this->inlineUdpSourcePort_var);
+    doPacking(b,this->inlineUdpDestinationPort_var);
 }
 
 void UdpPacketCompressed::parsimUnpack(cCommBuffer *b)
 {
     wsn_energy::UdpPacketInterface::parsimUnpack(b);
-    doUnpacking(b,this->udpSourcePort_var);
-    doUnpacking(b,this->udpDestinationPort_var);
-    doUnpacking(b,this->length_var);
+    doUnpacking(b,this->udpSourcePortCompressed_var);
+    doUnpacking(b,this->udpDestinationPortCompressed_var);
+    doUnpacking(b,this->lengthCompressed_var);
     doUnpacking(b,this->checksum_var);
+    doUnpacking(b,this->inlineLength_var);
+    doUnpacking(b,this->inlineUdpSourcePort_var);
+    doUnpacking(b,this->inlineUdpDestinationPort_var);
 }
 
-bool UdpPacketCompressed::getUdpSourcePort() const
+bool UdpPacketCompressed::getUdpSourcePortCompressed() const
 {
-    return udpSourcePort_var;
+    return udpSourcePortCompressed_var;
 }
 
-void UdpPacketCompressed::setUdpSourcePort(bool udpSourcePort)
+void UdpPacketCompressed::setUdpSourcePortCompressed(bool udpSourcePortCompressed)
 {
-    this->udpSourcePort_var = udpSourcePort;
+    this->udpSourcePortCompressed_var = udpSourcePortCompressed;
 }
 
-bool UdpPacketCompressed::getUdpDestinationPort() const
+bool UdpPacketCompressed::getUdpDestinationPortCompressed() const
 {
-    return udpDestinationPort_var;
+    return udpDestinationPortCompressed_var;
 }
 
-void UdpPacketCompressed::setUdpDestinationPort(bool udpDestinationPort)
+void UdpPacketCompressed::setUdpDestinationPortCompressed(bool udpDestinationPortCompressed)
 {
-    this->udpDestinationPort_var = udpDestinationPort;
+    this->udpDestinationPortCompressed_var = udpDestinationPortCompressed;
 }
 
-short UdpPacketCompressed::getLength() const
+bool UdpPacketCompressed::getLengthCompressed() const
 {
-    return length_var;
+    return lengthCompressed_var;
 }
 
-void UdpPacketCompressed::setLength(short length)
+void UdpPacketCompressed::setLengthCompressed(bool lengthCompressed)
 {
-    this->length_var = length;
+    this->lengthCompressed_var = lengthCompressed;
 }
 
 short UdpPacketCompressed::getChecksum() const
@@ -663,6 +675,36 @@ short UdpPacketCompressed::getChecksum() const
 void UdpPacketCompressed::setChecksum(short checksum)
 {
     this->checksum_var = checksum;
+}
+
+int UdpPacketCompressed::getInlineLength() const
+{
+    return inlineLength_var;
+}
+
+void UdpPacketCompressed::setInlineLength(int inlineLength)
+{
+    this->inlineLength_var = inlineLength;
+}
+
+int UdpPacketCompressed::getInlineUdpSourcePort() const
+{
+    return inlineUdpSourcePort_var;
+}
+
+void UdpPacketCompressed::setInlineUdpSourcePort(int inlineUdpSourcePort)
+{
+    this->inlineUdpSourcePort_var = inlineUdpSourcePort;
+}
+
+int UdpPacketCompressed::getInlineUdpDestinationPort() const
+{
+    return inlineUdpDestinationPort_var;
+}
+
+void UdpPacketCompressed::setInlineUdpDestinationPort(int inlineUdpDestinationPort)
+{
+    this->inlineUdpDestinationPort_var = inlineUdpDestinationPort;
 }
 
 class UdpPacketCompressedDescriptor : public cClassDescriptor
@@ -712,7 +754,7 @@ const char *UdpPacketCompressedDescriptor::getProperty(const char *propertyname)
 int UdpPacketCompressedDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
+    return basedesc ? 7+basedesc->getFieldCount(object) : 7;
 }
 
 unsigned int UdpPacketCompressedDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -728,8 +770,11 @@ unsigned int UdpPacketCompressedDescriptor::getFieldTypeFlags(void *object, int 
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<7) ? fieldTypeFlags[field] : 0;
 }
 
 const char *UdpPacketCompressedDescriptor::getFieldName(void *object, int field) const
@@ -741,22 +786,28 @@ const char *UdpPacketCompressedDescriptor::getFieldName(void *object, int field)
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "udpSourcePort",
-        "udpDestinationPort",
-        "length",
+        "udpSourcePortCompressed",
+        "udpDestinationPortCompressed",
+        "lengthCompressed",
         "checksum",
+        "inlineLength",
+        "inlineUdpSourcePort",
+        "inlineUdpDestinationPort",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : NULL;
+    return (field>=0 && field<7) ? fieldNames[field] : NULL;
 }
 
 int UdpPacketCompressedDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='u' && strcmp(fieldName, "udpSourcePort")==0) return base+0;
-    if (fieldName[0]=='u' && strcmp(fieldName, "udpDestinationPort")==0) return base+1;
-    if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+2;
+    if (fieldName[0]=='u' && strcmp(fieldName, "udpSourcePortCompressed")==0) return base+0;
+    if (fieldName[0]=='u' && strcmp(fieldName, "udpDestinationPortCompressed")==0) return base+1;
+    if (fieldName[0]=='l' && strcmp(fieldName, "lengthCompressed")==0) return base+2;
     if (fieldName[0]=='c' && strcmp(fieldName, "checksum")==0) return base+3;
+    if (fieldName[0]=='i' && strcmp(fieldName, "inlineLength")==0) return base+4;
+    if (fieldName[0]=='i' && strcmp(fieldName, "inlineUdpSourcePort")==0) return base+5;
+    if (fieldName[0]=='i' && strcmp(fieldName, "inlineUdpDestinationPort")==0) return base+6;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -771,10 +822,13 @@ const char *UdpPacketCompressedDescriptor::getFieldTypeString(void *object, int 
     static const char *fieldTypeStrings[] = {
         "bool",
         "bool",
+        "bool",
         "short",
-        "short",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<7) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *UdpPacketCompressedDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -814,10 +868,13 @@ std::string UdpPacketCompressedDescriptor::getFieldAsString(void *object, int fi
     }
     UdpPacketCompressed *pp = (UdpPacketCompressed *)object; (void)pp;
     switch (field) {
-        case 0: return bool2string(pp->getUdpSourcePort());
-        case 1: return bool2string(pp->getUdpDestinationPort());
-        case 2: return long2string(pp->getLength());
+        case 0: return bool2string(pp->getUdpSourcePortCompressed());
+        case 1: return bool2string(pp->getUdpDestinationPortCompressed());
+        case 2: return bool2string(pp->getLengthCompressed());
         case 3: return long2string(pp->getChecksum());
+        case 4: return long2string(pp->getInlineLength());
+        case 5: return long2string(pp->getInlineUdpSourcePort());
+        case 6: return long2string(pp->getInlineUdpDestinationPort());
         default: return "";
     }
 }
@@ -832,10 +889,13 @@ bool UdpPacketCompressedDescriptor::setFieldAsString(void *object, int field, in
     }
     UdpPacketCompressed *pp = (UdpPacketCompressed *)object; (void)pp;
     switch (field) {
-        case 0: pp->setUdpSourcePort(string2bool(value)); return true;
-        case 1: pp->setUdpDestinationPort(string2bool(value)); return true;
-        case 2: pp->setLength(string2long(value)); return true;
+        case 0: pp->setUdpSourcePortCompressed(string2bool(value)); return true;
+        case 1: pp->setUdpDestinationPortCompressed(string2bool(value)); return true;
+        case 2: pp->setLengthCompressed(string2bool(value)); return true;
         case 3: pp->setChecksum(string2long(value)); return true;
+        case 4: pp->setInlineLength(string2long(value)); return true;
+        case 5: pp->setInlineUdpSourcePort(string2long(value)); return true;
+        case 6: pp->setInlineUdpDestinationPort(string2long(value)); return true;
         default: return false;
     }
 }
@@ -853,8 +913,11 @@ const char *UdpPacketCompressedDescriptor::getFieldStructName(void *object, int 
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<7) ? fieldStructNames[field] : NULL;
 }
 
 void *UdpPacketCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const
