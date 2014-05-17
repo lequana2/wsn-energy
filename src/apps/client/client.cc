@@ -9,6 +9,7 @@
 #include "client.h"
 #include "radio.h"
 #include "statistic.h"
+#include "data_m.h"
 
 // define number of packet each sensor need to send
 //#define MAX 60
@@ -18,32 +19,33 @@
 #define DEBUG 0
 #endif
 
-// set global address
-// simulate the pseudo-assigned MAC and IPv6 address creation
-//
-// SELF ADDRESS
-// uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
-//  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
-//  uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
-//
-// SERVER ADDRESS
-//#if 0
-///* Mode 1 - 64 bits inline */
-//   uip_ip6addr(&server_ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 1);
-//#elif 1
-///* Mode 2 - 16 bits inline */
-//  uip_ip6addr(&server_ipaddr, 0xaaaa, 0, 0, 0, 0, 0x00ff, 0xfe00, 1);
-//#else
-///* Mode 3 - derived from server link-local (MAC) address */
-//  uip_ip6addr(&server_ipaddr, 0xaaaa, 0, 0, 0, 0x0250, 0xc2ff, 0xfea8, 0xcd1a); //redbee-econotag
-//#endif
-
 namespace wsn_energy {
 
 Define_Module(Client);
 
 void Client::initialize()
 {
+  // set global address
+  // simulate the pseudo-assigned MAC and IPv6 address creation
+
+  // create MAC
+  this->macAddress = new MacAddress(getId());
+
+  // create self IPv6 sddress
+  this->ipAddress = new IpAddress(this->macAddress);
+
+  // set gloabl server address
+  // network address aaaa::/64
+  // suppose it is a MAC-48 from 64 bit by putting ff::fe to midle
+  // server address aaaa::ff::fe:1
+  this->serverAddress = new IpAddress(170, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 254, 0, 0, 1);
+
+  std::cout << this->getFullPath() << "has mac address ";
+  this->macAddress->print();
+  std::cout << this->getFullPath() << "has tentative link-local address ";
+  this->ipAddress->print();
+  std::cout << endl;
+
   this->packetNumber = 0;
 
   /* Contiki test scheme */
@@ -144,15 +146,13 @@ void Client::processLowerLayerMessage(cPacket*)
  */
 void Client::newData()
 {
-  int sendInterval = 60; // seconds
-  int randomness = 00; // seconds
-//  int sendInterval = 300; // seconds
-//  int randomness = 40;  // seconds
+  int sendInterval = 240; // seconds
+  int restPeriod = 60; // seconds
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-  selfTimer(sendInterval + randomness, APP_SENSING_FLAG);
+  selfTimer(sendInterval + restPeriod, APP_SENSING_FLAG);
 
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;

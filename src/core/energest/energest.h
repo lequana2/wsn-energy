@@ -15,7 +15,10 @@
 #define BATTERY_NUMBER                2 // use 2 batteries
 #define OPERATION_POWER          1000.0 // mAh
 #define OPERATION_VOLTAGE           1.5 // Voltage
-#define CRITICAL                    0.1 // 10 %
+#define RESIDUAL                      1 // 100%
+//#define CRITICAL                    0.1 // 10 %
+#define CRITICAL                      0 // 0 %
+
 #define MAX_POWER    OPERATION_POWER * OPERATION_VOLTAGE * BATTERY_NUMBER
 
 // CPU power

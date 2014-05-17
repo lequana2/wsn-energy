@@ -10,7 +10,8 @@
 #define __WSN_ENERGY_SOURCE_H
 
 #include <myModule.h>
-#include <data_m.h>
+#include <macAddress.h>
+#include <ipAddress.h>
 
 #ifndef UDP_PORT
 #define UDP_PORT
@@ -24,6 +25,8 @@ class Client : public myModule
 {
   private:
     int packetNumber;
+    IpAddress* serverAddress;
+
     void sendData();
     void newData();
 
@@ -31,12 +34,15 @@ class Client : public myModule
     void initialize();
 
   public:
+    MacAddress* macAddress;
+    IpAddress* ipAddress;
+
     void processSelfMessage(cPacket*);
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);
 
     // Send message API using UDP/IP
-    void sendMessage(char*,int,int,int);
+    void sendMessage(char*, int, int, int);
 };
 
 }

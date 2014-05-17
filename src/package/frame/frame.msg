@@ -6,6 +6,14 @@
 //  functioning: MAC layer message
 //
 
+cplusplus {{
+#include <ipAddress.h>
+#include <macAddress.h>
+}};
+
+class noncobject IpAddress;
+class noncobject MacAddress;
+
 namespace wsn_energy;
 
 enum FRAME_TYPE{
@@ -44,10 +52,13 @@ packet FrameDataStandard extends Frame{
     
   	int dataSequenceNumber;	// 1 octet. Sequence number
   	
-	int sourcePanID;	  		// 0/2   octets PANID - hard coded
-	int destinationPanID; 		// 0/2   octets PANID - hard coded
-	int sourceMacAddress; 		// 0/2/8 octets link-layer address address
-	int destinationMacAddress;  // 0/2/8 octets link-layer addressaddress
+	uint16_t sourcePanID;	  				// 0/2   octets PANID - hard coded
+	uint16_t destinationPanID; 				// 0/2   octets PANID - hard coded
+	MacAddress sourceMacAddressEUI64; 		// 0/2/8 octets link-layer address address
+	MacAddress destinationMacAddressEUI;	// 0/2/8 octets link-layer addressaddress
+	
+	int sourceMacAddress; 		// meta
+	int destinationMacAddress;  // meta
 }
 
 packet FrameDataCompressed extends Frame{
@@ -118,17 +129,22 @@ packet FrameDataCompressed extends Frame{
 	
 	int broadcastHeader;				// 1 octet
 	int fragmentationHeader;			// 1 octet
-
-	int orginatorMacAddress; 			// 2/8 octects
-	int finalDestinationMacAddress;		// 2/8 octects
+	
+	MacAddress orginatorAddressEUI64; 				// 2/8 octects
+	MacAddress finalDestinationMacAddressEUI64;  	// 2/8 octects
 	
 	// normal MAC header
 	int dataSequenceNumber;		// 1 octet. Sequence number
   	
-	int sourcePanID;	  		// 0/2   octets PANID - hard-coded
-	int destinationPanID; 		// 0/2   octets PANID - hard-coded
-	int sourceMacAddress; 		// 0/2/8 octets link-layer address address
-	int destinationMacAddress;  // 0/2/8 octets link-layer addressaddress
+	int sourcePanID;	  					// 0/2   octets PANID - hard-coded
+	int destinationPanID; 					// 0/2   octets PANID - hard-coded
+	MacAddress sourceMacAddressEUI64; 		// 0/2/8 octets link-layer address address
+	MacAddress destinationMacAddressEUI64;  // 0/2/8 octets link-layer addressaddress
+	
+	int orginatorMacAddress; 			// meta
+	int finalDestinationMacAddress;		// meta
+	int sourceMacAddress; 		// meta
+	int destinationMacAddress;  // meta
 }
 
 // ACK Frame

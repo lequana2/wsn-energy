@@ -10,6 +10,8 @@
 #define __WSN_ENERGY_SINK_H
 
 #include <myModule.h>
+#include <macAddress.h>
+#include <ipAddress.h>
 #include <data_m.h>
 
 #ifndef UDP_PORT
@@ -28,6 +30,10 @@ class Server : public myModule
     virtual void processSelfMessage(cPacket*);
     virtual void processUpperLayerMessage(cPacket*);
     virtual void processLowerLayerMessage(cPacket*);
+
+  public:
+    MacAddress* macAddress;
+    IpAddress* ipAddress;
 };
 
 }

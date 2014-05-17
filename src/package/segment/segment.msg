@@ -6,6 +6,12 @@
 //  functioning: TRA layer message
 //
 
+cplusplus {{
+#include <ipAddress.h>
+}};
+
+class noncobject IpAddress;
+
 namespace wsn_energy;
 
 // Segment
@@ -19,9 +25,11 @@ packet UdpPacketStandard extends UdpPacketInterface{
 	headerLength = 8;  // meta-data: header length, carried in-line
 
 	short sourcePort;      // 2 octets of source port
-	short destinationPort; // 	2 octets of destination port
+	IpAddress destinationPortV6; // 	2 octets of destination port
 	short length;          // 	2 octets of packet length
 	short checksum;        // 	2 octets of check sum of pseudo-header (IP header) 
+	
+	int destinationPort; // meta
 }
 
 packet UdpPacketCompressed extends UdpPacketInterface{
@@ -72,5 +80,7 @@ packet UdpPacketCompressed extends UdpPacketInterface{
 
 	int inlineLength;				 // 0 bit compressed/ 16 bits non-compressed
 	int inlineUdpSourcePort;      // 4 bit compressed/ 16 bits non-compressed 
-	int inlineUdpDestinationPort; // 4 bit compressed/ 16 bits non-compressed
+	IpAddress inlineUdpDestinationPortV6; // 4 bit compressed/ 16 bits non-compressed
+	
+	int inlineUdpDestinationPort; // meta
 }

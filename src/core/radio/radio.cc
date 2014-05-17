@@ -15,6 +15,7 @@ namespace wsn_energy {
 void RadioDriver::initialize()
 {
   this->bufferTXFIFO = NULL;
+  this->isBufferOK = false;
 
   // Transmission power, programabble
   this->txPower = TXPOWER_MAX;
@@ -72,7 +73,8 @@ void RadioDriver::handleMessage(cMessage* msg)
 
 void RadioDriver::finish()
 {
-  if (this->bufferTXFIFO != NULL){
+  if (this->bufferTXFIFO != NULL)
+  {
     delete this->bufferTXFIFO;
     this->bufferTXFIFO = NULL;
   }
@@ -88,12 +90,7 @@ void RadioDriver::processSelfMessage(cPacket* packet)
       {
         case PHY_SWITCH_TRANSMIT: /* switch to transmit */
         {
-          /* show packet length (bytes) */
-          if (DEBUG)
-            ev << "Radio length " << bufferTXFIFO->getByteLength() << endl;
-
-          /* check packet length (127 + 6 bytes) */
-          if (bufferTXFIFO->getByteLength() > bufferTXFIFO->getHeaderLength() + bufferTXFIFO->getMaxPayloadLength())
+          if (!isBufferOK)
           {
             if (DEBUG)
               ev << "Packet is too large" << endl;
@@ -232,17 +229,7 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
-      if (this->bufferTXFIFO != NULL)
-      {
-        delete this->bufferTXFIFO;
-        this->bufferTXFIFO = NULL;
-      }
-
-      this->bufferTXFIFO = new Raw;
-      this->bufferTXFIFO->setKind(DATA);
-      this->bufferTXFIFO->setByteLength(this->bufferTXFIFO->getHeaderLength());
-
-      this->bufferTXFIFO->encapsulate(packet);
+      isBufferOK = Framer::createFramer(this->bufferTXFIFO, check_and_cast<Frame*>(packet));
 
       break;
     } /* Data */

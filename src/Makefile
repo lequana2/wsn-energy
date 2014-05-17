@@ -22,6 +22,7 @@ INCLUDE_PATH = \
     -Icore \
     -Icore/bytecount \
     -Icore/energest \
+    -Icore/framer802154 \
     -Icore/mac \
     -Icore/mac/csma \
     -Icore/mac/nullmac \
@@ -68,9 +69,12 @@ OBJS = \
     $O/core/myModule.o \
     $O/core/bytecount/count.o \
     $O/core/energest/energest.o \
+    $O/core/framer802154/framer.o \
     $O/core/mac/mac.o \
+    $O/core/mac/macAddress.o \
     $O/core/mac/csma/csma.o \
     $O/core/mac/nullmac/nullMAC.o \
+    $O/core/net/ipAddress.o \
     $O/core/net/ipv6/ipv6.o \
     $O/core/net/rpl/rpl.o \
     $O/core/net/rpl/of/hopEnergy.o \
@@ -178,6 +182,7 @@ clean:
 	$(Q)-rm -f core/*_m.cc core/*_m.h
 	$(Q)-rm -f core/bytecount/*_m.cc core/bytecount/*_m.h
 	$(Q)-rm -f core/energest/*_m.cc core/energest/*_m.h
+	$(Q)-rm -f core/framer802154/*_m.cc core/framer802154/*_m.h
 	$(Q)-rm -f core/mac/*_m.cc core/mac/*_m.h
 	$(Q)-rm -f core/mac/csma/*_m.cc core/mac/csma/*_m.h
 	$(Q)-rm -f core/mac/nullmac/*_m.cc core/mac/nullmac/*_m.h
@@ -211,45 +216,72 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/bytecount/*.cc core/energest/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc core/transport/*.cc core/transport/udp/*.cc mote/*.cc package/*.cc package/data/*.cc package/frame/*.cc package/packet/*.cc package/segment/*.cc package/signal/*.cc package/strobe/*.cc util/*.cc util/signal/*.cc util/statistic/*.cc util/world/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc apps/*.cc apps/client/*.cc apps/server/*.cc core/*.cc core/bytecount/*.cc core/energest/*.cc core/framer802154/*.cc core/mac/*.cc core/mac/csma/*.cc core/mac/nullmac/*.cc core/net/*.cc core/net/ipv6/*.cc core/net/rpl/*.cc core/net/rpl/of/*.cc core/radio/*.cc core/radio/cc2420/*.cc core/radio/nullradio/*.cc core/rdc/*.cc core/rdc/contikiMac/*.cc core/rdc/nullrdc/*.cc core/transport/*.cc core/transport/udp/*.cc mote/*.cc package/*.cc package/data/*.cc package/frame/*.cc package/packet/*.cc package/segment/*.cc package/signal/*.cc package/strobe/*.cc util/*.cc util/signal/*.cc util/statistic/*.cc util/world/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/apps/client/client.o: apps/client/client.cc \
 	apps/client/client.h \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/radio.h \
 	package/data/data_m.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/apps/server/server.o: apps/server/server.cc \
 	apps/server/server.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	package/data/data_m.h \
 	package/packet/packet_m.h \
 	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/core/myModule.o: core/myModule.cc \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/radio.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h
 $O/core/bytecount/count.o: core/bytecount/count.cc \
 	core/bytecount/count.h \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/radio.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/core/energest/energest.o: core/energest/energest.cc \
 	core/energest/energest.h \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/radio.h \
+	package/frame/frame_m.h \
+	package/signal/signal_m.h \
+	package/strobe/strobe_m.h
+$O/core/framer802154/framer.o: core/framer802154/framer.cc \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h
 $O/core/mac/mac.o: core/mac/mac.cc \
 	core/mac/mac.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	package/data/data_m.h \
@@ -258,25 +290,37 @@ $O/core/mac/mac.o: core/mac/mac.cc \
 	package/segment/segment_m.h \
 	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
+$O/core/mac/macAddress.o: core/mac/macAddress.cc \
+	core/mac/macAddress.h
 $O/core/mac/csma/csma.o: core/mac/csma/csma.cc \
 	core/mac/csma/csma.h \
 	core/mac/mac.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/strobe/strobe_m.h
 $O/core/mac/nullmac/nullMAC.o: core/mac/nullmac/nullMAC.cc \
 	core/mac/mac.h \
+	core/mac/macAddress.h \
 	core/mac/nullmac/nullMAC.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/strobe/strobe_m.h
+$O/core/net/ipAddress.o: core/net/ipAddress.cc \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h
 $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 	core/bytecount/count.h \
 	core/energest/energest.h \
+	core/framer802154/framer.h \
 	core/mac/mac.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
@@ -292,7 +336,9 @@ $O/core/net/ipv6/ipv6.o: core/net/ipv6/ipv6.cc \
 $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 	core/energest/energest.h \
 	core/mac/mac.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
@@ -306,6 +352,8 @@ $O/core/net/rpl/rpl.o: core/net/rpl/rpl.cc \
 $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
 	core/bytecount/count.h \
 	core/energest/energest.h \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h \
 	core/net/rpl/of/hopEnergy.h \
 	core/net/rpl/of/objectiveFunction.h \
 	core/net/rpl/rpl.h \
@@ -313,11 +361,15 @@ $O/core/net/rpl/of/hopEnergy.o: core/net/rpl/of/hopEnergy.cc \
 	package/strobe/strobe_m.h
 $O/core/radio/radio.o: core/radio/radio.cc \
 	core/energest/energest.h \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	core/radio/radio.h \
 	package/data/data_m.h \
+	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/segment/segment_m.h \
 	package/signal/signal_m.h \
@@ -327,9 +379,13 @@ $O/core/radio/radio.o: core/radio/radio.cc \
 	util/world/world.h
 $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	core/energest/energest.h \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/cc2420/cc2420.h \
 	core/radio/radio.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
@@ -337,9 +393,13 @@ $O/core/radio/cc2420/cc2420.o: core/radio/cc2420/cc2420.cc \
 	util/world/world.h
 $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	core/energest/energest.h \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/nullradio/nullRadio.h \
 	core/radio/radio.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \
@@ -347,8 +407,11 @@ $O/core/radio/nullradio/nullRadio.o: core/radio/nullradio/nullRadio.cc \
 	util/world/world.h
 $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	core/bytecount/count.h \
+	core/framer802154/framer.h \
 	core/mac/mac.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/radio.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
@@ -356,33 +419,47 @@ $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h
 $O/core/rdc/contikiMac/contikiMAC.o: core/rdc/contikiMac/contikiMAC.cc \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/rdc/contikiMac/contikiMAC.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/strobe/strobe_m.h
 $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/rdc/nullrdc/nullRDC.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \
 	package/strobe/strobe_m.h
 $O/core/transport/udp/udp.o: core/transport/udp/udp.cc \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/transport/udp/udp.h \
 	package/data/data_m.h \
 	package/segment/segment_m.h \
 	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/package/data/data_m.o: package/data/data_m.cc \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h \
 	package/data/data_m.h
 $O/package/frame/frame_m.o: package/frame/frame_m.cc \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h \
 	package/frame/frame_m.h
 $O/package/packet/packet_m.o: package/packet/packet_m.cc \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h \
 	package/packet/packet_m.h
 $O/package/segment/segment_m.o: package/segment/segment_m.cc \
+	core/mac/macAddress.h \
+	core/net/ipAddress.h \
 	package/segment/segment_m.h
 $O/package/signal/signal_m.o: package/signal/signal_m.cc \
 	package/signal/signal_m.h
@@ -393,7 +470,9 @@ $O/util/signal/mySignal.o: util/signal/mySignal.cc \
 $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	core/bytecount/count.h \
 	core/energest/energest.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/net/ipv6/ipv6.h \
 	core/net/rpl/rpl.h \
 	package/data/data_m.h \
@@ -402,8 +481,12 @@ $O/util/statistic/statistic.o: util/statistic/statistic.cc \
 	package/strobe/strobe_m.h \
 	util/statistic/statistic.h
 $O/util/world/world.o: util/world/world.cc \
+	core/framer802154/framer.h \
+	core/mac/macAddress.h \
 	core/myModule.h \
+	core/net/ipAddress.h \
 	core/radio/radio.h \
+	package/frame/frame_m.h \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h \
 	util/signal/mySignal.h \

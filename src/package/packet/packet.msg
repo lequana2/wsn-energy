@@ -6,6 +6,12 @@
 //  functioning: NET layer message
 //
 
+cplusplus {{
+#include <ipAddress.h>
+}};
+
+class noncobject IpAddress;
+
 namespace wsn_energy;
 
 // ip packet type
@@ -51,6 +57,9 @@ packet IpPacketStandard extends IpPacketInterface{
     int payloadLength;
     int nextHeader; // type: ICMP, UDP, TCP
     int hopLimit;
+    IpAddress sourceIpAddressV6;
+    IpAddress destinationIpAddressV6;
+    
     int sourceIpAddress;
     int destinationIpAddress;
 }
@@ -115,8 +124,11 @@ packet IpPacketCompressed extends IpPacketInterface{
 	int hopLimit; 					// 1 octet NEVER COMPRESSED
 	
 	int metaHopLimit;			  // in-line: hop limit
-	int metaSourceIpAddress;	  // meta-data: source Ip address
-	int metaDestinationIpAddress; // meta-data: destination ip address
+	IpAddress metaSourceIpAddressV6;	    // meta-data: source Ip address
+	IpAddress metaDestinationIpAddressV6; // meta-data: destination ip address
+	
+	int metaSourceIpAddress;	    // meta
+	int  metaDestinationIpAddress; // meta
 }
 
 // ICMP Packet
@@ -136,7 +148,7 @@ packet IcmpPacket{
 }
 
 packet DIO{
-    int senderID; // meta-data: sender IP address
+    int senderID; // meta-data: sender IP
 	int payloadLength = 24; // meta-data: length of DIO 
     
 	int instanceID;

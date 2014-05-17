@@ -352,6 +352,8 @@ void IpPacketStandard::copy(const IpPacketStandard& other)
     this->payloadLength_var = other.payloadLength_var;
     this->nextHeader_var = other.nextHeader_var;
     this->hopLimit_var = other.hopLimit_var;
+    this->sourceIpAddressV6_var = other.sourceIpAddressV6_var;
+    this->destinationIpAddressV6_var = other.destinationIpAddressV6_var;
     this->sourceIpAddress_var = other.sourceIpAddress_var;
     this->destinationIpAddress_var = other.destinationIpAddress_var;
 }
@@ -365,6 +367,8 @@ void IpPacketStandard::parsimPack(cCommBuffer *b)
     doPacking(b,this->payloadLength_var);
     doPacking(b,this->nextHeader_var);
     doPacking(b,this->hopLimit_var);
+    doPacking(b,this->sourceIpAddressV6_var);
+    doPacking(b,this->destinationIpAddressV6_var);
     doPacking(b,this->sourceIpAddress_var);
     doPacking(b,this->destinationIpAddress_var);
 }
@@ -378,6 +382,8 @@ void IpPacketStandard::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->payloadLength_var);
     doUnpacking(b,this->nextHeader_var);
     doUnpacking(b,this->hopLimit_var);
+    doUnpacking(b,this->sourceIpAddressV6_var);
+    doUnpacking(b,this->destinationIpAddressV6_var);
     doUnpacking(b,this->sourceIpAddress_var);
     doUnpacking(b,this->destinationIpAddress_var);
 }
@@ -440,6 +446,26 @@ int IpPacketStandard::getHopLimit() const
 void IpPacketStandard::setHopLimit(int hopLimit)
 {
     this->hopLimit_var = hopLimit;
+}
+
+IpAddress& IpPacketStandard::getSourceIpAddressV6()
+{
+    return sourceIpAddressV6_var;
+}
+
+void IpPacketStandard::setSourceIpAddressV6(const IpAddress& sourceIpAddressV6)
+{
+    this->sourceIpAddressV6_var = sourceIpAddressV6;
+}
+
+IpAddress& IpPacketStandard::getDestinationIpAddressV6()
+{
+    return destinationIpAddressV6_var;
+}
+
+void IpPacketStandard::setDestinationIpAddressV6(const IpAddress& destinationIpAddressV6)
+{
+    this->destinationIpAddressV6_var = destinationIpAddressV6;
 }
 
 int IpPacketStandard::getSourceIpAddress() const
@@ -509,7 +535,7 @@ const char *IpPacketStandardDescriptor::getProperty(const char *propertyname) co
 int IpPacketStandardDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 8+basedesc->getFieldCount(object) : 8;
+    return basedesc ? 10+basedesc->getFieldCount(object) : 10;
 }
 
 unsigned int IpPacketStandardDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -527,10 +553,12 @@ unsigned int IpPacketStandardDescriptor::getFieldTypeFlags(void *object, int fie
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISCOMPOUND,
+        FD_ISCOMPOUND,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
     };
-    return (field>=0 && field<8) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<10) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketStandardDescriptor::getFieldName(void *object, int field) const
@@ -548,10 +576,12 @@ const char *IpPacketStandardDescriptor::getFieldName(void *object, int field) co
         "payloadLength",
         "nextHeader",
         "hopLimit",
+        "sourceIpAddressV6",
+        "destinationIpAddressV6",
         "sourceIpAddress",
         "destinationIpAddress",
     };
-    return (field>=0 && field<8) ? fieldNames[field] : NULL;
+    return (field>=0 && field<10) ? fieldNames[field] : NULL;
 }
 
 int IpPacketStandardDescriptor::findField(void *object, const char *fieldName) const
@@ -564,8 +594,10 @@ int IpPacketStandardDescriptor::findField(void *object, const char *fieldName) c
     if (fieldName[0]=='p' && strcmp(fieldName, "payloadLength")==0) return base+3;
     if (fieldName[0]=='n' && strcmp(fieldName, "nextHeader")==0) return base+4;
     if (fieldName[0]=='h' && strcmp(fieldName, "hopLimit")==0) return base+5;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIpAddress")==0) return base+6;
-    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIpAddress")==0) return base+7;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIpAddressV6")==0) return base+6;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIpAddressV6")==0) return base+7;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourceIpAddress")==0) return base+8;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIpAddress")==0) return base+9;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -584,10 +616,12 @@ const char *IpPacketStandardDescriptor::getFieldTypeString(void *object, int fie
         "int",
         "int",
         "int",
+        "IpAddress",
+        "IpAddress",
         "int",
         "int",
     };
-    return (field>=0 && field<8) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<10) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketStandardDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -633,8 +667,10 @@ std::string IpPacketStandardDescriptor::getFieldAsString(void *object, int field
         case 3: return long2string(pp->getPayloadLength());
         case 4: return long2string(pp->getNextHeader());
         case 5: return long2string(pp->getHopLimit());
-        case 6: return long2string(pp->getSourceIpAddress());
-        case 7: return long2string(pp->getDestinationIpAddress());
+        case 6: {std::stringstream out; out << pp->getSourceIpAddressV6(); return out.str();}
+        case 7: {std::stringstream out; out << pp->getDestinationIpAddressV6(); return out.str();}
+        case 8: return long2string(pp->getSourceIpAddress());
+        case 9: return long2string(pp->getDestinationIpAddress());
         default: return "";
     }
 }
@@ -655,8 +691,8 @@ bool IpPacketStandardDescriptor::setFieldAsString(void *object, int field, int i
         case 3: pp->setPayloadLength(string2long(value)); return true;
         case 4: pp->setNextHeader(string2long(value)); return true;
         case 5: pp->setHopLimit(string2long(value)); return true;
-        case 6: pp->setSourceIpAddress(string2long(value)); return true;
-        case 7: pp->setDestinationIpAddress(string2long(value)); return true;
+        case 8: pp->setSourceIpAddress(string2long(value)); return true;
+        case 9: pp->setDestinationIpAddress(string2long(value)); return true;
         default: return false;
     }
 }
@@ -676,10 +712,12 @@ const char *IpPacketStandardDescriptor::getFieldStructName(void *object, int fie
         NULL,
         NULL,
         NULL,
+        "IpAddress",
+        "IpAddress",
         NULL,
         NULL,
     };
-    return (field>=0 && field<8) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<10) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketStandardDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -692,6 +730,8 @@ void *IpPacketStandardDescriptor::getFieldStructPointer(void *object, int field,
     }
     IpPacketStandard *pp = (IpPacketStandard *)object; (void)pp;
     switch (field) {
+        case 6: return (void *)(&pp->getSourceIpAddressV6()); break;
+        case 7: return (void *)(&pp->getDestinationIpAddressV6()); break;
         default: return NULL;
     }
 }
@@ -739,6 +779,8 @@ void IpPacketCompressed::copy(const IpPacketCompressed& other)
     this->hc2encoding_var = other.hc2encoding_var;
     this->hopLimit_var = other.hopLimit_var;
     this->metaHopLimit_var = other.metaHopLimit_var;
+    this->metaSourceIpAddressV6_var = other.metaSourceIpAddressV6_var;
+    this->metaDestinationIpAddressV6_var = other.metaDestinationIpAddressV6_var;
     this->metaSourceIpAddress_var = other.metaSourceIpAddress_var;
     this->metaDestinationIpAddress_var = other.metaDestinationIpAddress_var;
 }
@@ -753,6 +795,8 @@ void IpPacketCompressed::parsimPack(cCommBuffer *b)
     doPacking(b,this->hc2encoding_var);
     doPacking(b,this->hopLimit_var);
     doPacking(b,this->metaHopLimit_var);
+    doPacking(b,this->metaSourceIpAddressV6_var);
+    doPacking(b,this->metaDestinationIpAddressV6_var);
     doPacking(b,this->metaSourceIpAddress_var);
     doPacking(b,this->metaDestinationIpAddress_var);
 }
@@ -767,6 +811,8 @@ void IpPacketCompressed::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->hc2encoding_var);
     doUnpacking(b,this->hopLimit_var);
     doUnpacking(b,this->metaHopLimit_var);
+    doUnpacking(b,this->metaSourceIpAddressV6_var);
+    doUnpacking(b,this->metaDestinationIpAddressV6_var);
     doUnpacking(b,this->metaSourceIpAddress_var);
     doUnpacking(b,this->metaDestinationIpAddress_var);
 }
@@ -841,6 +887,26 @@ void IpPacketCompressed::setMetaHopLimit(int metaHopLimit)
     this->metaHopLimit_var = metaHopLimit;
 }
 
+IpAddress& IpPacketCompressed::getMetaSourceIpAddressV6()
+{
+    return metaSourceIpAddressV6_var;
+}
+
+void IpPacketCompressed::setMetaSourceIpAddressV6(const IpAddress& metaSourceIpAddressV6)
+{
+    this->metaSourceIpAddressV6_var = metaSourceIpAddressV6;
+}
+
+IpAddress& IpPacketCompressed::getMetaDestinationIpAddressV6()
+{
+    return metaDestinationIpAddressV6_var;
+}
+
+void IpPacketCompressed::setMetaDestinationIpAddressV6(const IpAddress& metaDestinationIpAddressV6)
+{
+    this->metaDestinationIpAddressV6_var = metaDestinationIpAddressV6;
+}
+
 int IpPacketCompressed::getMetaSourceIpAddress() const
 {
     return metaSourceIpAddress_var;
@@ -908,7 +974,7 @@ const char *IpPacketCompressedDescriptor::getProperty(const char *propertyname) 
 int IpPacketCompressedDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 9+basedesc->getFieldCount(object) : 9;
+    return basedesc ? 11+basedesc->getFieldCount(object) : 11;
 }
 
 unsigned int IpPacketCompressedDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -927,10 +993,12 @@ unsigned int IpPacketCompressedDescriptor::getFieldTypeFlags(void *object, int f
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISCOMPOUND,
+        FD_ISCOMPOUND,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
     };
-    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<11) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IpPacketCompressedDescriptor::getFieldName(void *object, int field) const
@@ -949,10 +1017,12 @@ const char *IpPacketCompressedDescriptor::getFieldName(void *object, int field) 
         "hc2encoding",
         "hopLimit",
         "metaHopLimit",
+        "metaSourceIpAddressV6",
+        "metaDestinationIpAddressV6",
         "metaSourceIpAddress",
         "metaDestinationIpAddress",
     };
-    return (field>=0 && field<9) ? fieldNames[field] : NULL;
+    return (field>=0 && field<11) ? fieldNames[field] : NULL;
 }
 
 int IpPacketCompressedDescriptor::findField(void *object, const char *fieldName) const
@@ -966,8 +1036,10 @@ int IpPacketCompressedDescriptor::findField(void *object, const char *fieldName)
     if (fieldName[0]=='h' && strcmp(fieldName, "hc2encoding")==0) return base+4;
     if (fieldName[0]=='h' && strcmp(fieldName, "hopLimit")==0) return base+5;
     if (fieldName[0]=='m' && strcmp(fieldName, "metaHopLimit")==0) return base+6;
-    if (fieldName[0]=='m' && strcmp(fieldName, "metaSourceIpAddress")==0) return base+7;
-    if (fieldName[0]=='m' && strcmp(fieldName, "metaDestinationIpAddress")==0) return base+8;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaSourceIpAddressV6")==0) return base+7;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaDestinationIpAddressV6")==0) return base+8;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaSourceIpAddress")==0) return base+9;
+    if (fieldName[0]=='m' && strcmp(fieldName, "metaDestinationIpAddress")==0) return base+10;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -987,10 +1059,12 @@ const char *IpPacketCompressedDescriptor::getFieldTypeString(void *object, int f
         "int",
         "int",
         "int",
+        "IpAddress",
+        "IpAddress",
         "int",
         "int",
     };
-    return (field>=0 && field<9) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<11) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *IpPacketCompressedDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -1037,8 +1111,10 @@ std::string IpPacketCompressedDescriptor::getFieldAsString(void *object, int fie
         case 4: return long2string(pp->getHc2encoding());
         case 5: return long2string(pp->getHopLimit());
         case 6: return long2string(pp->getMetaHopLimit());
-        case 7: return long2string(pp->getMetaSourceIpAddress());
-        case 8: return long2string(pp->getMetaDestinationIpAddress());
+        case 7: {std::stringstream out; out << pp->getMetaSourceIpAddressV6(); return out.str();}
+        case 8: {std::stringstream out; out << pp->getMetaDestinationIpAddressV6(); return out.str();}
+        case 9: return long2string(pp->getMetaSourceIpAddress());
+        case 10: return long2string(pp->getMetaDestinationIpAddress());
         default: return "";
     }
 }
@@ -1060,8 +1136,8 @@ bool IpPacketCompressedDescriptor::setFieldAsString(void *object, int field, int
         case 4: pp->setHc2encoding(string2long(value)); return true;
         case 5: pp->setHopLimit(string2long(value)); return true;
         case 6: pp->setMetaHopLimit(string2long(value)); return true;
-        case 7: pp->setMetaSourceIpAddress(string2long(value)); return true;
-        case 8: pp->setMetaDestinationIpAddress(string2long(value)); return true;
+        case 9: pp->setMetaSourceIpAddress(string2long(value)); return true;
+        case 10: pp->setMetaDestinationIpAddress(string2long(value)); return true;
         default: return false;
     }
 }
@@ -1082,10 +1158,12 @@ const char *IpPacketCompressedDescriptor::getFieldStructName(void *object, int f
         NULL,
         NULL,
         NULL,
+        "IpAddress",
+        "IpAddress",
         NULL,
         NULL,
     };
-    return (field>=0 && field<9) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<11) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1098,6 +1176,8 @@ void *IpPacketCompressedDescriptor::getFieldStructPointer(void *object, int fiel
     }
     IpPacketCompressed *pp = (IpPacketCompressed *)object; (void)pp;
     switch (field) {
+        case 7: return (void *)(&pp->getMetaSourceIpAddressV6()); break;
+        case 8: return (void *)(&pp->getMetaDestinationIpAddressV6()); break;
         default: return NULL;
     }
 }

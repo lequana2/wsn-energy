@@ -18,6 +18,7 @@
 
 #include "myModule.h"
 #include "signal_m.h"
+#include "framer.h"
 
 /*
  * Specification for CC2420
@@ -66,6 +67,7 @@ namespace wsn_energy {
 class RadioDriver : public myModule
 {
   private:
+    bool isBufferOK;
     Raw* bufferTXFIFO; // buffered transmit mode(TX_MODE 0) 128 bytes TXFIFO, in CC2420 RAM
 
     // Self functioning

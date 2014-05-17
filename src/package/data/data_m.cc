@@ -65,6 +65,7 @@ void Data::copy(const Data& other)
     this->time_var = other.time_var;
     this->destinationPort_var = other.destinationPort_var;
     this->destinationIPAddress_var = other.destinationIPAddress_var;
+    this->destinationIPAddressV6_var = other.destinationIPAddressV6_var;
     this->value_var = other.value_var;
 }
 
@@ -74,6 +75,7 @@ void Data::parsimPack(cCommBuffer *b)
     doPacking(b,this->time_var);
     doPacking(b,this->destinationPort_var);
     doPacking(b,this->destinationIPAddress_var);
+    doPacking(b,this->destinationIPAddressV6_var);
     doPacking(b,this->value_var);
 }
 
@@ -83,6 +85,7 @@ void Data::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->time_var);
     doUnpacking(b,this->destinationPort_var);
     doUnpacking(b,this->destinationIPAddress_var);
+    doUnpacking(b,this->destinationIPAddressV6_var);
     doUnpacking(b,this->value_var);
 }
 
@@ -114,6 +117,16 @@ int Data::getDestinationIPAddress() const
 void Data::setDestinationIPAddress(int destinationIPAddress)
 {
     this->destinationIPAddress_var = destinationIPAddress;
+}
+
+IpAddress& Data::getDestinationIPAddressV6()
+{
+    return destinationIPAddressV6_var;
+}
+
+void Data::setDestinationIPAddressV6(const IpAddress& destinationIPAddressV6)
+{
+    this->destinationIPAddressV6_var = destinationIPAddressV6;
 }
 
 const char * Data::getValue() const
@@ -173,7 +186,7 @@ const char *DataDescriptor::getProperty(const char *propertyname) const
 int DataDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
+    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
 }
 
 unsigned int DataDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -188,9 +201,10 @@ unsigned int DataDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISCOMPOUND,
         FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DataDescriptor::getFieldName(void *object, int field) const
@@ -205,9 +219,10 @@ const char *DataDescriptor::getFieldName(void *object, int field) const
         "time",
         "destinationPort",
         "destinationIPAddress",
+        "destinationIPAddressV6",
         "value",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldNames[field] : NULL;
 }
 
 int DataDescriptor::findField(void *object, const char *fieldName) const
@@ -217,7 +232,8 @@ int DataDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='t' && strcmp(fieldName, "time")==0) return base+0;
     if (fieldName[0]=='d' && strcmp(fieldName, "destinationPort")==0) return base+1;
     if (fieldName[0]=='d' && strcmp(fieldName, "destinationIPAddress")==0) return base+2;
-    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+3;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationIPAddressV6")==0) return base+3;
+    if (fieldName[0]=='v' && strcmp(fieldName, "value")==0) return base+4;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -233,9 +249,10 @@ const char *DataDescriptor::getFieldTypeString(void *object, int field) const
         "double",
         "int",
         "int",
+        "IpAddress",
         "string",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *DataDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -278,7 +295,8 @@ std::string DataDescriptor::getFieldAsString(void *object, int field, int i) con
         case 0: return double2string(pp->getTime());
         case 1: return long2string(pp->getDestinationPort());
         case 2: return long2string(pp->getDestinationIPAddress());
-        case 3: return oppstring2string(pp->getValue());
+        case 3: {std::stringstream out; out << pp->getDestinationIPAddressV6(); return out.str();}
+        case 4: return oppstring2string(pp->getValue());
         default: return "";
     }
 }
@@ -296,7 +314,7 @@ bool DataDescriptor::setFieldAsString(void *object, int field, int i, const char
         case 0: pp->setTime(string2double(value)); return true;
         case 1: pp->setDestinationPort(string2long(value)); return true;
         case 2: pp->setDestinationIPAddress(string2long(value)); return true;
-        case 3: pp->setValue((value)); return true;
+        case 4: pp->setValue((value)); return true;
         default: return false;
     }
 }
@@ -313,9 +331,10 @@ const char *DataDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        "IpAddress",
         NULL,
     };
-    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *DataDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -328,6 +347,7 @@ void *DataDescriptor::getFieldStructPointer(void *object, int field, int i) cons
     }
     Data *pp = (Data *)object; (void)pp;
     switch (field) {
+        case 3: return (void *)(&pp->getDestinationIPAddressV6()); break;
         default: return NULL;
     }
 }
