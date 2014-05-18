@@ -138,7 +138,7 @@ inline void doUnpacking(cCommBuffer *b, Frame& obj) {obj.parsimUnpack(b);}
  * 	uint16_t sourcePanID;	  				
  * 	uint16_t destinationPanID; 				
  * 	MacAddress sourceMacAddressEUI64; 		
- * 	MacAddress destinationMacAddressEUI;	
+ * 	MacAddress destinationMacAddressEUI64;  
  * 	
  * 	int sourceMacAddress; 		
  * 	int destinationMacAddress;  
@@ -152,7 +152,7 @@ class FrameDataStandard : public ::wsn_energy::Frame
     uint16_t sourcePanID_var;
     uint16_t destinationPanID_var;
     MacAddress sourceMacAddressEUI64_var;
-    MacAddress destinationMacAddressEUI_var;
+    MacAddress destinationMacAddressEUI64_var;
     int sourceMacAddress_var;
     int destinationMacAddress_var;
 
@@ -182,9 +182,9 @@ class FrameDataStandard : public ::wsn_energy::Frame
     virtual MacAddress& getSourceMacAddressEUI64();
     virtual const MacAddress& getSourceMacAddressEUI64() const {return const_cast<FrameDataStandard*>(this)->getSourceMacAddressEUI64();}
     virtual void setSourceMacAddressEUI64(const MacAddress& sourceMacAddressEUI64);
-    virtual MacAddress& getDestinationMacAddressEUI();
-    virtual const MacAddress& getDestinationMacAddressEUI() const {return const_cast<FrameDataStandard*>(this)->getDestinationMacAddressEUI();}
-    virtual void setDestinationMacAddressEUI(const MacAddress& destinationMacAddressEUI);
+    virtual MacAddress& getDestinationMacAddressEUI64();
+    virtual const MacAddress& getDestinationMacAddressEUI64() const {return const_cast<FrameDataStandard*>(this)->getDestinationMacAddressEUI64();}
+    virtual void setDestinationMacAddressEUI64(const MacAddress& destinationMacAddressEUI64);
     virtual int getSourceMacAddress() const;
     virtual void setSourceMacAddress(int sourceMacAddress);
     virtual int getDestinationMacAddress() const;

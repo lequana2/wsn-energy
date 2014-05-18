@@ -55,7 +55,7 @@ packet FrameDataStandard extends Frame{
 	uint16_t sourcePanID;	  				// 0/2   octets PANID - hard coded
 	uint16_t destinationPanID; 				// 0/2   octets PANID - hard coded
 	MacAddress sourceMacAddressEUI64; 		// 0/2/8 octets link-layer address address
-	MacAddress destinationMacAddressEUI;	// 0/2/8 octets link-layer addressaddress
+	MacAddress destinationMacAddressEUI64;  // 0/2/8 octets link-layer addressaddress
 	
 	int sourceMacAddress; 		// meta
 	int destinationMacAddress;  // meta

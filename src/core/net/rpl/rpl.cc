@@ -118,8 +118,6 @@ void RPL::sendDIO()
 
   net->multicast(icmpPacket);
 
-  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
-
 //  this->isDIOsent = false; // keep track of lastest DIO
 }
 

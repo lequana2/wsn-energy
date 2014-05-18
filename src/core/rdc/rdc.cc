@@ -900,9 +900,9 @@ void RDCdriver::off()
 bool RDCdriver::cca()
 {
   //          if (!this->ccaIsFreeChannel)
-//  if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0)
-//    return true;
-//  else
+  if ((check_and_cast<RadioDriver*>(getModuleByPath("^.radio")))->incomingSignal > 0)
+    return true;
+  else
   return false;
 }
 

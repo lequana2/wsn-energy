@@ -545,7 +545,7 @@ void FrameDataStandard::copy(const FrameDataStandard& other)
     this->sourcePanID_var = other.sourcePanID_var;
     this->destinationPanID_var = other.destinationPanID_var;
     this->sourceMacAddressEUI64_var = other.sourceMacAddressEUI64_var;
-    this->destinationMacAddressEUI_var = other.destinationMacAddressEUI_var;
+    this->destinationMacAddressEUI64_var = other.destinationMacAddressEUI64_var;
     this->sourceMacAddress_var = other.sourceMacAddress_var;
     this->destinationMacAddress_var = other.destinationMacAddress_var;
 }
@@ -557,7 +557,7 @@ void FrameDataStandard::parsimPack(cCommBuffer *b)
     doPacking(b,this->sourcePanID_var);
     doPacking(b,this->destinationPanID_var);
     doPacking(b,this->sourceMacAddressEUI64_var);
-    doPacking(b,this->destinationMacAddressEUI_var);
+    doPacking(b,this->destinationMacAddressEUI64_var);
     doPacking(b,this->sourceMacAddress_var);
     doPacking(b,this->destinationMacAddress_var);
 }
@@ -569,7 +569,7 @@ void FrameDataStandard::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->sourcePanID_var);
     doUnpacking(b,this->destinationPanID_var);
     doUnpacking(b,this->sourceMacAddressEUI64_var);
-    doUnpacking(b,this->destinationMacAddressEUI_var);
+    doUnpacking(b,this->destinationMacAddressEUI64_var);
     doUnpacking(b,this->sourceMacAddress_var);
     doUnpacking(b,this->destinationMacAddress_var);
 }
@@ -614,14 +614,14 @@ void FrameDataStandard::setSourceMacAddressEUI64(const MacAddress& sourceMacAddr
     this->sourceMacAddressEUI64_var = sourceMacAddressEUI64;
 }
 
-MacAddress& FrameDataStandard::getDestinationMacAddressEUI()
+MacAddress& FrameDataStandard::getDestinationMacAddressEUI64()
 {
-    return destinationMacAddressEUI_var;
+    return destinationMacAddressEUI64_var;
 }
 
-void FrameDataStandard::setDestinationMacAddressEUI(const MacAddress& destinationMacAddressEUI)
+void FrameDataStandard::setDestinationMacAddressEUI64(const MacAddress& destinationMacAddressEUI64)
 {
-    this->destinationMacAddressEUI_var = destinationMacAddressEUI;
+    this->destinationMacAddressEUI64_var = destinationMacAddressEUI64;
 }
 
 int FrameDataStandard::getSourceMacAddress() const
@@ -727,7 +727,7 @@ const char *FrameDataStandardDescriptor::getFieldName(void *object, int field) c
         "sourcePanID",
         "destinationPanID",
         "sourceMacAddressEUI64",
-        "destinationMacAddressEUI",
+        "destinationMacAddressEUI64",
         "sourceMacAddress",
         "destinationMacAddress",
     };
@@ -742,7 +742,7 @@ int FrameDataStandardDescriptor::findField(void *object, const char *fieldName) 
     if (fieldName[0]=='s' && strcmp(fieldName, "sourcePanID")==0) return base+1;
     if (fieldName[0]=='d' && strcmp(fieldName, "destinationPanID")==0) return base+2;
     if (fieldName[0]=='s' && strcmp(fieldName, "sourceMacAddressEUI64")==0) return base+3;
-    if (fieldName[0]=='d' && strcmp(fieldName, "destinationMacAddressEUI")==0) return base+4;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destinationMacAddressEUI64")==0) return base+4;
     if (fieldName[0]=='s' && strcmp(fieldName, "sourceMacAddress")==0) return base+5;
     if (fieldName[0]=='d' && strcmp(fieldName, "destinationMacAddress")==0) return base+6;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
@@ -809,7 +809,7 @@ std::string FrameDataStandardDescriptor::getFieldAsString(void *object, int fiel
         case 1: return ulong2string(pp->getSourcePanID());
         case 2: return ulong2string(pp->getDestinationPanID());
         case 3: {std::stringstream out; out << pp->getSourceMacAddressEUI64(); return out.str();}
-        case 4: {std::stringstream out; out << pp->getDestinationMacAddressEUI(); return out.str();}
+        case 4: {std::stringstream out; out << pp->getDestinationMacAddressEUI64(); return out.str();}
         case 5: return long2string(pp->getSourceMacAddress());
         case 6: return long2string(pp->getDestinationMacAddress());
         default: return "";
@@ -866,7 +866,7 @@ void *FrameDataStandardDescriptor::getFieldStructPointer(void *object, int field
     FrameDataStandard *pp = (FrameDataStandard *)object; (void)pp;
     switch (field) {
         case 3: return (void *)(&pp->getSourceMacAddressEUI64()); break;
-        case 4: return (void *)(&pp->getDestinationMacAddressEUI()); break;
+        case 4: return (void *)(&pp->getDestinationMacAddressEUI64()); break;
         default: return NULL;
     }
 }

@@ -49,23 +49,12 @@ void IPv6::finish()
 
   // Clear queue !!!
   for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
-  {
-//    if (this->bufferNET == *it)
-//      this->bufferNET = NULL;
-
     delete *it;
-  }
 
   this->ipPacketQueue.clear();
 
   // clear RPL
   this->rpl->finish();
-
-//  if (this->bufferNET != NULL)
-//  {
-//    delete this->bufferNET;
-//    this->bufferNET = NULL;
-//  }
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
@@ -273,8 +262,6 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
             if (check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != 0
                 && check_and_cast<IpPacketStandard*>(packet)->getDestinationIpAddress() != this->getId())
             {
-              (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(IP_TRANS);
-
               // hop limit !!!
               if (check_and_cast<IpPacketStandard*>(packet)->getHopLimit() == 1)
               {
@@ -339,27 +326,47 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           if (getModuleByPath("^.^")->par("usingHDC").boolValue())
           {
             // compress using HC01
-            if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+            if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+            {
+              (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(IP_TRANS);
+            }
+            else if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
             {
               if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
               {
                 if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                {
+                  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
                   this->rpl->hasSentDIO();
+                }
                 else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                {
+                  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIS_SENT));
                   this->rpl->hasSentDIS();
+                }
               }
             }
           }
           else
           {
-            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+            if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+            {
+              (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(IP_TRANS);
+            }
+            else if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
             {
               if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getType() == ICMP_RPL)
               {
                 if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIO_CODE)
+                {
+                  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
                   this->rpl->hasSentDIO();
+                }
                 else if (check_and_cast<IcmpPacket*>(bufferNET->getEncapsulatedPacket())->getCode() == RPL_DIS_CODE)
+                {
+                  (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(DIO_SENT));
                   this->rpl->hasSentDIS();
+                }
               }
             }
           }
@@ -394,8 +401,9 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
 
         case MAC_RELIABLE: /* resend */
         {
-          if (bufferNET != NULL)
-            putIntoQueue(bufferNET->dup());
+          // what if it really sent but no ack ???
+//          if (bufferNET != NULL)
+//            putIntoQueue(bufferNET->dup());
           break;
         } /* resend */
 
@@ -447,7 +455,7 @@ void IPv6::preparePacketToBeSent()
       }
       else
       {
-        if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_ICMP)
+        if (check_and_cast<IpPacketStandard*>(*it)->getNextHeader() == NEXT_HEADER_ICMP)
         {
           if (check_and_cast<IcmpPacket*>((*it)->getEncapsulatedPacket())->getType() == ICMP_RPL)
           {
@@ -467,14 +475,14 @@ void IPv6::preparePacketToBeSent()
     if (getModuleByPath("^.^")->par("usingHDC").boolValue())
     {
       // compress using HC01
-      if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
-        (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
+//      if (check_and_cast<IpPacketCompressed*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
     }
     else
     {
       // statistics
-      if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
-        (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
+//      if (check_and_cast<IpPacketStandard*>(bufferNET)->getNextHeader() == NEXT_HEADER_UDP)
+      (check_and_cast<Statistic*>(getModuleByPath("^.^.statistic")))->registerStatistic(NET_SEND);
     }
   }
 }
