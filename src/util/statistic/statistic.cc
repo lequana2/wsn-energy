@@ -108,16 +108,16 @@ void Statistic::finish()
 {
   // poll last time
   pollTotalSensorEnergy();
-  pollTotalSensorEnergyCount();
+//  pollTotalSensorEnergyCount();
 
-  // Power status of remaining sensor(s)
+// Power status of remaining sensor(s)
   cModule *wsn = getModuleByPath("^");
   int numberClient = wsn->par("numberClient").longValue();
 
   for (int i = 0; i < numberClient; i++)
   {
     numSensorEnergy =
-        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->energestRemaining;
+        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->residualEnergy;
 
     numTotalEnergy += numSensorEnergy;
 
@@ -132,9 +132,18 @@ void Statistic::finish()
 
     // residual energy
     if (getParentModule()->par("isPollingCount").boolValue())
+    {
       numSensorEnergyCount =
           check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
-    emit(sigSensorEnergyCount, numSensorEnergyCount);
+      emit(sigSensorEnergyCount, numSensorEnergyCount);
+    }
+
+    if (getParentModule()->par("isPolling").boolValue())
+    {
+      numSensorEnergy =
+          check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->residualEnergy;
+      emit(sigSensorEnergy, numSensorEnergy);
+    }
   }
 
   emit(sigTimeIdle, timeIdle);
@@ -180,7 +189,7 @@ void Statistic::pollTotalSensorEnergy()
     {
       (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->update();
       numNetworkEnergy +=
-          (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->energestRemaining;
+          (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->residualEnergy;
     }
 
     emit(sigNetworkEnergy, numNetworkEnergy);
