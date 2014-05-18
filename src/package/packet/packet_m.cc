@@ -1631,12 +1631,12 @@ void DIO::setVersion(int version)
     this->version_var = version;
 }
 
-double DIO::getRank() const
+unsigned long DIO::getRank() const
 {
     return rank_var;
 }
 
-void DIO::setRank(double rank)
+void DIO::setRank(unsigned long rank)
 {
     this->rank_var = rank;
 }
@@ -1856,7 +1856,7 @@ const char *DIODescriptor::getFieldTypeString(void *object, int field) const
         "int",
         "int",
         "int",
-        "double",
+        "unsigned long",
         "bool",
         "bool",
         "int",
@@ -1910,7 +1910,7 @@ std::string DIODescriptor::getFieldAsString(void *object, int field, int i) cons
         case 1: return long2string(pp->getPayloadLength());
         case 2: return long2string(pp->getInstanceID());
         case 3: return long2string(pp->getVersion());
-        case 4: return double2string(pp->getRank());
+        case 4: return ulong2string(pp->getRank());
         case 5: return bool2string(pp->getGrounded());
         case 6: return bool2string(pp->getO());
         case 7: return long2string(pp->getModeOfOperation());
@@ -1937,7 +1937,7 @@ bool DIODescriptor::setFieldAsString(void *object, int field, int i, const char 
         case 1: pp->setPayloadLength(string2long(value)); return true;
         case 2: pp->setInstanceID(string2long(value)); return true;
         case 3: pp->setVersion(string2long(value)); return true;
-        case 4: pp->setRank(string2double(value)); return true;
+        case 4: pp->setRank(string2ulong(value)); return true;
         case 5: pp->setGrounded(string2bool(value)); return true;
         case 6: pp->setO(string2bool(value)); return true;
         case 7: pp->setModeOfOperation(string2long(value)); return true;

@@ -392,7 +392,7 @@ inline void doUnpacking(cCommBuffer *b, IcmpPacket& obj) {obj.parsimUnpack(b);}
  *     
  * 	int instanceID;
  * 	int version; 
- * 	double rank; 
+ * 	unsigned long rank; 
  * 	bool grounded;
  * 	bool o;
  * 	int modeOfOperation;
@@ -411,7 +411,7 @@ class DIO : public ::cPacket
     int payloadLength_var;
     int instanceID_var;
     int version_var;
-    double rank_var;
+    unsigned long rank_var;
     bool grounded_var;
     bool o_var;
     int modeOfOperation_var;
@@ -446,8 +446,8 @@ class DIO : public ::cPacket
     virtual void setInstanceID(int instanceID);
     virtual int getVersion() const;
     virtual void setVersion(int version);
-    virtual double getRank() const;
-    virtual void setRank(double rank);
+    virtual unsigned long getRank() const;
+    virtual void setRank(unsigned long rank);
     virtual bool getGrounded() const;
     virtual void setGrounded(bool grounded);
     virtual bool getO() const;

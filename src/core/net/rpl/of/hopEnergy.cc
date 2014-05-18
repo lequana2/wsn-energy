@@ -27,14 +27,16 @@ RPL_neighbor* hopEnergy::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2
   return parent1;
 }
 
-double hopEnergy::calculateRank(RPL_neighbor* parent)
+unsigned long hopEnergy::calculateRank(RPL_neighbor* parent)
 {
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
     double percentRemaining = check_and_cast<Energest*>(
-    simulation.getModule(parent->neighborID))->energestRemaining / MAX_POWER;
+    simulation.getModule(parent->neighborID))->residualEnergy / MAX_POWER;
 
-    return parent->neighborRank + 1 + percentRemaining; // 1 hop + residual energy percentage
+    // hop increment = 256
+    // energy level  = 256
+    return parent->neighborRank + 256 + percentRemaining * 256;
   }
   else
   {

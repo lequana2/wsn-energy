@@ -18,7 +18,7 @@ class ObjectiveFunction
 {
   public:
     virtual RPL_neighbor* bestParent(RPL_neighbor*, RPL_neighbor*) = 0;
-    virtual double calculateRank(RPL_neighbor*) = 0;
+    virtual unsigned long calculateRank(RPL_neighbor*) = 0;
     virtual RPL_neighbor* updatePreferredParent(std::list<RPL_neighbor*>) = 0;
 };
 

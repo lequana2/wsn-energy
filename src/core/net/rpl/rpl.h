@@ -37,7 +37,7 @@ class RPL_neighbor
 {
   public:
     int neighborID; // IPv6 of neighbor
-    double neighborRank; // rank of this neighbor
+    unsigned long neighborRank; // rank of this neighbor
 
     NodeQuality nodeQuality; // quality of this neighbor
     LinkQuality linkQuality; // quality of link between this neighbor and ownner mote

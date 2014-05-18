@@ -90,8 +90,11 @@ void Statistic::handleMessage(cMessage *msg)
   {
     if (msg == polling)
     {
-      pollTotalSensorEnergy();
-      scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+      if (simTime() + getParentModule()->par("polling") < getModuleByPath("^")->par("timeLimit").doubleValue())
+      {
+        pollTotalSensorEnergy();
+        scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+      }
     }
     else if (msg == pollingCount)
     {
@@ -107,7 +110,7 @@ void Statistic::handleMessage(cMessage *msg)
 void Statistic::finish()
 {
   // poll last time
-  pollTotalSensorEnergy();
+//  pollTotalSensorEnergy();
 //  pollTotalSensorEnergyCount();
 
 // Power status of remaining sensor(s)
@@ -128,7 +131,6 @@ void Statistic::finish()
         (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
     timeIdle +=
         (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
-    emit(sigSensorEnergy, numSensorEnergy);
 
     // residual energy
     if (getParentModule()->par("isPollingCount").boolValue())

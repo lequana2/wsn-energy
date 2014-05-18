@@ -153,7 +153,7 @@ packet DIO{
     
 	int instanceID;
 	int version; // version
-	double rank; // rank 
+	unsigned long rank; // rank 
 	bool grounded;
 	bool o;
 	int modeOfOperation;
