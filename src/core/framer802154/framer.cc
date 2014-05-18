@@ -52,7 +52,7 @@ bool Framer::createFramer(Raw*& bufferTXFIFO, Frame* frame)
   switch (frame->getFrameType())
   {
     case FRAME_DATA: {
-      if (simulation.getModuleByPath("WSN")->par("usingHDR"))
+      if (simulation.getModuleByPath("WSN")->par("usingHDC"))
       {
         // Compress using HC01
 
