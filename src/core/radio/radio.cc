@@ -229,6 +229,12 @@ void RadioDriver::processUpperLayerMessage(cPacket* packet)
   {
     case DATA: /* Data */
     {
+      if (bufferTXFIFO != NULL)
+      {
+        delete bufferTXFIFO;
+        bufferTXFIFO = NULL;
+      }
+
       isBufferOK = Framer::createFramer(this->bufferTXFIFO, check_and_cast<Frame*>(packet));
 
       break;
@@ -344,7 +350,7 @@ void RadioDriver::listen()
 void RadioDriver::received(Raw* raw)
 {
   // consider bit error
-   if (!raw->hasBitError())
+  if (!raw->hasBitError())
   {
     if (DEBUG)
       ev << "PHY: RECEIVED" << endl;

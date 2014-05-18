@@ -125,25 +125,8 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
       (check_and_cast<FrameDataCompressed*>(bufferMAC))->setFinalDestinationMacAddress(0);
 
     // hop count
-    switch (check_and_cast<IpPacketCompressed*>(packet)->getHopLimit())
-    {
-      case HOP_LIMIT_COMPRESSED_1:
-        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(1);
-        break;
-
-      case HOP_LIMIT_COMPRESSED_64:
-        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(64);
-        break;
-
-      case HOP_LIMIT_COMPRESSED_128:
-        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(128);
-        break;
-
-      case HOP_LIMIT_NON_COMPRESSED:
-        (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(
-            check_and_cast<IpPacketCompressed*>(packet)->getMetaHopLimit());
-        break;
-    }
+    (check_and_cast<FrameDataCompressed*>(bufferMAC))->setHopLeft(
+        check_and_cast<IpPacketCompressed*>(packet)->getMetaHopLimit());
 
     // next hop
     if (check_and_cast<IpPacketCompressed*>(packet)->getMetaDestinationIpAddress() == 0)
@@ -415,8 +398,10 @@ void MACdriver::receiveFrame(Frame* frameMac)
       if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
         (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
     }
-
-    delete frameMac;
+    else
+    {
+      delete frameMac;
+    }
   }
 }
 

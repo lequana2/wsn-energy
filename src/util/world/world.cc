@@ -331,9 +331,9 @@ void World::releaseHost(RadioDriver* mote)
       // check success
       Raw* raw = host->onAir->dup();
       if ((*it)->getIsCorrupted())
-        raw->setBitError(false); // no error
+        raw->setBitError(true); // no error
       else
-        raw->setBitError(true);  // error
+        raw->setBitError(false);  // error
 
       // send message
       (check_and_cast<RadioDriver*>(simulation.getModule(senderID)))->sendDirect(raw,

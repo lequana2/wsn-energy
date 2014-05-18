@@ -146,8 +146,8 @@ void Client::processLowerLayerMessage(cPacket*)
  */
 void Client::newData()
 {
-  int sendInterval = 290; // seconds
-  int restPeriod = 10; // seconds
+  int sendInterval = 120; // seconds
+  int restPeriod = 25; // seconds
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;

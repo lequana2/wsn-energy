@@ -32,7 +32,7 @@ unsigned long hopEnergy::calculateRank(RPL_neighbor* parent)
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
     double percentRemaining = check_and_cast<Energest*>(
-    simulation.getModule(parent->neighborID))->residualEnergy / MAX_POWER;
+    simulation.getModule(parent->neighborID)->getModuleByPath("^.energest"))->residualEnergy / MAX_POWER;
 
     // hop increment = 256
     // energy level  = 256

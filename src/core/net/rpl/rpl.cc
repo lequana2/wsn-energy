@@ -519,7 +519,25 @@ void RPL::updatePrefferredParent()
     simulation.getModule(this->net->getParentModule()->getId())->gate(channelParent)->setDisplayString("ls=,0");
   }
 
-  this->rplDag.preferredParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+  RPL_neighbor *tentativeParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+
+  if (tentativeParent != NULL)
+  {
+    if (this->rplDag.preferredParent == NULL)
+    {
+      this->rplDag.preferredParent = tentativeParent;
+    }
+    else
+    {
+      this->rplDag.preferredParent =
+          this->rplDag.preferredParent->neighborRank <= tentativeParent->neighborRank ? this->rplDag.preferredParent :
+              tentativeParent;
+    }
+  }
+  else
+  {
+    this->rplDag.preferredParent = NULL;
+  }
 
   // draw new preferred parent (if exist)
   if (ANNOTATE_DEFAULT_ROUTE && this->rplDag.preferredParent != NULL)

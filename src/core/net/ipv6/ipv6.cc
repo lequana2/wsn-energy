@@ -224,6 +224,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           if (frame->getHopLeft() == 0)
           {
             // reach maximum hop left
+            // why so many packet dropped at this point ???
             std::cout << "Delete circular packet" << endl;
             delete ipPacket;
           }
@@ -516,6 +517,7 @@ void IPv6::multicast(IcmpPacket *icmpPacket)
     (check_and_cast<IpPacketCompressed*>(ipPacket))->setDestinationIpAddress(3); // 0x11: PC, IC
 
     // meta-data as arguments for mac functions
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaHopLimit(64);
     (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaSourceIpAddress(this->getId());
     (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaDestinationIpAddress(0);
   }
@@ -557,6 +559,7 @@ void IPv6::unicast(UdpPacketInterface *udpPacket)
     (check_and_cast<IpPacketCompressed*>(ipPacket))->setDestinationIpAddress(3); // 0x11: PC, IC
 
     // meta-data as arguments for mac functions
+    (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaHopLimit(64);
     (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaSourceIpAddress(this->getId());
     (check_and_cast<IpPacketCompressed*>(ipPacket))->setMetaDestinationIpAddress(
         check_and_cast<Data*>(udpPacket->getEncapsulatedPacket())->getDestinationIPAddress());

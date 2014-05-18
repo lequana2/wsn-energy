@@ -25,12 +25,6 @@ namespace wsn_energy {
 
 bool Framer::createFramer(Raw*& bufferTXFIFO, Frame* frame)
 {
-  if (bufferTXFIFO != NULL)
-  {
-    delete bufferTXFIFO;
-    bufferTXFIFO = NULL;
-  }
-
   bufferTXFIFO = new Raw;
   bufferTXFIFO->setKind(DATA);
   bufferTXFIFO->setByteLength(bufferTXFIFO->getHeaderLength());
