@@ -9,6 +9,8 @@
 namespace wsn_energy;
 
 packet Raw{
+    bool bitError;
+    
     // 6 octets preamable
     int headerLength = 6;
     

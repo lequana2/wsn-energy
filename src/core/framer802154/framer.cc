@@ -132,6 +132,7 @@ bool Framer::createFramer(Raw*& bufferTXFIFO, Frame* frame)
     }
   }
 
+  free(tx_frame_buffer);
   bufferTXFIFO->encapsulate(frame);
 
   /* show packet length (bytes) */

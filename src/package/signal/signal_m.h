@@ -20,6 +20,8 @@ namespace wsn_energy {
  * Class generated from <tt>package/signal/signal.msg</tt> by opp_msgc.
  * <pre>
  * packet Raw{
+ *     bool bitError;
+ *     
  *     
  *     int headerLength = 6;
  *     
@@ -39,6 +41,7 @@ namespace wsn_energy {
 class Raw : public ::cPacket
 {
   protected:
+    bool bitError_var;
     int headerLength_var;
     int maxPayloadLength_var;
 
@@ -59,6 +62,8 @@ class Raw : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
+    virtual bool getBitError() const;
+    virtual void setBitError(bool bitError);
     virtual int getHeaderLength() const;
     virtual void setHeaderLength(int headerLength);
     virtual int getMaxPayloadLength() const;

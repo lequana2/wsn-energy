@@ -37,6 +37,7 @@ Register_Class(Raw);
 
 Raw::Raw(const char *name, int kind) : cPacket(name,kind)
 {
+    this->bitError_var = 0;
     this->headerLength_var = 6;
     this->maxPayloadLength_var = 127;
 }
@@ -60,6 +61,7 @@ Raw& Raw::operator=(const Raw& other)
 
 void Raw::copy(const Raw& other)
 {
+    this->bitError_var = other.bitError_var;
     this->headerLength_var = other.headerLength_var;
     this->maxPayloadLength_var = other.maxPayloadLength_var;
 }
@@ -67,6 +69,7 @@ void Raw::copy(const Raw& other)
 void Raw::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
+    doPacking(b,this->bitError_var);
     doPacking(b,this->headerLength_var);
     doPacking(b,this->maxPayloadLength_var);
 }
@@ -74,8 +77,19 @@ void Raw::parsimPack(cCommBuffer *b)
 void Raw::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
+    doUnpacking(b,this->bitError_var);
     doUnpacking(b,this->headerLength_var);
     doUnpacking(b,this->maxPayloadLength_var);
+}
+
+bool Raw::getBitError() const
+{
+    return bitError_var;
+}
+
+void Raw::setBitError(bool bitError)
+{
+    this->bitError_var = bitError;
 }
 
 int Raw::getHeaderLength() const
@@ -145,7 +159,7 @@ const char *RawDescriptor::getProperty(const char *propertyname) const
 int RawDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
+    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
 unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -159,8 +173,9 @@ unsigned int RawDescriptor::getFieldTypeFlags(void *object, int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RawDescriptor::getFieldName(void *object, int field) const
@@ -172,18 +187,20 @@ const char *RawDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
+        "bitError",
         "headerLength",
         "maxPayloadLength",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
 int RawDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='h' && strcmp(fieldName, "headerLength")==0) return base+0;
-    if (fieldName[0]=='m' && strcmp(fieldName, "maxPayloadLength")==0) return base+1;
+    if (fieldName[0]=='b' && strcmp(fieldName, "bitError")==0) return base+0;
+    if (fieldName[0]=='h' && strcmp(fieldName, "headerLength")==0) return base+1;
+    if (fieldName[0]=='m' && strcmp(fieldName, "maxPayloadLength")==0) return base+2;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -196,10 +213,11 @@ const char *RawDescriptor::getFieldTypeString(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldTypeStrings[] = {
+        "bool",
         "int",
         "int",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *RawDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -239,8 +257,9 @@ std::string RawDescriptor::getFieldAsString(void *object, int field, int i) cons
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getHeaderLength());
-        case 1: return long2string(pp->getMaxPayloadLength());
+        case 0: return bool2string(pp->getBitError());
+        case 1: return long2string(pp->getHeaderLength());
+        case 2: return long2string(pp->getMaxPayloadLength());
         default: return "";
     }
 }
@@ -255,8 +274,9 @@ bool RawDescriptor::setFieldAsString(void *object, int field, int i, const char 
     }
     Raw *pp = (Raw *)object; (void)pp;
     switch (field) {
-        case 0: pp->setHeaderLength(string2long(value)); return true;
-        case 1: pp->setMaxPayloadLength(string2long(value)); return true;
+        case 0: pp->setBitError(string2bool(value)); return true;
+        case 1: pp->setHeaderLength(string2long(value)); return true;
+        case 2: pp->setMaxPayloadLength(string2long(value)); return true;
         default: return false;
     }
 }
@@ -272,8 +292,9 @@ const char *RawDescriptor::getFieldStructName(void *object, int field) const
     static const char *fieldStructNames[] = {
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const
