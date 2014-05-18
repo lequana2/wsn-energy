@@ -52,7 +52,7 @@ class Energest : public cSimpleModule
     virtual void finish();
 
   public:
-    double energestRemaining;
+    double residualEnergy;
     double capsuleTotalTime[ENERGEST_TYPE_MAX];
 
     void update();

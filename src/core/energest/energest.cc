@@ -32,7 +32,7 @@ void Energest::initialize()
 //  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
 
   // total energy remaining
-  this->energestRemaining = MAX_POWER * RESIDUAL;
+  this->residualEnergy = MAX_POWER * RESIDUAL;
 }
 
 void Energest::handleMessage(cMessage *msg)
@@ -68,12 +68,12 @@ void Energest::energestOff(int type)
     this->capsuleTotalTime[type] += consumeTime;
 
     // consume energy, in term off hour not second, because power is mAh
-    this->energestRemaining -= consumeTime * power[type] / 3600.0;
+    this->residualEnergy -= consumeTime * power[type] / 3600.0;
   }
 
   // residual energy
   // Turn off if below critical mode
-  if (this->energestRemaining < MAX_POWER * CRITICAL)
+  if (this->residualEnergy < MAX_POWER * CRITICAL)
   {
     std::cout << getParentModule()->getFullName() << " DOWN" << endl;
     ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
