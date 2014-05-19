@@ -145,6 +145,7 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
         if (DEBUG)
           std::cout << "FATAL NET ERROR" << endl;
 
+        sendResult(MAC_RELIABLE);
         selfTimer(0, MAC_EXPIRE_IFS);
 
         return;
@@ -198,7 +199,9 @@ void MACdriver::processUpperLayerMessage(cPacket* packet)
         if (DEBUG)
           std::cout << "FATAL NET ERROR" << endl;
 
+        sendResult(MAC_RELIABLE);
         selfTimer(0, MAC_EXPIRE_IFS);
+
         return;
       }
       else
@@ -372,7 +375,8 @@ void MACdriver::receiveFrame(Frame* frameMac)
 
     // check right hop
     if (check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == 0
-        || check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == getId())
+        || (check_and_cast<FrameDataCompressed*>(frameMac)->getDestinationMacAddress() == getId()
+            && check_and_cast<FrameDataCompressed*>(frameMac)->getSourceMacAddress() != defaultRoute))
     {
       // right MAC destination
       sendMessageToUpper(frameMac);
@@ -389,7 +393,8 @@ void MACdriver::receiveFrame(Frame* frameMac)
   else
   {
     if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == 0
-        || check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
+        || (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId()
+            && check_and_cast<FrameDataStandard*>(frameMac)->getSourceMacAddress() != defaultRoute))
     {
       // right MAC destination
       sendMessageToUpper(frameMac->decapsulate());
@@ -397,6 +402,8 @@ void MACdriver::receiveFrame(Frame* frameMac)
       /* statistics */
       if (check_and_cast<FrameDataStandard*>(frameMac)->getDestinationMacAddress() == getId())
         (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic"))->registerStatistic(MAC_RECV));
+
+      delete frameMac;
     }
     else
     {

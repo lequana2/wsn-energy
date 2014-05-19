@@ -403,8 +403,8 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
         case MAC_RELIABLE: /* resend */
         {
           // what if it really sent but no ack ???
-//          if (bufferNET != NULL)
-//            putIntoQueue(bufferNET->dup());
+          if (bufferNET != NULL)
+            putIntoQueue(bufferNET->dup());
           break;
         } /* resend */
 

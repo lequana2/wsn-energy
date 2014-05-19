@@ -31,12 +31,19 @@ unsigned long hopEnergy::calculateRank(RPL_neighbor* parent)
 {
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
-    double percentRemaining = check_and_cast<Energest*>(
+    double energyLevel = check_and_cast<Energest*>(
     simulation.getModule(parent->neighborID)->getModuleByPath("^.energest"))->residualEnergy / MAX_POWER;
 
-    // hop increment = 256
+    // hop increment
+    int hop = (parent->neighborRank / 256 + 1) * 256;
+
     // energy level  = 256
-    return parent->neighborRank + 256 + percentRemaining * 256;
+    int reside = 256 * energyLevel;
+
+//    std::cout << "parent rank: " << parent->neighborRank << " self rank: " << hop + reside << endl;
+    return hop + reside;
+
+    return parent->neighborRank + 1;
   }
   else
   {

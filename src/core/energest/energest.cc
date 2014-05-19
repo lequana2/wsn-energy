@@ -32,7 +32,7 @@ void Energest::initialize()
 //  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
 
   // total energy remaining
-  this->residualEnergy = MAX_POWER * RESIDUAL;
+  this->residualEnergy = MAX_POWER;
 }
 
 void Energest::handleMessage(cMessage *msg)

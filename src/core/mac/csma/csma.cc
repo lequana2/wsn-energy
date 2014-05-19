@@ -33,7 +33,7 @@ void csma::deferPacket()
     else
       selfTimer(SIFS, MAC_EXPIRE_IFS);
 
-    sendResult(MAC_RELIABLE);
+//    sendResult(MAC_RELIABLE);
 
     endMACphase();
   }

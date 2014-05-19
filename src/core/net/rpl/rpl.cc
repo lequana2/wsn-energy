@@ -82,8 +82,14 @@ void RPL::rpl_set_root()
 {
   this->rplDag.version++;
   this->rplDag.joined = true;
-  this->rplDag.rank = 1;
-
+  if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
+  {
+    this->rplDag.rank = 256;
+  }
+  else
+  {
+    this->rplDag.rank = 1;
+  }
 //  sendDIO();
 }
 
@@ -478,7 +484,14 @@ void RPL::processDIS(DIS* msg)
 
 void RPL::purgeRoute()
 {
-  // remove default route and update preffered parent
+  // should remove default route and update preffered parent ?
+//  if (this->rplDag.parentList.size() == 1)
+//  {
+//    // in case of only 1 default route left
+//    this->sendDIS();
+//    return;
+//  }
+
   this->rplDag.parentList.remove(this->rplDag.preferredParent);
   this->updatePrefferredParent();
 
