@@ -65,7 +65,7 @@ void World::arrangeMotes()
     {
       case 0: /* grid */
       {
-        if (col > 12)
+        if (col > 10)
         {
           row++;
           col = 0;

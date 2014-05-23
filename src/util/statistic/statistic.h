@@ -57,6 +57,9 @@ class Statistic : public cSimpleModule
     double numSensorEnergy; // Energy for each distributed node
     simsignal_t sigSensorEnergy;
 
+    double numSensorEnergyLevel; // Energy for each distributed node
+    simsignal_t sigSensorEnergyLevel;
+
     double numTotalEnergy;  // Energy remaining in whole network
     simsignal_t sigTotalEnergy;
 

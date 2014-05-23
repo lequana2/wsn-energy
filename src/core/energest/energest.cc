@@ -33,6 +33,7 @@ void Energest::initialize()
 
   // total energy remaining
   this->residualEnergy = MAX_POWER;
+  this->energyCap = MAX_POWER / 100;
 }
 
 void Energest::handleMessage(cMessage *msg)
@@ -69,6 +70,8 @@ void Energest::energestOff(int type)
 
     // consume energy, in term off hour not second, because power is mAh
     this->residualEnergy -= consumeTime * power[type] / 3600.0;
+
+    energyLevel = residualEnergy / energyCap;
   }
 
   // residual energy

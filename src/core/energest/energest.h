@@ -15,7 +15,7 @@
 #define BATTERY_NUMBER                2 // use 2 batteries
 #define OPERATION_POWER          1000.0 // mAh
 #define OPERATION_VOLTAGE           1.5 // Voltage
-#define RESIDUAL                  0.004 // 4.2 %
+#define RESIDUAL                   0.00005 // 4.2 %
 #define CRITICAL                      0 // 0 %
 
 #define MAX_POWER    OPERATION_POWER * OPERATION_VOLTAGE * BATTERY_NUMBER * RESIDUAL
@@ -51,6 +51,8 @@ class Energest : public cSimpleModule
     virtual void finish();
 
   public:
+    double energyCap;
+    int energyLevel;
     double residualEnergy;
     double capsuleTotalTime[ENERGEST_TYPE_MAX];
 

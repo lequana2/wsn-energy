@@ -78,6 +78,8 @@ class RPL
     void resetDIOTimer();
     void newDIOinterval();
 
+    void resetDISTimer();
+
     void processDIO(DIO*);
     void processDIS(DIS*);
 

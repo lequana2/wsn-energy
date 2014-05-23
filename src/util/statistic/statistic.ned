@@ -30,6 +30,8 @@ simple Statistic
         @statistic[networkEnergy](title="Node energy"; record=vector);
         @signal[sensorEnergy](type="double");
         @statistic[sensorEnergy](title="Sensor energy"; record=vector);
+        @signal[sensorEnergyLevel](type="int");
+        @statistic[sensorEnergyLevel](title="Sensor energy (level)"; record=vector);
 
         @signal[totalEnergy](type="double");
         @statistic[totalEnergy](title="Total energy"; record=last);

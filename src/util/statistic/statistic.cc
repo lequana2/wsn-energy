@@ -27,6 +27,7 @@ void Statistic::initialize()
   // Initialize statistics number
   numNetworkEnergyCount = 0;
   numSensorEnergyCount = 0;
+  numSensorEnergyLevel = 0;
   numNetworkEnergy = 0;
   numTotalEnergy = 0;
   numTotalDelayApp = 0;
@@ -54,6 +55,7 @@ void Statistic::initialize()
   sigSensorEnergyCount = registerSignal("sensorEnergyCount");
   sigNetworkEnergy = registerSignal("networkEnergy");
   sigSensorEnergy = registerSignal("sensorEnergy");
+  sigSensorEnergyLevel = registerSignal("sensorEnergyLevel");
   sigTotalEnergy = registerSignal("totalEnergy");
   sigTotalDelayApp = registerSignal("totalDelayApp");
   sigTotalDelayNet = registerSignal("totalDelayNet");
@@ -146,6 +148,10 @@ void Statistic::finish()
           check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->residualEnergy;
       emit(sigSensorEnergy, numSensorEnergy);
     }
+
+    numSensorEnergyLevel =
+        check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->energyLevel;
+    emit(sigSensorEnergyLevel, numSensorEnergyLevel);
   }
 
   emit(sigTimeIdle, timeIdle);

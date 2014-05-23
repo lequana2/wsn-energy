@@ -46,6 +46,7 @@ RPL::RPL(IPv6 *net)
 {
   this->net = net;
   this->rpl_init();
+  this->dioDelay = 0;
 
   // Self timer
   this->dioTimer = new Command;
@@ -64,7 +65,7 @@ RPL::RPL(IPv6 *net)
   resetDIOTimer();
 
   // create DIS timer
-  this->net->scheduleAt(this->net->getModuleByPath("^.^")->par("setupDelay").doubleValue(), disTimer);
+  this->net->scheduleAt(this->net->getModuleByPath("WSN")->par("setupDelay").doubleValue(), disTimer);
 }
 
 void RPL::rpl_init()
@@ -84,19 +85,21 @@ void RPL::rpl_set_root()
   this->rplDag.joined = true;
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
-    this->rplDag.rank = 256;
+    this->rplDag.rank = 100;
   }
   else
   {
     this->rplDag.rank = 1;
   }
-//  sendDIO();
 }
 
 void RPL::finish()
 {
-  this->net->cancelAndDelete(dioTimer);
-  this->net->cancelAndDelete(disTimer);
+  if (dioTimer != NULL)
+    this->net->cancelAndDelete(dioTimer);
+
+  if (disTimer != NULL)
+    this->net->cancelAndDelete(disTimer);
 }
 
 void RPL::sendDIO()
@@ -124,7 +127,7 @@ void RPL::sendDIO()
 
   net->multicast(icmpPacket);
 
-//  this->isDIOsent = false; // keep track of lastest DIO
+  this->isDIOsent = false; // keep track of lastest DIO
 }
 
 void RPL::sendDIS()
@@ -181,7 +184,7 @@ void RPL::newDIOinterval()
   if (this->net->getModuleByPath("^.^")->par("rand").doubleValue() == 0)
     dioDelay = (dioInterval / 2.0 + ((rand() % 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
   else if (this->net->getModuleByPath("^.^")->par("rand").doubleValue() == 1)
-    dioDelay = (dioInterval / 2.0 + (intuniform(0, 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
+    dioDelay = (dioInterval / 2 + (intuniform(0, 1000) / 2000.0) * dioInterval) / 1000.0;      // convert to sec
 
   if (DEBUG)
     std::cout << this->net->getId() << " has DIO interval: " << dioDelay << "(second)" << " of " << dioCurrent << " at "
@@ -193,12 +196,17 @@ void RPL::newDIOinterval()
     this->net->cancelEvent(dioTimer);
     this->net->scheduleAt(simTime() + dioDelay, dioTimer);
   }
+  else
+  {
+    this->net->cancelAndDelete(dioTimer);
+    dioTimer = NULL;
+  }
 }
 
 void RPL::handleDIOTimer()
 {
   // handle when timer expired
-  if (!this->rplDag.joined || !isDIOsent) // link local not OK or last DIO didn't sent
+  if (!this->rplDag.joined || !isDIOsent)
   {
     if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
     {
@@ -207,45 +215,68 @@ void RPL::handleDIOTimer()
     }
     else
     {
-      this->net->cancelEvent(dioTimer);
-      return;
+      this->net->cancelAndDelete(dioTimer);
+      dioTimer = NULL;
     }
   }
-  // do not exceed redundancy
-  else if (dioCounter < RPL_DIO_REDUNDANCY)
-  {
-    sendDIO();
-    dioCounter++;
-    if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
-    {
-      this->net->cancelEvent(dioTimer);
-      this->net->scheduleAt(simTime() + dioDelay, dioTimer);
-    }
-  }
-  // exceed redundancy, double interval
+  // only multicast DIO if joined
   else
   {
-    if (dioCurrent < RPL_DIO_INTERVAL_MIN + RPL_DIO_INTERVAL_DOUBLINGS)
-      dioCurrent++;
-    newDIOinterval();
+    sendDIO();
+
+    // next DIO
+    dioCounter++;
+
+    // do not exceed redundancy
+    if (dioCounter < RPL_DIO_REDUNDANCY)
+    {
+      if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+      {
+        this->net->cancelEvent(dioTimer);
+        this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+      }
+      else
+      {
+        this->net->cancelAndDelete(dioTimer);
+        dioTimer = NULL;
+      }
+    }
+    // exceed redundancy, double interval
+    else
+    {
+      // next DIO
+      if (dioCurrent < RPL_DIO_INTERVAL_MIN + RPL_DIO_INTERVAL_DOUBLINGS)
+        dioCurrent++;
+      newDIOinterval();
+    }
   }
+}
+
+void RPL::resetDISTimer()
+{
+  handleDISTimer();
 }
 
 void RPL::handleDISTimer()
 {
+  if (disTimer != NULL)
+    this->net->cancelEvent(this->disTimer);
+
   // simulation break
-  if (simTime() + 1 > this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+  if (simTime() + 1 < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+  {
+    // schedule next
+    this->net->scheduleAt(simTime() + RPL_DIO_INTERVAL_MIN, disTimer);
+
+    // consider is this need to send
+    if (!this->rplDag.joined && isDISsent)
+      sendDIS();
+  }
+  else
   {
     this->net->cancelAndDelete(this->disTimer);
-    return;
+    this->disTimer = NULL;
   }
-
-  this->net->cancelEvent(this->disTimer);
-
-  if (!this->rplDag.joined && isDISsent)
-    sendDIS();
-  else
-    this->net->scheduleAt(simTime() + 1, disTimer);
 }
 
 void RPL::processICMP(IcmpPacket *icmpPacket)
@@ -478,8 +509,7 @@ void RPL::processDIS(DIS* msg)
     EV << "Received DIS " << endl;
 
   // currently in DAG, then broadcast DIS
-  if (this->rplDag.joined)
-    this->resetDIOTimer();
+  this->resetDIOTimer();
 }
 
 void RPL::purgeRoute()
@@ -516,13 +546,15 @@ void RPL::purgeRoute()
     {
       this->rplDag.rank = RANK_INFINITY;
       this->rplDag.joined = false;
-      this->sendDIS();
+      this->resetDISTimer();
     }
   }
 }
 
 void RPL::updatePrefferredParent()
 {
+  // WSN recheck
+
   // delete old preferred parent (if needed)
   if (ANNOTATE_DEFAULT_ROUTE && this->rplDag.preferredParent != NULL)
   {

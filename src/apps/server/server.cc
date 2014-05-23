@@ -29,11 +29,14 @@ void Server::initialize()
   // server address aaaa::ff::fe:1
   this->ipAddress = new IpAddress(170, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 254, 0, 0, 1);
 
-  std::cout << this->getFullPath() << "has mac address ";
-  this->macAddress->print();
-  std::cout << this->getFullPath() << "has tentative link-local address ";
-  this->ipAddress->print();
-  std::cout << endl;
+  if (DEBUG)
+  {
+    std::cout << this->getFullPath() << "has mac address ";
+    this->macAddress->print();
+    std::cout << this->getFullPath() << "has tentative link-local address ";
+    this->ipAddress->print();
+    std::cout << endl;
+  }
 
   // create new session file
   std::ofstream myfile;

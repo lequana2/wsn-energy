@@ -9,7 +9,7 @@
 #include "csma.h"
 #include "packet_m.h"
 
-#define BACKOFF_PERIOD                0.00032 // second, 20 symbols
+#define BACKOFF_PERIOD                0.0032 // second, 20 symbols
 #define MAC_MIN_BE                    3 // min backoff exponent
 #define MAC_MAX_BE                    5 // max backoff exponent
 #define MAX_BACKOFF_TRANSMISSION      3 // 3 tries per frame
@@ -52,18 +52,15 @@ void csma::deferPacket()
     int backoffUnit;
 
     if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
-      backoff = (rand() % (backoff_transmission)) * BACKOFF_PERIOD;
+      backoffUnit = (rand() % (backoff_transmission));
     else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
       backoffUnit = (intuniform(0, backoff_transmission));
 
     // create unsynchronization
-    backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 10000000000.0;
+    backoff = backoffUnit * BACKOFF_PERIOD + intuniform(0, 1000) / 1000000000.0;
 
     if (DEBUG)
-    {
-      ev << "Random " << backoff_exponent << "/" << backoff_transmission << "/" << backoff << endl;
       std::cout << "Random " << backoff_transmission << "/" << backoffUnit << "/" << backoff << endl;
-    }
 
     bufferMAC->setNumberTransmission(bufferMAC->getNumberTransmission() + 1);
 

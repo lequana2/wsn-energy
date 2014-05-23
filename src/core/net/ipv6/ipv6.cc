@@ -42,7 +42,7 @@ void IPv6::initialize()
 
 void IPv6::finish()
 {
-//  if (DEBUG)
+  if (DEBUG)
   std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName()
 //      << " _ " << check_and_cast<RDCdriver*>(getModuleByPath("^.rdc"))->phase
       << endl;
@@ -98,16 +98,14 @@ void IPv6::processSelfMessage(cPacket* packet)
 
         case NET_TIMER_DIO: /* DIO timer*/
         {
-          if (this->rpl->rplDag.joined)
-            this->rpl->handleDIOTimer();
+          this->rpl->handleDIOTimer();
 
           break;
         } /* DIO timer*/
 
         case NET_TIMER_DIS: /* Solicit DODAG information*/
         {
-          if (!this->rpl->rplDag.joined)
-            this->rpl->handleDISTimer();
+          this->rpl->handleDISTimer();
 
           break;
         } /* Solicit DODAG information */

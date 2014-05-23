@@ -288,6 +288,7 @@ void MACdriver::processLowerLayerMessage(cPacket* packet)
           // no ack is considered dead neighbor
           if (this->bufferMAC->getNumberTransmission() > 3)
           {
+            // no dead ???
             sendResult(MAC_SEND_DEAD_NEIGHBOR);
 
             //std::cout << "NO ACK !!!" << endl;

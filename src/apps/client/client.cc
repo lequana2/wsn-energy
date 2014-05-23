@@ -40,11 +40,14 @@ void Client::initialize()
   // server address aaaa::ff::fe:1
   this->serverAddress = new IpAddress(170, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 254, 0, 0, 1);
 
-  std::cout << this->getFullPath() << "has mac address ";
-  this->macAddress->print();
-  std::cout << this->getFullPath() << "has tentative link-local address ";
-  this->ipAddress->print();
-  std::cout << endl;
+  if (DEBUG)
+  {
+    std::cout << this->getFullPath() << "has mac address ";
+    this->macAddress->print();
+    std::cout << this->getFullPath() << "has tentative link-local address ";
+    this->ipAddress->print();
+    std::cout << endl;
+  }
 
   this->packetNumber = 0;
 
@@ -146,16 +149,17 @@ void Client::processLowerLayerMessage(cPacket*)
  */
 void Client::newData()
 {
-  int sendInterval = 120; // seconds
-  int restPeriod = 25; // seconds
+  int sendInterval = 55; // seconds
+  int restPeriod = 10; // seconds
 
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-  selfTimer(sendInterval + restPeriod, APP_SENSING_FLAG);
+  if (simTime() + sendInterval + restPeriod < getModuleByPath("^.^")->par("timeLimit").doubleValue())
+    selfTimer(sendInterval + restPeriod, APP_SENSING_FLAG);
 
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
-    time = sendInterval / 2 + (rand() % 1000000) / 2000000.0 * sendInterval;
+    time = (rand() % 10000) / 10000.0 * sendInterval;
   else if (getModuleByPath("^.^")->par("rand").doubleValue() == 1)
     time = intuniform(0, 10000) / 10000.0 * sendInterval;
 
