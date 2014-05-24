@@ -25,10 +25,9 @@ void myModule::handleMessage(cMessage *msg)
   if (check_and_cast<RadioDriver*>(this->getModuleByPath("^.radio"))->status == POWER_DOWN)
   {
     delete msg;
-    return;
+    msg = NULL;
   }
-
-  if (msg->isSelfMessage())
+  else if (msg->isSelfMessage())
   {
     if (DEBUG)
       ev << this->getClassName() << " received a self-message" << endl;

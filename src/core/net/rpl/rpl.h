@@ -19,7 +19,6 @@ namespace wsn_energy {
 
 /* forward declaration */
 class IPv6;
-class ObjectiveFunction;
 
 class NodeQuality
 {
@@ -50,7 +49,7 @@ class RPL_dag
     bool joined; // is this node involved in the DODAG
     int dodagID; // ID of DODAG (IP of base station)
     int version; // version of DODAG
-    ObjectiveFunction *of; // Objective Function
+    int minHopRankInc; // Min hop rank increment
 
     unsigned long rank; // Owner rank
 
@@ -58,6 +57,11 @@ class RPL_dag
     RPL_neighbor *preferredParent; // default-upward route
     std::list<RPL_neighbor*> parentList; // list of neighbor with better rank
     std::list<RPL_neighbor*> siblingList; // list of neighbor with same rank
+
+    // Objective Function
+    RPL_neighbor* bestParent(RPL_neighbor*, RPL_neighbor*);
+    unsigned long calculateRank(RPL_neighbor*);
+    RPL_neighbor* updatePreferredParent(std::list<RPL_neighbor*>);
 };
 
 class RPL
@@ -84,7 +88,7 @@ class RPL
     void processDIS(DIS*);
 
   public:
-    RPL_dag rplDag;
+    RPL_dag *rplDag;
 
     RPL(IPv6 *net);
 

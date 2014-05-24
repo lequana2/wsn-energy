@@ -43,29 +43,29 @@ void IPv6::initialize()
 void IPv6::finish()
 {
   if (DEBUG)
-  std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName()
+    std::cout << "Packet remaining: " << ipPacketQueue.size() << " @ " << getParentModule()->getFullName()
 //      << " _ " << check_and_cast<RDCdriver*>(getModuleByPath("^.rdc"))->phase
-      << endl;
+        << endl;
 
   // Clear queue !!!
   for (std::list<IpPacketInterface*>::iterator it = this->ipPacketQueue.begin(); it != this->ipPacketQueue.end(); it++)
-    delete *it;
+    cancelAndDelete(*it);
 
   this->ipPacketQueue.clear();
 
   // clear RPL
   this->rpl->finish();
+
+  // clear buffer
+//  if (this->bufferNET != NULL)
+//  {
+//    cancelAndDelete(this->bufferNET);
+//    this->bufferNET = NULL;
+//  }
 }
 
 void IPv6::processSelfMessage(cPacket* packet)
 {
-  // if power down, does not put into queue
-  if (check_and_cast<RadioDriver*>(this->getModuleByPath("^.radio")) == POWER_DOWN)
-  {
-    delete packet;
-    return;
-  }
-
   switch (packet->getKind())
   {
     case COMMAND: /* Command */
@@ -228,12 +228,43 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           }
           else
           {
-            // decrease hop left
-            ipPacket->setHopLimit(HOP_LIMIT_NON_COMPRESSED);
-            ipPacket->setMetaHopLimit(frame->getHopLeft() - 1);
+            bool isCircular = false;
 
-            putIntoQueue(ipPacket);
+            // WSN check source address
+            if (getModuleByPath("^.^")->par("usingFLR").boolValue())
+            {
+              for (std::list<RPL_neighbor*>::iterator it = this->rpl->rplDag->parentList.begin();
+                  it != this->rpl->rplDag->parentList.end(); it++)
+              {
+                if ((*it)->neighborID
+                    == simulation.getModule(frame->getDestinationMacAddress())->getModuleByPath("^.net")->getId())
+                {
+                  isCircular = true;
+                  break;
+                }
+              }
+
+              for (std::list<RPL_neighbor*>::iterator it = this->rpl->rplDag->siblingList.begin();
+                  it != this->rpl->rplDag->siblingList.end(); it++)
+              {
+                if ((*it)->neighborID
+                    == simulation.getModule(frame->getDestinationMacAddress())->getModuleByPath("^.net")->getId())
+                {
+                  isCircular = true;
+                  break;
+                }
+              }
+            }
+
+            // decrease hop left
+            if (!isCircular)
+            {
+              ipPacket->setHopLimit(HOP_LIMIT_NON_COMPRESSED);
+              ipPacket->setMetaHopLimit(frame->getHopLeft() - 1);
+              putIntoQueue(ipPacket);
+            }
           }
+
         }
 
         delete frame;

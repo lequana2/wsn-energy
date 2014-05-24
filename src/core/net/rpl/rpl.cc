@@ -13,7 +13,6 @@
 #include "mac.h"
 #include "ipv6.h"
 #include "energest.h"
-#include "hopEnergy.h"
 #include "statistic.h"
 #include "packet_m.h"
 
@@ -70,27 +69,28 @@ RPL::RPL(IPv6 *net)
 
 void RPL::rpl_init()
 {
-  this->rplDag.version = 0;
-  this->rplDag.joined = false;
-  this->rplDag.rank = RANK_INFINITY;
-  this->rplDag.preferredParent = NULL;
-
-  // choosing objective function
-  this->rplDag.of = new hopEnergy;
+  this->rplDag = new RPL_dag;
+  this->rplDag->version = 0;
+  this->rplDag->joined = false;
+  this->rplDag->rank = RANK_INFINITY;
+  this->rplDag->preferredParent = NULL;
 }
 
 void RPL::rpl_set_root()
 {
-  this->rplDag.version++;
-  this->rplDag.joined = true;
+  this->rplDag->version++;
+  this->rplDag->joined = true;
+
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
-    this->rplDag.rank = 100;
+    this->rplDag->minHopRankInc = 100;
   }
   else
   {
-    this->rplDag.rank = 1;
+    this->rplDag->minHopRankInc = 1;
   }
+
+  this->rplDag->rank = this->rplDag->minHopRankInc;
 }
 
 void RPL::finish()
@@ -112,9 +112,9 @@ void RPL::sendDIO()
   dio->setByteLength(dio->getPayloadLength());
   dio->setSenderID(this->net->getId());
 
-  dio->setDodagID(this->rplDag.dodagID);
-  dio->setVersion(this->rplDag.version);
-  dio->setRank(this->rplDag.rank);
+  dio->setDodagID(this->rplDag->dodagID);
+  dio->setVersion(this->rplDag->version);
+  dio->setRank(this->rplDag->rank);
 
   IcmpPacket *icmpPacket = new IcmpPacket;
   icmpPacket->setKind(DATA);
@@ -206,7 +206,7 @@ void RPL::newDIOinterval()
 void RPL::handleDIOTimer()
 {
   // handle when timer expired
-  if (!this->rplDag.joined || !isDIOsent)
+  if (!this->rplDag->joined || !isDIOsent)
   {
     if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
     {
@@ -228,7 +228,7 @@ void RPL::handleDIOTimer()
     dioCounter++;
 
     // do not exceed redundancy
-    if (dioCounter < RPL_DIO_REDUNDANCY)
+    if (dioCounter <= RPL_DIO_REDUNDANCY)
     {
       if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
       {
@@ -269,7 +269,7 @@ void RPL::handleDISTimer()
     this->net->scheduleAt(simTime() + RPL_DIO_INTERVAL_MIN, disTimer);
 
     // consider is this need to send
-    if (!this->rplDag.joined && isDISsent)
+    if (!this->rplDag->joined && isDISsent)
       sendDIS();
   }
   else
@@ -288,7 +288,7 @@ void RPL::processICMP(IcmpPacket *icmpPacket)
       this->processDIO(check_and_cast<DIO*>(icmpPacket->getEncapsulatedPacket()));
 
       /* consider preferred parent is un-nultified under behavior of DIO */
-      if (this->rplDag.preferredParent != NULL)
+      if (this->rplDag->preferredParent != NULL)
         this->net->selfTimer(0, NET_CHECK_BUFFER); // prepare to send data again
 
       delete icmpPacket;
@@ -325,15 +325,15 @@ void RPL::processDIO(DIO* dio)
   neighbor->neighborID = dio->getSenderID();
   neighbor->neighborRank = dio->getRank();
 
-  if (!this->rplDag.joined)
+  if (!this->rplDag->joined)
   {
-    this->rplDag.parentList.push_back(neighbor);
+    this->rplDag->parentList.push_back(neighbor);
 
-    this->rplDag.version = dio->getVersion();
-    this->rplDag.joined = true;
-    this->rplDag.rank = this->rplDag.of->calculateRank(neighbor);
+    this->rplDag->version = dio->getVersion();
+    this->rplDag->joined = true;
+    this->rplDag->rank = this->rplDag->calculateRank(neighbor);
 
-    this->rplDag.parentList.push_back(neighbor);
+    this->rplDag->parentList.push_back(neighbor);
     this->updatePrefferredParent();
 
     // draw new connection
@@ -351,17 +351,17 @@ void RPL::processDIO(DIO* dio)
   else
   {
     // Consider neighbor version
-    if (this->rplDag.version < dio->getVersion())
+    if (this->rplDag->version < dio->getVersion())
     {
       // Update self information
-      this->rplDag.version = dio->getVersion();
-      this->rplDag.joined = true;
-      this->rplDag.rank = this->rplDag.of->calculateRank(neighbor);
+      this->rplDag->version = dio->getVersion();
+      this->rplDag->joined = true;
+      this->rplDag->rank = this->rplDag->calculateRank(neighbor);
 
       // remove out-of-date parents
       if (ANNOTATE_PARENT)
-        for (std::list<RPL_neighbor*>::iterator oldParent = this->rplDag.parentList.begin();
-            oldParent != this->rplDag.parentList.end(); oldParent++)
+        for (std::list<RPL_neighbor*>::iterator oldParent = this->rplDag->parentList.begin();
+            oldParent != this->rplDag->parentList.end(); oldParent++)
         {
           char channelParent[20];
           sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
@@ -369,8 +369,8 @@ void RPL::processDIO(DIO* dio)
           net->getParentModule()->gate(channelParent)->setDisplayString("ls=,0");
         }
 
-      this->rplDag.parentList.clear();
-      this->rplDag.parentList.push_back(neighbor);
+      this->rplDag->parentList.clear();
+      this->rplDag->parentList.push_back(neighbor);
       this->updatePrefferredParent();
 
       // draw new connection
@@ -387,13 +387,13 @@ void RPL::processDIO(DIO* dio)
       this->resetDIOTimer();
     }
     // obsolete/maintenace DIO
-    else if (this->rplDag.version >= dio->getVersion())
+    else if (this->rplDag->version >= dio->getVersion())
     {
       bool isNewParent = true;
 
       // Consider parent
-      std::list<RPL_neighbor*>::iterator oldParent = this->rplDag.parentList.begin();
-      for (; oldParent != this->rplDag.parentList.end(); oldParent++)
+      std::list<RPL_neighbor*>::iterator oldParent = this->rplDag->parentList.begin();
+      for (; oldParent != this->rplDag->parentList.end(); oldParent++)
       {
         if ((*oldParent)->neighborID == neighbor->neighborID)
         {
@@ -405,13 +405,13 @@ void RPL::processDIO(DIO* dio)
       if (isNewParent)
       {
         // better rank
-        if (this->rplDag.rank > dio->getRank())
+        if (this->rplDag->rank > dio->getRank())
         {
           if (DEBUG)
             ev << "new neighbor" << endl;
 
           // Update new neighbor
-          this->rplDag.parentList.push_back(neighbor);
+          this->rplDag->parentList.push_back(neighbor);
 
           // draw new connection
           if (ANNOTATE_PARENT)
@@ -430,14 +430,14 @@ void RPL::processDIO(DIO* dio)
           this->resetDIOTimer();
         }
         // siblings, same rank (DMR)
-        else if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag.rank == dio->getRank())
+        else if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag->rank == dio->getRank())
         {
           // New neighbor
           if (DEBUG)
             ev << "New sibling" << endl;
 
           // Update new neighbor
-          this->rplDag.siblingList.push_back(neighbor);
+          this->rplDag->siblingList.push_back(neighbor);
 
           if (ANNOTATE_SIBLINGS)
           {
@@ -477,7 +477,7 @@ void RPL::processDIO(DIO* dio)
         else
         {
           // is sole parent ?
-          if (this->rplDag.parentList.size() == 1)
+          if (this->rplDag->parentList.size() == 1)
           {
             // if yes, update
             (*oldParent)->neighborRank = neighbor->neighborRank;
@@ -485,7 +485,7 @@ void RPL::processDIO(DIO* dio)
           else
           {
             // else, remove this parent
-            this->rplDag.parentList.remove(*oldParent);
+            this->rplDag->parentList.remove(*oldParent);
             this->updatePrefferredParent();
           }
         }
@@ -498,7 +498,7 @@ void RPL::processDIO(DIO* dio)
   if (DEBUG)
   {
     char rank[10];
-    sprintf(rank, "Rank %d", (int) this->rplDag.rank);
+    sprintf(rank, "Rank %d", (int) this->rplDag->rank);
     net->getParentModule()->bubble(rank);
   }
 }
@@ -515,37 +515,37 @@ void RPL::processDIS(DIS* msg)
 void RPL::purgeRoute()
 {
   // should remove default route and update preffered parent ?
-//  if (this->rplDag.parentList.size() == 1)
+//  if (this->rplDag->parentList.size() == 1)
 //  {
 //    // in case of only 1 default route left
 //    this->sendDIS();
 //    return;
 //  }
 
-  this->rplDag.parentList.remove(this->rplDag.preferredParent);
+  this->rplDag->parentList.remove(this->rplDag->preferredParent);
   this->updatePrefferredParent();
 
   // if no parent found
-  if (this->rplDag.preferredParent == NULL)
+  if (this->rplDag->preferredParent == NULL)
   {
     // fast-local repair
-    if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag.siblingList.size() != 0)
+    if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag->siblingList.size() != 0)
     {
       // Self increase rank
-      this->rplDag.rank++;
+      this->rplDag->rank++;
 
       // Debate all siblings in parent list
-      for (std::list<RPL_neighbor*>::iterator it = this->rplDag.siblingList.begin();
-          it != this->rplDag.siblingList.end(); it++)
-        this->rplDag.parentList.push_back(*it);
-      this->rplDag.siblingList.clear();
+      for (std::list<RPL_neighbor*>::iterator it = this->rplDag->siblingList.begin();
+          it != this->rplDag->siblingList.end(); it++)
+        this->rplDag->parentList.push_back(*it);
+      this->rplDag->siblingList.clear();
       this->updatePrefferredParent();
     }
     // local repair
     else
     {
-      this->rplDag.rank = RANK_INFINITY;
-      this->rplDag.joined = false;
+      this->rplDag->rank = RANK_INFINITY;
+      this->rplDag->joined = false;
       this->resetDISTimer();
     }
   }
@@ -556,47 +556,47 @@ void RPL::updatePrefferredParent()
   // WSN recheck
 
   // delete old preferred parent (if needed)
-  if (ANNOTATE_DEFAULT_ROUTE && this->rplDag.preferredParent != NULL)
+  if (ANNOTATE_DEFAULT_ROUTE && this->rplDag->preferredParent != NULL)
   {
     char channelParent[20];
     sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
-    simulation.getModule(this->rplDag.preferredParent->neighborID)->getParentModule()->getId());
+    simulation.getModule(this->rplDag->preferredParent->neighborID)->getParentModule()->getId());
     simulation.getModule(this->net->getParentModule()->getId())->gate(channelParent)->setDisplayString("ls=,0");
   }
 
-  RPL_neighbor *tentativeParent = this->rplDag.of->updatePreferredParent(this->rplDag.parentList);
+  RPL_neighbor *tentativeParent = this->rplDag->updatePreferredParent(this->rplDag->parentList);
 
   if (tentativeParent != NULL)
   {
-    if (this->rplDag.preferredParent == NULL)
+    if (this->rplDag->preferredParent == NULL)
     {
-      this->rplDag.preferredParent = tentativeParent;
+      this->rplDag->preferredParent = tentativeParent;
     }
     else
     {
-      this->rplDag.preferredParent =
-          this->rplDag.preferredParent->neighborRank <= tentativeParent->neighborRank ? this->rplDag.preferredParent :
+      this->rplDag->preferredParent =
+          this->rplDag->preferredParent->neighborRank <= tentativeParent->neighborRank ? this->rplDag->preferredParent :
               tentativeParent;
     }
   }
   else
   {
-    this->rplDag.preferredParent = NULL;
+    this->rplDag->preferredParent = NULL;
   }
 
   // draw new preferred parent (if exist)
-  if (ANNOTATE_DEFAULT_ROUTE && this->rplDag.preferredParent != NULL)
+  if (ANNOTATE_DEFAULT_ROUTE && this->rplDag->preferredParent != NULL)
   {
     char channelParent[20];
     sprintf(channelParent, "out %d to %d", this->net->getParentModule()->getId(),
-    simulation.getModule(this->rplDag.preferredParent->neighborID)->getParentModule()->getId());
+    simulation.getModule(this->rplDag->preferredParent->neighborID)->getParentModule()->getId());
     simulation.getModule(this->net->getParentModule()->getId())->gate(channelParent)->setDisplayString("ls=purple,1");
   }
 
   // update default route
-  if (this->rplDag.preferredParent != NULL)
+  if (this->rplDag->preferredParent != NULL)
   {
-    this->net->defaultRoute = this->rplDag.preferredParent->neighborID;
+    this->net->defaultRoute = this->rplDag->preferredParent->neighborID;
 
     // mac default route in case of mesh-routing / IPv6
     if (this->net->getModuleByPath("^.^")->par("usingHDC"))
@@ -615,4 +615,59 @@ void RPL::updatePrefferredParent()
       (check_and_cast<MACdriver*>(this->net->getModuleByPath("^.mac")))->defaultRoute = 0;
   }
 }
+
+RPL_neighbor* RPL_dag::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2)
+{
+  if (parent1 == NULL)
+    return parent2;
+  else if (parent2 == NULL)
+    return parent1;
+
+  if (parent1->neighborRank < parent2->neighborRank)
+    return parent1;
+  else if (parent1->neighborRank > parent2->neighborRank)
+    return parent2;
+
+  return parent1;
+}
+
+unsigned long RPL_dag::calculateRank(RPL_neighbor* parent)
+{
+  if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
+  {
+    double energyLevel = check_and_cast<Energest*>(
+    simulation.getModule(parent->neighborID)->getModuleByPath("^.energest"))->residualEnergy / MAX_POWER;
+
+    // hop increment
+    int hop = parent->neighborRank / minHopRankInc * minHopRankInc;
+    hop += minHopRankInc;
+
+    // energy level  = 256
+    int reside = energyLevel;
+
+//    std::cout << "parent rank: " << parent->neighborRank << " self rank: " << hop + reside << endl;
+    return hop + reside;
+
+    return parent->neighborRank + this->minHopRankInc;
+  }
+  else
+  {
+    return parent->neighborRank + this->minHopRankInc;
+  }
+}
+
+RPL_neighbor* RPL_dag::updatePreferredParent(std::list<RPL_neighbor*> parentList)
+{
+  // Incase of update after purging route
+  if (parentList.size() == 0)
+    return NULL;
+
+  RPL_neighbor *preferredParent = NULL;
+
+  for (std::list<RPL_neighbor*>::iterator it = parentList.begin(); it != parentList.end(); it++)
+    preferredParent = bestParent(preferredParent, *it);
+
+  return preferredParent;
+}
+
 }/* namespace wsn_energy */

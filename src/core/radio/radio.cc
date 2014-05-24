@@ -422,11 +422,11 @@ void RadioDriver::switchOscilatorMode(int type)
 
       // remove preferred parent connection
       IPv6* net = check_and_cast<IPv6*>(getParentModule()->getSubmodule("net"));
-      if (net->rpl->rplDag.preferredParent != NULL)
+      if (net->rpl->rplDag->preferredParent != NULL)
       {
         char channelParent[20];
         sprintf(channelParent, "out %d to %d", this->getParentModule()->getId(),
-        simulation.getModule(net->rpl->rplDag.preferredParent->neighborID)->getParentModule()->getId());
+        simulation.getModule(net->rpl->rplDag->preferredParent->neighborID)->getParentModule()->getId());
         getParentModule()->gate(channelParent)->setDisplayString("ls=,0");
       }
 

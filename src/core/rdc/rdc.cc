@@ -548,7 +548,8 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
               }
               else
               {
-                if (check_and_cast<RadioDriver*>(getModuleByPath("^.radio"))->incomingSignal <= 1)
+                if (check_and_cast<RadioDriver*>(getModuleByPath("^.radio"))->incomingSignal
+                    <= 1&& check_and_cast<RadioDriver*>(getModuleByPath("^.radio"))->status != POWER_DOWN)
                 {
                   // check ACK required
                   if (frame->getAckRequired())
@@ -556,7 +557,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                     // send ACK
                     FrameACK* ack = new FrameACK;
                     ack->setKind(DATA);
-                    ack->setByteLength(ack->getHeaderLength());
+                    ack->setByteLength(ACK_LENGTH);
                     ack->setDataSequenceNumber(frame->getDataSequenceNumber());
 
                     // Simulate AUTO-ACK
@@ -566,7 +567,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
                     ackRaw->encapsulate(ack);
 
-                    if (check_and_cast<RadioDriver*>(getModuleByPath("^.radio"))->incomingSignal != 1)
+                    if (check_and_cast<RadioDriver*>(getModuleByPath("^.radio"))->incomingSignal == 0)
                       sendDirect(ackRaw,
                       simulation.getModule(sourceMacAddress)->getModuleByPath("^.radio")->gate("radioIn"));
 
@@ -593,7 +594,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                       else
                       {
                         // duplicated message, dismiss
-                        delete packet;
+                        delete frame;
                       }
 
                       break;
@@ -614,7 +615,7 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
                 }
                 else
                 {
-                  delete packet;
+                  delete frame;
                 }
               }
             }

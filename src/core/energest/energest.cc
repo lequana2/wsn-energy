@@ -31,7 +31,7 @@ void Energest::initialize()
 //  this->power[ENERGEST_TYPE_CPU] = MSP430_POWER;
 //  this->capsuleIsActivated[ENERGEST_TYPE_CPU] = true;
 
-  // total energy remaining
+// total energy remaining
   this->residualEnergy = MAX_POWER;
   this->energyCap = MAX_POWER / 100;
 }
@@ -70,16 +70,19 @@ void Energest::energestOff(int type)
 
     // consume energy, in term off hour not second, because power is mAh
     this->residualEnergy -= consumeTime * power[type] / 3600.0;
-
-    energyLevel = residualEnergy / energyCap;
   }
 
   // residual energy
   // Turn off if below critical mode
-  if (this->residualEnergy < MAX_POWER * CRITICAL)
+  if (this->residualEnergy <= 0)
   {
     std::cout << getParentModule()->getFullName() << " DOWN" << endl;
+    this->residualEnergy = 0;
     ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
+  }
+  else
+  {
+    energyLevel = residualEnergy / energyCap;
   }
 }
 
