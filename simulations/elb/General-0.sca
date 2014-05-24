@@ -1,0 +1,59 @@
+version 2
+run General-0-20140524-16:51:04-10695
+attr configname General
+attr datetime 20140524-16:51:04
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network WSN
+attr processid 10695
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar WSN.statistic 	lifeTimeFirst:last 	-nan
+attr title  "Network life time (first): , last"
+scalar WSN.statistic 	lifeTimePercentage:last 	-nan
+attr title  "Network life time (percentage): , last"
+scalar WSN.statistic 	lifeTimeRoute:last 	-nan
+attr title  "Network life time (route): , last"
+scalar WSN.statistic 	ipTrans:last 	57026
+attr title  "Number of ip transmitting : , last"
+scalar WSN.statistic 	ipInter:last 	-nan
+attr title  "Number of ip forwarding   : , last"
+scalar WSN.statistic 	disSent:last 	14112
+attr title  "Number of DIS  send       : , last"
+scalar WSN.statistic 	dioSent:last 	35733
+attr title  "Number of DIO  send       : , last"
+scalar WSN.statistic 	timeListen:last 	425.91565729905
+attr title  "Time listening: , last"
+scalar WSN.statistic 	timeTrans:last 	1849.9534395153
+attr title  "Time transmitting: , last"
+scalar WSN.statistic 	timeIdle:last 	515867.30157955
+attr title  "Time idling: , last"
+scalar WSN.statistic 	radioRecv:last 	-nan
+attr title  "Number of radio layer recv: , last"
+scalar WSN.statistic 	radioSend:last 	-nan
+attr title  "Number of radio layer send: , last"
+scalar WSN.statistic 	macRecv:last 	49241
+attr title  "Number of mac layer recv: , last"
+scalar WSN.statistic 	macSend:last 	49250
+attr title  "Number of mac layer send: , last"
+scalar WSN.statistic 	netRecv:last 	6471
+attr title  "Number of net layer recv: , last"
+scalar WSN.statistic 	netSend:last 	92039
+attr title  "Number of net layer send: , last"
+scalar WSN.statistic 	appRecv:last 	6471
+attr title  "Number of app layer recv: , last"
+scalar WSN.statistic 	appSend:last 	7776
+attr title  "Number of app layer send: , last"
+scalar WSN.statistic 	totalDelayNet:last 	-nan
+attr title  "Total delay (net): , last"
+scalar WSN.statistic 	totalDelayApp:last 	827.21117566367
+attr title  "Total delay (app): , last"
+scalar WSN.statistic 	totalEnergy:last 	437.20571001946
+attr title  "Total energy, last"
