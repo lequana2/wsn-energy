@@ -78,8 +78,8 @@ void World::arrangeMotes()
         y = row * 35 + 15;
 
         // Randomize
-        x = uniform(x - 5, x + 5);
-        y = uniform(y - 5, y + 5);
+        x = intuniform(x - 5, x + 5);
+        y = intuniform(y - 5, y + 5);
         break;
       }/* grid */
 

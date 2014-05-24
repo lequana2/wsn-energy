@@ -263,10 +263,16 @@ $O/core/energest/energest.o: core/energest/energest.cc \
 	core/mac/macAddress.h \
 	core/myModule.h \
 	core/net/ipAddress.h \
+	core/net/ipv6/ipv6.h \
+	core/net/rpl/rpl.h \
 	core/radio/radio.h \
+	package/data/data_m.h \
 	package/frame/frame_m.h \
+	package/packet/packet_m.h \
+	package/segment/segment_m.h \
 	package/signal/signal_m.h \
-	package/strobe/strobe_m.h
+	package/strobe/strobe_m.h \
+	util/statistic/statistic.h
 $O/core/framer802154/framer.o: core/framer802154/framer.cc \
 	core/framer802154/framer.h \
 	core/mac/macAddress.h \

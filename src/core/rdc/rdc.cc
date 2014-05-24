@@ -567,7 +567,6 @@ void RDCdriver::processLowerLayerMessage(cPacket* packet)
 
                     ackRaw->encapsulate(ack);
 
-                    if (check_and_cast<RadioDriver*>(getModuleByPath("^.radio"))->incomingSignal == 0)
                       sendDirect(ackRaw,
                       simulation.getModule(sourceMacAddress)->getModuleByPath("^.radio")->gate("radioIn"));
 

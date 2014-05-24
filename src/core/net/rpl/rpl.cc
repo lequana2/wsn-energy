@@ -74,12 +74,6 @@ void RPL::rpl_init()
   this->rplDag->joined = false;
   this->rplDag->rank = RANK_INFINITY;
   this->rplDag->preferredParent = NULL;
-}
-
-void RPL::rpl_set_root()
-{
-  this->rplDag->version++;
-  this->rplDag->joined = true;
 
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
@@ -89,7 +83,12 @@ void RPL::rpl_set_root()
   {
     this->rplDag->minHopRankInc = 1;
   }
+}
 
+void RPL::rpl_set_root()
+{
+  this->rplDag->version++;
+  this->rplDag->joined = true;
   this->rplDag->rank = this->rplDag->minHopRankInc;
 }
 
@@ -167,9 +166,12 @@ void RPL::hasSentDIS()
 
 void RPL::resetDIOTimer()
 {
-  // reset to initial stage
-  dioCurrent = RPL_DIO_INTERVAL_MIN;
-  newDIOinterval();
+  if (dioTimer != NULL)
+  {
+    // reset to initial stage
+    dioCurrent = RPL_DIO_INTERVAL_MIN;
+    newDIOinterval();
+  }
 }
 
 void RPL::newDIOinterval()
@@ -390,6 +392,7 @@ void RPL::processDIO(DIO* dio)
     else if (this->rplDag->version >= dio->getVersion())
     {
       bool isNewParent = true;
+      unsigned long dioRank = (floor(dio->getRank() * 1.0 / rplDag->minHopRankInc) + 1) * rplDag->minHopRankInc; // get parent hop
 
       // Consider parent
       std::list<RPL_neighbor*>::iterator oldParent = this->rplDag->parentList.begin();
@@ -405,7 +408,7 @@ void RPL::processDIO(DIO* dio)
       if (isNewParent)
       {
         // better rank
-        if (this->rplDag->rank > dio->getRank())
+        if (this->rplDag->rank > dioRank)
         {
           if (DEBUG)
             ev << "new neighbor" << endl;
@@ -430,7 +433,7 @@ void RPL::processDIO(DIO* dio)
           this->resetDIOTimer();
         }
         // siblings, same rank (DMR)
-        else if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag->rank == dio->getRank())
+        else if (this->net->getModuleByPath("^.^")->par("usingFLR").boolValue() && this->rplDag->rank == dioRank)
         {
           // New neighbor
           if (DEBUG)
@@ -462,7 +465,7 @@ void RPL::processDIO(DIO* dio)
       else
       {
         // better rank
-        if ((*oldParent)->neighborRank < neighbor->neighborRank)
+        if ((*oldParent)->neighborRank < dioRank)
         {
           (*oldParent)->neighborRank = neighbor->neighborRank;  // update rank
 
@@ -501,6 +504,9 @@ void RPL::processDIO(DIO* dio)
     sprintf(rank, "Rank %d", (int) this->rplDag->rank);
     net->getParentModule()->bubble(rank);
   }
+
+  if (DEBUG)
+    std::cout << "Rank " << this->rplDag->rank << "of" << this->net->getFullPath() << endl;
 }
 
 void RPL::processDIS(DIS* msg)
@@ -553,8 +559,6 @@ void RPL::purgeRoute()
 
 void RPL::updatePrefferredParent()
 {
-  // WSN recheck
-
   // delete old preferred parent (if needed)
   if (ANNOTATE_DEFAULT_ROUTE && this->rplDag->preferredParent != NULL)
   {
@@ -574,6 +578,7 @@ void RPL::updatePrefferredParent()
     }
     else
     {
+      // is new rank better
       this->rplDag->preferredParent =
           this->rplDag->preferredParent->neighborRank <= tentativeParent->neighborRank ? this->rplDag->preferredParent :
               tentativeParent;
@@ -631,24 +636,19 @@ RPL_neighbor* RPL_dag::bestParent(RPL_neighbor* parent1, RPL_neighbor* parent2)
   return parent1;
 }
 
-unsigned long RPL_dag::calculateRank(RPL_neighbor* parent)
+int RPL_dag::calculateRank(RPL_neighbor* parent)
 {
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
-    double energyLevel = check_and_cast<Energest*>(
-    simulation.getModule(parent->neighborID)->getModuleByPath("^.energest"))->residualEnergy / MAX_POWER;
+    unsigned long selfHop = (floor(parent->neighborRank * 1.0 / minHopRankInc) + 1) * minHopRankInc; // get parent hop
 
-    // hop increment
-    int hop = parent->neighborRank / minHopRankInc * minHopRankInc;
-    hop += minHopRankInc;
+    int reside = check_and_cast<Energest*>(
+    simulation.getModule(parent->neighborID)->getModuleByPath("^.energest"))->energyLevel;
 
-    // energy level  = 256
-    int reside = energyLevel;
+    if (DEBUG)
+      std::cout << " self hop: " << selfHop << ", energy: " << reside << endl;
 
-//    std::cout << "parent rank: " << parent->neighborRank << " self rank: " << hop + reside << endl;
-    return hop + reside;
-
-    return parent->neighborRank + this->minHopRankInc;
+    return selfHop + reside;
   }
   else
   {

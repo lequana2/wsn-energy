@@ -230,7 +230,6 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
           {
             bool isCircular = false;
 
-            // WSN check source address
             if (getModuleByPath("^.^")->par("usingFLR").boolValue())
             {
               for (std::list<RPL_neighbor*>::iterator it = this->rpl->rplDag->parentList.begin();
@@ -239,6 +238,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
                 if ((*it)->neighborID
                     == simulation.getModule(frame->getDestinationMacAddress())->getModuleByPath("^.net")->getId())
                 {
+                  this->rpl->rplDag->parentList.remove(*it);
                   isCircular = true;
                   break;
                 }
@@ -250,6 +250,7 @@ void IPv6::processLowerLayerMessage(cPacket* packet)
                 if ((*it)->neighborID
                     == simulation.getModule(frame->getDestinationMacAddress())->getModuleByPath("^.net")->getId())
                 {
+                  this->rpl->rplDag->siblingList.remove(*it);
                   isCircular = true;
                   break;
                 }
@@ -610,6 +611,14 @@ void IPv6::unicast(UdpPacketInterface *udpPacket)
   ipPacket->encapsulate(udpPacket);
 
   putIntoQueue(ipPacket);
+}
+
+void IPv6::resetDIOTimer()
+{
+  Enter_Method_Silent
+  ("resetDIOTimer");
+
+  this->rpl->resetDIOTimer();
 }
 
 } /* namespace wsn_energy */

@@ -8,6 +8,8 @@
 
 #include <energest.h>
 #include <radio.h>
+#include <statistic.h>
+#include <ipv6.h>
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -76,12 +78,24 @@ void Energest::energestOff(int type)
   // Turn off if below critical mode
   if (this->residualEnergy <= 0)
   {
-    std::cout << getParentModule()->getFullName() << " DOWN" << endl;
     this->residualEnergy = 0;
+    this->energyLevel = 0;
+    std::cout << getParentModule()->getFullName() << " DOWN" << endl;
     ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
+
+    (check_and_cast<Statistic*>(getModuleByPath("statistics")))->registerStatistic(LIFE_TIME_FIRST_DEAD_NODE);
   }
   else
   {
+    if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
+    {
+      if (energyLevel != residualEnergy / energyCap)
+      {
+        if (check_and_cast<IPv6*>(getModuleByPath("^.net")) != NULL)
+          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->resetDIOTimer();
+      }
+    }
+
     energyLevel = residualEnergy / energyCap;
   }
 }

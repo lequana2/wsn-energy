@@ -60,7 +60,7 @@ class RPL_dag
 
     // Objective Function
     RPL_neighbor* bestParent(RPL_neighbor*, RPL_neighbor*);
-    unsigned long calculateRank(RPL_neighbor*);
+    int calculateRank(RPL_neighbor*);
     RPL_neighbor* updatePreferredParent(std::list<RPL_neighbor*>);
 };
 
@@ -79,10 +79,7 @@ class RPL
     Command *dioTimer;
     Command *disTimer;
 
-    void resetDIOTimer();
     void newDIOinterval();
-
-    void resetDISTimer();
 
     void processDIO(DIO*);
     void processDIS(DIS*);
@@ -103,6 +100,9 @@ class RPL
     void hasSentDIS();
 
     void processICMP(IcmpPacket*);
+
+    void resetDIOTimer();
+    void resetDISTimer();
 
     void handleDIOTimer();
     void handleDISTimer();

@@ -50,6 +50,8 @@ class IPv6 : public myModule
 
     void multicast(IcmpPacket*);        // multicast an icmp packet
     void unicast(UdpPacketInterface*);  // unicast an udp packet
+
+    void resetDIOTimer();
 };
 
 }

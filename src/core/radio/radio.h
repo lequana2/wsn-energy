@@ -34,9 +34,12 @@
 #define RSSI_SENSITIVITY   -100.0   // dBm
 #define CCA_THRESHOLD       -77.0   // dBm, default, programable RSSI.CCA_THR
 #define CCA_PERIOD          00128   // seconds
-#define TXPOWER_CURRENT_MAX  17.4   // mA
-#define RXPOWER_CURRENT      18.8   // mA
-#define IDPOWER_CURRENT       0.426 // mA
+//#define TXPOWER_CURRENT_MAX  17.4   // mA
+//#define RXPOWER_CURRENT      18.8   // mA
+//#define IDPOWER_CURRENT       0.426 // mA
+#define TXPOWER_CURRENT_MAX  21.8   // mA (MCU on)
+#define RXPOWER_CURRENT      19.5   // mA (MCU on)
+#define IDPOWER_CURRENT       1.8   // mA (MCU on)
 #define SUPPLY_VOLTAGE        3.3   // V, VREG_IN
 // working delay
 #define SYMBOL                             0.000016   // 1 symbol = 4/250 millisecond
