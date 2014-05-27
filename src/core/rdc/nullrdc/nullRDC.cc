@@ -24,27 +24,20 @@ namespace wsn_energy {
 
 Define_Module(nullRDC);
 
-void nullRDC::sendPacket(Frame* frame)
+/* command from MAC */
+void nullRDC::beginTransmitting(int command)
 {
   return;
 }
 
-void nullRDC::sendSuccess(Frame* frame)
+/* send packet */
+void nullRDC::transmitFrame()
 {
   return;
 }
 
-void nullRDC::sendFailure()
-{
-  return;
-}
-
-void nullRDC::receiveSuccess(Frame* frame)
-{
-  return;
-}
-
-void nullRDC::receiveFailure()
+/* receive success from PHY */
+void nullRDC::receiveFrame(Frame*)
 {
   return;
 }

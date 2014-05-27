@@ -56,7 +56,7 @@ class Neighbor
 
 class RDCdriver : public myModule
 {
-  private:
+  protected:
     // just send ACK <-- distinguish with data sending
     bool isSentACK;
 
@@ -72,7 +72,6 @@ class RDCdriver : public myModule
     // CCA counter in 1 transmission turn
     int ccaInOneTurn;
 
-  protected:
     // For neighbor discovery protocol (NDP) - link-local aquire
     // For sequence checker
     // For phase optimization
@@ -106,16 +105,14 @@ class RDCdriver : public myModule
     void on();
     void off();
 
-    /* begin a transmission phase */
-    virtual void sendPacket(Frame*) = 0;
+    /* command from MAC */
+    virtual void beginTransmitting(int command) = 0;
 
-    /* after a transmission phase */
-    virtual void sendSuccess(Frame*) = 0;
-    virtual void sendFailure() = 0;
+    /* send packet */
+    virtual void transmitFrame() = 0;
 
-    /* after a listening phase */
-    virtual void receiveSuccess(Frame*) = 0;
-    virtual void receiveFailure() = 0;
+    /* receive success from PHY */
+    virtual void receiveFrame(Frame*) = 0;
 
   public:
     // working phase

@@ -410,13 +410,17 @@ $O/core/rdc/rdc.o: core/rdc/rdc.cc \
 	package/signal/signal_m.h \
 	package/strobe/strobe_m.h
 $O/core/rdc/contikiMac/contikiMAC.o: core/rdc/contikiMac/contikiMAC.cc \
+	core/framer802154/framer.h \
+	core/mac/mac.h \
 	core/mac/macAddress.h \
 	core/myModule.h \
 	core/net/ipAddress.h \
+	core/radio/radio.h \
 	core/rdc/contikiMac/contikiMAC.h \
 	core/rdc/rdc.h \
 	package/frame/frame_m.h \
 	package/packet/packet_m.h \
+	package/signal/signal_m.h \
 	package/strobe/strobe_m.h
 $O/core/rdc/nullrdc/nullRDC.o: core/rdc/nullrdc/nullRDC.cc \
 	core/mac/macAddress.h \
