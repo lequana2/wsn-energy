@@ -83,7 +83,7 @@ void Energest::energestOff(int type)
     std::cout << getParentModule()->getFullName() << " DOWN" << endl;
     ((RadioDriver*) getParentModule()->getModuleByPath(".radio"))->switchOscilatorMode(POWER_DOWN);
 
-    (check_and_cast<Statistic*>(getModuleByPath("statistics")))->registerStatistic(LIFE_TIME_FIRST_DEAD_NODE);
+    (check_and_cast<Statistic*>(simulation.getModuleByPath("statistic")))->registerStatistic(LIFE_TIME_FIRST_DEAD_NODE);
   }
   else
   {
@@ -95,7 +95,7 @@ void Energest::energestOff(int type)
         {
           // update rank
           (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank -= energyLevel;
-          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank += (residualEnergy/energyCap);
+          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank += (residualEnergy / energyCap);
 //          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->resetDIOTimer();
         }
       }

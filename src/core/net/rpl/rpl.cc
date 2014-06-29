@@ -193,16 +193,16 @@ void RPL::newDIOinterval()
         << simTime() << endl;
 
   // simulation break
-  if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
-  {
-    this->net->cancelEvent(dioTimer);
-    this->net->scheduleAt(simTime() + dioDelay, dioTimer);
-  }
-  else
-  {
-    this->net->cancelAndDelete(dioTimer);
-    dioTimer = NULL;
-  }
+//  if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+//  {
+  this->net->cancelEvent(dioTimer);
+  this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+//  }
+//  else
+//  {
+//    this->net->cancelAndDelete(dioTimer);
+//    dioTimer = NULL;
+//  }
 }
 
 void RPL::handleDIOTimer()
@@ -210,16 +210,17 @@ void RPL::handleDIOTimer()
   // handle when timer expired
   if (!this->rplDag->joined || !isDIOsent)
   {
-    if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
-    {
-      this->net->cancelEvent(dioTimer);
-      this->net->scheduleAt(simTime() + dioDelay, dioTimer);
-    }
-    else
-    {
-      this->net->cancelAndDelete(dioTimer);
-      dioTimer = NULL;
-    }
+    // simulation break
+//    if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+//    {
+    this->net->cancelEvent(dioTimer);
+    this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+//    }
+//    else
+//    {
+//      this->net->cancelAndDelete(dioTimer);
+//      dioTimer = NULL;
+//    }
   }
   // only multicast DIO if joined
   else
@@ -232,16 +233,17 @@ void RPL::handleDIOTimer()
     // do not exceed redundancy
     if (dioCounter <= RPL_DIO_REDUNDANCY)
     {
-      if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
-      {
-        this->net->cancelEvent(dioTimer);
-        this->net->scheduleAt(simTime() + dioDelay, dioTimer);
-      }
-      else
-      {
-        this->net->cancelAndDelete(dioTimer);
-        dioTimer = NULL;
-      }
+      // simulation break
+//      if (simTime() + dioDelay < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+//      {
+      this->net->cancelEvent(dioTimer);
+      this->net->scheduleAt(simTime() + dioDelay, dioTimer);
+//      }
+//      else
+//      {
+//        this->net->cancelAndDelete(dioTimer);
+//        dioTimer = NULL;
+//      }
     }
     // exceed redundancy, double interval
     else
@@ -265,20 +267,20 @@ void RPL::handleDISTimer()
     this->net->cancelEvent(this->disTimer);
 
   // simulation break
-  if (simTime() + 1 < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
-  {
-    // schedule next
-    this->net->scheduleAt(simTime() + RPL_DIO_INTERVAL_MIN, disTimer);
+//  if (simTime() + 1 < this->net->getModuleByPath("^.^")->par("timeLimit").doubleValue())
+//  {
+  // schedule next
+  this->net->scheduleAt(simTime() + RPL_DIO_INTERVAL_MIN, disTimer);
 
-    // consider is this need to send
-    if (!this->rplDag->joined && isDISsent)
-      sendDIS();
-  }
-  else
-  {
-    this->net->cancelAndDelete(this->disTimer);
-    this->disTimer = NULL;
-  }
+  // consider is this need to send
+  if (!this->rplDag->joined && isDISsent)
+    sendDIS();
+//  }
+//  else
+//  {
+//    this->net->cancelAndDelete(this->disTimer);
+//    this->disTimer = NULL;
+//  }
 }
 
 void RPL::processICMP(IcmpPacket *icmpPacket)
@@ -640,7 +642,7 @@ int RPL_dag::calculateRank(RPL_neighbor* parent)
 {
   if (simulation.getModuleByPath("WSN")->par("usingELB").boolValue())
   {
-    unsigned long selfHop = (floor(parent->neighborRank * 1.0 / minHopRankInc) + 1) * minHopRankInc; // get parent hop
+    unsigned long selfHop = (ceil(parent->neighborRank * 1.0 / minHopRankInc) + 1) * minHopRankInc; // get parent hop
 
     int reside = check_and_cast<Energest*>(
     simulation.getModule(parent->neighborID)->getModuleByPath("^.energest"))->energyLevel;
@@ -648,7 +650,7 @@ int RPL_dag::calculateRank(RPL_neighbor* parent)
     if (DEBUG)
       std::cout << " self hop: " << selfHop << ", energy: " << reside << endl;
 
-    return selfHop + reside;
+    return selfHop - reside;
   }
   else
   {

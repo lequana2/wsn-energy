@@ -155,7 +155,7 @@ void Client::newData()
   // avoid immediately sending + simulate not-synchronized clock
   double time = 0;
 
-  if (simTime() + sendInterval + restPeriod < getModuleByPath("^.^")->par("timeLimit").doubleValue())
+//  if (simTime() + sendInterval + restPeriod < getModuleByPath("^.^")->par("timeLimit").doubleValue())
     selfTimer(sendInterval + restPeriod, APP_SENSING_FLAG);
 
   if (getModuleByPath("^.^")->par("rand").doubleValue() == 0)
@@ -166,7 +166,7 @@ void Client::newData()
   if (DEBUG)
     this->getParentModule()->bubble("Data");
 
-  if (simTime().dbl() + sendInterval < getModuleByPath("^.^")->par("timeLimit").doubleValue())
+//  if (simTime().dbl() + sendInterval < getModuleByPath("^.^")->par("timeLimit").doubleValue())
     selfTimer(time, APP_READY_TO_SEND);
 }
 

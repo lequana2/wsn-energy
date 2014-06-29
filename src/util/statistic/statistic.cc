@@ -84,6 +84,8 @@ void Statistic::initialize()
 
   if (getParentModule()->par("isPollingCount").boolValue())
     scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), pollingCount);
+
+  isLimit = true;
 }
 
 void Statistic::handleMessage(cMessage *msg)
@@ -96,6 +98,57 @@ void Statistic::handleMessage(cMessage *msg)
       {
         pollTotalSensorEnergy();
         scheduleAt(simTime() + getParentModule()->par("polling").doubleValue(), polling);
+      }
+      else
+      {
+        if (isLimit)
+        {
+          isLimit = false;
+
+          // Power status of remaining sensor(s)
+          cModule *wsn = getModuleByPath("^");
+          int numberClient = wsn->par("numberClient").longValue();
+
+          for (int i = 0; i < numberClient; i++)
+          {
+            numSensorEnergy =
+                (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->residualEnergy;
+
+            numTotalEnergy += numSensorEnergy;
+
+            // % duty cycling
+            timeTrans +=
+                (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
+            timeListen +=
+                (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
+            timeIdle +=
+                (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
+
+            // residual energy
+            if (getParentModule()->par("isPollingCount").boolValue())
+            {
+              numSensorEnergyCount =
+                  check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
+              emit(sigSensorEnergyCount, numSensorEnergyCount);
+            }
+
+            if (getParentModule()->par("isPolling").boolValue())
+            {
+              numSensorEnergy =
+                  check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->residualEnergy;
+              emit(sigSensorEnergy, numSensorEnergy);
+            }
+
+            numSensorEnergyLevel =
+                check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->energyLevel;
+            emit(sigSensorEnergyLevel, numSensorEnergyLevel);
+          }
+
+          emit(sigTimeIdle, timeIdle);
+          emit(sigTimeTrans, timeTrans);
+          emit(sigTimeListen, timeListen);
+          emit(sigTotalEnergy, numTotalEnergy);
+        }
       }
     }
     else if (msg == pollingCount)
@@ -114,50 +167,6 @@ void Statistic::finish()
   // poll last time
 //  pollTotalSensorEnergy();
 //  pollTotalSensorEnergyCount();
-
-// Power status of remaining sensor(s)
-  cModule *wsn = getModuleByPath("^");
-  int numberClient = wsn->par("numberClient").longValue();
-
-  for (int i = 0; i < numberClient; i++)
-  {
-    numSensorEnergy =
-        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->residualEnergy;
-
-    numTotalEnergy += numSensorEnergy;
-
-    // % duty cycling
-    timeTrans +=
-        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_TRANSMIT];
-    timeListen +=
-        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_LISTEN];
-    timeIdle +=
-        (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->capsuleTotalTime[ENERGEST_TYPE_IDLE];
-
-    // residual energy
-    if (getParentModule()->par("isPollingCount").boolValue())
-    {
-      numSensorEnergyCount =
-          check_and_cast<Count*>(wsn->getSubmodule("client", i)->getSubmodule("count"))->residualEnergy;
-      emit(sigSensorEnergyCount, numSensorEnergyCount);
-    }
-
-    if (getParentModule()->par("isPolling").boolValue())
-    {
-      numSensorEnergy =
-          check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->residualEnergy;
-      emit(sigSensorEnergy, numSensorEnergy);
-    }
-
-    numSensorEnergyLevel =
-        check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest"))->energyLevel;
-    emit(sigSensorEnergyLevel, numSensorEnergyLevel);
-  }
-
-  emit(sigTimeIdle, timeIdle);
-  emit(sigTimeTrans, timeTrans);
-  emit(sigTimeListen, timeListen);
-  emit(sigTotalEnergy, numTotalEnergy);
 
   cancelAndDelete(polling);
   cancelAndDelete(pollingCount);
@@ -185,23 +194,23 @@ void Statistic::pollTotalSensorEnergyCount()
 
 void Statistic::pollTotalSensorEnergy()
 {
-  if (getParentModule()->par("isPolling").boolValue())
-  {
-
-    cModule *wsn = getModuleByPath("WSN");
-    int numberClient = wsn->par("numberClient").longValue();
-
-    numNetworkEnergy = 0.0;
-
-    for (int i = 0; i < numberClient; i++)
-    {
-      (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->update();
-      numNetworkEnergy +=
-          (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->residualEnergy;
-    }
-
-    emit(sigNetworkEnergy, numNetworkEnergy);
-  }
+//  if (getParentModule()->par("isPolling").boolValue())
+//  {
+//
+//    cModule *wsn = getModuleByPath("WSN");
+//    int numberClient = wsn->par("numberClient").longValue();
+//
+//    numNetworkEnergy = 0.0;
+//
+//    for (int i = 0; i < numberClient; i++)
+//    {
+//      (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->update();
+//      numNetworkEnergy +=
+//          (check_and_cast<Energest*>(wsn->getSubmodule("client", i)->getSubmodule("energest")))->residualEnergy;
+//    }
+//
+//    emit(sigNetworkEnergy, numNetworkEnergy);
+//  }
 }
 
 void Statistic::registerStatistic(int type)
@@ -209,70 +218,77 @@ void Statistic::registerStatistic(int type)
   Enter_Method_Silent
   ("registerStatistic");
 
-  switch (type)
+  if (type == LIFE_TIME_FIRST_DEAD_NODE)
   {
-    case APP_SEND:
-      emit(sigAppSend, ++numAppSend);
-      break;
-    case APP_RECV:
-      emit(sigAppRecv, ++numAppRecv);
-      break;
-    case NET_SEND:
-      emit(sigNetSend, ++numNetSend);
-      break;
-    case NET_RECV:
-      emit(sigNetRecv, ++numNetRecv);
-      break;
-    case MAC_SEND:
-      emit(sigMacSend, ++numMacSend);
-      break;
-    case MAC_RECV:
-      emit(sigMacRecv, ++numMacRecv);
-      break;
-    case RADIO_SEND:
-      emit(sigRadioSend, ++numRadioSend);
-      break;
-    case RADIO_RECV:
-      emit(sigRadioRecv, ++numRadioRecv);
-      break;
-    case DIO_SENT:
-      emit(sigNumDIOsent, ++numDIOsent);
-      break;
-    case DIS_SENT:
-      emit(sigNumDISsent, ++numDISsent);
-      break;
-    case IP_INTER:
-      emit(sigNumIPinter, ++numIPinter);
-      break;
-    case IP_TRANS:
-      emit(signumIPtrans, ++numIPtrans);
-      break;
-    case LIFE_TIME_INCREASE_SERVER_NEIGHBOR:
-      this->numServerNeighbor++;
-      std::cout << "Server neighbor: " << numServerNeighbor << endl;
-      break;
-    case LIFE_TIME_DECREASE_SERVER_NEIGHBOR:
-      this->numServerNeighbor--;
-      if (this->numServerNeighbor == 0)
-        emit(sigLifeTimeRoute, simTime().dbl());
-      break;
-    case LIFE_TIME_PERCENTAGE_DEAD_NODE:
-      this->numLiveNode--;
-      // Hard coded number
-      if (this->numLiveNode < 137 && this->numLiveNode > -1) // 70 % deadnode -> life time, -1 to unregister
-      {
-        emit(sigLifeTimePercentage, simTime().dbl());
-        this->numLiveNode = -1;
-      }
-      break;
-    case LIFE_TIME_FIRST_DEAD_NODE:
-      if (!firstDead)
-      {
-        firstDead = true;
-        emit(sigLifeTimeFirst, simTime().dbl());
-      }
-      break;
+    if (!firstDead)
+    {
+      firstDead = true;
+      emit(sigLifeTimeFirst, simTime().dbl());
+
+      // Stop simulation when first node dead appears
+      endSimulation();
+    }
   }
+  else if (simTime().dbl() > getParentModule()->par("timeLimit").doubleValue())
+    ;
+  else
+    switch (type)
+    {
+      case APP_SEND:
+        emit(sigAppSend, ++numAppSend);
+        break;
+      case APP_RECV:
+        emit(sigAppRecv, ++numAppRecv);
+        break;
+      case NET_SEND:
+        emit(sigNetSend, ++numNetSend);
+        break;
+      case NET_RECV:
+        emit(sigNetRecv, ++numNetRecv);
+        break;
+      case MAC_SEND:
+        emit(sigMacSend, ++numMacSend);
+        break;
+      case MAC_RECV:
+        emit(sigMacRecv, ++numMacRecv);
+        break;
+      case RADIO_SEND:
+        emit(sigRadioSend, ++numRadioSend);
+        break;
+      case RADIO_RECV:
+        emit(sigRadioRecv, ++numRadioRecv);
+        break;
+      case DIO_SENT:
+        emit(sigNumDIOsent, ++numDIOsent);
+        break;
+      case DIS_SENT:
+        emit(sigNumDISsent, ++numDISsent);
+        break;
+      case IP_INTER:
+        emit(sigNumIPinter, ++numIPinter);
+        break;
+      case IP_TRANS:
+        emit(signumIPtrans, ++numIPtrans);
+        break;
+//    case LIFE_TIME_INCREASE_SERVER_NEIGHBOR:
+//      this->numServerNeighbor++;
+//      std::cout << "Server neighbor: " << numServerNeighbor << endl;
+//      break;
+//    case LIFE_TIME_DECREASE_SERVER_NEIGHBOR:
+//      this->numServerNeighbor--;
+//      if (this->numServerNeighbor == 0)
+//        emit(sigLifeTimeRoute, simTime().dbl());
+//      break;
+//    case LIFE_TIME_PERCENTAGE_DEAD_NODE:
+//      this->numLiveNode--;
+//      // Hard coded number
+//      if (this->numLiveNode < 137 && this->numLiveNode > -1) // 70 % deadnode -> life time, -1 to unregister
+//      {
+//        emit(sigLifeTimePercentage, simTime().dbl());
+//        this->numLiveNode = -1;
+//      }
+//      break;
+    }
 }
 
 void Statistic::registerStatisticDelay(int type, double delayTime)
@@ -280,17 +296,20 @@ void Statistic::registerStatisticDelay(int type, double delayTime)
   Enter_Method_Silent
   ("registerStatisticDelay");
 
-  switch (type)
-  {
-    case DELAY_APP_LAYER: /* end to end delay */
-      numTotalDelayApp += delayTime;
-      emit(sigTotalDelayApp, numTotalDelayApp);
-      break;
+  if (simTime().dbl() > getParentModule()->par("timeLimit").doubleValue())
+    ;
+  else
+    switch (type)
+    {
+      case DELAY_APP_LAYER: /* end to end delay */
+        numTotalDelayApp += delayTime;
+        emit(sigTotalDelayApp, numTotalDelayApp);
+        break;
 
-    case DELAY_NET_LAYER: /* hop to hop delay */
-      numTotalDelayNet += delayTime;
-      emit(sigTotalDelayNet, numTotalDelayNet);
-      break;
-  }
+      case DELAY_NET_LAYER: /* hop to hop delay */
+        numTotalDelayNet += delayTime;
+        emit(sigTotalDelayNet, numTotalDelayNet);
+        break;
+    }
 }
 }

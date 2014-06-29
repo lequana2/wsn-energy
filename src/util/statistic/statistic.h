@@ -120,6 +120,8 @@ class Statistic : public cSimpleModule
     simsignal_t sigLifeTimePercentage;
     simsignal_t sigLifeTimeFirst;
 
+    bool isLimit;
+
     /* polling for energy */
     void pollTotalSensorEnergy();
     void pollTotalSensorEnergyCount();
