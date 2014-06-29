@@ -94,8 +94,8 @@ void Energest::energestOff(int type)
         if (check_and_cast<IPv6*>(getModuleByPath("^.net")) != NULL)
         {
           // update rank
-          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank -= energyLevel;
-          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank += (residualEnergy / energyCap);
+          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank += energyLevel;
+          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->rpl->rplDag->rank -= (residualEnergy / energyCap);
 //          (check_and_cast<IPv6*>(getModuleByPath("^.net")))->resetDIOTimer();
         }
       }

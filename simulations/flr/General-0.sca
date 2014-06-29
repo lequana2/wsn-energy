@@ -1,59 +1,59 @@
 version 2
-run General-0-20140630-02:11:44-28594
+run General-0-20140630-03:54:48-4817
 attr configname General
-attr datetime 20140630-02:11:44
+attr datetime 20140630-03:54:48
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvars2 $repetition=0
 attr measurement ""
 attr network WSN
-attr processid 28594
+attr processid 4817
 attr repetition 0
 attr replication #0
 attr resultdir results
 attr runnumber 0
 attr seedset 0
 
-scalar WSN.statistic 	lifeTimeFirst:last 	5416.031830109
+scalar WSN.statistic 	lifeTimeFirst:last 	5416.474522702
 attr title  "Network life time (first): , last"
 scalar WSN.statistic 	lifeTimePercentage:last 	-nan
 attr title  "Network life time (percentage): , last"
 scalar WSN.statistic 	lifeTimeRoute:last 	-nan
 attr title  "Network life time (route): , last"
-scalar WSN.statistic 	ipTrans:last 	55361
+scalar WSN.statistic 	ipTrans:last 	56185
 attr title  "Number of ip transmitting : , last"
 scalar WSN.statistic 	ipInter:last 	-nan
 attr title  "Number of ip forwarding   : , last"
-scalar WSN.statistic 	disSent:last 	16464
+scalar WSN.statistic 	disSent:last 	15876
 attr title  "Number of DIS  send       : , last"
-scalar WSN.statistic 	dioSent:last 	8544
+scalar WSN.statistic 	dioSent:last 	8604
 attr title  "Number of DIO  send       : , last"
-scalar WSN.statistic 	timeListen:last 	128.93450138752
+scalar WSN.statistic 	timeListen:last 	130.071143391
 attr title  "Time listening: , last"
-scalar WSN.statistic 	timeTrans:last 	526.18866868783
+scalar WSN.statistic 	timeTrans:last 	531.12176585814
 attr title  "Time transmitting: , last"
-scalar WSN.statistic 	timeIdle:last 	508623.15981161
+scalar WSN.statistic 	timeIdle:last 	508445.41927999
 attr title  "Time idling: , last"
 scalar WSN.statistic 	radioRecv:last 	-nan
 attr title  "Number of radio layer recv: , last"
 scalar WSN.statistic 	radioSend:last 	-nan
 attr title  "Number of radio layer send: , last"
-scalar WSN.statistic 	macRecv:last 	47557
+scalar WSN.statistic 	macRecv:last 	48390
 attr title  "Number of mac layer recv: , last"
-scalar WSN.statistic 	macSend:last 	47561
+scalar WSN.statistic 	macSend:last 	48391
 attr title  "Number of mac layer send: , last"
-scalar WSN.statistic 	netRecv:last 	6280
+scalar WSN.statistic 	netRecv:last 	6331
 attr title  "Number of net layer recv: , last"
-scalar WSN.statistic 	netSend:last 	64337
+scalar WSN.statistic 	netSend:last 	64933
 attr title  "Number of net layer send: , last"
-scalar WSN.statistic 	appRecv:last 	6280
+scalar WSN.statistic 	appRecv:last 	6331
 attr title  "Number of app layer recv: , last"
-scalar WSN.statistic 	appSend:last 	7801
+scalar WSN.statistic 	appSend:last 	7794
 attr title  "Number of app layer send: , last"
 scalar WSN.statistic 	totalDelayNet:last 	-nan
 attr title  "Total delay (net): , last"
-scalar WSN.statistic 	totalDelayApp:last 	771.2368604135
+scalar WSN.statistic 	totalDelayApp:last 	784.75074938418
 attr title  "Total delay (app): , last"
-scalar WSN.statistic 	totalEnergy:last 	454.46708209822
+scalar WSN.statistic 	totalEnergy:last 	454.74003649958
 attr title  "Total energy, last"
