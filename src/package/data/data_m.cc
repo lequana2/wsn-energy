@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from package/data/data.msg.
+// Generated file, do not edit! Created by opp_msgc 4.5 from package/data/data.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -14,9 +14,6 @@
 
 USING_NAMESPACE
 
-// Template rule which fires if a struct or class doesn't have operator<<
-template<typename T>
-std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -33,9 +30,33 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 namespace wsn_energy {
 
+// Template rule for outputting std::vector<T> types
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
+{
+    out.put('{');
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) {
+            out.put(','); out.put(' ');
+        }
+        out << *it;
+    }
+    out.put('}');
+    
+    char buf[32];
+    sprintf(buf, " (size=%u)", (unsigned int)vec.size());
+    out.write(buf, strlen(buf));
+    return out;
+}
+
+// Template rule which fires if a struct or class doesn't have operator<<
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
+
 Register_Class(Data);
 
-Data::Data(const char *name, int kind) : cPacket(name,kind)
+Data::Data(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->time_var = 0;
     this->destinationPort_var = 0;
@@ -43,7 +64,7 @@ Data::Data(const char *name, int kind) : cPacket(name,kind)
     this->value_var = 0;
 }
 
-Data::Data(const Data& other) : cPacket(other)
+Data::Data(const Data& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -55,7 +76,7 @@ Data::~Data()
 Data& Data::operator=(const Data& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -71,7 +92,7 @@ void Data::copy(const Data& other)
 
 void Data::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->time_var);
     doPacking(b,this->destinationPort_var);
     doPacking(b,this->destinationIPAddress_var);
@@ -81,7 +102,7 @@ void Data::parsimPack(cCommBuffer *b)
 
 void Data::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->time_var);
     doUnpacking(b,this->destinationPort_var);
     doUnpacking(b,this->destinationIPAddress_var);
@@ -327,14 +348,10 @@ const char *DataDescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        "IpAddress",
-        NULL,
+    switch (field) {
+        case 3: return opp_typename(typeid(IpAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *DataDescriptor::getFieldStructPointer(void *object, int field, int i) const

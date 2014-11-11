@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from package/frame/frame.msg.
+// Generated file, do not edit! Created by opp_msgc 4.5 from package/frame/frame.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -14,9 +14,6 @@
 
 USING_NAMESPACE
 
-// Template rule which fires if a struct or class doesn't have operator<<
-template<typename T>
-std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -33,6 +30,30 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 namespace wsn_energy {
 
+// Template rule for outputting std::vector<T> types
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
+{
+    out.put('{');
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) {
+            out.put(','); out.put(' ');
+        }
+        out << *it;
+    }
+    out.put('}');
+    
+    char buf[32];
+    sprintf(buf, " (size=%u)", (unsigned int)vec.size());
+    out.write(buf, strlen(buf));
+    return out;
+}
+
+// Template rule which fires if a struct or class doesn't have operator<<
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
+
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::FRAME_TYPE");
     if (!e) enums.getInstance()->add(e = new cEnum("wsn_energy::FRAME_TYPE"));
@@ -44,7 +65,7 @@ EXECUTE_ON_STARTUP(
 
 Register_Class(Frame);
 
-Frame::Frame(const char *name, int kind) : cPacket(name,kind)
+Frame::Frame(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->numberTransmission_var = 0;
     this->headerLength_var = 0;
@@ -60,7 +81,7 @@ Frame::Frame(const char *name, int kind) : cPacket(name,kind)
     this->frameCheckSequence_var = 0;
 }
 
-Frame::Frame(const Frame& other) : cPacket(other)
+Frame::Frame(const Frame& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -72,7 +93,7 @@ Frame::~Frame()
 Frame& Frame::operator=(const Frame& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -95,7 +116,7 @@ void Frame::copy(const Frame& other)
 
 void Frame::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->numberTransmission_var);
     doPacking(b,this->headerLength_var);
     doPacking(b,this->frameType_var);
@@ -112,7 +133,7 @@ void Frame::parsimPack(cCommBuffer *b)
 
 void Frame::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->numberTransmission_var);
     doUnpacking(b,this->headerLength_var);
     doUnpacking(b,this->frameType_var);
@@ -478,21 +499,9 @@ const char *FrameDescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<12) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -511,7 +520,7 @@ void *FrameDescriptor::getFieldStructPointer(void *object, int field, int i) con
 
 Register_Class(FrameDataStandard);
 
-FrameDataStandard::FrameDataStandard(const char *name, int kind) : wsn_energy::Frame(name,kind)
+FrameDataStandard::FrameDataStandard(const char *name, int kind) : ::wsn_energy::Frame(name,kind)
 {
     this->setHeaderLength(25);
 
@@ -522,7 +531,7 @@ FrameDataStandard::FrameDataStandard(const char *name, int kind) : wsn_energy::F
     this->destinationMacAddress_var = 0;
 }
 
-FrameDataStandard::FrameDataStandard(const FrameDataStandard& other) : wsn_energy::Frame(other)
+FrameDataStandard::FrameDataStandard(const FrameDataStandard& other) : ::wsn_energy::Frame(other)
 {
     copy(other);
 }
@@ -534,7 +543,7 @@ FrameDataStandard::~FrameDataStandard()
 FrameDataStandard& FrameDataStandard::operator=(const FrameDataStandard& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Frame::operator=(other);
+    ::wsn_energy::Frame::operator=(other);
     copy(other);
     return *this;
 }
@@ -552,7 +561,7 @@ void FrameDataStandard::copy(const FrameDataStandard& other)
 
 void FrameDataStandard::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimPack(b);
+    ::wsn_energy::Frame::parsimPack(b);
     doPacking(b,this->dataSequenceNumber_var);
     doPacking(b,this->sourcePanID_var);
     doPacking(b,this->destinationPanID_var);
@@ -564,7 +573,7 @@ void FrameDataStandard::parsimPack(cCommBuffer *b)
 
 void FrameDataStandard::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimUnpack(b);
+    ::wsn_energy::Frame::parsimUnpack(b);
     doUnpacking(b,this->dataSequenceNumber_var);
     doUnpacking(b,this->sourcePanID_var);
     doUnpacking(b,this->destinationPanID_var);
@@ -843,16 +852,11 @@ const char *FrameDataStandardDescriptor::getFieldStructName(void *object, int fi
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        "MacAddress",
-        "MacAddress",
-        NULL,
-        NULL,
+    switch (field) {
+        case 3: return opp_typename(typeid(MacAddress));
+        case 4: return opp_typename(typeid(MacAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<7) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameDataStandardDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -873,7 +877,7 @@ void *FrameDataStandardDescriptor::getFieldStructPointer(void *object, int field
 
 Register_Class(FrameDataCompressed);
 
-FrameDataCompressed::FrameDataCompressed(const char *name, int kind) : wsn_energy::Frame(name,kind)
+FrameDataCompressed::FrameDataCompressed(const char *name, int kind) : ::wsn_energy::Frame(name,kind)
 {
     this->headerLength_var = 32;
     this->codeBit_var = 0;
@@ -892,7 +896,7 @@ FrameDataCompressed::FrameDataCompressed(const char *name, int kind) : wsn_energ
     this->destinationMacAddress_var = 0;
 }
 
-FrameDataCompressed::FrameDataCompressed(const FrameDataCompressed& other) : wsn_energy::Frame(other)
+FrameDataCompressed::FrameDataCompressed(const FrameDataCompressed& other) : ::wsn_energy::Frame(other)
 {
     copy(other);
 }
@@ -904,7 +908,7 @@ FrameDataCompressed::~FrameDataCompressed()
 FrameDataCompressed& FrameDataCompressed::operator=(const FrameDataCompressed& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Frame::operator=(other);
+    ::wsn_energy::Frame::operator=(other);
     copy(other);
     return *this;
 }
@@ -934,7 +938,7 @@ void FrameDataCompressed::copy(const FrameDataCompressed& other)
 
 void FrameDataCompressed::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimPack(b);
+    ::wsn_energy::Frame::parsimPack(b);
     doPacking(b,this->headerLength_var);
     doPacking(b,this->codeBit_var);
     doPacking(b,this->isOrignatorCompressed_var);
@@ -958,7 +962,7 @@ void FrameDataCompressed::parsimPack(cCommBuffer *b)
 
 void FrameDataCompressed::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimUnpack(b);
+    ::wsn_energy::Frame::parsimUnpack(b);
     doUnpacking(b,this->headerLength_var);
     doUnpacking(b,this->codeBit_var);
     doUnpacking(b,this->isOrignatorCompressed_var);
@@ -1439,28 +1443,13 @@ const char *FrameDataCompressedDescriptor::getFieldStructName(void *object, int 
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        "MacAddress",
-        "MacAddress",
-        NULL,
-        NULL,
-        NULL,
-        "MacAddress",
-        "MacAddress",
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        case 8: return opp_typename(typeid(MacAddress));
+        case 9: return opp_typename(typeid(MacAddress));
+        case 13: return opp_typename(typeid(MacAddress));
+        case 14: return opp_typename(typeid(MacAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<19) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameDataCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1483,14 +1472,14 @@ void *FrameDataCompressedDescriptor::getFieldStructPointer(void *object, int fie
 
 Register_Class(FrameACK);
 
-FrameACK::FrameACK(const char *name, int kind) : wsn_energy::Frame(name,kind)
+FrameACK::FrameACK(const char *name, int kind) : ::wsn_energy::Frame(name,kind)
 {
     this->setHeaderLength(5);
 
     this->dataSequenceNumber_var = 0;
 }
 
-FrameACK::FrameACK(const FrameACK& other) : wsn_energy::Frame(other)
+FrameACK::FrameACK(const FrameACK& other) : ::wsn_energy::Frame(other)
 {
     copy(other);
 }
@@ -1502,7 +1491,7 @@ FrameACK::~FrameACK()
 FrameACK& FrameACK::operator=(const FrameACK& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Frame::operator=(other);
+    ::wsn_energy::Frame::operator=(other);
     copy(other);
     return *this;
 }
@@ -1514,13 +1503,13 @@ void FrameACK::copy(const FrameACK& other)
 
 void FrameACK::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimPack(b);
+    ::wsn_energy::Frame::parsimPack(b);
     doPacking(b,this->dataSequenceNumber_var);
 }
 
 void FrameACK::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimUnpack(b);
+    ::wsn_energy::Frame::parsimUnpack(b);
     doUnpacking(b,this->dataSequenceNumber_var);
 }
 
@@ -1699,10 +1688,9 @@ const char *FrameACKDescriptor::getFieldStructName(void *object, int field) cons
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameACKDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1721,7 +1709,7 @@ void *FrameACKDescriptor::getFieldStructPointer(void *object, int field, int i) 
 
 Register_Class(FrameBeacon);
 
-FrameBeacon::FrameBeacon(const char *name, int kind) : wsn_energy::Frame(name,kind)
+FrameBeacon::FrameBeacon(const char *name, int kind) : ::wsn_energy::Frame(name,kind)
 {
     this->setHeaderLength(26);
 
@@ -1739,7 +1727,7 @@ FrameBeacon::FrameBeacon(const char *name, int kind) : wsn_energy::Frame(name,ki
     this->associationPermit_var = 0;
 }
 
-FrameBeacon::FrameBeacon(const FrameBeacon& other) : wsn_energy::Frame(other)
+FrameBeacon::FrameBeacon(const FrameBeacon& other) : ::wsn_energy::Frame(other)
 {
     copy(other);
 }
@@ -1751,7 +1739,7 @@ FrameBeacon::~FrameBeacon()
 FrameBeacon& FrameBeacon::operator=(const FrameBeacon& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Frame::operator=(other);
+    ::wsn_energy::Frame::operator=(other);
     copy(other);
     return *this;
 }
@@ -1774,7 +1762,7 @@ void FrameBeacon::copy(const FrameBeacon& other)
 
 void FrameBeacon::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimPack(b);
+    ::wsn_energy::Frame::parsimPack(b);
     doPacking(b,this->beaconSequenceNumber_var);
     doPacking(b,this->sourcePanID_var);
     doPacking(b,this->destinationPanID_var);
@@ -1791,7 +1779,7 @@ void FrameBeacon::parsimPack(cCommBuffer *b)
 
 void FrameBeacon::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimUnpack(b);
+    ::wsn_energy::Frame::parsimUnpack(b);
     doUnpacking(b,this->beaconSequenceNumber_var);
     doUnpacking(b,this->sourcePanID_var);
     doUnpacking(b,this->destinationPanID_var);
@@ -2157,21 +2145,9 @@ const char *FrameBeaconDescriptor::getFieldStructName(void *object, int field) c
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<12) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameBeaconDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -2190,7 +2166,7 @@ void *FrameBeaconDescriptor::getFieldStructPointer(void *object, int field, int 
 
 Register_Class(FrameCommand);
 
-FrameCommand::FrameCommand(const char *name, int kind) : wsn_energy::Frame(name,kind)
+FrameCommand::FrameCommand(const char *name, int kind) : ::wsn_energy::Frame(name,kind)
 {
     this->setHeaderLength(25);
 
@@ -2202,7 +2178,7 @@ FrameCommand::FrameCommand(const char *name, int kind) : wsn_energy::Frame(name,
     this->commandType_var = 0;
 }
 
-FrameCommand::FrameCommand(const FrameCommand& other) : wsn_energy::Frame(other)
+FrameCommand::FrameCommand(const FrameCommand& other) : ::wsn_energy::Frame(other)
 {
     copy(other);
 }
@@ -2214,7 +2190,7 @@ FrameCommand::~FrameCommand()
 FrameCommand& FrameCommand::operator=(const FrameCommand& other)
 {
     if (this==&other) return *this;
-    wsn_energy::Frame::operator=(other);
+    ::wsn_energy::Frame::operator=(other);
     copy(other);
     return *this;
 }
@@ -2231,7 +2207,7 @@ void FrameCommand::copy(const FrameCommand& other)
 
 void FrameCommand::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimPack(b);
+    ::wsn_energy::Frame::parsimPack(b);
     doPacking(b,this->dataSequenceNumber_var);
     doPacking(b,this->sourcePanID_var);
     doPacking(b,this->destinationPanID_var);
@@ -2242,7 +2218,7 @@ void FrameCommand::parsimPack(cCommBuffer *b)
 
 void FrameCommand::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::Frame::parsimUnpack(b);
+    ::wsn_energy::Frame::parsimUnpack(b);
     doUnpacking(b,this->dataSequenceNumber_var);
     doUnpacking(b,this->sourcePanID_var);
     doUnpacking(b,this->destinationPanID_var);
@@ -2506,15 +2482,9 @@ const char *FrameCommandDescriptor::getFieldStructName(void *object, int field) 
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<6) ? fieldStructNames[field] : NULL;
 }
 
 void *FrameCommandDescriptor::getFieldStructPointer(void *object, int field, int i) const

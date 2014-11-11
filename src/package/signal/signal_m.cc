@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from package/signal/signal.msg.
+// Generated file, do not edit! Created by opp_msgc 4.5 from package/signal/signal.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -14,9 +14,6 @@
 
 USING_NAMESPACE
 
-// Template rule which fires if a struct or class doesn't have operator<<
-template<typename T>
-std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -33,16 +30,40 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 namespace wsn_energy {
 
+// Template rule for outputting std::vector<T> types
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
+{
+    out.put('{');
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) {
+            out.put(','); out.put(' ');
+        }
+        out << *it;
+    }
+    out.put('}');
+    
+    char buf[32];
+    sprintf(buf, " (size=%u)", (unsigned int)vec.size());
+    out.write(buf, strlen(buf));
+    return out;
+}
+
+// Template rule which fires if a struct or class doesn't have operator<<
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
+
 Register_Class(Raw);
 
-Raw::Raw(const char *name, int kind) : cPacket(name,kind)
+Raw::Raw(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->bitError_var = 0;
     this->headerLength_var = 6;
     this->maxPayloadLength_var = 127;
 }
 
-Raw::Raw(const Raw& other) : cPacket(other)
+Raw::Raw(const Raw& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -54,7 +75,7 @@ Raw::~Raw()
 Raw& Raw::operator=(const Raw& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -68,7 +89,7 @@ void Raw::copy(const Raw& other)
 
 void Raw::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->bitError_var);
     doPacking(b,this->headerLength_var);
     doPacking(b,this->maxPayloadLength_var);
@@ -76,7 +97,7 @@ void Raw::parsimPack(cCommBuffer *b)
 
 void Raw::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->bitError_var);
     doUnpacking(b,this->headerLength_var);
     doUnpacking(b,this->maxPayloadLength_var);
@@ -289,12 +310,9 @@ const char *RawDescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *RawDescriptor::getFieldStructPointer(void *object, int field, int i) const

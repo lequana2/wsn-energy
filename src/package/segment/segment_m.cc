@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from package/segment/segment.msg.
+// Generated file, do not edit! Created by opp_msgc 4.5 from package/segment/segment.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -14,9 +14,6 @@
 
 USING_NAMESPACE
 
-// Template rule which fires if a struct or class doesn't have operator<<
-template<typename T>
-std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -33,14 +30,38 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 namespace wsn_energy {
 
+// Template rule for outputting std::vector<T> types
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
+{
+    out.put('{');
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) {
+            out.put(','); out.put(' ');
+        }
+        out << *it;
+    }
+    out.put('}');
+    
+    char buf[32];
+    sprintf(buf, " (size=%u)", (unsigned int)vec.size());
+    out.write(buf, strlen(buf));
+    return out;
+}
+
+// Template rule which fires if a struct or class doesn't have operator<<
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
+
 Register_Class(UdpPacketInterface);
 
-UdpPacketInterface::UdpPacketInterface(const char *name, int kind) : cPacket(name,kind)
+UdpPacketInterface::UdpPacketInterface(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->headerLength_var = 0;
 }
 
-UdpPacketInterface::UdpPacketInterface(const UdpPacketInterface& other) : cPacket(other)
+UdpPacketInterface::UdpPacketInterface(const UdpPacketInterface& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -52,7 +73,7 @@ UdpPacketInterface::~UdpPacketInterface()
 UdpPacketInterface& UdpPacketInterface::operator=(const UdpPacketInterface& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -64,13 +85,13 @@ void UdpPacketInterface::copy(const UdpPacketInterface& other)
 
 void UdpPacketInterface::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->headerLength_var);
 }
 
 void UdpPacketInterface::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->headerLength_var);
 }
 
@@ -249,10 +270,9 @@ const char *UdpPacketInterfaceDescriptor::getFieldStructName(void *object, int f
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<1) ? fieldStructNames[field] : NULL;
 }
 
 void *UdpPacketInterfaceDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -271,7 +291,7 @@ void *UdpPacketInterfaceDescriptor::getFieldStructPointer(void *object, int fiel
 
 Register_Class(UdpPacketStandard);
 
-UdpPacketStandard::UdpPacketStandard(const char *name, int kind) : wsn_energy::UdpPacketInterface(name,kind)
+UdpPacketStandard::UdpPacketStandard(const char *name, int kind) : ::wsn_energy::UdpPacketInterface(name,kind)
 {
     this->setHeaderLength(8);
 
@@ -281,7 +301,7 @@ UdpPacketStandard::UdpPacketStandard(const char *name, int kind) : wsn_energy::U
     this->destinationPort_var = 0;
 }
 
-UdpPacketStandard::UdpPacketStandard(const UdpPacketStandard& other) : wsn_energy::UdpPacketInterface(other)
+UdpPacketStandard::UdpPacketStandard(const UdpPacketStandard& other) : ::wsn_energy::UdpPacketInterface(other)
 {
     copy(other);
 }
@@ -293,7 +313,7 @@ UdpPacketStandard::~UdpPacketStandard()
 UdpPacketStandard& UdpPacketStandard::operator=(const UdpPacketStandard& other)
 {
     if (this==&other) return *this;
-    wsn_energy::UdpPacketInterface::operator=(other);
+    ::wsn_energy::UdpPacketInterface::operator=(other);
     copy(other);
     return *this;
 }
@@ -309,7 +329,7 @@ void UdpPacketStandard::copy(const UdpPacketStandard& other)
 
 void UdpPacketStandard::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::UdpPacketInterface::parsimPack(b);
+    ::wsn_energy::UdpPacketInterface::parsimPack(b);
     doPacking(b,this->sourcePort_var);
     doPacking(b,this->destinationPortV6_var);
     doPacking(b,this->length_var);
@@ -319,7 +339,7 @@ void UdpPacketStandard::parsimPack(cCommBuffer *b)
 
 void UdpPacketStandard::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::UdpPacketInterface::parsimUnpack(b);
+    ::wsn_energy::UdpPacketInterface::parsimUnpack(b);
     doUnpacking(b,this->sourcePort_var);
     doUnpacking(b,this->destinationPortV6_var);
     doUnpacking(b,this->length_var);
@@ -565,14 +585,10 @@ const char *UdpPacketStandardDescriptor::getFieldStructName(void *object, int fi
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        "IpAddress",
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        case 1: return opp_typename(typeid(IpAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *UdpPacketStandardDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -592,7 +608,7 @@ void *UdpPacketStandardDescriptor::getFieldStructPointer(void *object, int field
 
 Register_Class(UdpPacketCompressed);
 
-UdpPacketCompressed::UdpPacketCompressed(const char *name, int kind) : wsn_energy::UdpPacketInterface(name,kind)
+UdpPacketCompressed::UdpPacketCompressed(const char *name, int kind) : ::wsn_energy::UdpPacketInterface(name,kind)
 {
     this->setHeaderLength(4);
 
@@ -605,7 +621,7 @@ UdpPacketCompressed::UdpPacketCompressed(const char *name, int kind) : wsn_energ
     this->inlineUdpDestinationPort_var = 0;
 }
 
-UdpPacketCompressed::UdpPacketCompressed(const UdpPacketCompressed& other) : wsn_energy::UdpPacketInterface(other)
+UdpPacketCompressed::UdpPacketCompressed(const UdpPacketCompressed& other) : ::wsn_energy::UdpPacketInterface(other)
 {
     copy(other);
 }
@@ -617,7 +633,7 @@ UdpPacketCompressed::~UdpPacketCompressed()
 UdpPacketCompressed& UdpPacketCompressed::operator=(const UdpPacketCompressed& other)
 {
     if (this==&other) return *this;
-    wsn_energy::UdpPacketInterface::operator=(other);
+    ::wsn_energy::UdpPacketInterface::operator=(other);
     copy(other);
     return *this;
 }
@@ -636,7 +652,7 @@ void UdpPacketCompressed::copy(const UdpPacketCompressed& other)
 
 void UdpPacketCompressed::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::UdpPacketInterface::parsimPack(b);
+    ::wsn_energy::UdpPacketInterface::parsimPack(b);
     doPacking(b,this->udpSourcePortCompressed_var);
     doPacking(b,this->udpDestinationPortCompressed_var);
     doPacking(b,this->lengthCompressed_var);
@@ -649,7 +665,7 @@ void UdpPacketCompressed::parsimPack(cCommBuffer *b)
 
 void UdpPacketCompressed::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::UdpPacketInterface::parsimUnpack(b);
+    ::wsn_energy::UdpPacketInterface::parsimUnpack(b);
     doUnpacking(b,this->udpSourcePortCompressed_var);
     doUnpacking(b,this->udpDestinationPortCompressed_var);
     doUnpacking(b,this->lengthCompressed_var);
@@ -946,17 +962,10 @@ const char *UdpPacketCompressedDescriptor::getFieldStructName(void *object, int 
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        "IpAddress",
-        NULL,
+    switch (field) {
+        case 6: return opp_typename(typeid(IpAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<8) ? fieldStructNames[field] : NULL;
 }
 
 void *UdpPacketCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const

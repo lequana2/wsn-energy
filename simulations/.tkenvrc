@@ -1,4 +1,4 @@
-# Partial Tkenv config file -- see $HOME/.tkenvrc as well
-inspector "WSN" "WSN" "2" "607x337+495+282:normal"
-inspector "WSN.global" "Global" "2" "607x337+495+282:normal"
+# Partial OMNeT++/Tkenv config file -- see $HOME/.tkenvrc as well
+config default-configname	{RPLMechanism}
+config default-runnumber	{0}
 

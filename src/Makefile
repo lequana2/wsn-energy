@@ -69,8 +69,8 @@ OBJS = \
     $O/core/bytecount/count.o \
     $O/core/energest/energest.o \
     $O/core/framer802154/framer.o \
-    $O/core/mac/mac.o \
     $O/core/mac/macAddress.o \
+    $O/core/mac/mac.o \
     $O/core/mac/csma/csma.o \
     $O/core/mac/nullmac/nullMAC.o \
     $O/core/net/ipAddress.o \

@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.4 from package/packet/packet.msg.
+// Generated file, do not edit! Created by opp_msgc 4.5 from package/packet/packet.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -14,9 +14,6 @@
 
 USING_NAMESPACE
 
-// Template rule which fires if a struct or class doesn't have operator<<
-template<typename T>
-std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -32,6 +29,30 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 
 namespace wsn_energy {
+
+// Template rule for outputting std::vector<T> types
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
+{
+    out.put('{');
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) {
+            out.put(','); out.put(' ');
+        }
+        out << *it;
+    }
+    out.put('}');
+    
+    char buf[32];
+    sprintf(buf, " (size=%u)", (unsigned int)vec.size());
+    out.write(buf, strlen(buf));
+    return out;
+}
+
+// Template rule which fires if a struct or class doesn't have operator<<
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("wsn_energy::IP_PACKET_NEXT_HEADER");
@@ -56,13 +77,13 @@ EXECUTE_ON_STARTUP(
 
 Register_Class(IpPacketInterface);
 
-IpPacketInterface::IpPacketInterface(const char *name, int kind) : cPacket(name,kind)
+IpPacketInterface::IpPacketInterface(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->time_var = 0;
     this->headerLength_var = 0;
 }
 
-IpPacketInterface::IpPacketInterface(const IpPacketInterface& other) : cPacket(other)
+IpPacketInterface::IpPacketInterface(const IpPacketInterface& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -74,7 +95,7 @@ IpPacketInterface::~IpPacketInterface()
 IpPacketInterface& IpPacketInterface::operator=(const IpPacketInterface& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -87,14 +108,14 @@ void IpPacketInterface::copy(const IpPacketInterface& other)
 
 void IpPacketInterface::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->time_var);
     doPacking(b,this->headerLength_var);
 }
 
 void IpPacketInterface::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->time_var);
     doUnpacking(b,this->headerLength_var);
 }
@@ -290,11 +311,9 @@ const char *IpPacketInterfaceDescriptor::getFieldStructName(void *object, int fi
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketInterfaceDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -313,7 +332,7 @@ void *IpPacketInterfaceDescriptor::getFieldStructPointer(void *object, int field
 
 Register_Class(IpPacketStandard);
 
-IpPacketStandard::IpPacketStandard(const char *name, int kind) : wsn_energy::IpPacketInterface(name,kind)
+IpPacketStandard::IpPacketStandard(const char *name, int kind) : ::wsn_energy::IpPacketInterface(name,kind)
 {
     this->setHeaderLength(40);
 
@@ -327,7 +346,7 @@ IpPacketStandard::IpPacketStandard(const char *name, int kind) : wsn_energy::IpP
     this->destinationIpAddress_var = 0;
 }
 
-IpPacketStandard::IpPacketStandard(const IpPacketStandard& other) : wsn_energy::IpPacketInterface(other)
+IpPacketStandard::IpPacketStandard(const IpPacketStandard& other) : ::wsn_energy::IpPacketInterface(other)
 {
     copy(other);
 }
@@ -339,7 +358,7 @@ IpPacketStandard::~IpPacketStandard()
 IpPacketStandard& IpPacketStandard::operator=(const IpPacketStandard& other)
 {
     if (this==&other) return *this;
-    wsn_energy::IpPacketInterface::operator=(other);
+    ::wsn_energy::IpPacketInterface::operator=(other);
     copy(other);
     return *this;
 }
@@ -360,7 +379,7 @@ void IpPacketStandard::copy(const IpPacketStandard& other)
 
 void IpPacketStandard::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::IpPacketInterface::parsimPack(b);
+    ::wsn_energy::IpPacketInterface::parsimPack(b);
     doPacking(b,this->version_var);
     doPacking(b,this->trafficClass_var);
     doPacking(b,this->flowLabel_var);
@@ -375,7 +394,7 @@ void IpPacketStandard::parsimPack(cCommBuffer *b)
 
 void IpPacketStandard::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::IpPacketInterface::parsimUnpack(b);
+    ::wsn_energy::IpPacketInterface::parsimUnpack(b);
     doUnpacking(b,this->version_var);
     doUnpacking(b,this->trafficClass_var);
     doUnpacking(b,this->flowLabel_var);
@@ -705,19 +724,11 @@ const char *IpPacketStandardDescriptor::getFieldStructName(void *object, int fie
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        "IpAddress",
-        "IpAddress",
-        NULL,
-        NULL,
+    switch (field) {
+        case 6: return opp_typename(typeid(IpAddress));
+        case 7: return opp_typename(typeid(IpAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<10) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketStandardDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -738,7 +749,7 @@ void *IpPacketStandardDescriptor::getFieldStructPointer(void *object, int field,
 
 Register_Class(IpPacketCompressed);
 
-IpPacketCompressed::IpPacketCompressed(const char *name, int kind) : wsn_energy::IpPacketInterface(name,kind)
+IpPacketCompressed::IpPacketCompressed(const char *name, int kind) : ::wsn_energy::IpPacketInterface(name,kind)
 {
     this->setHeaderLength(2);
 
@@ -753,7 +764,7 @@ IpPacketCompressed::IpPacketCompressed(const char *name, int kind) : wsn_energy:
     this->metaDestinationIpAddress_var = 0;
 }
 
-IpPacketCompressed::IpPacketCompressed(const IpPacketCompressed& other) : wsn_energy::IpPacketInterface(other)
+IpPacketCompressed::IpPacketCompressed(const IpPacketCompressed& other) : ::wsn_energy::IpPacketInterface(other)
 {
     copy(other);
 }
@@ -765,7 +776,7 @@ IpPacketCompressed::~IpPacketCompressed()
 IpPacketCompressed& IpPacketCompressed::operator=(const IpPacketCompressed& other)
 {
     if (this==&other) return *this;
-    wsn_energy::IpPacketInterface::operator=(other);
+    ::wsn_energy::IpPacketInterface::operator=(other);
     copy(other);
     return *this;
 }
@@ -787,7 +798,7 @@ void IpPacketCompressed::copy(const IpPacketCompressed& other)
 
 void IpPacketCompressed::parsimPack(cCommBuffer *b)
 {
-    wsn_energy::IpPacketInterface::parsimPack(b);
+    ::wsn_energy::IpPacketInterface::parsimPack(b);
     doPacking(b,this->sourceIpAddress_var);
     doPacking(b,this->destinationIpAddress_var);
     doPacking(b,this->trafficClassAndFlowLabel_var);
@@ -803,7 +814,7 @@ void IpPacketCompressed::parsimPack(cCommBuffer *b)
 
 void IpPacketCompressed::parsimUnpack(cCommBuffer *b)
 {
-    wsn_energy::IpPacketInterface::parsimUnpack(b);
+    ::wsn_energy::IpPacketInterface::parsimUnpack(b);
     doUnpacking(b,this->sourceIpAddress_var);
     doUnpacking(b,this->destinationIpAddress_var);
     doUnpacking(b,this->trafficClassAndFlowLabel_var);
@@ -1150,20 +1161,11 @@ const char *IpPacketCompressedDescriptor::getFieldStructName(void *object, int f
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        "IpAddress",
-        "IpAddress",
-        NULL,
-        NULL,
+    switch (field) {
+        case 7: return opp_typename(typeid(IpAddress));
+        case 8: return opp_typename(typeid(IpAddress));
+        default: return NULL;
     };
-    return (field>=0 && field<11) ? fieldStructNames[field] : NULL;
 }
 
 void *IpPacketCompressedDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1184,7 +1186,7 @@ void *IpPacketCompressedDescriptor::getFieldStructPointer(void *object, int fiel
 
 Register_Class(IcmpPacket);
 
-IcmpPacket::IcmpPacket(const char *name, int kind) : cPacket(name,kind)
+IcmpPacket::IcmpPacket(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->headerLength_var = 8;
     this->type_var = 0;
@@ -1193,7 +1195,7 @@ IcmpPacket::IcmpPacket(const char *name, int kind) : cPacket(name,kind)
     this->others_var = 0;
 }
 
-IcmpPacket::IcmpPacket(const IcmpPacket& other) : cPacket(other)
+IcmpPacket::IcmpPacket(const IcmpPacket& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -1205,7 +1207,7 @@ IcmpPacket::~IcmpPacket()
 IcmpPacket& IcmpPacket::operator=(const IcmpPacket& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -1221,7 +1223,7 @@ void IcmpPacket::copy(const IcmpPacket& other)
 
 void IcmpPacket::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->headerLength_var);
     doPacking(b,this->type_var);
     doPacking(b,this->code_var);
@@ -1231,7 +1233,7 @@ void IcmpPacket::parsimPack(cCommBuffer *b)
 
 void IcmpPacket::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->headerLength_var);
     doUnpacking(b,this->type_var);
     doUnpacking(b,this->code_var);
@@ -1478,14 +1480,9 @@ const char *IcmpPacketDescriptor::getFieldStructName(void *object, int field) co
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
 }
 
 void *IcmpPacketDescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1504,7 +1501,7 @@ void *IcmpPacketDescriptor::getFieldStructPointer(void *object, int field, int i
 
 Register_Class(DIO);
 
-DIO::DIO(const char *name, int kind) : cPacket(name,kind)
+DIO::DIO(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->senderID_var = 0;
     this->payloadLength_var = 24;
@@ -1521,7 +1518,7 @@ DIO::DIO(const char *name, int kind) : cPacket(name,kind)
     this->dodagID_var = 0;
 }
 
-DIO::DIO(const DIO& other) : cPacket(other)
+DIO::DIO(const DIO& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -1533,7 +1530,7 @@ DIO::~DIO()
 DIO& DIO::operator=(const DIO& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -1557,7 +1554,7 @@ void DIO::copy(const DIO& other)
 
 void DIO::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->senderID_var);
     doPacking(b,this->payloadLength_var);
     doPacking(b,this->instanceID_var);
@@ -1575,7 +1572,7 @@ void DIO::parsimPack(cCommBuffer *b)
 
 void DIO::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->senderID_var);
     doUnpacking(b,this->payloadLength_var);
     doUnpacking(b,this->instanceID_var);
@@ -1958,22 +1955,9 @@ const char *DIODescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<13) ? fieldStructNames[field] : NULL;
 }
 
 void *DIODescriptor::getFieldStructPointer(void *object, int field, int i) const
@@ -1992,14 +1976,14 @@ void *DIODescriptor::getFieldStructPointer(void *object, int field, int i) const
 
 Register_Class(DIS);
 
-DIS::DIS(const char *name, int kind) : cPacket(name,kind)
+DIS::DIS(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->payloadLength_var = 2;
     this->flag_var = 0;
     this->reserved_var = 0;
 }
 
-DIS::DIS(const DIS& other) : cPacket(other)
+DIS::DIS(const DIS& other) : ::cPacket(other)
 {
     copy(other);
 }
@@ -2011,7 +1995,7 @@ DIS::~DIS()
 DIS& DIS::operator=(const DIS& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ::cPacket::operator=(other);
     copy(other);
     return *this;
 }
@@ -2025,7 +2009,7 @@ void DIS::copy(const DIS& other)
 
 void DIS::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ::cPacket::parsimPack(b);
     doPacking(b,this->payloadLength_var);
     doPacking(b,this->flag_var);
     doPacking(b,this->reserved_var);
@@ -2033,7 +2017,7 @@ void DIS::parsimPack(cCommBuffer *b)
 
 void DIS::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->payloadLength_var);
     doUnpacking(b,this->flag_var);
     doUnpacking(b,this->reserved_var);
@@ -2246,12 +2230,9 @@ const char *DISDescriptor::getFieldStructName(void *object, int field) const
             return basedesc->getFieldStructName(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldStructNames[] = {
-        NULL,
-        NULL,
-        NULL,
+    switch (field) {
+        default: return NULL;
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
 }
 
 void *DISDescriptor::getFieldStructPointer(void *object, int field, int i) const
