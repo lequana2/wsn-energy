@@ -60,7 +60,7 @@ RPL::RPL(IPv6 *net) {
     this->isDISsent = true; // 0 to sent ~ success !!!
 
     // create DIO timer
-//    resetDIOTimer();
+    resetDIOTimer();
 
     // create DIS timer
     // TODO disable by default

@@ -25,12 +25,15 @@ namespace wsn_energy {
 Define_Module(IPv6);
 
 void IPv6::initialize() {
-    this->rpl = new RPL(this);
     this->bufferNET = NULL;
     this->defaultRoute = 0;
 
-    // If server then create RPL DODAG
+    // if using RPL
     if (getModuleByPath("^.^")->par("usingRPL").boolValue()) {
+        // initialize RPL
+        this->rpl = new RPL(this);
+
+        // If server then create RPL DODAG
         if (getParentModule()->getId()
                 == simulation.getModuleByPath("server")->getId()) {
             this->rpl->rpl_set_root();

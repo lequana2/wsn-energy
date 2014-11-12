@@ -4,6 +4,8 @@
  *      email  : lequana2@gmail.com
  *
  *  functioning: unslotted csma
+ *                  checking availability of channel before sending
+ *                  deferring packet to avoid collision
  */
 
 #ifndef CSMA_H_
@@ -13,10 +15,12 @@
 
 namespace wsn_energy {
 
-class csma : public MACdriver
-{
-  protected:
-    virtual void deferPacket();
+class csma: public MACdriver {
+protected:
+    void deferPacket();
+    void processSelfMessage(cPacket*);
+    void processUpperLayerMessage(cPacket*);
+    void processLowerLayerMessage(cPacket*);
 };
 
 } /* namespace wsn_energy */
