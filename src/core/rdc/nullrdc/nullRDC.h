@@ -26,6 +26,8 @@ namespace wsn_energy {
 class nullRDC : public RDCdriver
 {
   protected:
+    virtual void selfProcess(cPacket*);
+
     /* command from MAC */
     virtual void beginTransmitting(int);
 

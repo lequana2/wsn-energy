@@ -30,7 +30,7 @@ void IPv6::initialize() {
     this->defaultRoute = 0;
 
     // If server then create RPL DODAG
-    if (simulation.getModuleByPath("WSN") != NULL) {
+    if (getModuleByPath("^.^")->par("usingRPL").boolValue()) {
         if (getParentModule()->getId()
                 == simulation.getModuleByPath("server")->getId()) {
             this->rpl->rpl_set_root();

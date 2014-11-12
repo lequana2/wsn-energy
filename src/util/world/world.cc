@@ -117,16 +117,16 @@ void World::arrangeMotes() {
                 x = 100;
                 y = 30;
             } else if (i == 4) {
-                x = 10;
+                x = 20;
                 y = 50;
             } else if (i == 5) {
-                x = 40;
+                x = 50;
                 y = 50;
             } else if (i == 6) {
-                x = 70;
+                x = 80;
                 y = 50;
             } else if (i == 7) {
-                x = 100;
+                x = 110;
                 y = 50;
             } else if (i == 8) {
                 x = 10;
@@ -141,16 +141,16 @@ void World::arrangeMotes() {
                 x = 100;
                 y = 70;
             } else if (i == 12) {
-                x = 10;
+                x = 20;
                 y = 90;
             } else if (i == 13) {
-                x = 40;
+                x = 50;
                 y = 90;
             } else if (i == 14) {
-                x = 70;
+                x = 80;
                 y = 90;
             } else if (i == 15) {
-                x = 100;
+                x = 110;
                 y = 90;
             }
         }/* RPL square */
@@ -284,7 +284,8 @@ int World::validateConnection(RadioDriver* host, RadioDriver* client) {
 
     outGate->connectTo(inGate);
 
-    //hidden connection
+    // TODO hidden connection
+//    if (simulation.getModuleByPath("WSN") != NULL)
     outGate->setDisplayString("ls=,0");
 
     return WITHIN_TRANS;
@@ -408,10 +409,11 @@ void World::releaseHost(RadioDriver* mote) {
                     true;
     }
 
-// draw range
-    if (ANNOTATE) {
+// TODO draw range
+//    if (ANNOTATE) {
+    if (simulation.getModuleByPath("WSN") != NULL)
         (&mote->getParentModule()->getDisplayString())->setTagArg("r", 0, "0");
-    }
+//    }
 }
 
 /*

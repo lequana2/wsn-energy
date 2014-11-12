@@ -31,6 +31,7 @@ network WSN
 
         int topology;
 
+		bool usingRPL;
         bool usingFLR;
         bool usingELB;
         bool usingHDC;

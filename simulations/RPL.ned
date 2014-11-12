@@ -22,12 +22,10 @@ network RPL
 
         int topology;
 
+		bool usingRPL;
         bool usingFLR;
         bool usingELB;
         bool usingHDC;
-
-//        int serverX @unit(m);
-//        int serverY @unit(m);
 
         int scheme;
         int rand;

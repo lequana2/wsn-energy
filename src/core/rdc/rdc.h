@@ -13,50 +13,25 @@
 //#define WAIT_FOR_ACK_DURATION 0.000864 // wait time of nullRDC
 //#endif
 
-#ifndef RDC
-#define RDC
-// value of ACK length header
-#define ACK_LENGTH          5
 // working phase
 #define CHECKING_PHASE      0
 #define TRANSMITTING_PHASE  1
 #define FREE_PHASE          2
-// CCA type in checking phase
-#define RDC_CHECK_CCA       0
-#define RDC_TRANS_CCA       1
-#define MAC_CCA             2
-// check rate
-#define CHANNEL_CHECK_RATE       8        // Hertz
-#define CHANNEL_CHECK_INTERVAL   0.125    // second
-// CCA configuration
-#define CCA_TRANS_MAX            6        // maximum number of CCA before transmitting
-#define CCA_COUNT_MAX            2        // maximum number of CCA per check
-#define CCA_CHECK_TIME           0.000122 // time to perform a CCA (20 symbols)
-#define CCA_SLEEP_TIME           0.0005   // interval between each CCA
-// reaction
-#define LISTEN_AFTER_DETECT      0.0125   // second, interval after detecting a strobe
-#define INTER_FRAME_INTERVAL     0.004    // second, interval between each frame in a transmission phases
-#define MAX_PHASE_STROBE         0.145488 // second, time for a transmission phases (1 check interval + 2 check phases)
-// packet size
-#define SHORTEST_PACKET_SIZE     23       // octets
-#endif
 
 #include <myModule.h>
 #include <frame_m.h>
 
 namespace wsn_energy {
 
-class Neighbor
-{
-  public:
+class Neighbor {
+public:
     int senderID;
     int sequence;
     double phaseOptimization; // next time checking (because same check rate)
 };
 
-class RDCdriver : public myModule
-{
-  protected:
+class RDCdriver: public myModule {
+protected:
     // just send ACK <-- distinguish with data sending
     bool isSentACK;
 
@@ -92,18 +67,13 @@ class RDCdriver : public myModule
     void processUpperLayerMessage(cPacket*);
     void processLowerLayerMessage(cPacket*);
 
-    /* MAC call-back */
-    void enterMACtransmissonPhase();
-    void quitMACtransmissonPhase();
-
-    /* RDC transmission turn */
-    void enterRDCtransmissionPhase();
-    void quitRDCtransmissionPhase(int result);
-
     /* demand radio layer*/
     void sendFrame();
     void on();
     void off();
+
+    /* self process */
+    virtual void selfProcess(cPacket*) = 0;
 
     /* command from MAC */
     virtual void beginTransmitting(int command) = 0;
@@ -114,7 +84,7 @@ class RDCdriver : public myModule
     /* receive success from PHY */
     virtual void receiveFrame(Frame*) = 0;
 
-  public:
+public:
     // working phase
     int phase;
 };

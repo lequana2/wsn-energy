@@ -60,13 +60,14 @@ RPL::RPL(IPv6 *net) {
     this->isDISsent = true; // 0 to sent ~ success !!!
 
     // create DIO timer
-    resetDIOTimer();
+//    resetDIOTimer();
 
     // create DIS timer
-    if (simulation.getModuleByPath("WSN") != NULL)
-        this->net->scheduleAt(
-                this->net->getModuleByPath("WSN")->par("setupDelay").doubleValue(),
-                disTimer);
+    // TODO disable by default
+//    if (simulation.getModuleByPath("^.^")->par("usingRPL").boolValue())
+//        this->net->scheduleAt(
+//                this->net->getModuleByPath("WSN")->par("setupDelay").doubleValue(),
+//                disTimer);
 }
 
 void RPL::rpl_init() {
